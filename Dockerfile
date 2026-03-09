@@ -1,9 +1,11 @@
-FROM node:22.13.1-slim
+FROM mcr.microsoft.com/playwright:v1.58.2-jammy
 
 ENV TZ="Europe/London"
+ENV CI=true
 
 USER root
 
+# System dependencies needed by tests and tools (curl/zip/Java)
 RUN apt-get update -qq \
     && apt-get install -qqy \
     curl \
@@ -16,9 +18,18 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 
 WORKDIR /app
 
+# Install Node dependencies from lockfile; skip lifecycle scripts for security
+COPY package*.json ./
+RUN npm ci --ignore-scripts
+
+# Copy the rest of the project
 COPY . .
-RUN npm install
+
+# Use the non-root Playwright user provided by the base image
+RUN chown -R pwuser:pwuser /app
+USER pwuser
 
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-# This is downloading the linux amd64 aws cli. For M1 macs build and run with the --platform=linux/amd64 argument. eg docker build . --platform=linux/amd64
+# AWS CLI v2 is linux/amd64; on Apple Silicon build with:
+#   docker build --platform=linux/amd64 .
