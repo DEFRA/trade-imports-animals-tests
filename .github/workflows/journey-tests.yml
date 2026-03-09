@@ -3,6 +3,7 @@ name: Run Journey Tests on GitHub
 permissions:
   checks: write
   pull-requests: write
+  id-token: write
 
 on:
   workflow_dispatch:
@@ -12,4 +13,5 @@ jobs:
     name: Run Journey Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: DEFRA/cdp-node-journey-test-suite-template/run-journey-tests@main
+      - uses: actions/checkout@v4
+      - uses: ./run-journey-tests

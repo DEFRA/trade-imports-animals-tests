@@ -64,6 +64,47 @@ services:
       start_period: 2s
       retries: 5
 
+################################################################################
+  trade-imports-animals-frontend:
+    image: defradigital/trade-imports-animals-frontend:${TRADE_IMPORTS_ANIMALS_FRONTEND:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-frontend.env
+    environment:
+      - PORT=3000
+    depends_on:
+      trade-imports-animals-backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:3000/health"]
+      interval: 3s
+      start_period: 2s
+      retries: 3
+
+################################################################################
+  trade-imports-animals-backend:
+    image: defradigital/trade-imports-animals-backend:${TRADE_IMPORTS_ANIMALS_BACKEND:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-backend.env
+    environment:
+      - PORT=8085
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 5s
+      start_period: 60s
+      retries: 10
 
 ################################################################################
 #
