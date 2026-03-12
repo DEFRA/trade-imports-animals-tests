@@ -1,3 +1,8 @@
-package-lock.json
 node_modules
+dist
+package-lock.json
 docker
+test-results
+playwright-report
+allure-results
+allure-report

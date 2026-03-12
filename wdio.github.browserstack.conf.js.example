@@ -27,7 +27,7 @@ export const config = {
 
   commonCapabilities: {
     'bstack:options': {
-      buildName: `trade-imports-animals-tests-${process.env.ENVIRONMENT}` // configure as required
+      buildName: `trade-imports-animals-frontend-${process.env.ENVIRONMENT}` // configure as required
     }
   },
 

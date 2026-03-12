@@ -1,32 +1,29 @@
 ################################################################################
-# Docker Compose file for starting up the service for testing in GitHub workflow
-# This template provides comparable infrastructure to the real environment.
+# Docker Compose stack for Trade Imports Animals journey tests.
+# This file defines the infrastructure used locally and in CI to run
+# end-to-end Playwright tests against the Trade Imports Animals frontend
+# and backend services.
+#
+# It provides infrastructure comparable to the real environment:
 #   - mongodb
 #   - redis
 #   - localstack (s3, sqs, sns)
 #
-# Both mongo and localstack have init scripts included for setting up resources
-# on startup. These scripts are in docker/scripts.
+# Both mongodb and localstack have init scripts included for setting up
+# resources on startup. These scripts are in docker/scripts.
 #
-# It also includes a selenium-chrome container for running the browser headless.
-#
-# The services being tested can either be started up here using the latest
-# builds from dockerhub.
-# In the example each service has a .env config file in docker/config/
-# Services can reference each other by their container names.
-# e.g. http://cdp-example-node-backend:3001/
-#
-################################################################################
+# The Trade Imports Animals frontend and backend images are pulled from
+# Docker Hub (defradigital/*) and configured using .env files under
+# docker/config/. Services can reference each other by container name,
+# for example:
+#   - http://trade-imports-animals-frontend:3000/
+#   - http://trade-imports-animals-backend:8085/
+
 services:
 
 ################################################################################
-# Headless browser, used by the test suite to actually run the tests against the
-# containers.
-  selenium-chrome:
-    image: selenium/standalone-chrome:123.0
-    ports:
-      - 4444:4444
-
+# MongoDB
+# https://hub.docker.com/_/mongo/
 ################################################################################
   mongodb:
     image: mongo:6
@@ -37,6 +34,10 @@ services:
       interval: 5s
       start_period: 5s
       retries: 3
+
+################################################################################
+# Localstack
+# https://hub.docker.com/r/localstack/localstack/
 ################################################################################
   localstack:
     image: localstack/localstack:3.2.0
@@ -55,6 +56,9 @@ services:
       retries: 3
 
 ################################################################################
+# Redis
+# https://hub.docker.com/_/redis/
+################################################################################
   redis:
     image: redis:7
     restart: always
@@ -64,6 +68,9 @@ services:
       start_period: 2s
       retries: 5
 
+################################################################################
+# Trade Imports Animals frontend
+# https://hub.docker.com/r/defradigital/trade-imports-animals-frontend/
 ################################################################################
   trade-imports-animals-frontend:
     image: defradigital/trade-imports-animals-frontend:${TRADE_IMPORTS_ANIMALS_FRONTEND:-latest}
@@ -87,6 +94,9 @@ services:
       retries: 3
 
 ################################################################################
+# Trade Imports Animals backend
+# https://hub.docker.com/r/defradigital/trade-imports-animals-backend/
+################################################################################
   trade-imports-animals-backend:
     image: defradigital/trade-imports-animals-backend:${TRADE_IMPORTS_ANIMALS_BACKEND:-latest}
     platform: linux/amd64
@@ -107,43 +117,22 @@ services:
       retries: 10
 
 ################################################################################
-#
-# Add the services you want to test below.
-#
+# Playwright test runner
+# https://mcr.microsoft.com/en-us/artifact/mar/playwright
 ################################################################################
-#  cdp-example-node-frontend:
-#    image: defradigital/cdp-example-node-frontend:${CDP_EXAMPLE_NODE_FRONTEND:-latest}
-#    env_file:
-#      - ./docker/config/defaults.env
-#      - ./docker/config/example-frontend.env
-#    environment:
-#      - PORT=3000
-#    depends_on:
-#      cdp-example-node-backend:
-#        condition: service_started
-#      redis:
-#        condition: service_healthy
-#    ports:
-#      - 3000:3000
-#    healthcheck:
-#      test: ["CMD", "curl", "http://localhost:3000/health"]
-#      interval: 3s
-#      start_period: 2s
-#      retries: 3
-
-################################################################################
-# cdp-example-node-backend:
-#   image: defradigital/cdp-example-node-backend:${CDP_EXAMPLE_NODE_BACKEND:-latest}
-#   env_file:
-#     - ./docker/config/defaults.env
-#     - ./docker/config/example-backend.env
-#   environment:
-#     - PORT=3001
-#   depends_on:
-#     mongodb:
-#       condition: service_healthy
-#   healthcheck:
-#     test: ["CMD", "curl", "http://localhost:3001/health"]
-#     interval: 3s
-#     start_period: 2s
-#     retries: 3
+  playwright-tests:
+    image: mcr.microsoft.com/playwright:v1.58.2-jammy
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      - CI=true
+    profiles:
+      - tests
+    depends_on:
+      trade-imports-animals-backend:
+        condition: service_healthy
+      trade-imports-animals-frontend:
+        condition: service_healthy
+    command: >
+      bash -lc "npm ci --ignore-scripts && npm run test:github"
