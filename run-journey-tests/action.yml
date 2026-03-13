@@ -33,6 +33,10 @@ runs:
       shell: bash
       run: |
         docker compose --profile tests run --rm playwright-tests
+    - name: Generate test reports
+      if: always()
+      shell: bash
+      run: |
         npm run report
     - name: debug
       if: always()
