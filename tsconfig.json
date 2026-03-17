@@ -8,9 +8,11 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
+      "@domain/*": ["domain/*"],
       "@page-objects": ["ui/page-objects"],
       "@page-objects/*": ["ui/page-objects/*"],
-      "@fixtures": ["fixtures"]
+      "@fixtures": ["fixtures"],
+      "@utils/*": ["utils/*"]
     }
   }
 }

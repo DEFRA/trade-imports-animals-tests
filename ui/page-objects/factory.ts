@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
-import { NotificationDashboardPage } from './notification/NotificationDashboardPage';
-import { OriginOfImportPage } from './notification/OriginOfImportPage';
+import { CommoditySelectionPage } from './notification/commodity-selection-page';
+import { NotificationDashboardPage } from './notification/notification-dashboard-page';
+import { OriginOfImportPage } from './notification/origin-of-import-page';
 
 /**
  * Factory function to create all page object instances.
@@ -12,6 +13,7 @@ import { OriginOfImportPage } from './notification/OriginOfImportPage';
 export function createPageObjects(page: Page) {
   return {
     page,
+    commoditySelection: new CommoditySelectionPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),
   };
