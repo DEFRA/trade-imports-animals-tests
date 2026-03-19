@@ -15,7 +15,7 @@ test.describe('Origin of the import', () => {
     const expectedOptions = keys.map(camelCaseToTitleCase);
     expect(countryOptions[0]).toBe('Select a country');
     expect(countryOptions[1]).toMatch(/^─+$/);
-    // Dropdown countries must match the expected list in the correct order (alphabetical)
+    // Dropdown countries must match the expected list in the correct order (alphabetical).
     expect(countryOptions.slice(2)).toEqual(expectedOptions);
   });
 
@@ -30,7 +30,7 @@ test.describe('Origin of the import', () => {
   });
 
   test('defaults country to "Select a country" and region code to "No"', async ({ pages }) => {
-    // Empty value for "Select a country" option
+    // Default "Select a country" option has an empty value.
     await expect(pages.originOfImport.dropdownCountry.locator('option:checked')).toHaveText('Select a country');
     await expect(pages.originOfImport.dropdownCountry).toHaveValue('');
     await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes)).not.toBeChecked();
@@ -60,13 +60,8 @@ test.describe('Origin of the import', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test.beforeEach(async ({ pages }) => {
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.btnCreateNewNotification.click();
-    });
-
     test('shows error when country of origin is not selected', async ({ pages }) => {
-      // Leave country of origin on default "Select a country"
+      // Leave country of origin on default "Select a country".
       await pages.originOfImport.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
       const errorInline = pages.originOfImport.errorCountry;

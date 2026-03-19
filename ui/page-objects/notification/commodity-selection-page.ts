@@ -6,6 +6,10 @@ export class CommoditySelectionPage {
 
   constructor(private readonly page: Page) {}
 
+  get notificationId(): Locator {
+    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+  }
+
   get headingPage(): Locator {
     return this.page.getByTestId('app-heading-title');
   }
@@ -14,11 +18,11 @@ export class CommoditySelectionPage {
     return this.page.getByRole('combobox', { name: 'Select a Commodity' });
   }
 
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
+  get dropdownCommodityOptions(): Locator {
+    return this.dropdownCommodity.locator('option');
   }
 
-  get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }
