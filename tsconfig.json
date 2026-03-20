@@ -5,6 +5,14 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "sourceMap": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@domain/*": ["domain/*"],
+      "@page-objects": ["ui/page-objects"],
+      "@page-objects/*": ["ui/page-objects/*"],
+      "@fixtures": ["fixtures"],
+      "@utils/*": ["utils/*"]
+    }
   }
 }
