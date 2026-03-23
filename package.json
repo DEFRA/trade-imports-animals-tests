@@ -16,7 +16,7 @@
     "format": "prettier --write '**/*.{ts,mjs,md,json}'",
     "format:check": "prettier --check '**/*.{ts,mjs,md,json}'",
     "clean": "rm -rf test-results playwright-report allure-results allure-report FAILED",
-    "test": "npm run clean && playwright test --grep-invert @agent-only",
+    "test": "npm run clean && playwright test --project=frontend-chromium --grep-invert @agent-only",
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
     "test:local": "npm run clean && playwright test --config=playwright.local.config.ts --grep-invert @agent-only",
     "test:local:debug": "echo \"Local debug Playwright tests not implemented yet\"",

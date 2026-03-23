@@ -1,4 +1,6 @@
 import { Page } from '@playwright/test';
+import { AdminDashboardPage } from './admin/admin-dashboard-page';
+import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
@@ -13,6 +15,8 @@ import { OriginOfImportPage } from './notification/origin-of-import-page';
 export function createPageObjects(page: Page) {
   return {
     page,
+    adminDashboard: new AdminDashboardPage(page),
+    adminNotifications: new AdminNotificationsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),

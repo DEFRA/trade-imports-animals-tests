@@ -26,7 +26,9 @@ services:
 # https://hub.docker.com/_/mongo/
 ################################################################################
   mongodb:
-    image: mongo:6
+    image: mongo:7.0
+    ports:
+      - 27017:27017
     volumes:
       - ./docker/scripts/mongodb:/docker-entrypoint-initdb.d
     healthcheck:
@@ -100,6 +102,8 @@ services:
   trade-imports-animals-backend:
     image: defradigital/trade-imports-animals-backend:${TRADE_IMPORTS_ANIMALS_BACKEND:-latest}
     platform: linux/amd64
+    ports:
+      - 8085:8085
     env_file:
       - ./docker/config/defaults.env
       - ./docker/config/trade-imports-animals-backend.env
@@ -115,6 +119,31 @@ services:
       interval: 5s
       start_period: 60s
       retries: 10
+
+################################################################################
+# Trade Imports Animals admin
+# https://hub.docker.com/r/defradigital/trade-imports-animals-admin/
+################################################################################
+  trade-imports-animals-admin:
+    image: defradigital/trade-imports-animals-admin:${TRADE_IMPORTS_ANIMALS_ADMIN:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-admin.env
+    environment:
+      - PORT=3001
+    depends_on:
+      trade-imports-animals-backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    ports:
+      - 3001:3001
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:3001/health"]
+      interval: 3s
+      start_period: 2s
+      retries: 3
 
 ################################################################################
 # Playwright test runner
@@ -133,6 +162,8 @@ services:
       trade-imports-animals-backend:
         condition: service_healthy
       trade-imports-animals-frontend:
+        condition: service_healthy
+      trade-imports-animals-admin:
         condition: service_healthy
     command: >
       bash -lc "npm ci --ignore-scripts && npm run test:github"
