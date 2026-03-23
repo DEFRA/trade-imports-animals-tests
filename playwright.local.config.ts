@@ -1,14 +1,19 @@
 import { defineConfig } from '@playwright/test';
 import baseConfig from './playwright.config';
+import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
+
+const projectBaseUrls: Record<string, string> = {
+  'frontend-chromium': 'http://localhost:3000',
+  'admin-chromium': 'http://localhost:3001',
+};
 
 export default defineConfig({
-  ...baseConfig,
+  ...withProjectBaseUrls(baseConfig, projectBaseUrls, 'local'),
   workers: 1,
   retries: 0,
 
   use: {
     ...baseConfig.use,
-    baseURL: 'http://localhost:3000',
     headless: false,
     trace: 'on',
   },
