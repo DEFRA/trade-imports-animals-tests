@@ -29,13 +29,19 @@ This test suite provides a robust foundation for writing, executing, and maintai
    cd trade-imports-animals-tests
    ```
 
-2. Install dependencies:
+2. Use the correct version of Node.js:
+
+   ```bash
+   nvm use
+   ```
+
+3. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Install Playwright browsers:
+4. Install Playwright browsers:
 
    ```bash
    npx playwright install
