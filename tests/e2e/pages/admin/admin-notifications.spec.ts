@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures';
 
+// Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
+
 test.describe('Admin notifications', () => {
   test.describe.configure({ mode: 'default' });
   test.beforeEach(async ({ pages }) => {
