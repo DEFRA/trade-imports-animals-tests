@@ -1,4 +1,4 @@
-name: Run Journey Tests on GitHub
+name: Run E2E Tests
 
 permissions:
   checks: write
@@ -10,8 +10,8 @@ on:
   workflow_call:
 jobs:
   build:
-    name: Run Journey Tests
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./run-journey-tests
+      - uses: ./run-e2e-tests
