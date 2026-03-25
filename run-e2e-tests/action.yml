@@ -1,4 +1,4 @@
-name: Run Journey Tests on GitHub
+name: Run E2E Tests
 
 inputs:
   trade-imports-animals-frontend:

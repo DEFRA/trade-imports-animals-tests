@@ -143,7 +143,7 @@ Tests can be run as a GitHub Actions workflow against services spun up in Docker
 
 ### GitHub Actions workflow
 
-The `/.github/workflows/journey-tests.yml` workflow uses the composite action in `/run-journey-tests/` to start the Docker Compose stack (`compose.yml`) and run the `playwright-tests` container, then publish reports.
+The `/.github/workflows/e2e-tests.yml` workflow uses the composite action in `/run-e2e-tests/` to start the Docker Compose stack (`compose.yml`) and run the `playwright-tests` container, then publish reports.
 
 ## Running Tests via CDP Portal
 
