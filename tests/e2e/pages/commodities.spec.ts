@@ -33,11 +33,10 @@ test.describe('Select a commodity', () => {
     await expect(pages.commoditySelection.dropdownCommodity).toHaveValue('');
   });
 
-  test('continues after saving selected commodity (pending next-step implementation)', async ({ pages }) => {
+  test('continues to species selection after saving selected commodity', async ({ pages }) => {
     await pages.commoditySelection.dropdownCommodity.selectOption(commodityCodes.dog);
     await pages.commoditySelection.btnSaveAndContinue.click();
-    // Temporary AC behavior: currently reloads this page; update when next-step navigation is implemented.
-    await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.page).toHaveURL(pages.speciesSelection.expectedUrl);
+    await expect(pages.speciesSelection.headingPage).toHaveText(pages.speciesSelection.expectedHeading);
   });
 });
