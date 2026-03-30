@@ -118,20 +118,33 @@ Tests are split across two Playwright projects targeting different services:
 
 The local config (`playwright.local.config.ts`) runs with 1 worker in headed mode with full tracing enabled.
 
+Note:
+
+Add the following entries to `/etc/hosts` as required by the local stack:
+
+```text
+127.0.0.1       trade-imports-defra-id-stub
+```
+
 #### Docker Compose example commands (local)
 
-| Command                                                        | Purpose                                   |
-| -------------------------------------------------------------- | ----------------------------------------- |
-| `docker compose up --wait -d`                                  | Start and wait for services to be healthy |
-| `docker compose up --pull=always --wait -d`                    | Pull fresh images, then start and wait    |
-| `docker compose up --force-recreate --wait -d`                 | Recreate containers, then start and wait  |
-| `docker compose pull`                                          | Pull latest images for the stack          |
-| `docker compose down`                                          | Stop and remove containers                |
-| `docker compose down -v`                                       | Stop and remove containers and volumes    |
-| `docker compose logs -f trade-imports-animals-backend`         | Follow backend logs (tail -f style)       |
-| `docker compose logs --tail=200 trade-imports-animals-backend` | Show last 200 backend log lines           |
-| `docker compose ps`                                            | Check status / healthcheck state          |
-| `docker compose config`                                        | Validate the rendered compose config      |
+| Command                                                                  | Purpose                                               | Blocks shell |
+| ------------------------------------------------------------------------ | ----------------------------------------------------- | ------------ |
+| `docker compose up`                                                      | Start services in foreground                          | ✓            |
+| `docker compose up -d`                                                   | Start services in background                          | ✗            |
+| `docker compose up --wait`                                               | Start services and wait for health (detached)         | ✗            |
+| `docker compose up --pull=always --wait`                                 | Always pull images, then start and wait               | ✗            |
+| `docker compose up --force-recreate --wait`                              | Recreate containers from scratch, then start and wait | ✗            |
+| `docker compose up --force-recreate --renew-anon-volumes --wait mongodb` | Recreate MongoDB and rerun init seed scripts          | ✗            |
+| `docker compose pull`                                                    | Pull latest images for the stack                      | ✗            |
+| `docker compose down`                                                    | Stop and remove containers                            | ✗            |
+| `docker compose down -v`                                                 | Stop and remove containers and volumes                | ✗            |
+| `docker compose logs -f`                                                 | Follow all service logs (tail -f style)               | ✓            |
+| `docker compose logs -f trade-imports-animals-backend`                   | Follow backend logs (tail -f style)                   | ✓            |
+| `docker compose logs --tail=200 trade-imports-animals-backend`           | Show last 200 backend log lines                       | ✗            |
+| `docker compose ps`                                                      | Show running services and health status               | ✗            |
+| `docker compose ps -a`                                                   | Show all services, including stopped                  | ✗            |
+| `docker compose config`                                                  | Validate the rendered compose config                  | ✗            |
 
 ### Target CDP environments (from local machine)
 

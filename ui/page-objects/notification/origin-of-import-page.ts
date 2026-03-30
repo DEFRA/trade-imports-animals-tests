@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import type { YesNoValue } from '@domain/types/yes-no-values';
+import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class OriginOfImportPage {
   readonly expectedUrl = '/origin';
@@ -40,6 +41,15 @@ export class OriginOfImportPage {
 
   get errorInternalReferenceNumber(): Locator {
     return this.page.locator('#internalReference-error');
+  }
+
+  async open(attemptSignIn: boolean = true): Promise<void> {
+    await this.page.goto(this.expectedUrl);
+
+    if (attemptSignIn) {
+      const signInPage = new SignInPage(this.page);
+      await signInPage.signIn();
+    }
   }
 
   radioRequiresOriginCode(value: YesNoValue): Locator {

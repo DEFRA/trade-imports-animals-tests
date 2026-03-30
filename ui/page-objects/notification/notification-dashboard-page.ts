@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class NotificationDashboardPage {
   readonly expectedUrl = '/';
@@ -14,7 +15,16 @@ export class NotificationDashboardPage {
     return this.page.getByRole('button', { name: 'Create an import notification' });
   }
 
-  async open(): Promise<void> {
+  get btnSignOut(): Locator {
+    return this.page.getByRole('link', { name: 'Sign out' });
+  }
+
+  async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto('/');
+
+    if (attemptSignIn) {
+      const signInPage = new SignInPage(this.page);
+      await signInPage.signIn();
+    }
   }
 }
