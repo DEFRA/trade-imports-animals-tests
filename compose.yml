@@ -77,17 +77,11 @@ services:
   trade-imports-defra-id-stub:
     image: defradigital/trade-imports-defra-id-stub
     platform: linux/amd64
-    networks:
-      default:
-        aliases:
-          - idstub.cdp-docker.test
     ports:
       - '3007:3007'
     environment:
       port: 3007
       AUTH_PASSWORD: ${AUTH_PASSWORD:-Password123!}
-      WELL_KNOWN_HOST_OVERRIDE: http://idstub.cdp-docker.test:3007
-      SECURE_COOKIE: false
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3007/health" ]
       interval: 1m30s
@@ -107,16 +101,11 @@ services:
       - ./docker/config/trade-imports-animals-frontend.env
     environment:
       - PORT=3000
-      - SECURE_COOKIE=false
     depends_on:
       trade-imports-animals-backend:
         condition: service_started
       redis:
         condition: service_healthy
-    networks:
-      default:
-        aliases:
-          - frontend.cdp-docker.test
     ports:
       - '3000:3000'
     healthcheck:
@@ -167,10 +156,6 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
-    networks:
-      default:
-        aliases:
-          - admin.cdp-docker.test
     ports:
       - 3001:3001
     healthcheck:
@@ -193,12 +178,5 @@ services:
       - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
     profiles:
       - tests
-    depends_on:
-      trade-imports-animals-backend:
-        condition: service_healthy
-      trade-imports-animals-frontend:
-        condition: service_healthy
-      trade-imports-animals-admin:
-        condition: service_healthy
     command: >
       bash -lc "npm ci --ignore-scripts && npm run test:github"

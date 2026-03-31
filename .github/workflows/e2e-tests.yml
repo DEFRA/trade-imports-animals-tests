@@ -9,11 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       trade-imports-animals-frontend:
-        description: 'Image tag for defradigital/trade-imports-animals-frontend (defaults to latest)'
+        description: 'Image tag for defradigital/trade-imports-animals-frontend (optional, defaults to latest)'
         required: false
         type: string
       trade-imports-animals-backend:
-        description: 'Image tag for defradigital/trade-imports-animals-backend (defaults to latest)'
+        description: 'Image tag for defradigital/trade-imports-animals-backend (optional, defaults to latest)'
+        required: false
+        type: string
+      trade-imports-animals-admin:
+        description: 'Image tag for defradigital/trade-imports-animals-admin (optional, defaults to latest)'
         required: false
         type: string
   workflow_call:
@@ -22,6 +26,9 @@ on:
         required: false
         type: string
       trade-imports-animals-backend:
+        required: false
+        type: string
+      trade-imports-animals-admin:
         required: false
         type: string
 jobs:
@@ -36,3 +43,4 @@ jobs:
         with:
           trade-imports-animals-frontend: ${{ inputs.trade-imports-animals-frontend }}
           trade-imports-animals-backend: ${{ inputs.trade-imports-animals-backend }}
+          trade-imports-animals-admin: ${{ inputs.trade-imports-animals-admin }}
