@@ -1,0 +1,47 @@
+################################################################################
+# Docker Compose override for GitHub Actions.
+# This file extends `compose.yml` with CI-specific networking and env config
+# for end-to-end Playwright tests in GitHub Actions.
+# NOTE: The Defra Identity stub requires all related service URLs to use a matching
+# domain pattern. Locally this works because Compose exposes service ports on
+# localhost; in GitHub Actions, tests run in a separate container where
+# localhost resolves to itself, so aliases keep service URLs consistent.
+
+services:
+
+################################################################################
+# Trade Imports Defra ID Stub
+# https://hub.docker.com/r/defradigital/trade-imports-defra-id-stub/
+################################################################################
+  trade-imports-defra-id-stub:
+    networks:
+      default:
+        aliases:
+          - idstub.cdp-docker.test
+    environment:
+      SECURE_COOKIE: false
+      WELL_KNOWN_HOST_OVERRIDE: http://idstub.cdp-docker.test:3007
+
+################################################################################
+# Trade Imports Animals frontend
+# https://hub.docker.com/r/defradigital/trade-imports-animals-frontend/
+################################################################################
+  trade-imports-animals-frontend:
+    networks:
+      default:
+        aliases:
+          - frontend.cdp-docker.test
+    environment:
+      DEFRA_ID_OIDC_CONFIGURATION_URL: http://idstub.cdp-docker.test:3007/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration
+      DEFRA_ID_REDIRECT_URL: http://frontend.cdp-docker.test:3000/auth/sign-in-oidc
+      DEFRA_ID_SIGN_OUT_REDIRECT_URL: http://frontend.cdp-docker.test:3000/auth/sign-out-oidc
+
+################################################################################
+# Trade Imports Animals admin
+# https://hub.docker.com/r/defradigital/trade-imports-animals-admin/
+################################################################################
+  trade-imports-animals-admin:
+    networks:
+      default:
+        aliases:
+          - admin.cdp-docker.test

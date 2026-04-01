@@ -87,16 +87,16 @@ After tests run, Playwright results and report are generated automatically, and 
 
 The Playwright configuration is split across three files:
 
-| File                          | Purpose                                | URL target                          |
-| ----------------------------- | -------------------------------------- | ----------------------------------- |
-| `playwright.config.ts`        | Base config for CDP environment runs   | CDP services (CDP URLs)             |
-| `playwright.local.config.ts`  | Local development (headed, no retries) | Localhost (localhost URLs)          |
-| `playwright.github.config.ts` | GitHub Actions runs                    | Docker Compose (container DNS URLs) |
+| File                          | Purpose                                | URL target                              |
+| ----------------------------- | -------------------------------------- | --------------------------------------- |
+| `playwright.config.ts`        | Base config for CDP environment runs   | CDP services (CDP URLs)                 |
+| `playwright.local.config.ts`  | Local development (headed, no retries) | Localhost (localhost URLs)              |
+| `playwright.github.config.ts` | GitHub Actions runs                    | Docker Compose (service DNS/alias URLs) |
 
 Note:
 
 - Intended for local development: `playwright.local.config.ts` targets the apps via localhost (e.g. `http://localhost:3000` / `http://localhost:3001`), so ensure the local Docker stack is running before starting the tests.
-- Intended for GitHub Actions: `playwright.github.config.ts` targets the apps via Docker service DNS names (e.g. `trade-imports-animals-frontend:3000` / `trade-imports-animals-admin:3001`).
+- Intended for GitHub Actions: `playwright.github.config.ts` targets the apps via Docker internal hostnames, using either service DNS names (e.g. `trade-imports-animals-frontend:3000` / `trade-imports-animals-admin:3001`) or, as the newer approach for integration with the Defra Identity stub, Docker network aliases (e.g. `http://frontend.cdp-docker.test:3000` / `http://admin.cdp-docker.test:3001`).
 
 ### Test Projects
 
@@ -118,20 +118,35 @@ Tests are split across two Playwright projects targeting different services:
 
 The local config (`playwright.local.config.ts`) runs with 1 worker in headed mode with full tracing enabled.
 
+Note:
+
+Add the following entries to `/etc/hosts` as required by the local stack:
+
+```text
+# No /etc/hosts entries are currently required.
+```
+
 #### Docker Compose example commands (local)
 
-| Command                                                        | Purpose                                   |
-| -------------------------------------------------------------- | ----------------------------------------- |
-| `docker compose up --wait -d`                                  | Start and wait for services to be healthy |
-| `docker compose up --pull=always --wait -d`                    | Pull fresh images, then start and wait    |
-| `docker compose up --force-recreate --wait -d`                 | Recreate containers, then start and wait  |
-| `docker compose pull`                                          | Pull latest images for the stack          |
-| `docker compose down`                                          | Stop and remove containers                |
-| `docker compose down -v`                                       | Stop and remove containers and volumes    |
-| `docker compose logs -f trade-imports-animals-backend`         | Follow backend logs (tail -f style)       |
-| `docker compose logs --tail=200 trade-imports-animals-backend` | Show last 200 backend log lines           |
-| `docker compose ps`                                            | Check status / healthcheck state          |
-| `docker compose config`                                        | Validate the rendered compose config      |
+| Command                                                                     | Purpose                                                | Blocks shell |
+| --------------------------------------------------------------------------- | ------------------------------------------------------ | ------------ |
+| `docker compose up`                                                         | Start services in foreground                           | ✓            |
+| `docker compose up -d`                                                      | Start services in background                           | ✗            |
+| `docker compose up --wait`                                                  | Start services and wait for health (detached)          | ✗            |
+| `docker compose up --pull=always --wait`                                    | Always pull images, then start and wait                | ✗            |
+| `docker compose up --force-recreate --wait`                                 | Recreate containers from scratch, then start and wait  | ✗            |
+| `docker compose up --force-recreate --renew-anon-volumes --wait mongodb`    | Recreate MongoDB and rerun init seed scripts           | ✗            |
+| `docker compose -f compose.yml -f compose.github.override.yml up -d --wait` | Start stack with GitHub Actions auth-domain overrides  | ✗            |
+| `docker compose pull`                                                       | Pull latest images for the stack                       | ✗            |
+| `docker compose down`                                                       | Stop and remove containers                             | ✗            |
+| `docker compose down -v`                                                    | Stop and remove containers and volumes                 | ✗            |
+| `docker compose logs -f`                                                    | Follow all service logs (tail -f style)                | ✓            |
+| `docker compose logs -f trade-imports-animals-backend`                      | Follow backend logs (tail -f style)                    | ✓            |
+| `docker compose logs --tail=200 trade-imports-animals-backend`              | Show last 200 backend log lines                        | ✗            |
+| `docker compose ps`                                                         | Show running services and health status                | ✗            |
+| `docker compose ps -a`                                                      | Show all services, including stopped                   | ✗            |
+| `docker compose config`                                                     | Validate the rendered compose config                   | ✗            |
+| `docker compose -f compose.yml -f compose.github.override.yml config`       | Validate rendered config with GitHub Actions overrides | ✗            |
 
 ### Target CDP environments (from local machine)
 
@@ -149,7 +164,7 @@ Tests can be run as a GitHub Actions workflow against services spun up in Docker
 
 ### GitHub Actions workflow
 
-The `/.github/workflows/e2e-tests.yml` workflow uses the composite action in `/run-e2e-tests/` to start the Docker Compose stack (`compose.yml`) and run the `playwright-tests` container, then publish reports.
+The `/.github/workflows/e2e-tests.yml` workflow uses the composite action in `/run-e2e-tests/` to start the Docker Compose stack using `compose.yml` with `compose.github.override.yml`, run the `playwright-tests` container, then publish reports.
 
 ## Running Tests via CDP Portal
 

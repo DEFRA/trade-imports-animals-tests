@@ -7,11 +7,40 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      trade-imports-animals-frontend:
+        description: 'Image tag for defradigital/trade-imports-animals-frontend (optional, defaults to latest)'
+        required: false
+        type: string
+      trade-imports-animals-backend:
+        description: 'Image tag for defradigital/trade-imports-animals-backend (optional, defaults to latest)'
+        required: false
+        type: string
+      trade-imports-animals-admin:
+        description: 'Image tag for defradigital/trade-imports-animals-admin (optional, defaults to latest)'
+        required: false
+        type: string
   workflow_call:
+    inputs:
+      trade-imports-animals-frontend:
+        required: false
+        type: string
+      trade-imports-animals-backend:
+        required: false
+        type: string
+      trade-imports-animals-admin:
+        required: false
+        type: string
 jobs:
   build:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./run-e2e-tests
+        with:
+          trade-imports-animals-frontend: ${{ inputs.trade-imports-animals-frontend }}
+          trade-imports-animals-backend: ${{ inputs.trade-imports-animals-backend }}
+          trade-imports-animals-admin: ${{ inputs.trade-imports-animals-admin }}

@@ -7,6 +7,9 @@ inputs:
   trade-imports-animals-backend:
     required: false
     type: string
+  trade-imports-animals-admin:
+    required: false
+    type: string
 
 runs:
   using: "composite"
@@ -20,42 +23,51 @@ runs:
       with:
         node-version: 24
         cache: npm
+
     - name: Setup the tests
       run: npm ci --ignore-scripts
       shell: bash
+
     - name: Start docker compose
       shell: bash
       run: |
           TRADE_IMPORTS_ANIMALS_FRONTEND=${{inputs.trade-imports-animals-frontend}} \
           TRADE_IMPORTS_ANIMALS_BACKEND=${{inputs.trade-imports-animals-backend}} \
-          docker compose up --wait-timeout 300 -d --quiet-pull
+          TRADE_IMPORTS_ANIMALS_ADMIN=${{inputs.trade-imports-animals-admin}} \
+          docker compose -f compose.yml -f compose.github.override.yml up -d --wait --wait-timeout 300 --quiet-pull
+
     - name: Run the tests
       shell: bash
       run: |
         docker compose --profile tests run --rm playwright-tests
+
     - name: Generate test reports
       if: always()
       shell: bash
       run: |
         npm run report
+
     - name: debug
       if: always()
       run: |
         docker compose logs > logs.txt
         docker ps
       shell: bash
+
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report
         path: ./playwright-report
+
     - name: Upload allure report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: allure-report
         path: ./allure-report
+
     - name: Upload docker compose logs
       if: always()
       uses: actions/upload-artifact@v4

@@ -5,6 +5,8 @@ import { CommoditySelectionPage } from './notification/commodity-selection-page'
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { SpeciesSelectionPage } from './notification/species-selection-page';
+import { SignInPage } from './auth/sign-in-page';
+import { SignOutPage } from './auth/sign-out-page';
 
 /**
  * Factory function to create all page object instances.
@@ -22,6 +24,8 @@ export function createPageObjects(page: Page) {
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),
     speciesSelection: new SpeciesSelectionPage(page),
+    signIn: new SignInPage(page),
+    signOut: new SignOutPage(page),
   };
 }
 
