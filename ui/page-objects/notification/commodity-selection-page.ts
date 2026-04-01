@@ -15,7 +15,7 @@ export class CommoditySelectionPage {
   }
 
   get dropdownCommodity(): Locator {
-    return this.page.getByRole('combobox', { name: 'Select a Commodity' });
+    return this.page.getByRole('combobox', { name: 'Select a commodity' });
   }
 
   get dropdownCommodityOptions(): Locator {
