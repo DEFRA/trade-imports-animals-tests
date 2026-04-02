@@ -43,7 +43,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
   });
 
-  test.describe('Origin of import (unauthenticated entry)', () => {
+  test.describe('Origin of the import (unauthenticated entry)', () => {
     test.beforeEach(async ({ journeys, pages }) => {
       await journeys.toSignIn((attemptSignIn) => pages.originOfImport.open(attemptSignIn));
     });
