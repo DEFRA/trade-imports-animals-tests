@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
+import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { SpeciesSelectionPage } from './notification/species-selection-page';
@@ -21,6 +22,7 @@ export function createPageObjects(page: Page) {
     adminDashboard: new AdminDashboardPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
+    importReason: new ImportReasonPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),
     speciesSelection: new SpeciesSelectionPage(page),

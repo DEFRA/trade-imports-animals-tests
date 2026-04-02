@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Import notification dashboard', () => {
+test.describe('Import notification service', () => {
   test('lands on the notification dashboard', async ({ pages }) => {
     await pages.notificationDashboard.open();
     await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);

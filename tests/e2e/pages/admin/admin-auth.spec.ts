@@ -1,5 +1,5 @@
-// TODO EUDPA-52: Enable/refactor admin basic-auth tests when functionality is available.
-// test.describe('Admin authentication', { tag: '@auth' }, () => {
+// TODO EUDPA-52: Enable/refactor admin auth tests when functionality is available.
+// test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 //   test.beforeEach(async ({ pages }) => {
 //     await pages.adminDashboard.open(false);
 //   });
