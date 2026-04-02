@@ -5,7 +5,7 @@ import { commodityTypes } from '@domain/types/commodity-types';
 import { commoditySpecies } from '@domain/types/commodity-species';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
-test.describe('Commodity (species selection)', () => {
+test.describe('Select species of commodity', () => {
   test.beforeEach(async ({ pages }) => {
     await pages.notificationDashboard.open();
     await pages.notificationDashboard.btnCreateNewNotification.click();

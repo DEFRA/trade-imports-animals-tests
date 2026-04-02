@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Admin dashboard', () => {
+test.describe('Admin service', () => {
   test('lands on the admin dashboard', async ({ pages }) => {
     await pages.adminDashboard.open();
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
