@@ -1,11 +1,10 @@
 import { test, expect } from '@fixtures';
-import { countryCodes } from '@domain/types/country-codes';
 import { commodityCodes } from '@domain/types/commodity-codes';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Commodities', () => {
   test.beforeEach(async ({ journeys }) => {
-    await journeys.toCommoditySelection({ countryCode: countryCodes.eu.france });
+    await journeys.toCommoditySelection();
   });
 
   test('shows system-generated notification id', async ({ pages }) => {
