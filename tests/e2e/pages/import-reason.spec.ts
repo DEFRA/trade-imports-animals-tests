@@ -1,20 +1,8 @@
 import { test, expect } from '@fixtures';
-import { countryCodes } from '@domain/types/country-codes';
-import { commodityCodes } from '@domain/types/commodity-codes';
-import { commodityTypes } from '@domain/types/commodity-types';
-import { commoditySpecies } from '@domain/types/commodity-species';
 
 test.describe('Reason for import', () => {
-  test.beforeEach(async ({ pages }) => {
-    await pages.notificationDashboard.open();
-    await pages.notificationDashboard.btnCreateNewNotification.click();
-    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.france);
-    await pages.originOfImport.btnSaveAndContinue.click();
-    await pages.commoditySelection.dropdownCommodity.selectOption(commodityCodes.dog);
-    await pages.commoditySelection.btnSaveAndContinue.click();
-    await pages.speciesSelection.dropdownCommodityType.selectOption(commodityTypes.domestic);
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).check();
-    await pages.speciesSelection.btnSaveAndContinue.click();
+  test.beforeEach(async ({ journeys }) => {
+    await journeys.toImportReason();
   });
 
   test('shows system-generated notification id', async ({ pages }) => {

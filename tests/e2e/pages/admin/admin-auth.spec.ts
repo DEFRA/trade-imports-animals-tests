@@ -1,7 +1,7 @@
 // TODO EUDPA-52: Enable/refactor admin auth tests when functionality is available.
 // test.describe('Authentication (admin)', { tag: '@auth' }, () => {
-//   test.beforeEach(async ({ pages }) => {
-//     await pages.adminDashboard.open(false);
+//   test.beforeEach(async ({ journeys, pages }) => {
+//     await journeys.toSignIn((attemptSignIn) => pages.adminDashboard.open(attemptSignIn));
 //   });
 //
 //   test('lands on the sign in page when opening the admin dashboard', async ({ pages }) => {

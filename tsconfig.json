@@ -11,6 +11,7 @@
       "@domain/*": ["domain/*"],
       "@page-objects": ["ui/page-objects"],
       "@page-objects/*": ["ui/page-objects/*"],
+      "@flows/*": ["ui/flows/*"],
       "@fixtures": ["fixtures"],
       "@utils/*": ["utils/*"]
     }

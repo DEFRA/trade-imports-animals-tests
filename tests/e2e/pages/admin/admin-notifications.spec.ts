@@ -4,9 +4,8 @@ import { test, expect } from '@fixtures';
 
 test.describe('Notifications (admin)', () => {
   test.describe.configure({ mode: 'default' });
-  test.beforeEach(async ({ pages }) => {
-    await pages.adminDashboard.open();
-    await pages.adminDashboard.btnNotifications.click();
+  test.beforeEach(async ({ journeys }) => {
+    await journeys.toAdminNotifications();
   });
 
   test('shows notifications for deletion', async ({ pages }) => {

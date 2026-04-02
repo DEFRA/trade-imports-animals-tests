@@ -4,9 +4,8 @@ import { yesNoValues } from '@domain/types/yes-no-values';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Origin of the import', () => {
-  test.beforeEach(async ({ pages }) => {
-    await pages.notificationDashboard.open();
-    await pages.notificationDashboard.btnCreateNewNotification.click();
+  test.beforeEach(async ({ journeys }) => {
+    await journeys.toOriginOfImport();
   });
 
   test('shows only EU and EFTA countries in origin dropdown', async ({ pages }) => {
