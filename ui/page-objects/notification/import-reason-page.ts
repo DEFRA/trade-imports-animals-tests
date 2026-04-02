@@ -10,7 +10,23 @@ export class ImportReasonPage {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
   }
 
+  get linkBack(): Locator {
+    return this.page.getByRole('link', { name: 'Back' });
+  }
+
   get headingPage(): Locator {
-    return this.page.locator('.govuk-heading-xl');
+    return this.page.getByRole('heading', { level: 1 });
+  }
+
+  get radioInternalMarket(): Locator {
+    return this.page.getByRole('radio', { name: 'Internal Market' });
+  }
+
+  get radioReEntry(): Locator {
+    return this.page.getByRole('radio', { name: 'Re-entry' });
+  }
+
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }
