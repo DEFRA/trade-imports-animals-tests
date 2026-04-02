@@ -4,11 +4,8 @@ import { commodityCodes } from '@domain/types/commodity-codes';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Commodities', () => {
-  test.beforeEach(async ({ pages }) => {
-    await pages.notificationDashboard.open();
-    await pages.notificationDashboard.btnCreateNewNotification.click();
-    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.france);
-    await pages.originOfImport.btnSaveAndContinue.click();
+  test.beforeEach(async ({ journeys }) => {
+    await journeys.toCommoditySelection({ countryCode: countryCodes.eu.france });
   });
 
   test('shows system-generated notification id', async ({ pages }) => {

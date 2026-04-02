@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Authentication', { tag: '@auth' }, () => {
-  test.beforeEach(async ({ pages }) => {
-    await pages.notificationDashboard.open(false);
+  test.beforeEach(async ({ journeys, pages }) => {
+    await journeys.toSignIn((attemptSignIn) => pages.notificationDashboard.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening the notification dashboard', async ({ pages }) => {
@@ -43,16 +43,20 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
   });
 
-  test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {
-    await pages.originOfImport.open(false);
-    await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-    await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
-  });
+  test.describe('Origin of import (unauthenticated entry)', () => {
+    test.beforeEach(async ({ journeys, pages }) => {
+      await journeys.toSignIn((attemptSignIn) => pages.originOfImport.open(attemptSignIn));
+    });
 
-  test('allows signing into a page further in the journey', async ({ pages }) => {
-    await pages.originOfImport.open(false);
-    await pages.signIn.signIn();
-    await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-    await expect(pages.originOfImport.headingPage).toHaveText(pages.originOfImport.expectedHeading);
+    test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {
+      await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
+      await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+    });
+
+    test('allows signing into a page further in the journey', async ({ pages }) => {
+      await pages.signIn.signIn();
+      await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
+      await expect(pages.originOfImport.headingPage).toHaveText(pages.originOfImport.expectedHeading);
+    });
   });
 });
