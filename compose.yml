@@ -176,6 +176,7 @@ services:
     environment:
       - CI=true
       - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
+      - MONGODB_URI=mongodb://mongodb:27017
     profiles:
       - tests
     command: >
