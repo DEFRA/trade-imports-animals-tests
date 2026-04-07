@@ -3,7 +3,7 @@ import { MongoDbClient } from '@domain/clients/mongodb-client';
 
 // Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
 
-test.describe('Notifications (admin)', () => {
+test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   test.describe.configure({ mode: 'default' });
   test.beforeEach(async ({ journeys }) => {
     await journeys.toAdminNotifications();
@@ -37,7 +37,7 @@ test.describe('Notifications (admin)', () => {
     await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
-  test('allows deleting a notification by checkbox', async ({ pages }) => {
+  test('allows deleting a notification by checkbox', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     const referenceNumber = 'DRAFT.IMP.2026.69c12f11cafe202600000002';
 
     await test.step('delete notification by checkbox', async () => {
@@ -79,7 +79,7 @@ test.describe('Notifications (admin)', () => {
     });
   });
 
-  test('allows deleting all notifications by select all', async ({ pages }) => {
+  test('allows deleting all notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     const referenceNumbers = ['DRAFT.IMP.2026.69c12f11cafe202600000003', 'DRAFT.IMP.2026.69c12f11cafe202600000004'];
 
     await test.step('delete all notifications by select all', async () => {

@@ -59,7 +59,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 
 | Command               | Action                             | Generates Report |
 | --------------------- | ---------------------------------- | ---------------- |
-| `npm test`            | Run frontend suite [CDP]           | ✓                |
+| `npm test`            | Run CDP suite                      | ✓                |
 | `npm run test:local`  | Run local suite                    | ✓                |
 | `npm run test:github` | Run compose suite [GitHub Actions] | ✓                |
 
@@ -106,8 +106,6 @@ Tests are split across two Playwright projects targeting different services:
 | ------------------- | ------------------------------- |
 | `frontend-chromium` | All tests excluding admin pages |
 | `admin-chromium`    | Admin pages only                |
-
-`npm test` runs `frontend-chromium` by default.
 
 ## Local Testing
 
