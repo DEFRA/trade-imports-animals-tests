@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class AdminNotificationsPage {
   readonly expectedUrl = '/notifications';
@@ -42,8 +43,13 @@ export class AdminNotificationsPage {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
   }
 
-  async open(): Promise<void> {
-    await this.page.goto('/');
+  async open(attemptSignIn: boolean = true): Promise<void> {
+    await this.page.goto(this.expectedUrl);
+
+    if (attemptSignIn) {
+      const signInPage = new SignInPage(this.page);
+      await signInPage.signIn();
+    }
   }
 
   tableRowByReference(referenceNumber: string): Locator {
