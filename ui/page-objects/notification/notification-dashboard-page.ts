@@ -11,12 +11,12 @@ export class NotificationDashboardPage {
     return this.page.getByRole('heading', { level: 1 });
   }
 
-  get btnCreateNewNotification(): Locator {
-    return this.page.getByRole('button', { name: 'Create an import notification' });
-  }
-
   get btnSignOut(): Locator {
     return this.page.getByRole('link', { name: 'Sign out' });
+  }
+
+  get btnCreateNewNotification(): Locator {
+    return this.page.getByRole('button', { name: 'Create an import notification' });
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {

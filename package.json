@@ -16,11 +16,11 @@
     "format": "prettier --write '**/*.{ts,mjs,md,json}'",
     "format:check": "prettier --check '**/*.{ts,mjs,md,json}'",
     "clean": "rm -rf test-results playwright-report allure-results allure-report FAILED",
-    "test": "npm run clean && playwright test --project=frontend-chromium --grep-invert @agent-only",
+    "test": "npm run clean && playwright test --grep-invert \"@agent|@compose\"",
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
-    "test:local": "npm run clean && playwright test --config=playwright.local.config.ts --grep-invert @agent-only",
+    "test:local": "npm run clean && playwright test --config=playwright.local.config.ts --grep-invert @agent",
     "test:local:debug": "echo \"Local debug Playwright tests not implemented yet\"",
-    "test:github": "npm run clean && playwright test --config=playwright.github.config.ts --grep-invert @agent-only",
+    "test:github": "npm run clean && playwright test --config=playwright.github.config.ts --grep-invert @agent",
     "test:github:browserstack": "echo \"GitHub BrowserStack Playwright tests not implemented yet\"",
     "report": "allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"
@@ -35,6 +35,7 @@
     "eslint": "^9.39.4",
     "husky": "9.1.7",
     "lint-staged": "^16.3.3",
+    "mongodb": "7.1.1",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0"
