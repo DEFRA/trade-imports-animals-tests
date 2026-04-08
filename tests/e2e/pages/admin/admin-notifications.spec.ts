@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@domain/clients/mongodb-client';
 import { ObjectId } from 'mongodb';
+import { skipIfCdpEnvironment } from '@utils/playwright/environment-guards';
 
 // Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
 
@@ -81,6 +82,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   });
 
   test('allows deleting all notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+    skipIfCdpEnvironment('Compose/local only: destructive (deletes all notifications); never run on CDP environments.');
     const referenceNumbers = ['DRAFT.IMP.2026.69c12f11cafe202600000003', 'DRAFT.IMP.2026.69c12f11cafe202600000004'];
 
     await test.step('delete all notifications by select all', async () => {
