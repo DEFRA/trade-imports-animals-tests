@@ -1,5 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@domain/clients/mongodb-client';
+import { ObjectId } from 'mongodb';
+import { skipIfCdpEnvironment } from '@utils/playwright/environment-guards';
 
 // Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
 
@@ -80,6 +82,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   });
 
   test('allows deleting all notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+    skipIfCdpEnvironment('Compose/local only: destructive (deletes all notifications); never run on CDP environments.');
     const referenceNumbers = ['DRAFT.IMP.2026.69c12f11cafe202600000003', 'DRAFT.IMP.2026.69c12f11cafe202600000004'];
 
     await test.step('delete all notifications by select all', async () => {
@@ -112,6 +115,48 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         expect(String(records[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
         expect(records[0].numberOfNotifications).toBeGreaterThanOrEqual(2);
         expect(records[0].notificationReferenceNumbers).toEqual(expect.arrayContaining(referenceNumbers));
+        expect(records[0].traceId).toBe('test-trace-id');
+        expect(records[0].userId).toBe('2100010101');
+        expect(records[0]._class).toBe('uk.gov.defra.trade.imports.animals.audit.Audit');
+      } finally {
+        await client.close();
+      }
+    });
+  });
+
+  test('does not allow deleting a notification by invalid reference number', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+    const randomId = new ObjectId().toString();
+    const invalidReference = `EXIST.NON.2026.${randomId}`;
+
+    await test.step('attempt delete by invalid reference number shows an error', async () => {
+      await pages.adminNotifications.inputReferenceNumber.fill(invalidReference);
+      await pages.adminNotifications.btnDeleteByReferenceNumber.click();
+      await pages.adminNotifications.btnConfirm.click();
+      await expect(pages.adminNotifications.alertImportant).toContainText(
+        'There was a problem deleting the notifications. Please try again.',
+      );
+    });
+
+    await test.step('writes a failed delete audit record for one notification delete', async () => {
+      const client = new MongoDbClient();
+
+      try {
+        await client.connect();
+        const collection = client.collection('trade-imports-animals-backend', 'audit');
+
+        const records = await collection
+          .find({
+            notificationReferenceNumbers: invalidReference,
+          })
+          .toArray();
+
+        expect(records).toHaveLength(1);
+        expect(String(records[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+        expect(records[0].action).toBe('DELETE_NOTIFICATIONS');
+        expect(records[0].result).toBe('FAILURE');
+        expect(String(records[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+        expect(records[0].numberOfNotifications).toBe(1);
+        expect(records[0].notificationReferenceNumbers).toEqual([invalidReference]);
         expect(records[0].traceId).toBe('test-trace-id');
         expect(records[0].userId).toBe('2100010101');
         expect(records[0]._class).toBe('uk.gov.defra.trade.imports.animals.audit.Audit');

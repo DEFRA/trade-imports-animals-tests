@@ -43,6 +43,10 @@ export class AdminNotificationsPage {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
   }
 
+  get alertImportant(): Locator {
+    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Important' }) });
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto(this.expectedUrl);
 
