@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write '**/*.{ts,mjs,md,json,yml,yaml}'",
-    "format:check": "prettier --check '**/*.{ts,mjs,md,json,yml,yaml}'",
+    "format": "prettier --write '**/*.{ts,js,mjs,md,json,yml,yaml}'",
+    "format:check": "prettier --check '**/*.{ts,js,mjs,md,json,yml,yaml}'",
     "clean": "rm -rf test-results playwright-report allure-results allure-report FAILED",
     "test": "npm run clean && playwright test --grep-invert \"@agent|@compose\"",
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
@@ -45,7 +45,7 @@
       "eslint",
       "prettier --list-different"
     ],
-    "*.{mjs,json,md,yml,yaml}": [
+    "*.{js,mjs,json,md,yml,yaml}": [
       "prettier --list-different"
     ]
   }
