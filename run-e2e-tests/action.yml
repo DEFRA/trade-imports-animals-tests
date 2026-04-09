@@ -12,7 +12,7 @@ inputs:
     type: string
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: actions/checkout@v4
 
@@ -31,10 +31,10 @@ runs:
     - name: Start docker compose
       shell: bash
       run: |
-          TRADE_IMPORTS_ANIMALS_FRONTEND=${{inputs.trade-imports-animals-frontend}} \
-          TRADE_IMPORTS_ANIMALS_BACKEND=${{inputs.trade-imports-animals-backend}} \
-          TRADE_IMPORTS_ANIMALS_ADMIN=${{inputs.trade-imports-animals-admin}} \
-          docker compose -f compose.yml -f compose.github.override.yml up -d --wait --wait-timeout 300 --quiet-pull
+        TRADE_IMPORTS_ANIMALS_FRONTEND=${{inputs.trade-imports-animals-frontend}} \
+        TRADE_IMPORTS_ANIMALS_BACKEND=${{inputs.trade-imports-animals-backend}} \
+        TRADE_IMPORTS_ANIMALS_ADMIN=${{inputs.trade-imports-animals-admin}} \
+        docker compose -f compose.yml -f compose.github.override.yml up -d --wait --wait-timeout 300 --quiet-pull
 
     - name: Run the tests
       shell: bash
