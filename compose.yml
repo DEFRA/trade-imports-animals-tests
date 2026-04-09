@@ -1,4 +1,4 @@
-################################################################################
+# ──────────────────────────────────────────────────────────────────────────────
 # Docker Compose stack for Trade Imports Animals journey tests.
 # This file defines the infrastructure used locally and in CI to run
 # end-to-end Playwright tests against the Trade Imports Animals frontend
@@ -20,79 +20,79 @@
 #   - http://trade-imports-animals-backend:8085/
 
 services:
-
-################################################################################
-# MongoDB
-# https://hub.docker.com/_/mongo/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # MongoDB
+  # https://hub.docker.com/_/mongo/
+  # ──────────────────────────────────────────────────────────────────────────────
   mongodb:
     image: mongo:7.0
     ports:
-      - 27017:27017
+      - '27017:27017'
     volumes:
       - ./docker/scripts/mongodb:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.hello().ok"]
+      test: ['CMD', 'mongosh', '--eval', 'db.hello().ok']
       interval: 5s
       start_period: 5s
       retries: 3
 
-################################################################################
-# Localstack
-# https://hub.docker.com/r/localstack/localstack/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Localstack
+  # https://hub.docker.com/r/localstack/localstack/
+  # Uses default edge port 4566 on the compose network (port not exposed).
+  # ──────────────────────────────────────────────────────────────────────────────
   localstack:
-    image: localstack/localstack:3.2.0
-    environment:
-      - LOCALSTACK_HOST=127.0.0.1
-      - SERVICES=s3,sqs,sns,dynamodb
-      - LS_LOG=WARN
+    image: localstack/localstack:3.0.2
     env_file:
       - ./docker/config/defaults.env
+    environment:
+      - LS_LOG=WARN
+      - SERVICES=s3,sqs,sns,dynamodb
+      - LOCALSTACK_HOST=127.0.0.1
     volumes:
       - ./docker/scripts/localstack:/etc/localstack/init/ready.d
     healthcheck:
-      test: ["CMD", "curl", "localhost:4566"]
+      test: ['CMD', 'curl', 'localhost:4566']
       interval: 5s
       start_period: 5s
       retries: 3
 
-################################################################################
-# Redis
-# https://hub.docker.com/_/redis/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Redis
+  # https://hub.docker.com/_/redis/
+  # ──────────────────────────────────────────────────────────────────────────────
   redis:
-    image: redis:7
+    image: redis:7.2.3-alpine3.18
     restart: always
     healthcheck:
-      test: [ "CMD", "redis-cli", "PING" ]
+      test: ['CMD', 'redis-cli', 'PING']
       interval: 5s
       start_period: 2s
       retries: 5
 
-################################################################################
-# Trade Imports Defra ID Stub
-# https://hub.docker.com/r/defradigital/trade-imports-defra-id-stub/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Defra ID Stub
+  # https://hub.docker.com/r/defradigital/trade-imports-defra-id-stub/
+  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-defra-id-stub:
-    image: defradigital/trade-imports-defra-id-stub
+    image: defradigital/trade-imports-defra-id-stub:latest
     platform: linux/amd64
+    environment:
+      - PORT=3007
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
     ports:
       - '3007:3007'
-    environment:
-      port: 3007
-      AUTH_PASSWORD: ${AUTH_PASSWORD:-Password123!}
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3007/health" ]
-      interval: 1m30s
-      timeout: 30s
+      test: ['CMD', 'curl', '-f', 'http://localhost:3007/health']
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 3s
 
-################################################################################
-# Trade Imports Animals frontend
-# https://hub.docker.com/r/defradigital/trade-imports-animals-frontend/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals frontend
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-frontend/
+  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-animals-frontend:
     image: defradigital/trade-imports-animals-frontend:${TRADE_IMPORTS_ANIMALS_FRONTEND:-latest}
     platform: linux/amd64
@@ -101,48 +101,48 @@ services:
       - ./docker/config/trade-imports-animals-frontend.env
     environment:
       - PORT=3000
+    ports:
+      - '3000:3000'
     depends_on:
       trade-imports-animals-backend:
         condition: service_started
       redis:
         condition: service_healthy
-    ports:
-      - '3000:3000'
     healthcheck:
-      test: ["CMD", "curl", "http://localhost:3000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 3s
       start_period: 2s
       retries: 3
 
-################################################################################
-# Trade Imports Animals backend
-# https://hub.docker.com/r/defradigital/trade-imports-animals-backend/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals backend
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-backend/
+  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-animals-backend:
     image: defradigital/trade-imports-animals-backend:${TRADE_IMPORTS_ANIMALS_BACKEND:-latest}
     platform: linux/amd64
-    ports:
-      - 8085:8085
     env_file:
       - ./docker/config/defaults.env
       - ./docker/config/trade-imports-animals-backend.env
     environment:
       - PORT=8085
+    ports:
+      - '8085:8085'
     depends_on:
       mongodb:
         condition: service_healthy
       localstack:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
       interval: 5s
       start_period: 60s
       retries: 10
 
-################################################################################
-# Trade Imports Animals admin
-# https://hub.docker.com/r/defradigital/trade-imports-animals-admin/
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals admin
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-admin/
+  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-animals-admin:
     image: defradigital/trade-imports-animals-admin:${TRADE_IMPORTS_ANIMALS_ADMIN:-latest}
     platform: linux/amd64
@@ -151,33 +151,33 @@ services:
       - ./docker/config/trade-imports-animals-admin.env
     environment:
       - PORT=3001
+    ports:
+      - '3001:3001'
     depends_on:
       trade-imports-animals-backend:
         condition: service_started
       redis:
         condition: service_healthy
-    ports:
-      - 3001:3001
     healthcheck:
-      test: ["CMD", "curl", "http://localhost:3001/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
       interval: 3s
       start_period: 2s
       retries: 3
 
-################################################################################
-# Playwright test runner
-# https://mcr.microsoft.com/en-us/artifact/mar/playwright
-################################################################################
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Playwright tests runner
+  # https://mcr.microsoft.com/en-us/artifact/mar/playwright
+  # ──────────────────────────────────────────────────────────────────────────────
   playwright-tests:
     image: mcr.microsoft.com/playwright:v1.59.1-jammy
+    profiles:
+      - tests
     working_dir: /app
     volumes:
       - ./:/app
     environment:
       - CI=true
-      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
       - MONGODB_URI=mongodb://mongodb:27017
-    profiles:
-      - tests
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
     command: >
       bash -lc "npm ci --ignore-scripts && npm run test:github"
