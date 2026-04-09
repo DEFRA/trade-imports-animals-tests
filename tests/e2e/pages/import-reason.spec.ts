@@ -32,11 +32,10 @@ test.describe('Reason for import', () => {
     await expect(pages.importReason.radioReEntry).toBeChecked();
   });
 
-  test('continues (to next page*) after saving selected reason', async ({ pages }) => {
+  test('continues to commodity details after saving selected reason', async ({ pages }) => {
     await pages.importReason.radioInternalMarket.click();
     await pages.importReason.btnSaveAndContinue.click();
-    // Temporary behaviour: currently reloads this page; update when next-step navigation is implemented.
-    await expect(pages.page).toHaveURL(pages.importReason.expectedUrl);
-    await expect(pages.importReason.headingPage).toHaveText(pages.importReason.expectedHeading);
+    await expect(pages.page).toHaveURL(pages.commodityDetails.expectedUrl);
+    await expect(pages.commodityDetails.headingPage).toHaveText(pages.commodityDetails.expectedHeading);
   });
 });
