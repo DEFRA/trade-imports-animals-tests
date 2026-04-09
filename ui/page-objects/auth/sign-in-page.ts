@@ -28,7 +28,7 @@ export class SignInPage {
 
   async signIn(options?: { userId?: string; password?: string }): Promise<void> {
     const userId = options?.userId ?? '2100010101';
-    const password = options?.password ?? process.env.AUTH_PASSWORD ?? 'Password123!';
+    const password = options?.password ?? process.env.AUTH_PASSWORD ?? 'Password123';
     await this.inputUserId.fill(userId);
 
     if (process.env.PWDEBUG) {

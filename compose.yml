@@ -79,7 +79,7 @@ services:
     platform: linux/amd64
     environment:
       - PORT=3007
-      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123}
     ports:
       - '3007:3007'
     healthcheck:
@@ -178,6 +178,6 @@ services:
     environment:
       - CI=true
       - MONGODB_URI=mongodb://mongodb:27017
-      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123!}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123}
     command: >
       bash -lc "npm ci --ignore-scripts && npm run test:github"
