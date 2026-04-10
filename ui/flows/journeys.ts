@@ -2,6 +2,7 @@ import { commodityCodes, type CommodityCode } from '@domain/types/commodity-code
 import { commoditySpecies, type CommoditySpecies } from '@domain/types/commodity-species';
 import { commodityTypes, type CommodityType } from '@domain/types/commodity-types';
 import { countryCodes, type CountryCode } from '@domain/types/country-codes';
+import { importReasons, type ImportReason } from '@domain/types/import-reasons';
 import type { PageObjects } from '@page-objects';
 
 type JourneyOptions = {
@@ -9,6 +10,7 @@ type JourneyOptions = {
   commodityCode?: CommodityCode;
   commodityType?: CommodityType;
   species?: CommoditySpecies;
+  importReason?: ImportReason;
 };
 
 const defaults: Required<JourneyOptions> = {
@@ -16,6 +18,7 @@ const defaults: Required<JourneyOptions> = {
   commodityCode: commodityCodes.dog,
   commodityType: commodityTypes.domestic,
   species: commoditySpecies.bisonBison,
+  importReason: importReasons.internalMarket,
 };
 
 export class Journeys {
@@ -54,6 +57,17 @@ export class Journeys {
     await this.pages.speciesSelection.dropdownCommodityType.selectOption(commodityType);
     await this.pages.speciesSelection.checkboxSpecies(species).check();
     await this.pages.speciesSelection.btnSaveAndContinue.click();
+  }
+
+  async toCommodityDetails(options: JourneyOptions = {}): Promise<void> {
+    const { importReason } = { ...defaults, ...options };
+    await this.toImportReason(options);
+    if (importReason === importReasons.internalMarket) {
+      await this.pages.importReason.radioInternalMarket.click();
+    } else if (importReason === importReasons.reEntry) {
+      await this.pages.importReason.radioReEntry.click();
+    }
+    await this.pages.importReason.btnSaveAndContinue.click();
   }
 
   async toAdminDashboard(): Promise<void> {
