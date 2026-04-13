@@ -28,12 +28,14 @@ test.describe('Origin of the import', () => {
     }
   });
 
-  test('defaults country to "Select a country" and region code to "No"', async ({ pages }) => {
+  test('shows default values on first load', async ({ pages }) => {
     // Default "Select a country" option has an empty value.
     await expect(pages.originOfImport.dropdownCountry.locator('option:checked')).toHaveText('Select a country');
     await expect(pages.originOfImport.dropdownCountry).toHaveValue('');
     await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes)).not.toBeChecked();
     await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.no)).toBeChecked();
+    await expect(pages.originOfImport.inputInternalReferenceNumber).toHaveAttribute('type', 'text');
+    await expect(pages.originOfImport.inputInternalReferenceNumber).toHaveValue('');
   });
 
   test('allows changing the region code from "No" to "Yes"', async ({ pages }) => {
