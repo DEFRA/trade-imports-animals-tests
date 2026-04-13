@@ -11,8 +11,8 @@ export type JourneyOptions = {
   commodityType?: CommodityType;
   species?: CommoditySpecies;
   importReason?: ImportReason;
-  numberOfAnimals?: string;
-  numberOfPackages?: string;
+  numberOfAnimals?: number;
+  numberOfPackages?: number;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -21,8 +21,8 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   commodityType: commodityTypes.domestic,
   species: commoditySpecies.bisonBison,
   importReason: importReasons.internalMarket,
-  numberOfAnimals: '5',
-  numberOfPackages: '13',
+  numberOfAnimals: 5,
+  numberOfPackages: 13,
 };
 
 export class Journeys {
@@ -77,8 +77,8 @@ export class Journeys {
   async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
     const { numberOfAnimals, numberOfPackages } = { ...defaultJourneyOptions, ...options };
     await this.toCommodityDetails(options);
-    await this.pages.commodityDetails.inputNoOfAnimals.fill(numberOfAnimals);
-    await this.pages.commodityDetails.inputNoOfPackages.fill(numberOfPackages);
+    await this.pages.commodityDetails.inputNoOfAnimals.fill(numberOfAnimals.toString());
+    await this.pages.commodityDetails.inputNoOfPackages.fill(numberOfPackages.toString());
     await this.pages.commodityDetails.btnSaveAndContinue.click();
   }
 

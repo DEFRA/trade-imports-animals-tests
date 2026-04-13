@@ -5,7 +5,7 @@ import { type NotificationDocument } from '@domain/models/db/notification-docume
 
 test.describe('Notification persistence', () => {
   test(
-    'persists notification (after full journey completion*)',
+    'persists notification to database (after full journey completion*)',
     { tag: ['@compose', '@integration', '@mongodb'] },
     async ({ journeys, pages }) => {
       await journeys.toAdditionalDetails();
@@ -32,11 +32,11 @@ test.describe('Notification persistence', () => {
         expect(persistedSpecies).toBeDefined();
         expect(persistedSpecies?.text).toBe(defaults.species);
         expect(record.reasonForImport).toBe(defaults.importReason);
-        expect(persistedSpecies?.noOfAnimals).toBe(Number(defaults.numberOfAnimals));
-        expect(persistedSpecies?.noOfPackages).toBe(Number(defaults.numberOfPackages));
+        expect(persistedSpecies?.noOfAnimals).toBe(defaults.numberOfAnimals);
+        expect(persistedSpecies?.noOfPackages).toBe(defaults.numberOfPackages);
         // TODO: update to compute totals when full journey is implemented
-        expect(commodityComplement.totalNoOfAnimals).toBe(Number(defaults.numberOfAnimals));
-        expect(commodityComplement.totalNoOfPackages).toBe(Number(defaults.numberOfPackages));
+        expect(commodityComplement.totalNoOfAnimals).toBe(defaults.numberOfAnimals);
+        expect(commodityComplement.totalNoOfPackages).toBe(defaults.numberOfPackages);
       } finally {
         await client.close();
       }
