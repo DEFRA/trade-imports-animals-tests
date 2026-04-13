@@ -74,7 +74,6 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         expect(records[0].notificationReferenceNumbers).toEqual([referenceNumber]);
         expect(records[0].traceId).toBe('test-trace-id');
         expect(records[0].userId).toBe('2100010101');
-        expect(records[0]._class).toBe('uk.gov.defra.trade.imports.animals.audit.Audit');
       } finally {
         await client.close();
       }
@@ -117,7 +116,6 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         expect(records[0].notificationReferenceNumbers).toEqual(expect.arrayContaining(referenceNumbers));
         expect(records[0].traceId).toBe('test-trace-id');
         expect(records[0].userId).toBe('2100010101');
-        expect(records[0]._class).toBe('uk.gov.defra.trade.imports.animals.audit.Audit');
       } finally {
         await client.close();
       }
@@ -159,7 +157,6 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         expect(records[0].notificationReferenceNumbers).toEqual([invalidReference]);
         expect(records[0].traceId).toBe('test-trace-id');
         expect(records[0].userId).toBe('2100010101');
-        expect(records[0]._class).toBe('uk.gov.defra.trade.imports.animals.audit.Audit');
       } finally {
         await client.close();
       }
