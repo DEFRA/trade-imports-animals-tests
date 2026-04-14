@@ -16,6 +16,14 @@ export class OriginOfImportPage {
     return this.page.getByRole('combobox', { name: 'Origin of the Import' });
   }
 
+  get groupRequiresOriginCode(): Locator {
+    return this.page.getByRole('group', { name: 'Does the consignment require a region of origin code?' });
+  }
+
+  radioRequiresOriginCode(value: YesNoValue): Locator {
+    return this.groupRequiresOriginCode.getByRole('radio', { name: value });
+  }
+
   get dropdownCountryOptions(): Locator {
     return this.dropdownCountry.locator('option');
   }
@@ -50,9 +58,5 @@ export class OriginOfImportPage {
       const signInPage = new SignInPage(this.page);
       await signInPage.signIn();
     }
-  }
-
-  radioRequiresOriginCode(value: YesNoValue): Locator {
-    return this.page.getByRole('radio', { name: value });
   }
 }

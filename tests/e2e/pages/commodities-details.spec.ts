@@ -1,4 +1,9 @@
 import { test, expect } from '@fixtures';
+import { commoditySpecies } from '@domain/types/commodity-species';
+import { commodityTypes } from '@domain/types/commodity-types';
+
+const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domestic}`;
+const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;
 
 test.describe('Commodity details', () => {
   test.beforeEach(async ({ journeys }) => {
@@ -26,34 +31,44 @@ test.describe('Commodity details', () => {
 
   test('shows species and type in table (for selected commodity*)', async ({ pages }) => {
     // Species and type are currently hardcoded in the view.
-    await expect(pages.commodityDetails.tableBodyRowsQuantities).toHaveCount(2);
-    const speciesAndType = await pages.commodityDetails.tableBodyRowCellsQuantities(0).allTextContents();
-    expect(speciesAndType[0]).toContain('Bison bison, Domestic');
+    await expect(pages.commodityDetails.tableBodyRowsQuantities).toHaveCount(3);
+    const speciesAndType = await pages.commodityDetails.tableBodyRowsQuantities.allTextContents();
+    expect(speciesAndType[0]).toContain(BISON_DOMESTIC);
+    expect(speciesAndType[1]).toContain(BOS_DOMESTIC);
+    expect(speciesAndType[2]).toContain('Subtotal');
   });
 
   test('shows empty quantity inputs and zero subtotals by default', async ({ pages }) => {
-    await expect(pages.commodityDetails.inputNoOfAnimals).toHaveAttribute('type', 'number');
-    await expect(pages.commodityDetails.inputNoOfAnimals).toHaveText('');
-    await expect(pages.commodityDetails.inputNoOfPackages).toHaveAttribute('type', 'number');
-    await expect(pages.commodityDetails.inputNoOfPackages).toHaveText('');
+    await expect(pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC)).toHaveAttribute('type', 'number');
+    await expect(pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC)).toHaveText('');
+    await expect(pages.commodityDetails.inputNoOfPackages(BOS_DOMESTIC)).toHaveAttribute('type', 'number');
+    await expect(pages.commodityDetails.inputNoOfPackages(BOS_DOMESTIC)).toHaveText('');
     await expect(pages.commodityDetails.subTotalNoOfAnimals).toHaveText('0');
     await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('0');
   });
 
   test('allows entering quantities and updates subtotals', async ({ pages }) => {
-    await pages.commodityDetails.inputNoOfAnimals.fill('1');
-    await pages.commodityDetails.inputNoOfPackages.fill('99');
+    await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('1');
+    await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('99');
     await expect(pages.commodityDetails.subTotalNoOfAnimals).toHaveText('1');
     await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('99');
-    await pages.commodityDetails.inputNoOfAnimals.fill('256');
-    await pages.commodityDetails.inputNoOfPackages.fill('2147483647');
-    await expect(pages.commodityDetails.subTotalNoOfAnimals).toHaveText('256');
+    await pages.commodityDetails.inputNoOfAnimals(BOS_DOMESTIC).fill('19');
+    await pages.commodityDetails.inputNoOfPackages(BOS_DOMESTIC).fill('102');
+    await expect(pages.commodityDetails.subTotalNoOfAnimals).toHaveText('20');
+    await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('201');
+    await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('256');
+    await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('2147483000');
+    await pages.commodityDetails.inputNoOfAnimals(BOS_DOMESTIC).fill('256');
+    await pages.commodityDetails.inputNoOfPackages(BOS_DOMESTIC).fill('647');
+    await expect(pages.commodityDetails.subTotalNoOfAnimals).toHaveText('512');
     await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('2147483647');
   });
 
   test('continues to additional details after saving quantities', async ({ pages }) => {
-    await pages.commodityDetails.inputNoOfAnimals.fill('1');
-    await pages.commodityDetails.inputNoOfPackages.fill('99');
+    await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('1');
+    await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('99');
+    await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('99');
+    await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('101');
     await pages.commodityDetails.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.additionalDetails.expectedUrl);
     await expect(pages.additionalDetails.headingPage).toHaveText(pages.additionalDetails.expectedHeading);

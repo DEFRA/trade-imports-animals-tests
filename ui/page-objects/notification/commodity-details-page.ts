@@ -42,14 +42,14 @@ export class CommodityDetailsPage {
     return this.tableBodyRowsQuantities.nth(index).getByRole('cell');
   }
 
-  get inputNoOfAnimals(): Locator {
-    // return this.tableQuantities('Live bovine animals').getByRole('textbox', { name: 'Number of animals' });
-    return this.tableQuantities('Live bovine animals').locator('tbody').getByRole('row').getByRole('spinbutton').first();
+  inputNoOfAnimals(speciesAndType: string): Locator {
+    // return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('textbox', { name: 'Number of animals' });
+    return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('spinbutton').first();
   }
 
-  get inputNoOfPackages(): Locator {
-    //return this.tableQuantities('Live bovine animals').getByRole('textbox', { name: 'Number of packages' });
-    return this.tableQuantities('Live bovine animals').locator('tbody').getByRole('row').getByRole('spinbutton').nth(1);
+  inputNoOfPackages(speciesAndType: string): Locator {
+    //return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('textbox', { name: 'Number of packages' });
+    return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('spinbutton').nth(1);
   }
 
   get subTotalNoOfAnimals(): Locator {
