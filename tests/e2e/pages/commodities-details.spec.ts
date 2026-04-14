@@ -51,10 +51,11 @@ test.describe('Commodity details', () => {
     await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('2147483647');
   });
 
-  test('continues (to next page*) after saving quantities', async ({ pages }) => {
+  test('continues to additional details after saving quantities', async ({ pages }) => {
     await pages.commodityDetails.inputNoOfAnimals.fill('1');
     await pages.commodityDetails.inputNoOfPackages.fill('99');
     await pages.commodityDetails.btnSaveAndContinue.click();
-    // TODO: pending next page assertion
+    await expect(pages.page).toHaveURL(pages.additionalDetails.expectedUrl);
+    await expect(pages.additionalDetails.headingPage).toHaveText(pages.additionalDetails.expectedHeading);
   });
 });

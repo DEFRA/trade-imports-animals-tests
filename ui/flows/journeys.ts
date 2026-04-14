@@ -3,6 +3,7 @@ import { commoditySpecies, type CommoditySpecies } from '@domain/types/commodity
 import { commodityTypes, type CommodityType } from '@domain/types/commodity-types';
 import { countryCodes, type CountryCode } from '@domain/types/country-codes';
 import { importReasons, type ImportReason } from '@domain/types/import-reasons';
+import { certificationPurposes, type CertificationPurpose } from '@domain/types/certification-purposes';
 import type { PageObjects } from '@page-objects';
 
 export type JourneyOptions = {
@@ -11,8 +12,9 @@ export type JourneyOptions = {
   commodityType?: CommodityType;
   species?: CommoditySpecies;
   importReason?: ImportReason;
-  numberOfAnimals?: number;
-  numberOfPackages?: number;
+  noOfAnimals?: number;
+  noOfPackages?: number;
+  certificationPurpose?: CertificationPurpose;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -21,8 +23,9 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   commodityType: commodityTypes.domestic,
   species: commoditySpecies.bisonBison,
   importReason: importReasons.internalMarket,
-  numberOfAnimals: 5,
-  numberOfPackages: 13,
+  noOfAnimals: 5,
+  noOfPackages: 13,
+  certificationPurpose: certificationPurposes.approvedBodies,
 };
 
 export class Journeys {
@@ -75,11 +78,24 @@ export class Journeys {
   }
 
   async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
-    const { numberOfAnimals, numberOfPackages } = { ...defaultJourneyOptions, ...options };
+    const { noOfAnimals, noOfPackages } = { ...defaultJourneyOptions, ...options };
     await this.toCommodityDetails(options);
-    await this.pages.commodityDetails.inputNoOfAnimals.fill(numberOfAnimals.toString());
-    await this.pages.commodityDetails.inputNoOfPackages.fill(numberOfPackages.toString());
+    await this.pages.commodityDetails.inputNoOfAnimals.fill(noOfAnimals.toString());
+    await this.pages.commodityDetails.inputNoOfPackages.fill(noOfPackages.toString());
     await this.pages.commodityDetails.btnSaveAndContinue.click();
+  }
+
+  async toAccompanyingDocuments(options: JourneyOptions = {}): Promise<void> {
+    const { certificationPurpose } = { ...defaultJourneyOptions, ...options };
+    await this.toAdditionalDetails(options);
+    if (certificationPurpose === certificationPurposes.approvedBodies) {
+      await this.pages.additionalDetails.radioApprovedBodies.click();
+    } else if (certificationPurpose === certificationPurposes.breedingAndOrProduction) {
+      await this.pages.additionalDetails.radioBreedingAndOrProduction.click();
+    } else if (certificationPurpose === certificationPurposes.slaughter) {
+      await this.pages.additionalDetails.radioSlaughter.click();
+    }
+    await this.pages.additionalDetails.btnSaveAndContinue.click();
   }
 
   async toAdminDashboard(): Promise<void> {

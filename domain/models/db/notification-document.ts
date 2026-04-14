@@ -18,4 +18,8 @@ export type NotificationDocument = {
     }>;
   };
   reasonForImport: string;
+  additionalDetails: {
+    certifiedFor: string;
+    unweanedAnimals: string;
+  };
 };
