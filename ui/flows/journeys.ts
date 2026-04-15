@@ -94,9 +94,9 @@ export class Journeys {
   }
 
   async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {
-    const { noOfAnimals, noOfPackages } = { ...defaultJourneyOptions, ...options };
+    const { commodityType, species, noOfAnimals, noOfPackages } = { ...defaultJourneyOptions, ...options };
     await this.toCommodityDetails(options);
-    const speciesList = Array.isArray(defaultJourneyOptions.species) ? defaultJourneyOptions.species : [defaultJourneyOptions.species];
+    const speciesList = Array.isArray(species) ? species : [species];
     const animalList = Array.isArray(noOfAnimals) ? noOfAnimals : [noOfAnimals];
     const packageList = Array.isArray(noOfPackages) ? noOfPackages : [noOfPackages];
 
@@ -107,7 +107,7 @@ export class Journeys {
     }
 
     for (let i = 0; i < speciesList.length; i += 1) {
-      const label = `${speciesList[i]}, ${defaultJourneyOptions.commodityType}`;
+      const label = `${speciesList[i]}, ${commodityType}`;
       await this.pages.commodityDetails.inputNoOfAnimals(label).fill(animalList[i].toString());
       await this.pages.commodityDetails.inputNoOfPackages(label).fill(packageList[i].toString());
     }
