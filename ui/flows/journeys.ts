@@ -93,7 +93,7 @@ export class Journeys {
     await this.pages.importReason.btnSaveAndContinue.click();
   }
 
-  async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
+  async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {
     const { noOfAnimals, noOfPackages } = { ...defaultJourneyOptions, ...options };
     await this.toCommodityDetails(options);
     const speciesList = Array.isArray(defaultJourneyOptions.species) ? defaultJourneyOptions.species : [defaultJourneyOptions.species];
@@ -112,6 +112,12 @@ export class Journeys {
       await this.pages.commodityDetails.inputNoOfPackages(label).fill(packageList[i].toString());
     }
     await this.pages.commodityDetails.btnSaveAndContinue.click();
+  }
+
+  async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
+    await this.toAnimalIdentification(options);
+    // TODO: inputs
+    await this.pages.animalIdentification.btnSaveAndContinue.click();
   }
 
   async toAccompanyingDocuments(options: JourneyOptions = {}): Promise<void> {

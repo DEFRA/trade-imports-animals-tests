@@ -64,13 +64,13 @@ test.describe('Commodity details', () => {
     await expect(pages.commodityDetails.subTotalNoOfPackages).toHaveText('2147483647');
   });
 
-  test('continues to additional details after saving quantities', async ({ pages }) => {
+  test('continues to animal identification after saving quantities', async ({ pages }) => {
     await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('1');
     await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('99');
     await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('99');
     await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('101');
     await pages.commodityDetails.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.additionalDetails.expectedUrl);
-    await expect(pages.additionalDetails.headingPage).toHaveText(pages.additionalDetails.expectedHeading);
+    await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
+    await expect(pages.animalIdentification.headingPage).toHaveText(pages.animalIdentification.expectedHeading);
   });
 });

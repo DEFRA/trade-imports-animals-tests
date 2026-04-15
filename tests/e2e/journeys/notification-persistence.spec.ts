@@ -19,8 +19,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       const docs = await collection.find({ referenceNumber }).toArray();
       const [doc] = docs;
       const [subdocCommodityComplement] = doc.commodity.commodityComplement;
-      const subdocSpecies1 = subdocCommodityComplement.species.find((species) => species.text === defaults.species[0]);
-      const subdocSpecies2 = subdocCommodityComplement.species.find((species) => species.text === defaults.species[1]);
+      const subdocFirstSpecies = subdocCommodityComplement.species.find((species) => species.text === defaults.species[0]);
+      const subdocSecondSpecies = subdocCommodityComplement.species.find((species) => species.text === defaults.species[1]);
 
       expect(docs).toHaveLength(1);
       expect(doc.referenceNumber).toBe(referenceNumber);
@@ -29,15 +29,15 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.origin.internalReference).toBe(undefined);
       expect(doc.commodity.name).toBe(defaults.commodityCode);
       expect(subdocCommodityComplement.typeOfCommodity).toBe(defaults.commodityType);
-      expect(subdocSpecies1).toBeDefined();
-      expect(subdocSpecies1?.text).toBe(defaults.species[0]);
-      expect(subdocSpecies2).toBeDefined();
-      expect(subdocSpecies2?.text).toBe(defaults.species[1]);
+      expect(subdocFirstSpecies).toBeDefined();
+      expect(subdocFirstSpecies?.text).toBe(defaults.species[0]);
+      expect(subdocSecondSpecies).toBeDefined();
+      expect(subdocSecondSpecies?.text).toBe(defaults.species[1]);
       expect(doc.reasonForImport).toBe(defaults.importReason);
-      expect(subdocSpecies1?.noOfAnimals).toBe(defaults.noOfAnimals[0]);
-      expect(subdocSpecies1?.noOfPackages).toBe(defaults.noOfPackages[0]);
-      expect(subdocSpecies2?.noOfAnimals).toBe(defaults.noOfAnimals[1]);
-      expect(subdocSpecies2?.noOfPackages).toBe(defaults.noOfPackages[1]);
+      expect(subdocFirstSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[0]);
+      expect(subdocFirstSpecies?.noOfPackages).toBe(defaults.noOfPackages[0]);
+      expect(subdocSecondSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[1]);
+      expect(subdocSecondSpecies?.noOfPackages).toBe(defaults.noOfPackages[1]);
       expect(subdocCommodityComplement.totalNoOfAnimals).toBe(defaults.noOfAnimals[0] + defaults.noOfAnimals[1]);
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);

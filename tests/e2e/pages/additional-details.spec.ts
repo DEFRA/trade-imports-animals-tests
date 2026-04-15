@@ -11,10 +11,10 @@ test.describe('Additional details', () => {
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
   });
 
-  test('can navigate back to commodity details', async ({ pages }) => {
+  test('can navigate back to animal identification', async ({ pages }) => {
     await pages.commodityDetails.linkBack.click();
-    await expect(pages.page).toHaveURL(pages.commodityDetails.expectedUrl);
-    await expect(pages.importReason.headingPage).toHaveText(pages.commodityDetails.expectedHeading);
+    await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
+    await expect(pages.animalIdentification.headingPage).toHaveText(pages.animalIdentification.expectedHeading);
   });
 
   test('shows default values on first load', async ({ pages }) => {
