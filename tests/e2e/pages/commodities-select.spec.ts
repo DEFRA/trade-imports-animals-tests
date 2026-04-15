@@ -16,7 +16,7 @@ test.describe('Select species of commodity', () => {
   test('can navigate back to commodity selection', async ({ pages }) => {
     await pages.speciesSelection.linkBack.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
@@ -83,6 +83,6 @@ test.describe('Select species of commodity', () => {
     await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).check();
     await pages.speciesSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.importReason.expectedUrl);
-    await expect(pages.importReason.headingPage).toHaveText(pages.importReason.expectedHeading);
+    await expect(pages.importReason.heading).toBeVisible();
   });
 });

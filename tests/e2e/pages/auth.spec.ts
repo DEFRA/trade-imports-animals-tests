@@ -7,13 +7,13 @@ test.describe('Authentication', { tag: '@auth' }, () => {
 
   test('lands on the sign in page when opening the notification dashboard', async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-    await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+    await expect(pages.signIn.heading).toBeVisible();
   });
 
   test('allows signing into the notification dashboard', async ({ pages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-    await expect(pages.notificationDashboard.headingPage).toHaveText(pages.notificationDashboard.expectedHeading);
+    await expect(pages.notificationDashboard.heading).toBeVisible();
   });
 
   test('displays an error message when signing in with invalid user id', async ({ pages }) => {
@@ -32,7 +32,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await pages.signIn.signIn();
     await pages.notificationDashboard.btnSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
-    await expect(pages.signOut.headingPage).toHaveText(pages.signOut.expectedHeading);
+    await expect(pages.signOut.heading).toBeVisible();
   });
 
   test('lands on the sign in page when reopening the notification dashboard after sign out', async ({ pages }) => {
@@ -40,7 +40,7 @@ test.describe('Authentication', { tag: '@auth' }, () => {
     await pages.notificationDashboard.btnSignOut.click();
     await pages.notificationDashboard.open(false);
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-    await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+    await expect(pages.signIn.heading).toBeVisible();
   });
 
   test.describe('Origin of the import (unauthenticated entry)', () => {
@@ -50,13 +50,13 @@ test.describe('Authentication', { tag: '@auth' }, () => {
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {
       await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-      await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+      await expect(pages.signIn.heading).toBeVisible();
     });
 
     test('allows signing into a page further in the journey', async ({ pages }) => {
       await pages.signIn.signIn();
       await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-      await expect(pages.originOfImport.headingPage).toHaveText(pages.originOfImport.expectedHeading);
+      await expect(pages.originOfImport.heading).toBeVisible();
     });
   });
 });

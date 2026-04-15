@@ -2,7 +2,6 @@ import { Page, Locator } from '@playwright/test';
 
 export class CommoditySelectionPage {
   readonly expectedUrl = '/commodities';
-  readonly expectedHeading = 'Select a Commodity';
 
   constructor(private readonly page: Page) {}
 
@@ -10,8 +9,8 @@ export class CommoditySelectionPage {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
   }
 
-  get headingPage(): Locator {
-    return this.page.getByTestId('app-heading-title');
+  get heading(): Locator {
+    return this.page.getByRole('heading', { name: 'Select a Commodity', exact: true });
   }
 
   get dropdownCommodity(): Locator {

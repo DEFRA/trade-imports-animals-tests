@@ -7,12 +7,12 @@ test.describe('Admin service', () => {
 
   test('lands on the admin dashboard', async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
-    await expect(pages.adminDashboard.headingPage).toHaveText(pages.adminDashboard.expectedHeading);
+    await expect(pages.adminDashboard.heading).toBeVisible();
   });
 
   test('allows navigating to notifications area', async ({ pages }) => {
     await pages.adminDashboard.btnNotifications.click();
     await expect(pages.page).toHaveURL(pages.adminNotifications.expectedUrl);
-    await expect(pages.adminNotifications.headingPage).toHaveText(pages.adminNotifications.expectedHeading);
+    await expect(pages.adminNotifications.heading).toBeVisible();
   });
 });

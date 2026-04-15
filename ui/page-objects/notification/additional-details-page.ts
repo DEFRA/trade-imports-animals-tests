@@ -3,7 +3,6 @@ import type { YesNoValue } from '@domain/types/yes-no-values';
 
 export class AdditionalDetailsPage {
   readonly expectedUrl = '/additional-details';
-  readonly expectedHeading = 'Additional animal details';
 
   constructor(private readonly page: Page) {}
 
@@ -15,8 +14,8 @@ export class AdditionalDetailsPage {
     return this.page.getByRole('link', { name: 'Back' });
   }
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Additional animal details' });
   }
 
   get groupAnimalsCertifiedFor(): Locator {

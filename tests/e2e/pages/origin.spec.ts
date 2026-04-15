@@ -48,7 +48,7 @@ test.describe('Origin of the import', () => {
     await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.austria);
     await pages.originOfImport.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test('continues to commodity selection when all fields are valid', async ({ pages }) => {
@@ -57,7 +57,7 @@ test.describe('Origin of the import', () => {
     await pages.originOfImport.inputInternalReferenceNumber.fill('B'.repeat(58));
     await pages.originOfImport.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {

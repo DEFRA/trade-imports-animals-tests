@@ -3,12 +3,11 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class AdminNotificationsPage {
   readonly expectedUrl = '/notifications';
-  readonly expectedHeading = 'Notifications';
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Notifications' });
   }
 
   get inputReferenceNumber(): Locator {

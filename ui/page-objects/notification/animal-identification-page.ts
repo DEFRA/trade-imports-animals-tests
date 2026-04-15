@@ -2,7 +2,6 @@ import { Page, Locator } from '@playwright/test';
 
 export class AnimalIdentificationPage {
   readonly expectedUrl = '/commodities/identification';
-  readonly expectedHeading = 'Enter animal identification details';
 
   constructor(private readonly page: Page) {}
 
@@ -14,8 +13,8 @@ export class AnimalIdentificationPage {
     return this.page.getByRole('link', { name: 'Back' });
   }
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Enter animal identification details' });
   }
 
   get btnSaveAndContinue(): Locator {

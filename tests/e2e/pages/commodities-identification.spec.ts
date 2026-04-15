@@ -13,13 +13,13 @@ test.describe('Animal identification details', () => {
   test('can navigate back to commodity details', async ({ pages }) => {
     await pages.animalIdentification.linkBack.click();
     await expect(pages.page).toHaveURL(pages.commodityDetails.expectedUrl);
-    await expect(pages.commodityDetails.headingPage).toHaveText(pages.commodityDetails.expectedHeading);
+    await expect(pages.commodityDetails.heading).toBeVisible();
   });
 
   test('continues to additional details after saving identification details', async ({ pages }) => {
     // TODO: inputs
     await pages.additionalDetails.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.additionalDetails.expectedUrl);
-    await expect(pages.additionalDetails.headingPage).toHaveText(pages.additionalDetails.expectedHeading);
+    await expect(pages.additionalDetails.heading).toBeVisible();
   });
 });

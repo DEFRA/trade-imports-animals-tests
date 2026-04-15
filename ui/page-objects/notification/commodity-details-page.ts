@@ -2,7 +2,6 @@ import { Page, Locator } from '@playwright/test';
 
 export class CommodityDetailsPage {
   readonly expectedUrl = '/commodities/details';
-  readonly expectedHeading = 'Commodity';
 
   constructor(private readonly page: Page) {}
 
@@ -14,8 +13,8 @@ export class CommodityDetailsPage {
     return this.page.getByRole('link', { name: 'Back' });
   }
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Commodity' });
   }
 
   get tableCommodities(): Locator {

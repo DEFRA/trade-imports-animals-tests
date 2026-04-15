@@ -3,12 +3,11 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class AdminDashboardPage {
   readonly expectedUrl = '/';
-  readonly expectedHeading = 'Home';
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Home' });
   }
 
   get btnSignOut(): Locator {

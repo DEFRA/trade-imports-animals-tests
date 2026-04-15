@@ -14,7 +14,7 @@ test.describe('Additional details', () => {
   test('can navigate back to animal identification', async ({ pages }) => {
     await pages.commodityDetails.linkBack.click();
     await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
-    await expect(pages.animalIdentification.headingPage).toHaveText(pages.animalIdentification.expectedHeading);
+    await expect(pages.animalIdentification.heading).toBeVisible();
   });
 
   test('shows default values on first load', async ({ pages }) => {

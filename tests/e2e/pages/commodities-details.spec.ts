@@ -18,7 +18,7 @@ test.describe('Commodity details', () => {
   test('can navigate back to species selection', async ({ pages }) => {
     await pages.commodityDetails.linkBack.click();
     await expect(pages.page).toHaveURL(pages.importReason.expectedUrl);
-    await expect(pages.importReason.headingPage).toHaveText(pages.importReason.expectedHeading);
+    await expect(pages.importReason.heading).toBeVisible();
   });
 
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
@@ -71,6 +71,6 @@ test.describe('Commodity details', () => {
     await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('101');
     await pages.commodityDetails.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
-    await expect(pages.animalIdentification.headingPage).toHaveText(pages.animalIdentification.expectedHeading);
+    await expect(pages.animalIdentification.heading).toBeVisible();
   });
 });
