@@ -59,21 +59,21 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         await client.connect();
         const collection = client.collection('trade-imports-animals-backend', 'audit');
 
-        const records = await collection
+        const docs = await collection
           .find({
             notificationReferenceNumbers: referenceNumber,
           })
           .toArray();
 
-        expect(records).toHaveLength(1);
-        expect(String(records[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(records[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(records[0].result).toBe('SUCCESS');
-        expect(String(records[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(records[0].numberOfNotifications).toBe(1);
-        expect(records[0].notificationReferenceNumbers).toEqual([referenceNumber]);
-        expect(records[0].traceId).toBe('test-trace-id');
-        expect(records[0].userId).toBe('2100010101');
+        expect(docs).toHaveLength(1);
+        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+        expect(docs[0].result).toBe('SUCCESS');
+        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+        expect(docs[0].numberOfNotifications).toBe(1);
+        expect(docs[0].notificationReferenceNumbers).toEqual([referenceNumber]);
+        expect(docs[0].traceId).toBe('test-trace-id');
+        expect(docs[0].userId).toBe('2100010101');
       } finally {
         await client.close();
       }
@@ -101,21 +101,21 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         await client.connect();
         const collection = client.collection('trade-imports-animals-backend', 'audit');
 
-        const records = await collection
+        const docs = await collection
           .find({
             notificationReferenceNumbers: { $all: referenceNumbers },
           })
           .toArray();
 
-        expect(records).toHaveLength(1);
-        expect(String(records[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(records[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(records[0].result).toBe('SUCCESS');
-        expect(String(records[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(records[0].numberOfNotifications).toBeGreaterThanOrEqual(2);
-        expect(records[0].notificationReferenceNumbers).toEqual(expect.arrayContaining(referenceNumbers));
-        expect(records[0].traceId).toBe('test-trace-id');
-        expect(records[0].userId).toBe('2100010101');
+        expect(docs).toHaveLength(1);
+        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+        expect(docs[0].result).toBe('SUCCESS');
+        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+        expect(docs[0].numberOfNotifications).toBeGreaterThanOrEqual(2);
+        expect(docs[0].notificationReferenceNumbers).toEqual(expect.arrayContaining(referenceNumbers));
+        expect(docs[0].traceId).toBe('test-trace-id');
+        expect(docs[0].userId).toBe('2100010101');
       } finally {
         await client.close();
       }
@@ -142,21 +142,21 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         await client.connect();
         const collection = client.collection('trade-imports-animals-backend', 'audit');
 
-        const records = await collection
+        const docs = await collection
           .find({
             notificationReferenceNumbers: invalidReference,
           })
           .toArray();
 
-        expect(records).toHaveLength(1);
-        expect(String(records[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(records[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(records[0].result).toBe('FAILURE');
-        expect(String(records[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(records[0].numberOfNotifications).toBe(1);
-        expect(records[0].notificationReferenceNumbers).toEqual([invalidReference]);
-        expect(records[0].traceId).toBe('test-trace-id');
-        expect(records[0].userId).toBe('2100010101');
+        expect(docs).toHaveLength(1);
+        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+        expect(docs[0].result).toBe('FAILURE');
+        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+        expect(docs[0].numberOfNotifications).toBe(1);
+        expect(docs[0].notificationReferenceNumbers).toEqual([invalidReference]);
+        expect(docs[0].traceId).toBe('test-trace-id');
+        expect(docs[0].userId).toBe('2100010101');
       } finally {
         await client.close();
       }
