@@ -1,7 +1,8 @@
 import { test, expect } from '@fixtures';
 import { defaultJourneyOptions } from '@flows/journeys';
-import { MongoDbClient } from '@domain/clients/mongodb-client';
+import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/types/yes-no-values';
+import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
@@ -14,7 +15,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     try {
       await client.connect();
       const collection = client.collection<NotificationDocument>('trade-imports-animals-backend', 'notification');
-      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: 5_000 }).toBe(1);
+      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
 
       const docs = await collection.find({ referenceNumber }).toArray();
       const [doc] = docs;
@@ -62,7 +63,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     try {
       await client.connect();
       const collection = client.collection<NotificationDocument>('trade-imports-animals-backend', 'notification');
-      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: 5_000 }).toBe(1);
+      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
 
       const docs = await collection.find({ referenceNumber }).toArray();
       const [doc] = docs;

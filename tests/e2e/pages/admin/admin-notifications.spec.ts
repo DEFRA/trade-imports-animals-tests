@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
-import { MongoDbClient } from '@domain/clients/mongodb-client';
+import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { timeouts } from '@config/timeouts';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment } from '@utils/playwright/environment-guards';
 
@@ -27,7 +28,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await pages.adminNotifications.btnDeleteByReferenceNumber.click();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-    await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: 10_000 }).toBe(initialRowCount - 1);
+    await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: timeouts.medium }).toBe(initialRowCount - 1);
     await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).not.toBeVisible();
   });
 
@@ -48,7 +49,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-      await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: 10_000 }).toBe(initialRowCount - 1);
+      await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: timeouts.medium }).toBe(initialRowCount - 1);
       await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).not.toBeVisible();
     });
 
@@ -89,7 +90,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-      await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: 10_000 }).toBe(0);
+      await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: timeouts.medium }).toBe(0);
       await expect(pages.adminNotifications.tableRowByReference(referenceNumbers[0])).not.toBeVisible();
       await expect(pages.adminNotifications.tableRowByReference(referenceNumbers[1])).not.toBeVisible();
     });
