@@ -9,8 +9,9 @@ if (environment?.toLowerCase() === 'prod') {
   throw new Error('Refusing to run Playwright tests against prod environment. Set ENVIRONMENT/PLAYWRIGHT_ENVIRONMENT to a non-prod value.');
 }
 
-const frontendBaseUrl = `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`;
-const adminBaseUrl = `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
+const isLocal = environment?.toLowerCase() === 'local';
+const frontendBaseUrl = isLocal ? 'http://localhost:3000' : `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`;
+const adminBaseUrl = isLocal ? 'http://localhost:3001' : `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
 
 /**
  * See https://playwright.dev/docs/test-configuration.

@@ -56,6 +56,17 @@ export class Journeys {
     await this.pages.speciesSelection.btnSaveAndContinue.click();
   }
 
+  async toCommodityDetails(options: JourneyOptions = {}): Promise<void> {
+    await this.toImportReason(options);
+    await this.pages.importReason.radioInternalMarket.click();
+    await this.pages.importReason.btnSaveAndContinue.click();
+  }
+
+  async toAccompanyingDocuments(options: JourneyOptions = {}): Promise<void> {
+    await this.toCommodityDetails(options);
+    await this.pages.page.goto('/accompanying-documents');
+  }
+
   async toAdminDashboard(): Promise<void> {
     await this.pages.adminDashboard.open();
   }
