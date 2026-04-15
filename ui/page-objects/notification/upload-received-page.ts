@@ -22,7 +22,7 @@ export class UploadReceivedPage {
   }
 
   get btnTryAgain(): Locator {
-    return this.page.getByRole('link', { name: 'Try again' });
+    return this.page.getByRole('button', { name: 'Try again' });
   }
 
   get errorVirusSummary(): Locator {

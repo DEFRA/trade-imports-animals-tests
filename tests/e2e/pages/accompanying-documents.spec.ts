@@ -94,4 +94,16 @@ test.describe('Accompanying documents', () => {
     await expect(pages.uploadReceived.panelSuccess).toBeVisible({ timeout: 30000 });
     await expect(pages.uploadReceived.btnContinue).toBeVisible();
   });
+
+  test('shows virus error when uploaded file contains a virus', async ({ pages }) => {
+    await pages.accompanyingDocuments.fillTextFields();
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-virus-document.pdf'));
+    await pages.accompanyingDocuments.btnSaveAndContinue.click();
+    await pages.page.waitForURL(`**${pages.uploadReceived.expectedUrl}`, { timeout: 15000 });
+
+    // The page auto-refreshes every 3s while PENDING — wait for REJECTED state
+    await expect(pages.uploadReceived.errorVirusSummary).toBeVisible({ timeout: 30000 });
+    await expect(pages.uploadReceived.errorVirusSummary.getByText('The selected file contains a virus')).toBeVisible();
+    await expect(pages.uploadReceived.btnTryAgain).toBeVisible();
+  });
 });
