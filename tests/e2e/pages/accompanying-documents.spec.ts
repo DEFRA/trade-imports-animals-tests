@@ -76,16 +76,16 @@ test.describe('Accompanying documents', () => {
 
   test('shows document row with Checking status immediately after upload', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.txt'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
-    const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.txt');
-    // Status may be Checking, Safe, or Virus found depending on scan speed
+    const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.pdf');
+    // Status may already be Safe by the time we assert — accept either
     await expect(statusTag).toBeVisible();
-    await expect(statusTag).toHaveText(/Checking|Safe|Virus found/);
+    await expect(statusTag).toHaveText(/Checking|Safe/);
   });
 
   test('shows Safe status tag once virus scan completes', async ({ pages }) => {
@@ -127,7 +127,7 @@ test.describe('Accompanying documents', () => {
 
     // Upload second document
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.txt'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
