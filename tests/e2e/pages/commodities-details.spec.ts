@@ -23,16 +23,16 @@ test.describe('Commodity details', () => {
 
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
     // Commodity details are currently hardcoded in the view.
-    await expect(pages.commodityDetails.tableBodyRowsCommodities).toHaveCount(1);
-    const commodityDetails = await pages.commodityDetails.tableBodyRowCellsCommodities(0).allTextContents();
+    await expect(pages.commodityDetails.rowsCommodities).toHaveCount(1);
+    const commodityDetails = await pages.commodityDetails.cellsCommodities(0).allTextContents();
     expect(commodityDetails[0]).toBe('0102');
     expect(commodityDetails[1]).toBe('Live bovine animals');
   });
 
   test('shows species and type in table (for selected commodity*)', async ({ pages }) => {
     // Species and type are currently hardcoded in the view.
-    await expect(pages.commodityDetails.tableBodyRowsQuantities).toHaveCount(3);
-    const speciesAndType = await pages.commodityDetails.tableBodyRowsQuantities.allTextContents();
+    await expect(pages.commodityDetails.rowsQuantities).toHaveCount(3);
+    const speciesAndType = await pages.commodityDetails.rowsQuantities.allTextContents();
     expect(speciesAndType[0]).toContain(BISON_DOMESTIC);
     expect(speciesAndType[1]).toContain(BOS_DOMESTIC);
     expect(speciesAndType[2]).toContain('Subtotal');
@@ -67,8 +67,8 @@ test.describe('Commodity details', () => {
   test('continues to animal identification after saving quantities', async ({ pages }) => {
     await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('1');
     await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('99');
-    await pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC).fill('99');
-    await pages.commodityDetails.inputNoOfPackages(BISON_DOMESTIC).fill('101');
+    await pages.commodityDetails.inputNoOfAnimals(BOS_DOMESTIC).fill('99');
+    await pages.commodityDetails.inputNoOfPackages(BOS_DOMESTIC).fill('101');
     await pages.commodityDetails.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
     await expect(pages.animalIdentification.heading).toBeVisible();

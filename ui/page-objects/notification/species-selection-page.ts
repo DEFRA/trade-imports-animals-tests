@@ -22,12 +22,12 @@ export class SpeciesSelectionPage {
     return this.page.getByRole('table', { name: 'Commodities' });
   }
 
-  get tableBodyRowsCommodities(): Locator {
+  get rowsCommodities(): Locator {
     return this.tableCommodities.locator('tbody').getByRole('row');
   }
 
-  tableBodyRowCellsCommodities(index: number): Locator {
-    return this.tableBodyRowsCommodities.nth(index).getByRole('cell');
+  cellsCommodities(rowIndex: number): Locator {
+    return this.rowsCommodities.nth(rowIndex).getByRole('cell');
   }
 
   get dropdownCommodityType(): Locator {
