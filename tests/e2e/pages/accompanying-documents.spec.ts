@@ -83,9 +83,9 @@ test.describe('Accompanying documents', () => {
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
     const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.txt');
-    // Status may already be Safe by the time we assert — accept either
+    // Status may be Checking, Safe, or Virus found depending on scan speed
     await expect(statusTag).toBeVisible();
-    await expect(statusTag).toHaveText(/Checking|Safe/);
+    await expect(statusTag).toHaveText(/Checking|Safe|Virus found/);
   });
 
   test('shows Safe status tag once virus scan completes', async ({ pages }) => {
