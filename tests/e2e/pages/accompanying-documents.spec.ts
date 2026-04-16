@@ -131,7 +131,7 @@ test.describe('Accompanying documents', () => {
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
-    const rows = pages.page.locator('.govuk-summary-list__row');
+    const rows = pages.page.locator('.govuk-table__row[data-upload-id]');
     await expect(rows).toHaveCount(2);
   });
 

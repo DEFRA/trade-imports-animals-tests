@@ -75,14 +75,14 @@ export class AccompanyingDocumentsPage {
     return this.page.locator('#file-error');
   }
 
-  /** The summary list table showing uploaded documents and their scan statuses. */
+  /** The table showing uploaded documents and their scan statuses. */
   get documentsTable(): Locator {
-    return this.page.locator('.govuk-summary-list');
+    return this.page.locator('.govuk-table');
   }
 
   /** A single row in the documents table, identified by filename. */
   getDocumentRow(filename: string): Locator {
-    return this.page.locator('.govuk-summary-list__row').filter({ hasText: filename });
+    return this.page.locator('.govuk-table__row[data-upload-id]').filter({ hasText: filename });
   }
 
   /** The GOV.UK tag showing scan status for a given filename. */
