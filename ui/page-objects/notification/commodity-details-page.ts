@@ -37,10 +37,6 @@ export class CommodityDetailsPage {
     return this.tableQuantities('Live bovine animals').locator('tbody').getByRole('row');
   }
 
-  tableBodyRowCellsQuantities(index: number): Locator {
-    return this.tableBodyRowsQuantities.nth(index).getByRole('cell');
-  }
-
   inputNoOfAnimals(speciesAndType: string): Locator {
     // return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('textbox', { name: 'Number of animals' });
     return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('spinbutton').first();
