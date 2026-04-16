@@ -31,20 +31,25 @@ export class AccompanyingDocumentsPage {
   }
 
   get inputFileUpload(): Locator {
-    return this.page.getByLabel('Upload a document');
+    return this.page.getByLabel('Attachment');
   }
 
-  /** The "Upload document" button that submits the add-document form. */
+  /** The "Add attachment" button that submits the add-document form. */
   get btnUploadDocument(): Locator {
-    return this.page.getByRole('button', { name: 'Upload document' });
+    return this.page.getByRole('button', { name: 'Add attachment' });
   }
 
   /**
-   * The "Save and continue" button — only rendered when at least one document
-   * has been uploaded and all scans have completed without a virus.
+   * The "Save and continue" button — always rendered, but disabled until at least
+   * one document has been uploaded and all scans have completed without a virus.
    */
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
+  }
+
+  /** True when Save and continue is enabled (not aria-disabled). */
+  get btnSaveAndContinueEnabled(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' }).and(this.page.locator(':not([aria-disabled="true"])'));
   }
 
   get errorSummaryItems(): Locator {

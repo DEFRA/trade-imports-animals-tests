@@ -18,10 +18,11 @@ test.describe('Accompanying documents', () => {
     await expect.soft(pages.accompanyingDocuments.inputIssueDateYear).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputFileUpload).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.btnUploadDocument).toBeVisible();
+    await expect.soft(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
   });
 
-  test('does not show Save and continue until a document has been uploaded', async ({ pages }) => {
-    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
+  test('Save and continue is disabled until a document has been uploaded', async ({ pages }) => {
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
@@ -97,7 +98,7 @@ test.describe('Accompanying documents', () => {
     // The page auto-refreshes every 3s while PENDING — wait for COMPLETE state
     const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.pdf');
     await expect(statusTag).toHaveText('Safe', { timeout: 30000 });
-    await expect(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
   });
 
   test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
@@ -114,7 +115,7 @@ test.describe('Accompanying documents', () => {
     const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
     expect(summaryItems.some((t) => t.includes('contains a virus'))).toBe(true);
 
-    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
   });
 
   test('can upload multiple documents and see all in the list', async ({ pages }) => {
@@ -146,6 +147,6 @@ test.describe('Accompanying documents', () => {
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentsTable).not.toBeVisible();
-    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
   });
 });
