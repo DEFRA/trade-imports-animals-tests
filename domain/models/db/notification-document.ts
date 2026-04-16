@@ -17,6 +17,8 @@ export type NotificationDocument = {
         text: string;
         noOfAnimals: number;
         noOfPackages: number;
+        earTag: string;
+        passport: string;
       }>;
       totalNoOfAnimals: number;
       totalNoOfPackages: number;

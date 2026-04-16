@@ -121,8 +121,9 @@ export class Journeys {
 
     // Currently limited to one animal identifier per species
     for (let i = 0; i < speciesList.length; i += 1) {
-      await this.pages.animalIdentification.inputEarTag(i).fill(`FR12345678908${i}`);
-      await this.pages.animalIdentification.inputPassport(i).fill(`FR-BOV-2024-00128${i}`);
+      const digits = String(i + 1).padStart(12, '0');
+      await this.pages.animalIdentification.inputEarTag(i).fill(`FR${digits}`);
+      await this.pages.animalIdentification.inputPassport(i).fill(`FR-BOV-2024-${digits.slice(-6)}`);
     }
     await this.pages.animalIdentification.btnSaveAndContinue.click();
   }
