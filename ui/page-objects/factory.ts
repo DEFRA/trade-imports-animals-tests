@@ -6,7 +6,6 @@ import { CommoditySelectionPage } from './notification/commodity-selection-page'
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
-import { UploadReceivedPage } from './notification/upload-received-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { SpeciesSelectionPage } from './notification/species-selection-page';
 import { SignInPage } from './auth/sign-in-page';
@@ -23,7 +22,6 @@ export function createPageObjects(page: Page) {
   return {
     page,
     accompanyingDocuments: new AccompanyingDocumentsPage(page),
-    uploadReceived: new UploadReceivedPage(page),
     adminDashboard: new AdminDashboardPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     commodityDetails: new CommodityDetailsPage(page),

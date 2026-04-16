@@ -17,12 +17,11 @@ test.describe('Accompanying documents', () => {
     await expect.soft(pages.accompanyingDocuments.inputIssueDateMonth).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputIssueDateYear).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputFileUpload).toBeVisible();
-    await expect.soft(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
+    await expect.soft(pages.accompanyingDocuments.btnUploadDocument).toBeVisible();
   });
 
-  test('can skip and continue without adding a document', async ({ pages }) => {
-    await pages.accompanyingDocuments.btnSaveAndContinue.click();
-    await expect(pages.page).not.toHaveURL(pages.accompanyingDocuments.expectedUrl);
+  test('does not show Save and continue until a document has been uploaded', async ({ pages }) => {
+    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
@@ -37,7 +36,7 @@ test.describe('Accompanying documents', () => {
         select.add(opt);
         select.value = 'INVALID';
       });
-      await pages.accompanyingDocuments.btnSaveAndContinue.click();
+      await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorDocumentType).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
@@ -47,7 +46,7 @@ test.describe('Accompanying documents', () => {
     test('shows error when document reference contains special characters', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
       await pages.accompanyingDocuments.inputDocumentReference.fill('REF@#$!');
-      await pages.accompanyingDocuments.btnSaveAndContinue.click();
+      await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorDocumentReference).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
@@ -57,7 +56,7 @@ test.describe('Accompanying documents', () => {
     test('shows error when partial date is provided', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
       await pages.accompanyingDocuments.inputIssueDateDay.fill('15');
-      await pages.accompanyingDocuments.btnSaveAndContinue.click();
+      await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorIssueDate).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
@@ -66,7 +65,7 @@ test.describe('Accompanying documents', () => {
 
     test('shows error when no file is selected', async ({ pages }) => {
       await pages.accompanyingDocuments.fillTextFields();
-      await pages.accompanyingDocuments.btnSaveAndContinue.click();
+      await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorFile).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
@@ -74,36 +73,79 @@ test.describe('Accompanying documents', () => {
     });
   });
 
-  test('can upload a file and reach upload-received page', async ({ pages }) => {
+  test('shows document row with Checking status immediately after upload', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.txt'));
-    await pages.accompanyingDocuments.btnSaveAndContinue.click();
-    await pages.page.waitForURL(`**${pages.accompanyingDocuments.expectedUploadReceivedUrl}`, {
-      timeout: 15000,
-    });
-    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUploadReceivedUrl);
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+
+    const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.txt');
+    // Status may already be Safe by the time we assert — accept either
+    await expect(statusTag).toBeVisible();
+    await expect(statusTag).toHaveText(/Checking|Safe/);
   });
 
-  test('shows success panel once virus scan completes', async ({ pages }) => {
+  test('shows Safe status tag once virus scan completes', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
-    await pages.accompanyingDocuments.btnSaveAndContinue.click();
-    await pages.page.waitForURL(`**${pages.uploadReceived.expectedUrl}`, { timeout: 15000 });
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
 
     // The page auto-refreshes every 3s while PENDING — wait for COMPLETE state
-    await expect(pages.uploadReceived.panelSuccess).toBeVisible({ timeout: 30000 });
-    await expect(pages.uploadReceived.btnContinue).toBeVisible();
+    const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.pdf');
+    await expect(statusTag).toHaveText('Safe', { timeout: 30000 });
+    await expect(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
   });
 
-  test('shows virus error when uploaded file contains a virus', async ({ pages }) => {
+  test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-virus-document.pdf'));
-    await pages.accompanyingDocuments.btnSaveAndContinue.click();
-    await pages.page.waitForURL(`**${pages.uploadReceived.expectedUrl}`, { timeout: 15000 });
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
 
     // The page auto-refreshes every 3s while PENDING — wait for REJECTED state
-    await expect(pages.uploadReceived.errorVirusSummary).toBeVisible({ timeout: 30000 });
-    await expect(pages.uploadReceived.errorVirusSummary.getByText('The selected file contains a virus')).toBeVisible();
-    await expect(pages.uploadReceived.btnTryAgain).toBeVisible();
+    const statusTag = pages.accompanyingDocuments.getStatusTag('test-virus-document.pdf');
+    await expect(statusTag).toHaveText('Virus found', { timeout: 30000 });
+
+    const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
+    expect(summaryItems.some((t) => t.includes('contains a virus'))).toBe(true);
+
+    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
+  });
+
+  test('can upload multiple documents and see all in the list', async ({ pages }) => {
+    // Upload first document
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-001' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+
+    // Upload second document
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.txt'));
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    const rows = pages.page.locator('.govuk-summary-list__row');
+    await expect(rows).toHaveCount(2);
+  });
+
+  test('can remove a document from the list', async ({ pages }) => {
+    await pages.accompanyingDocuments.fillTextFields();
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+
+    // Wait for the document row to appear (Remove is available immediately)
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+
+    await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').click();
+
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.accompanyingDocuments.documentsTable).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnSaveAndContinue).not.toBeVisible();
   });
 });

@@ -3,7 +3,6 @@ import { Page, Locator } from '@playwright/test';
 export class AccompanyingDocumentsPage {
   readonly expectedUrl = '/accompanying-documents';
   readonly expectedHeading = 'Accompanying documents';
-  readonly expectedUploadReceivedUrl = '/accompanying-documents/upload-received';
 
   constructor(private readonly page: Page) {}
 
@@ -35,6 +34,15 @@ export class AccompanyingDocumentsPage {
     return this.page.getByLabel('Upload a document');
   }
 
+  /** The "Upload document" button that submits the add-document form. */
+  get btnUploadDocument(): Locator {
+    return this.page.getByRole('button', { name: 'Upload document' });
+  }
+
+  /**
+   * The "Save and continue" button — only rendered when at least one document
+   * has been uploaded and all scans have completed without a virus.
+   */
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
@@ -60,6 +68,26 @@ export class AccompanyingDocumentsPage {
 
   get errorFile(): Locator {
     return this.page.locator('#file-error');
+  }
+
+  /** The summary list table showing uploaded documents and their scan statuses. */
+  get documentsTable(): Locator {
+    return this.page.locator('.govuk-summary-list');
+  }
+
+  /** A single row in the documents table, identified by filename. */
+  getDocumentRow(filename: string): Locator {
+    return this.page.locator('.govuk-summary-list__row').filter({ hasText: filename });
+  }
+
+  /** The GOV.UK tag showing scan status for a given filename. */
+  getStatusTag(filename: string): Locator {
+    return this.getDocumentRow(filename).locator('.govuk-tag');
+  }
+
+  /** The "Remove" button for a given filename. */
+  getBtnRemove(filename: string): Locator {
+    return this.getDocumentRow(filename).getByRole('button', { name: /Remove/ });
   }
 
   async fillTextFields(
