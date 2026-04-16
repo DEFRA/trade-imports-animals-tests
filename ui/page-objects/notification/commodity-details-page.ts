@@ -21,34 +21,30 @@ export class CommodityDetailsPage {
     return this.page.getByRole('table', { name: 'Commodities' });
   }
 
-  get tableBodyRowsCommodities(): Locator {
+  get rowsCommodities(): Locator {
     return this.tableCommodities.locator('tbody').getByRole('row');
   }
 
-  tableBodyRowCellsCommodities(index: number): Locator {
-    return this.tableBodyRowsCommodities.nth(index).getByRole('cell');
+  cellsCommodities(rowIndex: number): Locator {
+    return this.rowsCommodities.nth(rowIndex).getByRole('cell');
   }
 
-  tableQuantities(name: string): Locator {
-    return this.page.getByRole('table', { name: name });
+  tableQuantities(tableName: string): Locator {
+    return this.page.getByRole('table', { name: tableName });
   }
 
-  get tableBodyRowsQuantities(): Locator {
+  get rowsQuantities(): Locator {
     return this.tableQuantities('Live bovine animals').locator('tbody').getByRole('row');
   }
 
-  tableBodyRowCellsQuantities(index: number): Locator {
-    return this.tableBodyRowsQuantities.nth(index).getByRole('cell');
-  }
-
   inputNoOfAnimals(speciesAndType: string): Locator {
-    // return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('textbox', { name: 'Number of animals' });
-    return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('spinbutton').first();
+    //return this.rowsQuantities.filter({ hasText: speciesAndType }).getByRole('textbox', { name: 'Number of animals' });
+    return this.rowsQuantities.filter({ hasText: speciesAndType }).getByRole('spinbutton').first();
   }
 
   inputNoOfPackages(speciesAndType: string): Locator {
-    //return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('textbox', { name: 'Number of packages' });
-    return this.tableQuantities('Live bovine animals').getByRole('row', { name: speciesAndType }).getByRole('spinbutton').nth(1);
+    //return this.rowsQuantities.filter({ hasText: speciesAndType }).getByRole('textbox', { name: 'Number of packages' });
+    return this.rowsQuantities.filter({ hasText: speciesAndType }).getByRole('spinbutton').nth(1);
   }
 
   get subTotalNoOfAnimals(): Locator {

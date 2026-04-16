@@ -115,8 +115,16 @@ export class Journeys {
   }
 
   async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
+    const { species } = { ...defaultJourneyOptions, ...options };
     await this.toAnimalIdentification(options);
-    // TODO: inputs
+    const speciesList = Array.isArray(species) ? species : [species];
+
+    // Currently limited to one animal identifier per species
+    for (let i = 0; i < speciesList.length; i += 1) {
+      const digits = String(i + 1).padStart(12, '0');
+      await this.pages.animalIdentification.inputEarTag(i).fill(`FR${digits}`);
+      await this.pages.animalIdentification.inputPassport(i).fill(`FR-BOV-2024-${digits.slice(-6)}`);
+    }
     await this.pages.animalIdentification.btnSaveAndContinue.click();
   }
 

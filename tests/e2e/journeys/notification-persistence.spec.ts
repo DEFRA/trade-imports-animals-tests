@@ -37,8 +37,12 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.reasonForImport).toBe(defaults.importReason);
       expect(subdocFirstSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[0]);
       expect(subdocFirstSpecies?.noOfPackages).toBe(defaults.noOfPackages[0]);
+      expect(subdocFirstSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
+      expect(subdocFirstSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
       expect(subdocSecondSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[1]);
       expect(subdocSecondSpecies?.noOfPackages).toBe(defaults.noOfPackages[1]);
+      expect(subdocSecondSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
+      expect(subdocSecondSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
       expect(subdocCommodityComplement.totalNoOfAnimals).toBe(defaults.noOfAnimals[0] + defaults.noOfAnimals[1]);
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
