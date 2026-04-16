@@ -21,8 +21,8 @@ test.describe('Accompanying documents', () => {
     await expect.soft(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
   });
 
-  test('Save and continue is disabled until a document has been uploaded', async ({ pages }) => {
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
+  test('Save and continue is enabled with no documents uploaded', async ({ pages }) => {
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
@@ -147,6 +147,6 @@ test.describe('Accompanying documents', () => {
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentsTable).not.toBeVisible();
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
   });
 });
