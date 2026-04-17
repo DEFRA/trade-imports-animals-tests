@@ -46,10 +46,10 @@ test.describe('Additional details', () => {
     await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.no)).not.toBeChecked();
   });
 
-  test('continues (to next page*) after saving additional details', async ({ pages }) => {
+  test('continues to accompanying documents after saving additional details', async ({ pages }) => {
     await pages.additionalDetails.radioApprovedBodies.click();
     await pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes).click();
     await pages.additionalDetails.btnSaveAndContinue.click();
-    // TODO: pending next page implementation (accompanying documents)
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
   });
 });
