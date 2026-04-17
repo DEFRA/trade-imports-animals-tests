@@ -142,7 +142,7 @@ export class Journeys {
     if (unweanedAnimals !== undefined) {
       await this.pages.additionalDetails.radioContainsUnweanedAnimals(unweanedAnimals).click();
     }
-    await this.pages.additionalDetails.btnSaveAndContinue.click();
+    await this.pages.page.goto('/accompanying-documents');
   }
 
   async toAdminDashboard(): Promise<void> {
