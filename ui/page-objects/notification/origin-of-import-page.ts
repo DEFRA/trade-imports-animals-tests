@@ -4,16 +4,23 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class OriginOfImportPage {
   readonly expectedUrl = '/origin';
-  readonly expectedHeading = 'Origin of the import';
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
   }
 
   get dropdownCountry(): Locator {
     return this.page.getByRole('combobox', { name: 'Origin of the Import' });
+  }
+
+  get groupRequiresOriginCode(): Locator {
+    return this.page.getByRole('group', { name: 'Does the consignment require a region of origin code?' });
+  }
+
+  radioRequiresOriginCode(value: YesNoValue): Locator {
+    return this.groupRequiresOriginCode.getByRole('radio', { name: value });
   }
 
   get dropdownCountryOptions(): Locator {
@@ -50,9 +57,5 @@ export class OriginOfImportPage {
       const signInPage = new SignInPage(this.page);
       await signInPage.signIn();
     }
-  }
-
-  radioRequiresOriginCode(value: YesNoValue): Locator {
-    return this.page.getByRole('radio', { name: value });
   }
 }

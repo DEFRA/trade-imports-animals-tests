@@ -3,12 +3,11 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class NotificationDashboardPage {
   readonly expectedUrl = '/';
-  readonly expectedHeading = 'Import notification service';
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Import notification service' });
   }
 
   get btnSignOut(): Locator {

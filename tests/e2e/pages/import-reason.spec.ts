@@ -13,7 +13,7 @@ test.describe('Reason for import', () => {
   test('can navigate back to species selection', async ({ pages }) => {
     await pages.importReason.linkBack.click();
     await expect(pages.page).toHaveURL(pages.speciesSelection.expectedUrl);
-    await expect(pages.speciesSelection.headingPage).toHaveText(pages.speciesSelection.expectedHeading);
+    await expect(pages.speciesSelection.heading).toBeVisible();
   });
 
   test('shows reasons and they are unchecked by default', async ({ pages }) => {
@@ -36,6 +36,6 @@ test.describe('Reason for import', () => {
     await pages.importReason.radioInternalMarket.click();
     await pages.importReason.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commodityDetails.expectedUrl);
-    await expect(pages.commodityDetails.headingPage).toHaveText(pages.commodityDetails.expectedHeading);
+    await expect(pages.commodityDetails.heading).toBeVisible();
   });
 });

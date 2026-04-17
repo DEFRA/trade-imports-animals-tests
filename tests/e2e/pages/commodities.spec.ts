@@ -33,6 +33,6 @@ test.describe('Commodities', () => {
     await pages.commoditySelection.dropdownCommodity.selectOption(commodityCodes.dog);
     await pages.commoditySelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.speciesSelection.expectedUrl);
-    await expect(pages.speciesSelection.headingPage).toHaveText(pages.speciesSelection.expectedHeading);
+    await expect(pages.speciesSelection.heading).toBeVisible();
   });
 });

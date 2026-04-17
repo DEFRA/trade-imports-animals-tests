@@ -7,12 +7,12 @@ test.describe('Import notification service', () => {
 
   test('lands on the notification dashboard', async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-    await expect(pages.notificationDashboard.headingPage).toHaveText(pages.notificationDashboard.expectedHeading);
+    await expect(pages.notificationDashboard.heading).toBeVisible();
   });
 
   test('allows creating a new notification', async ({ pages }) => {
     await pages.notificationDashboard.btnCreateNewNotification.click();
     await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-    await expect(pages.originOfImport.headingPage).toHaveText(pages.originOfImport.expectedHeading);
+    await expect(pages.originOfImport.heading).toBeVisible();
   });
 });

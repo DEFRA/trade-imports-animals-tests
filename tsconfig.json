@@ -8,6 +8,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
+      "@adapters/*": ["adapters/*"],
+      "@config/*": ["config/*"],
       "@domain/*": ["domain/*"],
       "@page-objects": ["ui/page-objects"],
       "@page-objects/*": ["ui/page-objects/*"],

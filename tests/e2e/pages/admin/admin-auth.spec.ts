@@ -7,13 +7,13 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 
   test('lands on the sign in page when opening the admin dashboard', async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-    await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+    await expect(pages.signIn.heading).toBeVisible();
   });
 
   test('allows signing into the admin dashboard', async ({ pages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
-    await expect(pages.adminDashboard.headingPage).toHaveText(pages.adminDashboard.expectedHeading);
+    await expect(pages.adminDashboard.heading).toBeVisible();
   });
 
   test('displays an error message when signing in with empty credentials', async ({ pages }) => {
@@ -32,7 +32,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
     await pages.signIn.signIn();
     await pages.adminDashboard.btnSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
-    await expect(pages.signOut.headingPage).toHaveText(pages.signOut.expectedHeading);
+    await expect(pages.signOut.heading).toBeVisible();
   });
 
   test('lands on the sign in page when reopening the admin dashboard after sign out', async ({ pages }) => {
@@ -40,7 +40,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
     await pages.adminDashboard.btnSignOut.click();
     await pages.adminDashboard.open(false);
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-    await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+    await expect(pages.signIn.heading).toBeVisible();
   });
 
   test.describe('Notifications (admin) (unauthenticated entry)', () => {
@@ -50,13 +50,13 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {
       await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
-      await expect(pages.signIn.headingPage).toHaveText(pages.signIn.expectedHeading);
+      await expect(pages.signIn.heading).toBeVisible();
     });
 
     test('allows signing into a page further in the journey', async ({ pages }) => {
       await pages.signIn.signIn();
       await expect(pages.page).toHaveURL(pages.adminNotifications.expectedUrl);
-      await expect(pages.adminNotifications.headingPage).toHaveText(pages.adminNotifications.expectedHeading);
+      await expect(pages.adminNotifications.heading).toBeVisible();
     });
   });
 });

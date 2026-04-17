@@ -2,12 +2,11 @@ import { Page, Locator } from '@playwright/test';
 
 export class SignInPage {
   readonly expectedUrl = new RegExp('/dcidmtest.onmicrosoft.com/oauth2/authresp$');
-  readonly expectedHeading = 'Sign in using Government Gateway';
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Sign in using Government Gateway' });
   }
 
   get inputUserId(): Locator {

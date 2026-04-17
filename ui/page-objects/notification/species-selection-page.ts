@@ -3,7 +3,6 @@ import { CommoditySpecies } from '@domain/types/commodity-species';
 
 export class SpeciesSelectionPage {
   readonly expectedUrl = '/commodities/select';
-  readonly expectedHeading = 'Commodity';
 
   constructor(private readonly page: Page) {}
 
@@ -15,20 +14,20 @@ export class SpeciesSelectionPage {
     return this.page.getByRole('link', { name: 'Back' });
   }
 
-  get headingPage(): Locator {
-    return this.page.locator('.govuk-heading-xl');
+  get heading(): Locator {
+    return this.page.getByRole('heading', { name: 'Commodity', exact: true });
   }
 
   get tableCommodities(): Locator {
     return this.page.getByRole('table', { name: 'Commodities' });
   }
 
-  get tableBodyRowsCommodities(): Locator {
+  get rowsCommodities(): Locator {
     return this.tableCommodities.locator('tbody').getByRole('row');
   }
 
-  tableBodyRowCellsCommodities(index: number): Locator {
-    return this.tableBodyRowsCommodities.nth(index).getByRole('cell');
+  cellsCommodities(rowIndex: number): Locator {
+    return this.rowsCommodities.nth(rowIndex).getByRole('cell');
   }
 
   get dropdownCommodityType(): Locator {

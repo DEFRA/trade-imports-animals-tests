@@ -28,12 +28,14 @@ test.describe('Origin of the import', () => {
     }
   });
 
-  test('defaults country to "Select a country" and region code to "No"', async ({ pages }) => {
+  test('shows default values on first load', async ({ pages }) => {
     // Default "Select a country" option has an empty value.
     await expect(pages.originOfImport.dropdownCountry.locator('option:checked')).toHaveText('Select a country');
     await expect(pages.originOfImport.dropdownCountry).toHaveValue('');
     await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes)).not.toBeChecked();
     await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.no)).toBeChecked();
+    await expect(pages.originOfImport.inputInternalReferenceNumber).toHaveAttribute('type', 'text');
+    await expect(pages.originOfImport.inputInternalReferenceNumber).toHaveValue('');
   });
 
   test('allows changing the region code from "No" to "Yes"', async ({ pages }) => {
@@ -46,7 +48,7 @@ test.describe('Origin of the import', () => {
     await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.austria);
     await pages.originOfImport.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test('continues to commodity selection when all fields are valid', async ({ pages }) => {
@@ -55,7 +57,7 @@ test.describe('Origin of the import', () => {
     await pages.originOfImport.inputInternalReferenceNumber.fill('B'.repeat(58));
     await pages.originOfImport.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {

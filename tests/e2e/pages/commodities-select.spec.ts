@@ -16,13 +16,13 @@ test.describe('Select species of commodity', () => {
   test('can navigate back to commodity selection', async ({ pages }) => {
     await pages.speciesSelection.linkBack.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
-    await expect(pages.commoditySelection.headingPage).toHaveText(pages.commoditySelection.expectedHeading);
+    await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
     // Commodity details are currently hardcoded in the view.
-    await expect(pages.speciesSelection.tableBodyRowsCommodities).toHaveCount(1);
-    const commodityDetails = await pages.speciesSelection.tableBodyRowCellsCommodities(0).allTextContents();
+    await expect(pages.speciesSelection.rowsCommodities).toHaveCount(1);
+    const commodityDetails = await pages.speciesSelection.cellsCommodities(0).allTextContents();
     expect(commodityDetails[0]).toBe('0102');
     expect(commodityDetails[1]).toBe('Cow');
     expect(commodityDetails[2]).toBe('Live bovine animals');
@@ -83,6 +83,6 @@ test.describe('Select species of commodity', () => {
     await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).check();
     await pages.speciesSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.importReason.expectedUrl);
-    await expect(pages.importReason.headingPage).toHaveText(pages.importReason.expectedHeading);
+    await expect(pages.importReason.heading).toBeVisible();
   });
 });
