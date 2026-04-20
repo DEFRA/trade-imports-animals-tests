@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
+import { MongoDbClient } from '@adapters/db/mongodb-client';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -148,5 +149,48 @@ test.describe('Accompanying documents', () => {
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentsTable).not.toBeVisible();
     await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
+  });
+
+  test('removing a document also removes it from the backend', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+    // Upload first document
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-001' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+
+    // Upload second document
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.btnUploadDocument.click();
+    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+
+    const rows = pages.page.locator('.govuk-table__row[data-upload-id]');
+    await expect(rows).toHaveCount(2);
+
+    // Wait for all scans to complete before saving
+    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible({ timeout: 30000 });
+
+    // Capture reference number before navigating away
+    const ref = (await pages.page.locator('[data-testid="app-reference-number-caption"]').textContent()).trim();
+
+    // Remove the first document — frontend session is updated correctly, one row remains
+    await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click();
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(rows).toHaveCount(1);
+
+    // Click Save and continue to complete the flow
+    await pages.accompanyingDocuments.btnSaveAndContinueEnabled.click();
+
+    // BUG: remove only updates the session — the backend still has both documents.
+    // After the fix, this assertion should pass: only 1 document in the database.
+    const client = new MongoDbClient();
+    try {
+      await client.connect();
+      const collection = client.collection('trade-imports-animals-backend', 'accompanying_documents');
+      const docs = await collection.find({ notificationReferenceNumber: ref }).toArray();
+      expect(docs, 'Backend should have 1 document after removing one, but still has all uploaded documents').toHaveLength(1);
+    } finally {
+      await client.close();
+    }
   });
 });
