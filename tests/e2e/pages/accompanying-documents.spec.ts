@@ -181,8 +181,6 @@ test.describe('Accompanying documents', () => {
     // Click Save and continue to complete the flow
     await pages.accompanyingDocuments.btnSaveAndContinueEnabled.click();
 
-    // BUG: remove only updates the session — the backend still has both documents.
-    // After the fix, this assertion should pass: only 1 document in the database.
     const client = new MongoDbClient();
     try {
       await client.connect();
