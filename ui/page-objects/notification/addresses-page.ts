@@ -21,14 +21,6 @@ export class AddressesPage {
     return this.page.getByRole('link', { name: 'Add a consignor or exporter' });
   }
 
-  get linkAddConsignee(): Locator {
-    return this.page.getByRole('link', { name: 'Add a consignee' });
-  }
-
-  get linkAddImporter(): Locator {
-    return this.page.getByRole('link', { name: 'Add an importer' });
-  }
-
   get linkAddPlaceOfDestination(): Locator {
     return this.page.getByRole('link', { name: 'Add a place of destination' });
   }

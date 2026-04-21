@@ -20,23 +20,13 @@ test.describe('Addresses landing page', () => {
     // TODO: pending consignor or exporter page implementation.
   });
 
-  test('can navigate to consignee page', async ({ pages }) => {
-    await pages.addresses.linkAddConsignee.click();
-    // TODO: pending consignee page implementation.
-  });
-
-  test('can navigate to importer page', async ({ pages }) => {
-    await pages.addresses.linkAddImporter.click();
-    // TODO: pending importer page implementation.
-  });
-
   test('can navigate to place of destination page', async ({ pages }) => {
     await pages.addresses.linkAddPlaceOfDestination.click();
-    // TODO: pending place of destination page implementation
+    // TODO: pending entry point page implementation.
   });
 
   test('continues to CPH number page after saving addresses', async ({ pages }) => {
-    // TODO: Implement address input.
+    // TODO: Pending implementation of address input pages.
     await pages.addresses.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
     await expect(pages.cphNumber.heading).toBeVisible();

@@ -25,4 +25,15 @@ export class CphNumberPage {
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
+
+  get errorSummaryItems(): Locator {
+    return this.page
+      .getByRole('alert')
+      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
+      .getByRole('link');
+  }
+
+  get errorCphNumber(): Locator {
+    return this.page.locator('#cphNumber-error');
+  }
 }
