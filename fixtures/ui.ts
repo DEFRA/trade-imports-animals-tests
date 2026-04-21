@@ -5,6 +5,7 @@ import { Journeys } from '@flows/journeys';
 export interface PageFixtures {
   pages: PageObjects;
   journeys: Journeys;
+  adminBaseUrl: string;
 }
 
 export const test = base.extend<PageFixtures>({
@@ -13,6 +14,15 @@ export const test = base.extend<PageFixtures>({
   },
   journeys: async ({ pages }, use) => {
     await use(new Journeys(pages));
+  },
+  // eslint-disable-next-line no-empty-pattern
+  adminBaseUrl: async ({}, use) => {
+    const environment = process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
+    const url =
+      !environment || environment.toLowerCase() === 'local'
+        ? 'http://localhost:3001'
+        : `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
+    await use(url);
   },
 });
 

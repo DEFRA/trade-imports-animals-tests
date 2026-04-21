@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
+import { AdminNotificationViewPage } from './admin/admin-notification-view-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { CommodityDetailsPage } from './notification/commodity-details-page';
@@ -26,6 +27,7 @@ export function createPageObjects(page: Page) {
     accompanyingDocuments: new AccompanyingDocumentsPage(page),
     additionalDetails: new AdditionalDetailsPage(page),
     adminDashboard: new AdminDashboardPage(page),
+    adminNotificationView: new AdminNotificationViewPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     animalIdentification: new AnimalIdentificationPage(page),
     commodityDetails: new CommodityDetailsPage(page),
