@@ -145,6 +145,19 @@ export class Journeys {
     await this.pages.additionalDetails.btnSaveAndContinue.click();
   }
 
+  async toAddresses(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAccompanyingDocuments(options);
+    // TODO: pending accompanying documents page implementation
+  }
+
+  async toCphNumber(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAddresses(options);
+    // TODO: Implement address input.
+    await this.pages.addresses.btnSaveAndContinue.click();
+  }
+
   async toAdminDashboard(): Promise<void> {
     await this.pages.adminDashboard.open();
   }

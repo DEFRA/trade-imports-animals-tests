@@ -7,7 +7,7 @@ import { type NotificationDocument } from '@domain/models/db/notification-docume
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
   test('persists notification with defaults (after full journey completion*)', async ({ journeys, pages }) => {
-    await journeys.toAccompanyingDocuments();
+    await journeys.toAddresses();
     const referenceNumber = await pages.additionalDetails.notificationId.textContent();
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
@@ -60,7 +60,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       unweanedAnimals: yesNoValues.yes,
     };
 
-    await journeys.toAccompanyingDocuments(options);
+    await journeys.toAddresses(options);
     const referenceNumber = await pages.additionalDetails.notificationId.textContent();
     const client = new MongoDbClient();
 

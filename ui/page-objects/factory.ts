@@ -1,10 +1,12 @@
 import { Page } from '@playwright/test';
+import { AddressesPage } from './notification/addresses-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
+import { CphNumberPage } from './notification/cph-number-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
@@ -22,12 +24,14 @@ import { SignOutPage } from './auth/sign-out-page';
 export function createPageObjects(page: Page) {
   return {
     page,
+    addresses: new AddressesPage(page),
     additionalDetails: new AdditionalDetailsPage(page),
     adminDashboard: new AdminDashboardPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     animalIdentification: new AnimalIdentificationPage(page),
     commodityDetails: new CommodityDetailsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
+    cphNumber: new CphNumberPage(page),
     importReason: new ImportReasonPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),
