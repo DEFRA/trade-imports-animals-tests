@@ -126,6 +126,16 @@ export class AdminNotificationViewPage {
       .filter({ has: this.page.locator('.govuk-summary-list__value', { hasText: reference }) });
   }
 
+  /** Scan status tag for the document with the given reference value. */
+  documentScanStatusByReference(reference: string): Locator {
+    return this.documentSectionByReference(reference).locator('.govuk-tag');
+  }
+
+  /** File download link(s) for the document with the given reference value. */
+  documentFileLinkByReference(reference: string): Locator {
+    return this.documentSectionByReference(reference).getByRole('link');
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   /** Gets the value cell for a summary list row by key text. */

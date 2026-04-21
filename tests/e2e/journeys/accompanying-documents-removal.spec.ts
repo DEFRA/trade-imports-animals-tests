@@ -71,5 +71,14 @@ test(
     await expect(pages.adminNotificationView.documentHeadings).toHaveCount(1);
     await expect(pages.adminNotificationView.documentSectionByReference('REF-002')).toBeVisible();
     await expect(pages.adminNotificationView.documentSectionByReference('REF-001')).not.toBeVisible();
+
+    // The kept document should be Safe and its file should be downloadable
+    await expect(pages.adminNotificationView.documentScanStatusByReference('REF-002')).toHaveText('Safe');
+
+    const [download] = await Promise.all([
+      pages.page.waitForEvent('download'),
+      pages.adminNotificationView.documentFileLinkByReference('REF-002').click(),
+    ]);
+    expect(download.suggestedFilename()).toBe('test-document.pdf');
   },
 );
