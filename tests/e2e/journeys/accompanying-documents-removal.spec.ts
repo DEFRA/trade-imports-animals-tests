@@ -1,8 +1,5 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Cross-service regression test for the accompanying document removal bug.
