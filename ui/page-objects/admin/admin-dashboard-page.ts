@@ -1,17 +1,12 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 
-export class AdminDashboardPage {
+export class AdminDashboardPage extends BasePage {
   readonly expectedUrl = '/';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Home' });
-  }
-
-  get btnSignOut(): Locator {
-    return this.page.getByRole('link', { name: 'Sign out' });
   }
 
   get btnNotifications(): Locator {

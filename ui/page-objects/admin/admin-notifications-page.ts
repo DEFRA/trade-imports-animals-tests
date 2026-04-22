@@ -1,10 +1,9 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 
-export class AdminNotificationsPage {
+export class AdminNotificationsPage extends BasePage {
   readonly expectedUrl = '/notifications';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Notifications' });

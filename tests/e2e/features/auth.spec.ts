@@ -30,14 +30,19 @@ test.describe('Authentication', { tag: '@auth' }, () => {
 
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
-    await pages.notificationDashboard.btnSignOut.click();
+    await pages.notificationDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
     await expect(pages.signOut.heading).toBeVisible();
   });
 
+  test('displays signed in user after signing in', async ({ pages }) => {
+    await pages.signIn.signIn();
+    await expect(pages.notificationDashboard.user()).toBeVisible();
+  });
+
   test('lands on the sign in page when reopening the notification dashboard after sign out', async ({ pages }) => {
     await pages.signIn.signIn();
-    await pages.notificationDashboard.btnSignOut.click();
+    await pages.notificationDashboard.linkSignOut.click();
     await pages.notificationDashboard.open(false);
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
     await expect(pages.signIn.heading).toBeVisible();

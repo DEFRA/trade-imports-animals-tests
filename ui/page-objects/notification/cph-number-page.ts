@@ -1,10 +1,9 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 
 // County Parish Holding number (CPH) page
-export class CphNumberPage {
+export class CphNumberPage extends BasePage {
   readonly expectedUrl = '/cph-number';
-
-  constructor(private readonly page: Page) {}
 
   get notificationId(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });

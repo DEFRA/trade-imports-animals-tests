@@ -1,17 +1,12 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 
-export class NotificationDashboardPage {
+export class NotificationDashboardPage extends BasePage {
   readonly expectedUrl = '/';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Import notification service' });
-  }
-
-  get btnSignOut(): Locator {
-    return this.page.getByRole('link', { name: 'Sign out' });
   }
 
   get btnCreateNewNotification(): Locator {

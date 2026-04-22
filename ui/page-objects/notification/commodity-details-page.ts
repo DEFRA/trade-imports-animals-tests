@@ -1,9 +1,8 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 
-export class CommodityDetailsPage {
+export class CommodityDetailsPage extends BasePage {
   readonly expectedUrl = '/commodities/details';
-
-  constructor(private readonly page: Page) {}
 
   get notificationId(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });

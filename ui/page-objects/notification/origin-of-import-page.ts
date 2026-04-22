@@ -1,11 +1,10 @@
-import { Page, Locator } from '@playwright/test';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 import type { YesNoValue } from '@domain/types/yes-no-values';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 
-export class OriginOfImportPage {
+export class OriginOfImportPage extends BasePage {
   readonly expectedUrl = '/origin';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
