@@ -1,6 +1,5 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
-import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 export class AdminDashboardPage extends BasePage {
   readonly expectedUrl = '/';
@@ -15,10 +14,6 @@ export class AdminDashboardPage extends BasePage {
 
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto(this.expectedUrl);
-
-    if (attemptSignIn) {
-      const signInPage = new SignInPage(this.page);
-      await signInPage.signIn();
-    }
+    await this.signInWhenRequested(attemptSignIn);
   }
 }
