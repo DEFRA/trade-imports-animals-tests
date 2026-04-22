@@ -54,6 +54,15 @@ test.describe('Accompanying documents', () => {
       expect(summaryItems).toContain('Document reference must only contain letters, numbers, spaces and hyphens');
     });
 
+    test('shows error when no date is provided', async ({ pages }) => {
+      await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
+      await pages.accompanyingDocuments.btnUploadDocument.click();
+      await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+      await expect(pages.accompanyingDocuments.errorIssueDate).toBeVisible();
+      const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
+      expect(summaryItems).toContain('Enter a date of issue');
+    });
+
     test('shows error when partial date is provided', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
       await pages.accompanyingDocuments.inputIssueDateDay.fill('15');
@@ -61,7 +70,7 @@ test.describe('Accompanying documents', () => {
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorIssueDate).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      expect(summaryItems).toContain('Enter a complete date of issue');
+      expect(summaryItems).toContain('Date of issue must include a month');
     });
 
     test('shows error when no file is selected', async ({ pages }) => {
