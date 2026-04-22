@@ -5,7 +5,7 @@ test.describe('County parish holding (cph) number', () => {
     await journeys.toCphNumber();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ pages }) => {
     const notificationId = await pages.cphNumber.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
   });

@@ -7,9 +7,9 @@ import { type NotificationDocument } from '@domain/models/db/notification-docume
 import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CPH_NUMBER } from '@flows/journeys';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists notification with defaults (after full journey completion*)', async ({ journeys, pages }) => {
+  test('persists notification with defaults (after full journey completion*)', async ({ journeys, journeyContext }) => {
     await journeys.toEntryPoint();
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+    const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
 
@@ -54,7 +54,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     }
   });
 
-  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, pages }) => {
+  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       requiresRegionCode: yesNoValues.yes,
@@ -63,7 +63,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     };
 
     await journeys.toEntryPoint(options);
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+    const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 
     try {

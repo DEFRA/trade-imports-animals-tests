@@ -21,6 +21,10 @@ export type JourneyOptions = {
   unweanedAnimals?: YesNoValue;
 };
 
+export type JourneyContext = {
+  notificationId?: string;
+};
+
 export const defaultJourneyOptions: Required<JourneyOptions> = {
   countryCode: countryCodes.eu.france,
   requiresRegionCode: undefined,
@@ -40,7 +44,10 @@ export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const CPH_NUMBER = '123456789';
 
 export class Journeys {
-  constructor(private readonly pages: PageObjects) {}
+  constructor(
+    private readonly pages: PageObjects,
+    private readonly journeyContext?: JourneyContext,
+  ) {}
 
   async toSignIn(open: (attemptSignIn: boolean) => Promise<void>): Promise<void> {
     await open(false);
@@ -95,6 +102,9 @@ export class Journeys {
       await this.pages.importReason.radioReEntry.click();
     }
     await this.pages.importReason.btnSaveAndContinue.click();
+    if (this.journeyContext) {
+      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+    }
   }
 
   async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {

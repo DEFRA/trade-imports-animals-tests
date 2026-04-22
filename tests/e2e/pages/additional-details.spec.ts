@@ -6,7 +6,7 @@ test.describe('Additional details', () => {
     await journeys.toAdditionalDetails();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ pages }) => {
     const notificationId = await pages.additionalDetails.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
   });

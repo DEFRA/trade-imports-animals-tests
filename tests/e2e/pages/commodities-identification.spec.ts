@@ -11,7 +11,7 @@ test.describe('Animal identification details', () => {
     await journeys.toAnimalIdentification();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ pages }) => {
     const notificationId = await pages.animalIdentification.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
   });
