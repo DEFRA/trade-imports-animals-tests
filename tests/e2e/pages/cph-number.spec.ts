@@ -16,7 +16,7 @@ test.describe('County parish holding (cph) number', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows empty CPH number input on first load', async ({ pages }) => {
+  test('shows empty cph number input on first load', async ({ pages }) => {
     await expect(pages.cphNumber.inputCphNumber).toHaveValue('');
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('type', 'text');
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('maxlength', '9');
@@ -29,7 +29,7 @@ test.describe('County parish holding (cph) number', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('limits CPH number input to 9 characters', async ({ pages }) => {
+    test('limits cph number input to 9 characters', async ({ pages }) => {
       await pages.cphNumber.inputCphNumber.fill('1'.repeat(20));
       await expect(pages.cphNumber.inputCphNumber).toHaveValue('1'.repeat(9));
     });
