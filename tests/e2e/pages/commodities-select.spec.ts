@@ -8,7 +8,7 @@ test.describe('Select species of commodity', () => {
     await journeys.toSpeciesSelection();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ pages }) => {
     const notificationId = await pages.speciesSelection.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
   });

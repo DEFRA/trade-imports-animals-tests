@@ -21,6 +21,10 @@ export type JourneyOptions = {
   unweanedAnimals?: YesNoValue;
 };
 
+export type JourneyContext = {
+  notificationId?: string;
+};
+
 export const defaultJourneyOptions: Required<JourneyOptions> = {
   countryCode: countryCodes.eu.france,
   requiresRegionCode: undefined,
@@ -35,8 +39,15 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   unweanedAnimals: undefined,
 };
 
+export const EAR_TAG_PREFIX = 'FR';
+export const PASSPORT_PREFIX = 'FR-BOV-2024-';
+export const CPH_NUMBER = '123456789';
+
 export class Journeys {
-  constructor(private readonly pages: PageObjects) {}
+  constructor(
+    private readonly pages: PageObjects,
+    private readonly journeyContext?: JourneyContext,
+  ) {}
 
   async toSignIn(open: (attemptSignIn: boolean) => Promise<void>): Promise<void> {
     await open(false);
@@ -91,6 +102,9 @@ export class Journeys {
       await this.pages.importReason.radioReEntry.click();
     }
     await this.pages.importReason.btnSaveAndContinue.click();
+    if (this.journeyContext) {
+      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+    }
   }
 
   async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {
@@ -122,8 +136,8 @@ export class Journeys {
     // Currently limited to one animal identifier per species
     for (let i = 0; i < speciesList.length; i += 1) {
       const digits = String(i + 1).padStart(12, '0');
-      await this.pages.animalIdentification.inputEarTag(i).fill(`FR${digits}`);
-      await this.pages.animalIdentification.inputPassport(i).fill(`FR-BOV-2024-${digits.slice(-6)}`);
+      await this.pages.animalIdentification.inputEarTag(i).fill(`${EAR_TAG_PREFIX}${digits}`);
+      await this.pages.animalIdentification.inputPassport(i).fill(`${PASSPORT_PREFIX}${digits.slice(-6)}`);
     }
     await this.pages.animalIdentification.btnSaveAndContinue.click();
   }
@@ -143,6 +157,26 @@ export class Journeys {
       await this.pages.additionalDetails.radioContainsUnweanedAnimals(unweanedAnimals).click();
     }
     await this.pages.additionalDetails.btnSaveAndContinue.click();
+  }
+
+  async toAddresses(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAccompanyingDocuments(options);
+    // TODO: pending accompanying documents page implementation.
+  }
+
+  async toCphNumber(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAddresses(options);
+    // TODO: Pending implementation of address input pages.
+    await this.pages.addresses.btnSaveAndContinue.click();
+  }
+
+  async toEntryPoint(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toCphNumber(options);
+    await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
+    await this.pages.cphNumber.btnSaveAndContinue.click();
   }
 
   async toAdminDashboard(): Promise<void> {

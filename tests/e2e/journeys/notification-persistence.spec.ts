@@ -4,11 +4,12 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/types/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CPH_NUMBER } from '@flows/journeys';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists notification with defaults (after full journey completion*)', async ({ journeys, pages }) => {
-    await journeys.toAccompanyingDocuments();
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+  test('persists notification with defaults (after full journey completion*)', async ({ journeys, journeyContext }) => {
+    await journeys.toEntryPoint();
+    const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
 
@@ -37,22 +38,23 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.reasonForImport).toBe(defaults.importReason);
       expect(subdocFirstSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[0]);
       expect(subdocFirstSpecies?.noOfPackages).toBe(defaults.noOfPackages[0]);
-      expect(subdocFirstSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
-      expect(subdocFirstSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
+      expect(subdocFirstSpecies?.earTag).toMatch(new RegExp(`^${EAR_TAG_PREFIX}`));
+      expect(subdocFirstSpecies?.passport).toMatch(new RegExp(`^${PASSPORT_PREFIX}`));
       expect(subdocSecondSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[1]);
       expect(subdocSecondSpecies?.noOfPackages).toBe(defaults.noOfPackages[1]);
-      expect(subdocSecondSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
-      expect(subdocSecondSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
+      expect(subdocSecondSpecies?.earTag).toMatch(new RegExp(`^${EAR_TAG_PREFIX}`));
+      expect(subdocSecondSpecies?.passport).toMatch(new RegExp(`^${PASSPORT_PREFIX}`));
       expect(subdocCommodityComplement.totalNoOfAnimals).toBe(defaults.noOfAnimals[0] + defaults.noOfAnimals[1]);
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
       expect(doc.additionalDetails.unweanedAnimals).toBe(yesNoValues.no.toLowerCase());
+      expect(doc.cphNumber).toBe(CPH_NUMBER);
     } finally {
       await client.close();
     }
   });
 
-  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, pages }) => {
+  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       requiresRegionCode: yesNoValues.yes,
@@ -60,8 +62,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       unweanedAnimals: yesNoValues.yes,
     };
 
-    await journeys.toAccompanyingDocuments(options);
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+    await journeys.toEntryPoint(options);
+    const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 
     try {

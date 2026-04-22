@@ -29,6 +29,7 @@ export type NotificationDocument = {
     certifiedFor: string;
     unweanedAnimals: string;
   };
+  cphNumber: string;
   created: Date;
   updated: Date;
   _class: string;
