@@ -33,34 +33,32 @@ test(
     await pages.accompanyingDocuments.btnUploadDocument.click();
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
-    const rows = pages.page.locator('.govuk-table__row[data-upload-id]');
-    await expect(rows).toHaveCount(2);
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
 
     // Wait for all scans to complete
     await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible({ timeout: 30000 });
 
     // Capture reference number before navigating away
-    const ref = (await pages.page.locator('[data-testid="app-reference-number-caption"]').textContent()).trim();
+    const ref = await pages.accompanyingDocuments.referenceNumberCaption.innerText();
 
     // Remove the first document
     await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click();
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-    await expect(rows).toHaveCount(1);
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
 
     // Save and continue — completes the frontend flow
     await pages.accompanyingDocuments.btnSaveAndContinueEnabled.click();
 
     // ── Cross to admin ────────────────────────────────────────────────────────
 
-    await pages.page.goto(`${adminBaseUrl}/notifications/${ref}`);
-
-    // The admin may redirect through DCID. If the sign-in form appears, the
-    // DCID session from the frontend journey did not carry over — sign in again.
-    const signInVisible = await pages.signIn.inputUserId.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (signInVisible) {
+    // Navigate to the admin root to trigger the auth redirect, sign in, then
+    // proceed to the specific notification. The frontend and admin are on
+    // different origins so no SSO session carries over automatically.
+    await pages.page.goto(`${adminBaseUrl}/`);
+    if (await pages.signIn.heading.isVisible()) {
       await pages.signIn.signIn();
     }
+    await pages.page.goto(`${adminBaseUrl}/notifications/${ref}`);
 
     // Wait for the admin notification view to load
     await expect(pages.adminNotificationView.sectionAccompanyingDocuments).toBeVisible({

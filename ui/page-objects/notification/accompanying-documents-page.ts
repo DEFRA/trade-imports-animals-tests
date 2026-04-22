@@ -47,9 +47,9 @@ export class AccompanyingDocumentsPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  /** True when Save and continue is enabled (not aria-disabled). */
+  /** True when Save and continue is enabled (native disabled attribute absent). */
   get btnSaveAndContinueEnabled(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' }).and(this.page.locator(':not([aria-disabled="true"])'));
+    return this.page.getByRole('button', { name: 'Save and continue' }).and(this.page.locator(':not([disabled])'));
   }
 
   get errorSummaryItems(): Locator {
@@ -78,6 +78,16 @@ export class AccompanyingDocumentsPage {
   /** The table showing uploaded documents and their scan statuses. */
   get documentsTable(): Locator {
     return this.page.locator('.govuk-table');
+  }
+
+  /** All document rows in the uploaded-documents table. */
+  get documentRows(): Locator {
+    return this.page.locator('.govuk-table__row[data-upload-id]');
+  }
+
+  /** The application reference number caption shown at the top of the page. */
+  get referenceNumberCaption(): Locator {
+    return this.page.locator('[data-testid="app-reference-number-caption"]');
   }
 
   /** A single row in the documents table, identified by filename. */

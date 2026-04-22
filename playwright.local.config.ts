@@ -9,7 +9,7 @@ const projectBaseUrls: Record<string, string> = {
 
 export default defineConfig({
   ...withProjectBaseUrls(baseConfig, projectBaseUrls, 'local'),
-  workers: 1,
+  workers: 8,
   retries: 1,
 
   use: {

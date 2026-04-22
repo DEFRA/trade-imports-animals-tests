@@ -102,6 +102,10 @@ test.describe('Accompanying documents', () => {
   });
 
   test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
+    // Note: cdp-uploader's mock virus scanner (MOCK_VIRUS_SCAN_ENABLED=true) detects "viruses" by
+    // matching the filename against the regex .*virus.* (MOCK_VIRUS_REGEX). File content is never
+    // inspected — the fixture content being identical to test-document.pdf is intentional; only the
+    // filename matters for triggering the INFECTED scan result in the test environment.
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-virus-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
@@ -131,8 +135,7 @@ test.describe('Accompanying documents', () => {
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
-    const rows = pages.page.locator('.govuk-table__row[data-upload-id]');
-    await expect(rows).toHaveCount(2);
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
   });
 
   test('can remove a document from the list', async ({ pages }) => {
