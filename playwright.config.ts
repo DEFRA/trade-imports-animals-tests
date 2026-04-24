@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
 // Read environment variables from file
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const environment = process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
 if (environment?.toLowerCase() === 'prod') {
