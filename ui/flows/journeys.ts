@@ -168,7 +168,9 @@ export class Journeys {
   async toCphNumber(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAddresses(options);
-    // TODO: Pending implementation of address input pages.
+    await this.pages.addresses.linkAddConsignorOrExporter.click();
+    await this.pages.consignorSelection.linkSelectConsignor(0).click();
+    // TODO: Pending implementation of place of destination page.
     await this.pages.addresses.btnSaveAndContinue.click();
   }
 

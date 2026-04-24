@@ -6,6 +6,7 @@ import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
+import { ConsignorSelectionPage } from './notification/consignor-selection-page';
 import { CphNumberPage } from './notification/cph-number-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
@@ -31,6 +32,7 @@ export function createPageObjects(page: Page) {
     animalIdentification: new AnimalIdentificationPage(page),
     commodityDetails: new CommodityDetailsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
+    consignorSelection: new ConsignorSelectionPage(page),
     cphNumber: new CphNumberPage(page),
     importReason: new ImportReasonPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
