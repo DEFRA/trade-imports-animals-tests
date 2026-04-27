@@ -99,11 +99,9 @@ export class AdminNotificationViewPage {
 
   /**
    * Returns the section for a specific document by 1-based index.
-   * Scoped from the "Document N" heading to the next heading of the same level,
-   * so all summary rows within that block are accessible.
    */
   documentSection(index: number): Locator {
-    return this.page.locator('.govuk-summary-list').nth(index + 1); // +1 to skip notification details list
+    return this.page.getByTestId(`document-${index}`);
   }
 
   /** Scan status tag ("Safe", "Virus found", "Pending") for document at 1-based index. */
@@ -138,11 +136,11 @@ export class AdminNotificationViewPage {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  /** Gets the value cell for a summary list row by key text. */
+  /** Gets the value cell for a summary list row by key text (exact match). */
   private summaryValue(key: string): Locator {
     return this.page
       .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key, exact: true }) })
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: new RegExp(`^${key}$`) }) })
       .locator('.govuk-summary-list__value');
   }
 }
