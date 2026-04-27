@@ -51,5 +51,8 @@ test.describe('Additional details', () => {
     await pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes).click();
     await pages.additionalDetails.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await pages.page.goBack();
+    await expect(pages.additionalDetails.radioApprovedBodies).toBeChecked();
+    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes)).toBeChecked();
   });
 });
