@@ -21,6 +21,15 @@ test.describe('Accompanying documents', () => {
     await expect.soft(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
   });
 
+  test('shows expected document type options', async ({ pages }) => {
+    const options = pages.page.locator('#documentType option:not([value=""])');
+    await expect(options).toHaveCount(2);
+    await expect(options.nth(0)).toHaveText('Intra-Trade Animal Health Certificate (ITAHC)');
+    await expect(options.nth(0)).toHaveAttribute('value', 'ITAHC');
+    await expect(options.nth(1)).toHaveText('Veterinary health certificate');
+    await expect(options.nth(1)).toHaveAttribute('value', 'VETERINARY_HEALTH_CERTIFICATE');
+  });
+
   test('Save and continue is enabled with no documents uploaded', async ({ pages }) => {
     await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
   });
