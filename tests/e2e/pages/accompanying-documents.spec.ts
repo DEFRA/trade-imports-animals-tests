@@ -63,6 +63,16 @@ test.describe('Accompanying documents', () => {
       expect(summaryItems).toContain('Document reference must only contain letters, numbers, spaces and hyphens');
     });
 
+    test('shows error when document reference exceeds 100 characters', async ({ pages }) => {
+      await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
+      await pages.accompanyingDocuments.inputDocumentReference.fill('a'.repeat(101));
+      await pages.accompanyingDocuments.btnUploadDocument.click();
+      await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+      await expect(pages.accompanyingDocuments.errorDocumentReference).toBeVisible();
+      const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
+      expect(summaryItems).toContain('Document reference must be 100 characters or less');
+    });
+
     test('shows error when no date is provided', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
       await pages.accompanyingDocuments.btnUploadDocument.click();
