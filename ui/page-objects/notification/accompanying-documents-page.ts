@@ -47,7 +47,7 @@ export class AccompanyingDocumentsPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  /** True when Save and continue is enabled (native disabled attribute absent). */
+  /** Locator for the "Save and continue" button when it is enabled (native disabled attribute absent). */
   get btnSaveAndContinueEnabled(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' }).and(this.page.locator(':not([disabled])'));
   }
