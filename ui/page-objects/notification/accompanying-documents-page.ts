@@ -77,7 +77,7 @@ export class AccompanyingDocumentsPage {
 
   /** The table showing uploaded documents and their scan statuses. */
   get documentsTable(): Locator {
-    return this.page.locator('.govuk-table');
+    return this.page.getByTestId('documents-table');
   }
 
   /** All document rows in the uploaded-documents table. */
