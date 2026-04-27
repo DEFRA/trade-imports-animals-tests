@@ -7,7 +7,7 @@ export class AccompanyingDocumentsPage {
   constructor(private readonly page: Page) {}
 
   get headingPage(): Locator {
-    return this.page.getByRole('heading', { level: 1 });
+    return this.page.getByRole('heading', { level: 1, name: this.expectedHeading });
   }
 
   get dropdownDocumentType(): Locator {
