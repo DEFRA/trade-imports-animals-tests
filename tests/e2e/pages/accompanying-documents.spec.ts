@@ -10,7 +10,7 @@ test.describe('Accompanying documents', () => {
   });
 
   test('shows required form fields', async ({ pages }) => {
-    await expect.soft(pages.accompanyingDocuments.headingPage).toBeVisible();
+    await expect.soft(pages.accompanyingDocuments.headingPage).toHaveText('Accompanying documents');
     await expect.soft(pages.accompanyingDocuments.dropdownDocumentType).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputDocumentReference).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputIssueDateDay).toBeVisible();
