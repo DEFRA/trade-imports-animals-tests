@@ -126,7 +126,7 @@ test.describe('Accompanying documents', () => {
     await expect(statusTag).toHaveText('Virus found', { timeout: 30000 });
 
     const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-    expect(summaryItems.some((t) => t.includes('contains a virus'))).toBe(true);
+    expect(summaryItems).toEqual(expect.arrayContaining([expect.stringContaining('contains a virus')]));
 
     await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
   });
