@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminNotificationViewPage } from './admin/admin-notification-view-page';
@@ -8,7 +9,6 @@ import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
-import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { SpeciesSelectionPage } from './notification/species-selection-page';
 import { SignInPage } from './auth/sign-in-page';
