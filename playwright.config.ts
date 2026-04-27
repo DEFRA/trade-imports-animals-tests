@@ -1,17 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { getServiceBaseUrl } from './utils/urls';
 
 // Read environment variables from file
 dotenv.config({ quiet: true });
 
-const environment = process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
-if (environment?.toLowerCase() === 'prod') {
+const rawEnvironment = process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
+if (rawEnvironment?.toLowerCase() === 'prod') {
   throw new Error('Refusing to run Playwright tests against prod environment. Set ENVIRONMENT/PLAYWRIGHT_ENVIRONMENT to a non-prod value.');
 }
 
-const isLocal = environment?.toLowerCase() === 'local';
-const frontendBaseUrl = isLocal ? 'http://localhost:3000' : `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`;
-const adminBaseUrl = isLocal ? 'http://localhost:3001' : `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
+const frontendBaseUrl = getServiceBaseUrl('trade-imports-animals-frontend', 3000);
+const adminBaseUrl = getServiceBaseUrl('trade-imports-animals-admin', 3001);
 
 /**
  * See https://playwright.dev/docs/test-configuration.

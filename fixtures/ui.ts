@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { createPageObjects, type PageObjects } from '@page-objects';
 import { Journeys } from '@flows/journeys';
+import { getServiceBaseUrl } from '../utils/urls';
 
 export interface PageFixtures {
   pages: PageObjects;
@@ -17,12 +18,7 @@ export const test = base.extend<PageFixtures>({
   },
   // eslint-disable-next-line no-empty-pattern
   adminBaseUrl: async ({}, use) => {
-    const environment = process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
-    const url =
-      !environment || environment.toLowerCase() === 'local'
-        ? 'http://localhost:3001'
-        : `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
-    await use(url);
+    await use(getServiceBaseUrl('trade-imports-animals-admin', 3001));
   },
 });
 
