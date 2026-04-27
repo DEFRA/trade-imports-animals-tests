@@ -142,7 +142,7 @@ export class AdminNotificationViewPage {
   private summaryValue(key: string): Locator {
     return this.page
       .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key, exact: true }) })
       .locator('.govuk-summary-list__value');
   }
 }
