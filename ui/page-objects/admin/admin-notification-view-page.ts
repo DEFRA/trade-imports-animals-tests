@@ -14,7 +14,7 @@ export class AdminNotificationViewPage {
   }
 
   get caption(): Locator {
-    return this.page.locator('.govuk-caption-xl');
+    return this.page.locator('.govuk-caption-xl'); // no semantic role — CSS class is the only selector available
   }
 
   // ── Notification details ──────────────────────────────────────────────────
