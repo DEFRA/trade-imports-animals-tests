@@ -8,6 +8,7 @@ import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { ConsignorSelectionPage } from './notification/consignor-selection-page';
 import { CphNumberPage } from './notification/cph-number-page';
+import { EntryPointPage } from './notification/entry-point-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
@@ -34,6 +35,7 @@ export function createPageObjects(page: Page) {
     commoditySelection: new CommoditySelectionPage(page),
     consignorSelection: new ConsignorSelectionPage(page),
     cphNumber: new CphNumberPage(page),
+    entryPoint: new EntryPointPage(page),
     importReason: new ImportReasonPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),
