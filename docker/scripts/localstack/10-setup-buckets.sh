@@ -1,4 +1,9 @@
 #!/bin/bash
+# Provisions LocalStack AWS resources for local development.
+# Creates two S3 buckets (quarantine and document storage), four SQS queues
+# (ClamAV results, download requests, mock ClamAV, and a FIFO scan-results
+# callback queue), and wires an S3 event notification so that files uploaded
+# to the quarantine bucket are forwarded to the mock-clamav queue.
 set -euo pipefail
 
 # S3 buckets (|| true makes creation idempotent on restart)
