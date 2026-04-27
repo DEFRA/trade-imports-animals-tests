@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const fixture = (name: string) => path.join(__dirname, '../../fixtures', name);
 
 test.describe('Accompanying documents', () => {
   test.beforeEach(async ({ journeys }) => {
@@ -104,7 +105,7 @@ test.describe('Accompanying documents', () => {
 
   test('shows document row with Checking status immediately after upload', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
@@ -118,7 +119,7 @@ test.describe('Accompanying documents', () => {
 
   test('shows Safe status tag once virus scan completes', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
@@ -135,7 +136,7 @@ test.describe('Accompanying documents', () => {
     // inspected — the fixture content being identical to test-document.pdf is intentional; only the
     // filename matters for triggering the INFECTED scan result in the test environment.
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-virus-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-virus-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
@@ -153,13 +154,13 @@ test.describe('Accompanying documents', () => {
   test('can upload multiple documents and see all in the list', async ({ pages }) => {
     // Upload first document
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-001' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
     // Upload second document
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
@@ -168,7 +169,7 @@ test.describe('Accompanying documents', () => {
 
   test('can remove a document from the list', async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     // Wait for the document row to appear (Remove is available immediately)
