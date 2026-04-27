@@ -114,7 +114,13 @@ export class AccompanyingDocumentsPage {
       year?: string;
     } = {},
   ): Promise<void> {
-    const { documentType = 'ITAHC', documentReference = 'ITAHC001', day = '15', month = '01', year = '2024' } = options;
+    const {
+      documentType = 'ITAHC',
+      documentReference = 'ITAHC001',
+      day = '15',
+      month = '01',
+      year = new Date().getFullYear().toString(),
+    } = options;
 
     await this.dropdownDocumentType.selectOption(documentType);
     await this.inputDocumentReference.fill(documentReference);
