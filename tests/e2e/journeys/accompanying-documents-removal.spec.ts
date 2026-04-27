@@ -42,7 +42,7 @@ test(
     const ref = await pages.accompanyingDocuments.referenceNumberCaption.innerText();
 
     // Remove the first document
-    await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click();
+    await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click(); // two docs share this filename
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
 
