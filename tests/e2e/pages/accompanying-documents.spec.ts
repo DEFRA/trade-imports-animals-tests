@@ -61,12 +61,15 @@ test.describe('Accompanying documents', () => {
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorDocumentReference).toBeVisible();
       const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      expect(summaryItems).toContain('Document reference must only contain letters, numbers, spaces and hyphens');
+      expect(summaryItems).toContain('Document reference must only contain letters and numbers');
     });
 
     test('shows error when document reference exceeds 100 characters', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
-      await pages.accompanyingDocuments.inputDocumentReference.fill('a'.repeat(101));
+      // Use evaluate to bypass browser maxlength="100" enforcement and test server-side validation
+      await pages.accompanyingDocuments.inputDocumentReference.evaluate((el, val) => {
+        (el as HTMLInputElement).value = val;
+      }, 'a'.repeat(101));
       await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorDocumentReference).toBeVisible();
@@ -76,6 +79,7 @@ test.describe('Accompanying documents', () => {
 
     test('shows error when no date is provided', async ({ pages }) => {
       await pages.accompanyingDocuments.dropdownDocumentType.selectOption('ITAHC');
+      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
       await pages.accompanyingDocuments.btnUploadDocument.click();
       await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
       await expect(pages.accompanyingDocuments.errorIssueDate).toBeVisible();
@@ -153,13 +157,13 @@ test.describe('Accompanying documents', () => {
 
   test('can upload multiple documents and see all in the list', async ({ pages }) => {
     // Upload first document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-001' });
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
     // Upload second document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 

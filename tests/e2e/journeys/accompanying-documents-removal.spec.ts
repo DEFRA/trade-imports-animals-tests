@@ -22,13 +22,13 @@ test(
     await journeys.toAccompanyingDocuments();
 
     // Upload first document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-001' });
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
 
     // Upload second document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF-002' });
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
     await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
@@ -67,15 +67,15 @@ test(
 
     // Only 1 document should appear — the one the user did NOT remove
     await expect(pages.adminNotificationView.documentHeadings).toHaveCount(1);
-    await expect(pages.adminNotificationView.documentSectionByReference('REF-002')).toBeVisible();
-    await expect(pages.adminNotificationView.documentSectionByReference('REF-001')).not.toBeVisible();
+    await expect(pages.adminNotificationView.documentSectionByReference('REF002')).toBeVisible();
+    await expect(pages.adminNotificationView.documentSectionByReference('REF001')).not.toBeVisible();
 
     // The kept document should be Safe and its file should be downloadable
-    await expect(pages.adminNotificationView.documentScanStatusByReference('REF-002')).toHaveText('Safe');
+    await expect(pages.adminNotificationView.documentScanStatusByReference('REF002')).toHaveText('Safe');
 
     const [download] = await Promise.all([
       pages.page.waitForEvent('download'),
-      pages.adminNotificationView.documentFileLinkByReference('REF-002').click(),
+      pages.adminNotificationView.documentFileLinkByReference('REF002').click(),
     ]);
     expect(download.suggestedFilename()).toBe('test-document.pdf');
   },
