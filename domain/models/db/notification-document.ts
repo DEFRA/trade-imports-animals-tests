@@ -29,7 +29,20 @@ export type NotificationDocument = {
     certifiedFor: string;
     unweanedAnimals: string;
   };
+  consignor: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2: string;
+      addressLine3: string;
+      country: string;
+    };
+  };
   cphNumber: string;
+  transport: {
+    portOfEntry: string;
+    arrivalDate: Date;
+  };
   created: Date;
   updated: Date;
   _class: string;

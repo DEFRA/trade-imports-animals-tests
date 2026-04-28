@@ -16,6 +16,22 @@ export class AddressesPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Addresses' });
   }
 
+  get groupConsignorOrExporter(): Locator {
+    return this.page.getByRole('group', { name: 'Consignor or exporter' });
+  }
+
+  get tableConsignorOrExporter(): Locator {
+    return this.groupConsignorOrExporter.getByRole('table');
+  }
+
+  get rowsConsignorOrExporter(): Locator {
+    return this.tableConsignorOrExporter.locator('tbody').getByRole('row');
+  }
+
+  get cellsConsignorOrExporter(): Locator {
+    return this.rowsConsignorOrExporter.first().getByRole('cell');
+  }
+
   get linkAddConsignorOrExporter(): Locator {
     return this.page.getByRole('link', { name: 'Add a consignor or exporter' });
   }

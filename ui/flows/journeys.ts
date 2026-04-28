@@ -5,7 +5,10 @@ import { countryCodes, type CountryCode } from '@domain/types/country-codes';
 import { importReasons, type ImportReason } from '@domain/types/import-reasons';
 import { certificationPurposes, type CertificationPurpose } from '@domain/types/certification-purposes';
 import type { YesNoValue } from '@domain/types/yes-no-values';
+import { pointOfEntries, type PointOfEntry } from '@domain/types/point-of-entries';
+import type { DateInput } from '@domain/types/date-time-input';
 import type { PageObjects } from '@page-objects';
+import { getRelativeDateInput } from '@utils/date-utils';
 
 export type JourneyOptions = {
   countryCode?: CountryCode;
@@ -19,6 +22,8 @@ export type JourneyOptions = {
   noOfPackages?: number | number[];
   certificationPurpose?: CertificationPurpose;
   unweanedAnimals?: YesNoValue;
+  pointOfEntry?: PointOfEntry;
+  arrivalDate?: DateInput;
 };
 
 export type JourneyContext = {
@@ -37,10 +42,13 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   noOfPackages: [13, 21],
   certificationPurpose: certificationPurposes.approvedBodies,
   unweanedAnimals: undefined,
+  pointOfEntry: pointOfEntries.aberdeen,
+  arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
 };
 
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
+export const CONSIGNOR_NAME = 'Astra Rosales';
 export const CPH_NUMBER = '123456789';
 
 export class Journeys {
@@ -168,7 +176,9 @@ export class Journeys {
   async toCphNumber(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAddresses(options);
-    // TODO: Pending implementation of address input pages.
+    await this.pages.addresses.linkAddConsignorOrExporter.click();
+    await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
+    // TODO: Pending implementation of place of destination page.
     await this.pages.addresses.btnSaveAndContinue.click();
   }
 
@@ -177,6 +187,14 @@ export class Journeys {
     await this.toCphNumber(options);
     await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
     await this.pages.cphNumber.btnSaveAndContinue.click();
+  }
+
+  async toTransporter(options: JourneyOptions = {}): Promise<void> {
+    const { pointOfEntry, arrivalDate } = { ...defaultJourneyOptions, ...options };
+    await this.toEntryPoint(options);
+    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry);
+    await this.pages.entryPoint.fillArrivalDate(arrivalDate);
+    await this.pages.entryPoint.btnSaveAndContinue.click();
   }
 
   async toAdminDashboard(): Promise<void> {
