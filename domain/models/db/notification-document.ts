@@ -30,6 +30,10 @@ export type NotificationDocument = {
     unweanedAnimals: string;
   };
   cphNumber: string;
+  transport: {
+    portOfEntry: string;
+    arrivalDate: Date;
+  };
   created: Date;
   updated: Date;
   _class: string;

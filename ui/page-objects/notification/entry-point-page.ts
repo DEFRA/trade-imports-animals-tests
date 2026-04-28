@@ -1,5 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
+import type { DateInput } from '@domain/types/date-time-input';
 
 export class EntryPointPage extends BasePage {
   readonly expectedUrl = '/port-of-entry';
@@ -51,9 +52,9 @@ export class EntryPointPage extends BasePage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  async fillArrivalDate(day: string, month: string, year: string): Promise<void> {
-    await this.inputDay.fill(day);
-    await this.inputMonth.fill(month);
-    await this.inputYear.fill(year);
+  async fillArrivalDate(date: DateInput): Promise<void> {
+    await this.inputDay.fill(date.day);
+    await this.inputMonth.fill(date.month);
+    await this.inputYear.fill(date.year);
   }
 }

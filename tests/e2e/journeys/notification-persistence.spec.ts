@@ -5,10 +5,11 @@ import { yesNoValues } from '@domain/types/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CPH_NUMBER } from '@flows/journeys';
+import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
   test('persists notification with defaults (after full journey completion*)', async ({ journeys, journeyContext }) => {
-    await journeys.toEntryPoint();
+    await journeys.toTransporter();
     const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
@@ -49,6 +50,9 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
       expect(doc.additionalDetails.unweanedAnimals).toBe(yesNoValues.no.toLowerCase());
       expect(doc.cphNumber).toBe(CPH_NUMBER);
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
+      const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
+      expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
     } finally {
       await client.close();
     }

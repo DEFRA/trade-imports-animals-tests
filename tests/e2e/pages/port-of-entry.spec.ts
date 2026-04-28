@@ -36,14 +36,15 @@ test.describe('Entry point and arrival at destination', () => {
 
   test('continues (to next page*) after saving valid entry', async ({ pages }) => {
     await pages.entryPoint.dropdownPortOfEntry.selectOption('ABERDEEN');
-    await pages.entryPoint.fillArrivalDate('27', '3', '2026');
+    await pages.entryPoint.fillArrivalDate({ day: '27', month: '3', year: '2026' });
     await pages.entryPoint.btnSaveAndContinue.click();
     // TODO: pending next page implementation (transporter page)
   });
 
+  // Basic date format/min-max validation (not in the original ACs) ensures a valid backend payload; extend coverage later.
   test.describe('Input validation', { tag: '@validation' }, () => {
     test('shows error when arrival date day is out of range', async ({ pages }) => {
-      await pages.entryPoint.fillArrivalDate('32', '1', '2026');
+      await pages.entryPoint.fillArrivalDate({ day: '32', month: '1', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
       await expect(pages.entryPoint.errorArrivalDate).toContainText('Enter a valid day');
@@ -53,7 +54,7 @@ test.describe('Entry point and arrival at destination', () => {
     });
 
     test('shows error when arrival date month is out of range', async ({ pages }) => {
-      await pages.entryPoint.fillArrivalDate('1', '13', '2026');
+      await pages.entryPoint.fillArrivalDate({ day: '1', month: '13', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
       await expect(pages.entryPoint.errorArrivalDate).toContainText('Enter a valid month');
@@ -63,7 +64,7 @@ test.describe('Entry point and arrival at destination', () => {
     });
 
     test('shows error when arrival date year is out of range (three digits)', async ({ pages }) => {
-      await pages.entryPoint.fillArrivalDate('1', '1', '202');
+      await pages.entryPoint.fillArrivalDate({ day: '1', month: '1', year: '202' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
       await expect(pages.entryPoint.errorArrivalDate).toContainText('Enter a valid year');
@@ -73,7 +74,7 @@ test.describe('Entry point and arrival at destination', () => {
     });
 
     test('shows all errors when all arrival date fields are out of range', async ({ pages }) => {
-      await pages.entryPoint.fillArrivalDate('0', '13', '20266');
+      await pages.entryPoint.fillArrivalDate({ day: '0', month: '13', year: '20266' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
       await expect(pages.entryPoint.errorArrivalDate).toContainText('Enter a valid day');
