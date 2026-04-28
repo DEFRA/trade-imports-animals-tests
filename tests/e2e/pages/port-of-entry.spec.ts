@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { pointOfEntries } from '@domain/types/point-of-entries';
+import { pointOfEntries } from '@domain/constants/point-of-entries';
 
 test.describe('Entry point and arrival at destination', () => {
   test.beforeEach(async ({ journeys }) => {

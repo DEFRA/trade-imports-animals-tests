@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
-import { countryCodes } from '@domain/types/country-codes';
-import { yesNoValues } from '@domain/types/yes-no-values';
+import { countryCodes } from '@domain/constants/country-codes';
+import { yesNoValues } from '@domain/constants/yes-no-values';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Origin of the import', () => {

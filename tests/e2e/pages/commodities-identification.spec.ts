@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { defaultJourneyOptions } from '@flows/journeys';
-import { commoditySpecies } from '@domain/types/commodity-species';
-import { commodityTypes } from '@domain/types/commodity-types';
+import { commoditySpecies } from '@domain/constants/commodity-species';
+import { commodityTypes } from '@domain/constants/commodity-types';
 
 const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domestic}`;
 const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;

@@ -1,6 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
-import type { YesNoValue } from '@domain/types/yes-no-values';
+import type { YesNoValue } from '@domain/constants/yes-no-values';
 
 export class AdditionalDetailsPage extends BasePage {
   readonly expectedUrl = '/additional-details';

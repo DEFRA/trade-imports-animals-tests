@@ -1,6 +1,6 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
-import { CommoditySpecies } from '@domain/types/commodity-species';
+import { CommoditySpecies } from '@domain/constants/commodity-species';
 
 export class SpeciesSelectionPage extends BasePage {
   readonly expectedUrl = '/commodities/select';

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
-import { commodityTypes } from '@domain/types/commodity-types';
-import { commoditySpecies } from '@domain/types/commodity-species';
+import { commodityTypes } from '@domain/constants/commodity-types';
+import { commoditySpecies } from '@domain/constants/commodity-species';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Select species of commodity', () => {

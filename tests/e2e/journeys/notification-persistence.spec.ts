@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { defaultJourneyOptions } from '@flows/journeys';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { yesNoValues } from '@domain/types/yes-no-values';
+import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, CPH_NUMBER } from '@flows/journeys';

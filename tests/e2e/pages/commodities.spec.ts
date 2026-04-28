@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { commodityCodes } from '@domain/types/commodity-codes';
+import { commodityCodes } from '@domain/constants/commodity-codes';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Commodities', () => {

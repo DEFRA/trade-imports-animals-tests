@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { yesNoValues } from '@domain/types/yes-no-values';
+import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {
   test.beforeEach(async ({ journeys }) => {
