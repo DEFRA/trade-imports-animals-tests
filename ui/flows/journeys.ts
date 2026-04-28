@@ -196,13 +196,4 @@ export class Journeys {
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
     await this.pages.entryPoint.btnSaveAndContinue.click();
   }
-
-  async toAdminDashboard(): Promise<void> {
-    await this.pages.adminDashboard.open();
-  }
-
-  async toAdminNotifications(): Promise<void> {
-    await this.toAdminDashboard();
-    await this.pages.adminDashboard.btnNotifications.click();
-  }
 }
