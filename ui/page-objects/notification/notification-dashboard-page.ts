@@ -24,6 +24,15 @@ export class NotificationDashboardPage {
     if (attemptSignIn) {
       const signInPage = new SignInPage(this.page);
       await signInPage.signIn();
+
+      // The auth stub can fail under concurrent load. If we don't land on the
+      // dashboard within a short grace period, retry the whole auth flow once.
+      try {
+        await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+      } catch {
+        await this.page.goto('/');
+        await signInPage.signIn();
+      }
     }
   }
 }

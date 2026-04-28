@@ -47,9 +47,11 @@ export class AccompanyingDocumentsPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  /** Locator for the "Save and continue" button when it is enabled (native disabled attribute absent). */
+  /** Locator for the "Save and continue" button when it is enabled (neither native disabled nor aria-disabled). */
   get btnSaveAndContinueEnabled(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' }).and(this.page.locator(':not([disabled])'));
+    return this.page
+      .getByRole('button', { name: 'Save and continue' })
+      .and(this.page.locator(':not([disabled]):not([aria-disabled="true"])'));
   }
 
   get errorSummaryItems(): Locator {

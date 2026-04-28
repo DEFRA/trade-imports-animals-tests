@@ -37,6 +37,10 @@ test.describe('Accompanying documents', () => {
 
   test.describe('Input validation', { tag: '@validation' }, () => {
     test('shows error when invalid document type is submitted', async ({ pages }) => {
+      // Wait for the select to be in the DOM before manipulating it — govuk-frontend
+      // JS initialises the Select component after page load and briefly the element
+      // may not yet be queryable via querySelector('#documentType').
+      await expect(pages.accompanyingDocuments.dropdownDocumentType).toBeAttached();
       // Force-select an invalid option by manipulating the select value directly
       await pages.page.evaluate(() => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
