@@ -29,9 +29,8 @@ test.describe('Entry point and arrival at destination', () => {
     const options = await pages.entryPoint.dropdownPortOfEntryOptions.allTextContents();
     const expectedOptions = Object.values(pointOfEntries);
     expect(options[0]).toBe('Entry port of entry');
-    // Dropdown options must match the expected list (same items and count; order ignored).
-    expect(options.slice(1)).toHaveLength(expectedOptions.length);
-    expect(options.slice(1)).toEqual(expect.arrayContaining(expectedOptions));
+    // Dropdown options must match the expected list in the correct order (alphabetical).
+    expect(options.slice(1)).toEqual(expectedOptions);
   });
 
   test('continues (to next page*) after saving valid entry', async ({ pages }) => {

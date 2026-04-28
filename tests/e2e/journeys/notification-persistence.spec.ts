@@ -4,7 +4,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/types/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CPH_NUMBER } from '@flows/journeys';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, CPH_NUMBER } from '@flows/journeys';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
@@ -49,6 +49,11 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
       expect(doc.additionalDetails.unweanedAnimals).toBe(yesNoValues.no.toLowerCase());
+      expect(doc.consignor.name).toBe(CONSIGNOR_NAME);
+      expect(doc.consignor.address.addressLine1).toBe('43 East Hague Extension');
+      expect(doc.consignor.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
+      expect(doc.consignor.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
+      expect(doc.consignor.address.country).toBe('Switzerland');
       expect(doc.cphNumber).toBe(CPH_NUMBER);
       expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);

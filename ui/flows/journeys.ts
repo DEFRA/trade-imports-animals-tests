@@ -48,6 +48,7 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
 
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
+export const CONSIGNOR_NAME = 'Astra Rosales';
 export const CPH_NUMBER = '123456789';
 
 export class Journeys {
@@ -176,7 +177,7 @@ export class Journeys {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAddresses(options);
     await this.pages.addresses.linkAddConsignorOrExporter.click();
-    await this.pages.consignorSelection.linkSelectConsignor(0).click();
+    await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
     // TODO: Pending implementation of place of destination page.
     await this.pages.addresses.btnSaveAndContinue.click();
   }
