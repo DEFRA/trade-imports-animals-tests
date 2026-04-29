@@ -36,6 +36,22 @@ export class AddressesPage extends BasePage {
     return this.page.getByRole('link', { name: 'Add a consignor or exporter' });
   }
 
+  get groupPlaceOfDestination(): Locator {
+    return this.page.getByRole('group', { name: 'Place of destination' });
+  }
+
+  get tablePlaceOfDestination(): Locator {
+    return this.groupPlaceOfDestination.getByRole('table');
+  }
+
+  get rowsPlaceOfDestination(): Locator {
+    return this.tablePlaceOfDestination.locator('tbody').getByRole('row');
+  }
+
+  get cellsPlaceOfDestination(): Locator {
+    return this.rowsPlaceOfDestination.first().getByRole('cell');
+  }
+
   get linkAddPlaceOfDestination(): Locator {
     return this.page.getByRole('link', { name: 'Add a place of destination' });
   }

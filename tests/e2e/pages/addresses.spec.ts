@@ -24,7 +24,8 @@ test.describe('Addresses landing page', () => {
 
   test('can navigate to place of destination selection', async ({ pages }) => {
     await pages.addresses.linkAddPlaceOfDestination.click();
-    // TODO: pending entry point page implementation.
+    await expect(pages.page).toHaveURL(pages.destinationSelection.expectedUrl);
+    await expect(pages.destinationSelection.heading).toBeVisible();
   });
 
   test('continues to cph number page after saving with no addresses selected', async ({ pages }) => {
