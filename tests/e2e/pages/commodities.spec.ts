@@ -7,9 +7,10 @@ test.describe('Commodities', () => {
     await journeys.toCommoditySelection();
   });
 
-  test('shows system-generated notification id (draft)', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
     const notificationId = await pages.commoditySelection.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('shows expected commodities in commodity dropdown', async ({ pages }) => {
