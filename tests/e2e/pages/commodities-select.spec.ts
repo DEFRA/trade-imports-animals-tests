@@ -8,9 +8,10 @@ test.describe('Select species of commodity', () => {
     await journeys.toSpeciesSelection();
   });
 
-  test('shows system-generated notification id (draft)', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
     const notificationId = await pages.speciesSelection.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to commodity selection', async ({ pages }) => {

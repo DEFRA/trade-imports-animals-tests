@@ -10,6 +10,7 @@ test.describe('Entry point and arrival at destination', () => {
     // TODO: pending notification id implementation on page
     //const notificationId = await pages.entryPoint.notificationId.textContent();
     //expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    //expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to cph number', async ({ pages }) => {

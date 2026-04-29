@@ -81,6 +81,9 @@ export class Journeys {
       await this.pages.originOfImport.inputInternalReferenceNumber.fill(internalReference);
     }
     await this.pages.originOfImport.btnSaveAndContinue.click();
+    if (this.journeyContext) {
+      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+    }
   }
 
   async toSpeciesSelection(options: JourneyOptions = {}): Promise<void> {
@@ -110,9 +113,6 @@ export class Journeys {
       await this.pages.importReason.radioReEntry.click();
     }
     await this.pages.importReason.btnSaveAndContinue.click();
-    if (this.journeyContext) {
-      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
-    }
   }
 
   async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {
