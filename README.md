@@ -6,6 +6,7 @@ This test suite provides a robust foundation for writing, executing, and maintai
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Editor Setup](#editor-setup)
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
 - [Running Tests on GitHub](#running-tests-on-github)
@@ -52,6 +53,17 @@ This test suite provides a robust foundation for writing, executing, and maintai
    ```bash
    npx playwright install chromium
    ```
+
+## Editor Setup
+
+### TypeScript version (VS Code and Cursor)
+
+To keep TypeScript checks and editor behaviour consistent with this repository and CI, use the workspace TypeScript version in your editor:
+
+1. Open any `.ts` or `.tsx` file.
+2. Open Command Palette (`Cmd+Shift+P` on macOS).
+3. Run `TypeScript: Select TypeScript Version`.
+4. Select `Use Workspace Version`.
 
 ## Running Tests
 
