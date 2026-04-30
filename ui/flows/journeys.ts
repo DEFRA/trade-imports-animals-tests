@@ -171,10 +171,7 @@ export class Journeys {
   async toAddresses(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAccompanyingDocuments(options);
-    // The "Save and continue" link on /accompanying-documents is disabled until a
-    // document is uploaded; go direct so journey-driven tests can reach /addresses
-    // without exercising the upload flow.
-    await this.pages.page.goto(this.pages.addresses.expectedUrl);
+    await this.pages.accompanyingDocuments.btnSaveAndContinue.click();
   }
 
   async toCphNumber(options: JourneyOptions = {}): Promise<void> {
