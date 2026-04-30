@@ -53,6 +53,7 @@ FAILED
 /playwright-report/
 /playwright/.cache/
 /blob-report/
+/.playwright-cli/
 
 # Generated assets
 *.png

@@ -1,17 +1,11 @@
-import { Page, Locator } from '@playwright/test';
-import { SignInPage } from '@page-objects/auth/sign-in-page';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 
-export class NotificationDashboardPage {
+export class NotificationDashboardPage extends BasePage {
   readonly expectedUrl = '/';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Import notification service' });
-  }
-
-  get btnSignOut(): Locator {
-    return this.page.getByRole('link', { name: 'Sign out' });
   }
 
   get btnCreateNewNotification(): Locator {
@@ -20,18 +14,16 @@ export class NotificationDashboardPage {
 
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto('/');
+    await this.signInWhenRequested(attemptSignIn);
 
     if (attemptSignIn) {
-      const signInPage = new SignInPage(this.page);
-      await signInPage.signIn();
-
       // The auth stub can fail under concurrent load. If we don't land on the
       // dashboard within a short grace period, retry the whole auth flow once.
       try {
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
       } catch {
         await this.page.goto('/');
-        await signInPage.signIn();
+        await this.signInWhenRequested(true);
       }
     }
   }

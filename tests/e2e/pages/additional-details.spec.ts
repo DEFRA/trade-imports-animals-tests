@@ -1,14 +1,15 @@
 import { test, expect } from '@fixtures';
-import { yesNoValues } from '@domain/types/yes-no-values';
+import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {
   test.beforeEach(async ({ journeys }) => {
     await journeys.toAdditionalDetails();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
     const notificationId = await pages.additionalDetails.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to animal identification', async ({ pages }) => {

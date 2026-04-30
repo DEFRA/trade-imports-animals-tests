@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
-import { commodityTypes } from '@domain/types/commodity-types';
-import { commoditySpecies } from '@domain/types/commodity-species';
+import { commodityTypes } from '@domain/constants/commodity-types';
+import { commoditySpecies } from '@domain/constants/commodity-species';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Select species of commodity', () => {
@@ -8,9 +8,10 @@ test.describe('Select species of commodity', () => {
     await journeys.toSpeciesSelection();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
     const notificationId = await pages.speciesSelection.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to commodity selection', async ({ pages }) => {

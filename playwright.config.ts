@@ -24,8 +24,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* CI: 50% workers for stability. Local: undefined uses Playwright default CPU-based auto-scaling. */
+  workers: process.env.CI ? '50%' : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['list'], ['html', { open: 'never' }], ['allure-playwright'], ['./utils/playwright/failed-suite-reporter.ts']],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -40,7 +40,7 @@ export default defineConfig({
   projects: [
     {
       name: 'frontend-chromium',
-      testIgnore: '**/tests/e2e/pages/admin/**/*.spec.ts',
+      testIgnore: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: frontendBaseUrl,
@@ -49,7 +49,7 @@ export default defineConfig({
     },
     {
       name: 'admin-chromium',
-      testMatch: '**/tests/e2e/pages/admin/**/*.spec.ts',
+      testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: adminBaseUrl,

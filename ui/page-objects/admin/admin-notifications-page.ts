@@ -1,10 +1,8 @@
-import { Page, Locator } from '@playwright/test';
-import { SignInPage } from '@page-objects/auth/sign-in-page';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
 
-export class AdminNotificationsPage {
+export class AdminNotificationsPage extends BasePage {
   readonly expectedUrl = '/notifications';
-
-  constructor(private readonly page: Page) {}
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Notifications' });
@@ -48,11 +46,7 @@ export class AdminNotificationsPage {
 
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto(this.expectedUrl);
-
-    if (attemptSignIn) {
-      const signInPage = new SignInPage(this.page);
-      await signInPage.signIn();
-    }
+    await this.signInWhenRequested(attemptSignIn);
   }
 
   tableRowByReference(referenceNumber: string): Locator {

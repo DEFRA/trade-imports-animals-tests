@@ -1,11 +1,14 @@
-import { commodityCodes, type CommodityCode } from '@domain/types/commodity-codes';
-import { commoditySpecies, type CommoditySpecies } from '@domain/types/commodity-species';
-import { commodityTypes, type CommodityType } from '@domain/types/commodity-types';
-import { countryCodes, type CountryCode } from '@domain/types/country-codes';
-import { importReasons, type ImportReason } from '@domain/types/import-reasons';
-import { certificationPurposes, type CertificationPurpose } from '@domain/types/certification-purposes';
-import type { YesNoValue } from '@domain/types/yes-no-values';
+import { commodityCodes, type CommodityCode } from '@domain/constants/commodity-codes';
+import { commoditySpecies, type CommoditySpecies } from '@domain/constants/commodity-species';
+import { commodityTypes, type CommodityType } from '@domain/constants/commodity-types';
+import { countryCodes, type CountryCode } from '@domain/constants/country-codes';
+import { importReasons, type ImportReason } from '@domain/constants/import-reasons';
+import { certificationPurposes, type CertificationPurpose } from '@domain/constants/certification-purposes';
+import type { YesNoValue } from '@domain/constants/yes-no-values';
+import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-entries';
+import type { DateInput } from '@domain/types/date-time-input';
 import type { PageObjects } from '@page-objects';
+import { getRelativeDateInput } from '@utils/date-utils';
 
 export type JourneyOptions = {
   countryCode?: CountryCode;
@@ -19,6 +22,12 @@ export type JourneyOptions = {
   noOfPackages?: number | number[];
   certificationPurpose?: CertificationPurpose;
   unweanedAnimals?: YesNoValue;
+  pointOfEntry?: PointOfEntry;
+  arrivalDate?: DateInput;
+};
+
+export type JourneyContext = {
+  notificationId?: string;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -33,10 +42,21 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   noOfPackages: [13, 21],
   certificationPurpose: certificationPurposes.approvedBodies,
   unweanedAnimals: undefined,
+  pointOfEntry: pointOfEntries.aberdeen,
+  arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
 };
 
+export const EAR_TAG_PREFIX = 'FR';
+export const PASSPORT_PREFIX = 'FR-BOV-2024-';
+export const CONSIGNOR_NAME = 'Astra Rosales';
+export const DESTINATION_NAME = 'Tech Imports Ltd';
+export const CPH_NUMBER = '123456789';
+
 export class Journeys {
-  constructor(private readonly pages: PageObjects) {}
+  constructor(
+    private readonly pages: PageObjects,
+    private readonly journeyContext?: JourneyContext,
+  ) {}
 
   async toSignIn(open: (attemptSignIn: boolean) => Promise<void>): Promise<void> {
     await open(false);
@@ -62,6 +82,9 @@ export class Journeys {
       await this.pages.originOfImport.inputInternalReferenceNumber.fill(internalReference);
     }
     await this.pages.originOfImport.btnSaveAndContinue.click();
+    if (this.journeyContext) {
+      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+    }
   }
 
   async toSpeciesSelection(options: JourneyOptions = {}): Promise<void> {
@@ -122,8 +145,8 @@ export class Journeys {
     // Currently limited to one animal identifier per species
     for (let i = 0; i < speciesList.length; i += 1) {
       const digits = String(i + 1).padStart(12, '0');
-      await this.pages.animalIdentification.inputEarTag(i).fill(`FR${digits}`);
-      await this.pages.animalIdentification.inputPassport(i).fill(`FR-BOV-2024-${digits.slice(-6)}`);
+      await this.pages.animalIdentification.inputEarTag(i).fill(`${EAR_TAG_PREFIX}${digits}`);
+      await this.pages.animalIdentification.inputPassport(i).fill(`${PASSPORT_PREFIX}${digits.slice(-6)}`);
     }
     await this.pages.animalIdentification.btnSaveAndContinue.click();
   }
@@ -145,12 +168,34 @@ export class Journeys {
     await this.pages.additionalDetails.btnSaveAndContinue.click();
   }
 
-  async toAdminDashboard(): Promise<void> {
-    await this.pages.adminDashboard.open();
+  async toAddresses(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAccompanyingDocuments(options);
+    // TODO: pending accompanying documents page implementation.
   }
 
-  async toAdminNotifications(): Promise<void> {
-    await this.toAdminDashboard();
-    await this.pages.adminDashboard.btnNotifications.click();
+  async toCphNumber(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toAddresses(options);
+    await this.pages.addresses.linkAddConsignorOrExporter.click();
+    await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
+    await this.pages.addresses.linkAddPlaceOfDestination.click();
+    await this.pages.destinationSelection.linkSelectDestinationByName(DESTINATION_NAME).click();
+    await this.pages.addresses.btnSaveAndContinue.click();
+  }
+
+  async toEntryPoint(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toCphNumber(options);
+    await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
+    await this.pages.cphNumber.btnSaveAndContinue.click();
+  }
+
+  async toTransporter(options: JourneyOptions = {}): Promise<void> {
+    const { pointOfEntry, arrivalDate } = { ...defaultJourneyOptions, ...options };
+    await this.toEntryPoint(options);
+    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry);
+    await this.pages.entryPoint.fillArrivalDate(arrivalDate);
+    await this.pages.entryPoint.btnSaveAndContinue.click();
   }
 }

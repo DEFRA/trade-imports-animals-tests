@@ -30,14 +30,19 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
 
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
-    await pages.adminDashboard.btnSignOut.click();
+    await pages.adminDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
     await expect(pages.signOut.heading).toBeVisible();
   });
 
+  test('displays signed in user after signing in', async ({ pages }) => {
+    await pages.signIn.signIn();
+    await expect(pages.adminDashboard.user()).toBeVisible();
+  });
+
   test('lands on the sign in page when reopening the admin dashboard after sign out', async ({ pages }) => {
     await pages.signIn.signIn();
-    await pages.adminDashboard.btnSignOut.click();
+    await pages.adminDashboard.linkSignOut.click();
     await pages.adminDashboard.open(false);
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);
     await expect(pages.signIn.heading).toBeVisible();

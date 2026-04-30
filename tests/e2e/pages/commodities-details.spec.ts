@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
-import { commoditySpecies } from '@domain/types/commodity-species';
-import { commodityTypes } from '@domain/types/commodity-types';
+import { commoditySpecies } from '@domain/constants/commodity-species';
+import { commodityTypes } from '@domain/constants/commodity-types';
 
 const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domestic}`;
 const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;
@@ -10,9 +10,10 @@ test.describe('Commodity details', () => {
     await journeys.toCommodityDetails();
   });
 
-  test('shows system-generated notification id', async ({ pages }) => {
+  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
     const notificationId = await pages.commodityDetails.notificationId.textContent();
     expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to species selection', async ({ pages }) => {

@@ -1,14 +1,16 @@
 import { test, expect } from '@fixtures';
 import { defaultJourneyOptions } from '@flows/journeys';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { yesNoValues } from '@domain/types/yes-no-values';
+import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journeys';
+import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists notification with defaults (after full journey completion*)', async ({ journeys, pages }) => {
-    await journeys.toAccompanyingDocuments();
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+  test('persists notification with defaults (after full journey completion*)', async ({ journeys, journeyContext }) => {
+    await journeys.toTransporter();
+    const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
 
@@ -37,22 +39,35 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.reasonForImport).toBe(defaults.importReason);
       expect(subdocFirstSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[0]);
       expect(subdocFirstSpecies?.noOfPackages).toBe(defaults.noOfPackages[0]);
-      expect(subdocFirstSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
-      expect(subdocFirstSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
+      expect(subdocFirstSpecies?.earTag).toMatch(new RegExp(`^${EAR_TAG_PREFIX}`));
+      expect(subdocFirstSpecies?.passport).toMatch(new RegExp(`^${PASSPORT_PREFIX}`));
       expect(subdocSecondSpecies?.noOfAnimals).toBe(defaults.noOfAnimals[1]);
       expect(subdocSecondSpecies?.noOfPackages).toBe(defaults.noOfPackages[1]);
-      expect(subdocSecondSpecies?.earTag).toEqual(expect.stringMatching(/^FR/));
-      expect(subdocSecondSpecies?.passport).toEqual(expect.stringMatching(/^FR-BOV-2024-/));
+      expect(subdocSecondSpecies?.earTag).toMatch(new RegExp(`^${EAR_TAG_PREFIX}`));
+      expect(subdocSecondSpecies?.passport).toMatch(new RegExp(`^${PASSPORT_PREFIX}`));
       expect(subdocCommodityComplement.totalNoOfAnimals).toBe(defaults.noOfAnimals[0] + defaults.noOfAnimals[1]);
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
       expect(doc.additionalDetails.unweanedAnimals).toBe(yesNoValues.no.toLowerCase());
+      expect(doc.consignor.name).toBe(CONSIGNOR_NAME);
+      expect(doc.consignor.address.addressLine1).toBe('43 East Hague Extension');
+      expect(doc.consignor.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
+      expect(doc.consignor.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
+      expect(doc.consignor.address.country).toBe('Switzerland');
+      expect(doc.destination.name).toBe(DESTINATION_NAME);
+      expect(doc.destination.address.addressLine1).toBe('643 Main Street');
+      expect(doc.destination.address.addressLine2).toBe('Birmingham G1 3AZ');
+      expect(doc.destination.address.country).toBe('United Kingdom');
+      expect(doc.cphNumber).toBe(CPH_NUMBER);
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
+      const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
+      expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
     } finally {
       await client.close();
     }
   });
 
-  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, pages }) => {
+  test('persists notification with defaults overidden (after full journey completion*)', async ({ journeys, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       requiresRegionCode: yesNoValues.yes,
@@ -60,8 +75,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       unweanedAnimals: yesNoValues.yes,
     };
 
-    await journeys.toAccompanyingDocuments(options);
-    const referenceNumber = await pages.additionalDetails.notificationId.textContent();
+    await journeys.toEntryPoint(options);
+    const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 
     try {

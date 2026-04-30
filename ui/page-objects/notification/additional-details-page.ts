@@ -1,10 +1,9 @@
-import { Page, Locator } from '@playwright/test';
-import type { YesNoValue } from '@domain/types/yes-no-values';
+import { Locator } from '@playwright/test';
+import { BasePage } from '@page-objects/base/base-page';
+import type { YesNoValue } from '@domain/constants/yes-no-values';
 
-export class AdditionalDetailsPage {
+export class AdditionalDetailsPage extends BasePage {
   readonly expectedUrl = '/additional-details';
-
-  constructor(private readonly page: Page) {}
 
   get notificationId(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
