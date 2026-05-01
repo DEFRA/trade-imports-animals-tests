@@ -22,6 +22,7 @@ export class NotificationDashboardPage extends BasePage {
       try {
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
       } catch {
+        console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
         await this.page.goto('/');
         await this.signInWhenRequested(true);
       }
