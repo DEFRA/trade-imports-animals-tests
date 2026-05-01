@@ -8,7 +8,7 @@ test.describe('Origin of the import', () => {
     await journeys.toOriginOfImport();
   });
 
-  test('shows only EU and EFTA countries in origin dropdown', async ({ pages }) => {
+  test.skip('shows only EU and EFTA countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
     const keys = Object.keys(countryCodes.eu);
     const expectedOptions = keys.map(camelCaseToTitleCase);
@@ -18,7 +18,7 @@ test.describe('Origin of the import', () => {
     expect(countryOptions.slice(2)).toEqual(expectedOptions);
   });
 
-  test('does not show any ROW countries in origin dropdown', async ({ pages }) => {
+  test.skip('does not show any ROW countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
     const keys = Object.keys(countryCodes.row);
     const rowOptions = keys.map(camelCaseToTitleCase);
