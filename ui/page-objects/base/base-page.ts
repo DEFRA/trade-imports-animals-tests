@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, errors } from '@playwright/test';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 const SIGN_IN_FORM_PROBE_MS = 5_000;
@@ -33,8 +33,9 @@ export class BasePage {
         state: 'visible',
         timeout: SIGN_IN_FORM_PROBE_MS,
       });
-    } catch {
-      return;
+    } catch (error) {
+      if (error instanceof errors.TimeoutError) return;
+      throw error;
     }
     await signInPage.signIn();
   }
