@@ -1,9 +1,9 @@
 import { test } from '@fixtures/a11y';
 import { defaultJourneyOptions } from '@flows/journeys';
 
-test.describe('Accessibility (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
+test.describe('Accessibility WCAG 2.2 AA', { tag: '@a11y' }, () => {
   test.describe('Initial state (no user input)', () => {
-    test('has no accessibility violations on intitial load', async ({ journeys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations on initial load', async ({ journeys, pages, runA11yScan }) => {
       // Scan notification dashboard
       await journeys.toNotificationDashboard();
       await runA11yScan();
@@ -22,7 +22,7 @@ test.describe('Accessibility (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
   });
 
   test.describe('Completed state (valid user input)', () => {
-    test('has no accessibility violations after user input', async ({ journeys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations after user input', async ({ journeys, pages, runA11yScan }) => {
       await journeys.toNotificationDashboard();
       await pages.notificationDashboard.btnCreateNewNotification.click();
 
@@ -41,7 +41,7 @@ test.describe('Accessibility (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
   });
 
   test.describe('Error state (validation failures)', () => {
-    test('has no accessibility violations when validation errors are shown', async ({ journeys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations when validation errors are shown', async ({ journeys, pages, runA11yScan }) => {
       await journeys.toNotificationDashboard();
       await pages.notificationDashboard.btnCreateNewNotification.click();
 

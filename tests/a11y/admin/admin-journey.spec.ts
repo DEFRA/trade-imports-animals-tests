@@ -1,9 +1,9 @@
 import { test } from '@fixtures/a11y';
 import { ObjectId } from 'mongodb';
 
-test.describe('Accessibility (admin) (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
+test.describe('Accessibility (admin) WCAG 2.2 AA', { tag: '@a11y' }, () => {
   test.describe('Initial state (no user input)', () => {
-    test('has no accessibility violations on intitial load', async ({ adminJourneys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations on initial load', async ({ adminJourneys, pages, runA11yScan }) => {
       // Scan admin dashboard
       await adminJourneys.toAdminDashboard();
       await runA11yScan();
@@ -15,7 +15,7 @@ test.describe('Accessibility (admin) (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
   });
 
   test.describe('Completed state (valid user input)', () => {
-    test('has no accessibility violations after user input', async ({ adminJourneys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations after user input', async ({ adminJourneys, pages, runA11yScan }) => {
       await adminJourneys.toAdminDashboard();
       await pages.adminDashboard.btnNotifications.click();
 
@@ -27,7 +27,11 @@ test.describe('Accessibility (admin) (WCAG 2.2 AA)', { tag: '@a11y' }, () => {
   });
 
   test.describe('Error state (validation failures)', () => {
-    test('has no accessibility violations when validation errors are shown', async ({ adminJourneys, pages, runA11yScan }) => {
+    test('each visited page has no accessibility violations when validation errors are shown', async ({
+      adminJourneys,
+      pages,
+      runA11yScan,
+    }) => {
       await adminJourneys.toAdminDashboard();
       await pages.adminDashboard.btnNotifications.click();
 
