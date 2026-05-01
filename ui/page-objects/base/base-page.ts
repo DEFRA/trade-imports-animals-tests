@@ -21,9 +21,16 @@ export class BasePage {
   }
 
   protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {
-    if (attemptSignIn) {
-      const signInPage = new SignInPage(this.page);
-      await signInPage.signIn();
+    if (!attemptSignIn) return;
+    const signInPage = new SignInPage(this.page);
+    // Under concurrent load the auth stub can be slow; the caller may retry
+    // after a goto that landed directly on a post-auth page. Only sign in if
+    // the sign-in form is actually present.
+    try {
+      await signInPage.inputUserId.waitFor({ state: 'visible', timeout: 5000 });
+    } catch {
+      return;
     }
+    await signInPage.signIn();
   }
 }

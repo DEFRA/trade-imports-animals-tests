@@ -69,6 +69,7 @@ export class Journeys {
   async toOriginOfImport(): Promise<void> {
     await this.toNotificationDashboard();
     await this.pages.notificationDashboard.btnCreateNewNotification.click();
+    await this.pages.originOfImport.heading.waitFor();
   }
 
   async toCommoditySelection(options: JourneyOptions = {}): Promise<void> {
@@ -82,6 +83,7 @@ export class Journeys {
       await this.pages.originOfImport.inputInternalReferenceNumber.fill(internalReference);
     }
     await this.pages.originOfImport.btnSaveAndContinue.click();
+    await this.pages.commoditySelection.heading.waitFor();
     if (this.journeyContext) {
       this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
     }
@@ -92,6 +94,7 @@ export class Journeys {
     await this.toCommoditySelection(options);
     await this.pages.commoditySelection.dropdownCommodity.selectOption(commodityCode);
     await this.pages.commoditySelection.btnSaveAndContinue.click();
+    await this.pages.speciesSelection.heading.waitFor();
   }
 
   async toImportReason(options: JourneyOptions = {}): Promise<void> {
@@ -103,6 +106,7 @@ export class Journeys {
       await this.pages.speciesSelection.checkboxSpecies(speciesOption).check();
     }
     await this.pages.speciesSelection.btnSaveAndContinue.click();
+    await this.pages.importReason.heading.waitFor();
   }
 
   async toCommodityDetails(options: JourneyOptions = {}): Promise<void> {
@@ -114,6 +118,7 @@ export class Journeys {
       await this.pages.importReason.radioReEntry.click();
     }
     await this.pages.importReason.btnSaveAndContinue.click();
+    await this.pages.commodityDetails.heading.waitFor();
   }
 
   async toAnimalIdentification(options: JourneyOptions = {}): Promise<void> {
@@ -135,6 +140,7 @@ export class Journeys {
       await this.pages.commodityDetails.inputNoOfPackages(label).fill(packageList[i].toString());
     }
     await this.pages.commodityDetails.btnSaveAndContinue.click();
+    await this.pages.animalIdentification.heading.waitFor();
   }
 
   async toAdditionalDetails(options: JourneyOptions = {}): Promise<void> {
@@ -149,6 +155,7 @@ export class Journeys {
       await this.pages.animalIdentification.inputPassport(i).fill(`${PASSPORT_PREFIX}${digits.slice(-6)}`);
     }
     await this.pages.animalIdentification.btnSaveAndContinue.click();
+    await this.pages.additionalDetails.heading.waitFor();
   }
 
   async toAccompanyingDocuments(options: JourneyOptions = {}): Promise<void> {
@@ -166,12 +173,14 @@ export class Journeys {
       await this.pages.additionalDetails.radioContainsUnweanedAnimals(unweanedAnimals).click();
     }
     await this.pages.additionalDetails.btnSaveAndContinue.click();
+    await this.pages.accompanyingDocuments.headingPage.waitFor();
   }
 
   async toAddresses(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAccompanyingDocuments(options);
     await this.pages.accompanyingDocuments.btnSaveAndContinue.click();
+    await this.pages.addresses.heading.waitFor();
   }
 
   async toCphNumber(options: JourneyOptions = {}): Promise<void> {
@@ -182,6 +191,7 @@ export class Journeys {
     await this.pages.addresses.linkAddPlaceOfDestination.click();
     await this.pages.destinationSelection.linkSelectDestinationByName(DESTINATION_NAME).click();
     await this.pages.addresses.btnSaveAndContinue.click();
+    await this.pages.cphNumber.heading.waitFor();
   }
 
   async toEntryPoint(options: JourneyOptions = {}): Promise<void> {
@@ -189,6 +199,7 @@ export class Journeys {
     await this.toCphNumber(options);
     await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
     await this.pages.cphNumber.btnSaveAndContinue.click();
+    await this.pages.entryPoint.heading.waitFor();
   }
 
   async toTransporter(options: JourneyOptions = {}): Promise<void> {
