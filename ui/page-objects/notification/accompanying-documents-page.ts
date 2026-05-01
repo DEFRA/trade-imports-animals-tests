@@ -89,7 +89,7 @@ export class AccompanyingDocumentsPage {
 
   /** The application reference number caption shown at the top of the page. */
   get referenceNumberCaption(): Locator {
-    return this.page.locator('[data-testid="app-reference-number-caption"]');
+    return this.page.getByTestId('app-reference-number-caption');
   }
 
   /** A single row in the documents table, identified by filename. */
