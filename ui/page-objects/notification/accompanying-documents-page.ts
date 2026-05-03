@@ -107,6 +107,11 @@ export class AccompanyingDocumentsPage {
     return this.getDocumentRow(filename).getByRole('button', { name: /Remove/ });
   }
 
+  /** The "View file" link for a given filename — only rendered once the scan is COMPLETE. */
+  getViewFileLink(filename: string): Locator {
+    return this.getDocumentRow(filename).getByRole('link', { name: /View file/ });
+  }
+
   async fillTextFields(
     options: {
       documentType?: string;
