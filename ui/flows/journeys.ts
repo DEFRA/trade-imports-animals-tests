@@ -179,7 +179,7 @@ export class Journeys {
   async toAddresses(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAccompanyingDocuments(options);
-    await this.pages.accompanyingDocuments.btnSaveAndContinue.click();
+    await this.pages.accompanyingDocuments.btnContinue.click();
     await this.pages.addresses.heading.waitFor();
   }
 

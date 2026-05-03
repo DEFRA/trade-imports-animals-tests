@@ -40,18 +40,17 @@ export class AccompanyingDocumentsPage {
   }
 
   /**
-   * The "Save and continue" button — always rendered, but disabled until at least
-   * one document has been uploaded and all scans have completed without a virus.
+   * The continue button at the bottom of the page. Reads "Continue without documents"
+   * while the list is empty and "Save and continue" once any document has been added.
+   * Always rendered, but disabled until all scans have completed without a virus.
    */
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
+  get btnContinue(): Locator {
+    return this.page.getByRole('button', { name: /^(Save and continue|Continue without documents)$/ });
   }
 
-  /** Locator for the "Save and continue" button when it is enabled (neither native disabled nor aria-disabled). */
-  get btnSaveAndContinueEnabled(): Locator {
-    return this.page
-      .getByRole('button', { name: 'Save and continue' })
-      .and(this.page.locator(':not([disabled]):not([aria-disabled="true"])'));
+  /** Locator for the continue button when it is enabled (neither native disabled nor aria-disabled). */
+  get btnContinueEnabled(): Locator {
+    return this.btnContinue.and(this.page.locator(':not([disabled]):not([aria-disabled="true"])'));
   }
 
   get errorSummaryItems(): Locator {
@@ -77,14 +76,14 @@ export class AccompanyingDocumentsPage {
     return this.page.locator('#file-error');
   }
 
-  /** The table showing uploaded documents and their scan statuses. */
-  get documentsTable(): Locator {
-    return this.page.getByTestId('documents-table');
+  /** The "Documents added" heading — present once at least one document has been uploaded. */
+  get documentsList(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'Documents added' });
   }
 
-  /** All document rows in the uploaded-documents table. */
+  /** All document cards in the uploaded-documents list. */
   get documentRows(): Locator {
-    return this.page.locator('.govuk-table__row[data-upload-id]');
+    return this.page.locator('[data-testid="document-card"][data-upload-id]');
   }
 
   /** The application reference number caption shown at the top of the page. */
@@ -92,9 +91,9 @@ export class AccompanyingDocumentsPage {
     return this.page.getByTestId('app-reference-number-caption');
   }
 
-  /** A single row in the documents table, identified by filename. */
+  /** A single document card, identified by filename. */
   getDocumentRow(filename: string): Locator {
-    return this.page.locator('.govuk-table__row[data-upload-id]').filter({ hasText: filename });
+    return this.page.locator('[data-testid="document-card"][data-upload-id]').filter({ hasText: filename });
   }
 
   /** The GOV.UK tag showing scan status for a given filename. */
@@ -104,12 +103,12 @@ export class AccompanyingDocumentsPage {
 
   /** The "Remove" button for a given filename. */
   getBtnRemove(filename: string): Locator {
-    return this.getDocumentRow(filename).getByRole('button', { name: /Remove/ });
+    return this.page.getByRole('button', { name: `Remove ${filename}` });
   }
 
   /** The "View file" link for a given filename — only rendered once the scan is COMPLETE. */
   getViewFileLink(filename: string): Locator {
-    return this.getDocumentRow(filename).getByRole('link', { name: /View file/ });
+    return this.getDocumentRow(filename).getByRole('link', { name: `View file ${filename}` });
   }
 
   async fillTextFields(

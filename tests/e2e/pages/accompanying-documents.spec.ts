@@ -19,7 +19,7 @@ test.describe('Accompanying documents', () => {
     await expect.soft(pages.accompanyingDocuments.inputIssueDateYear).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.inputFileUpload).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.btnUploadDocument).toBeVisible();
-    await expect.soft(pages.accompanyingDocuments.btnSaveAndContinue).toBeVisible();
+    await expect.soft(pages.accompanyingDocuments.btnContinue).toBeVisible();
   });
 
   test('shows expected document type options', async ({ pages }) => {
@@ -33,8 +33,9 @@ test.describe('Accompanying documents', () => {
     await expect(options.nth(3)).toHaveAttribute('value', 'VETERINARY_HEALTH_CERTIFICATE');
   });
 
-  test('Save and continue is enabled with no documents uploaded', async ({ pages }) => {
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
+  test('Continue without documents is enabled with no documents uploaded', async ({ pages }) => {
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible();
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toHaveText('Continue without documents');
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
@@ -119,7 +120,7 @@ test.describe('Accompanying documents', () => {
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.pdf');
     // Status may already be Safe by the time we assert — accept either
@@ -137,7 +138,7 @@ test.describe('Accompanying documents', () => {
     // The page auto-refreshes every 3s while PENDING — wait for COMPLETE state
     const statusTag = pages.accompanyingDocuments.getStatusTag('test-document.pdf');
     await expect(statusTag).toHaveText('Safe', { timeout: 30000 });
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible();
   });
 
   test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
@@ -158,7 +159,7 @@ test.describe('Accompanying documents', () => {
     const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
     expect(summaryItems).toEqual(expect.arrayContaining([expect.stringContaining('contains a virus')]));
 
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).not.toBeVisible();
   });
 
   test('can upload multiple documents and see all in the list', async ({ pages }) => {
@@ -166,14 +167,14 @@ test.describe('Accompanying documents', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     // Upload second document
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
     await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
   });
 
@@ -183,12 +184,12 @@ test.describe('Accompanying documents', () => {
     await pages.accompanyingDocuments.btnUploadDocument.click();
 
     // Wait for the document row to appear (Remove is available immediately)
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-    await expect(pages.accompanyingDocuments.documentsTable).not.toBeVisible();
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible();
+    await expect(pages.accompanyingDocuments.documentsList).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible();
   });
 });

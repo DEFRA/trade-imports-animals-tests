@@ -25,18 +25,18 @@ test(
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     // Upload second document
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
 
     // Wait for all scans to complete
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible({ timeout: 30000 });
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
 
     // Capture reference number before navigating away
     const ref = await pages.accompanyingDocuments.referenceNumberCaption.innerText();
@@ -47,7 +47,7 @@ test(
     await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
 
     // Save and continue — completes the frontend flow
-    await pages.accompanyingDocuments.btnSaveAndContinueEnabled.click();
+    await pages.accompanyingDocuments.btnContinueEnabled.click();
 
     // ── Cross to admin ────────────────────────────────────────────────────────
 

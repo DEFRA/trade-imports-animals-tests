@@ -15,10 +15,10 @@ test.describe('accompanying documents — View file', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixturePath);
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     // Wait for scan to complete
-    await expect(pages.accompanyingDocuments.btnSaveAndContinueEnabled).toBeVisible({ timeout: 30000 });
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
     await expect(pages.accompanyingDocuments.getStatusTag('test-document.pdf')).toHaveText('Safe');
 
     const viewLink = pages.accompanyingDocuments.getViewFileLink('test-document.pdf');
@@ -40,7 +40,7 @@ test.describe('accompanying documents — View file', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(virusFixturePath);
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsTable).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
     await expect(pages.accompanyingDocuments.getStatusTag('test-virus-document.pdf')).toHaveText('Virus found', {
       timeout: 30000,
