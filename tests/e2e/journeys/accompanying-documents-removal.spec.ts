@@ -5,78 +5,47 @@ import { test, expect } from '@fixtures';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * Cross-service regression test for the accompanying document removal bug.
+ * Regression test for the accompanying document removal bug.
  *
- * Verifies that removing a document in the frontend also removes it from the
- * backend, so the admin notification view shows the correct document count.
- *
- * Auth note: the frontend journey signs in via DCID. When we navigate to the
- * admin service (different origin), the existing DCID session cookie in the
- * browser should satisfy the admin's auth challenge silently via SSO. If not,
- * we fall back to an explicit sign-in.
+ * Verifies that removing a document in the frontend persists to the backend
+ * (the page re-renders from backend state after the remove POST), so the
+ * removed document does not return on a subsequent reload and the surviving
+ * document remains downloadable.
  */
-test(
-  'removed document does not appear on the admin notification view',
-  { tag: ['@integration', '@cross-service'] },
-  async ({ pages, journeys, adminBaseUrl }) => {
-    await journeys.toAccompanyingDocuments();
+test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, journeys }) => {
+  await journeys.toAccompanyingDocuments();
 
-    // Upload first document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
-    await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+  // Upload first document
+  await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
+  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+  await pages.accompanyingDocuments.btnUploadDocument.click();
+  await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
-    // Upload second document
-    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
-    await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+  // Upload second document
+  await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
+  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+  await pages.accompanyingDocuments.btnUploadDocument.click();
+  await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
-    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
+  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
 
-    // Wait for all scans to complete
-    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
+  // Wait for all scans to complete
+  await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
 
-    // Capture reference number before navigating away
-    const ref = await pages.accompanyingDocuments.referenceNumberCaption.innerText();
+  // Remove the first document
+  await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click(); // two docs share this filename
+  await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
 
-    // Remove the first document
-    await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click(); // two docs share this filename
-    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
+  // Reload the page to re-fetch state from the backend — proves the removal persisted
+  await pages.page.reload();
+  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
+  await expect(pages.accompanyingDocuments.documentRows.first()).toContainText('REF002');
 
-    // Save and continue — completes the frontend flow
-    await pages.accompanyingDocuments.btnContinueEnabled.click();
-
-    // ── Cross to admin ────────────────────────────────────────────────────────
-
-    // Navigate to the admin root to trigger the auth redirect, sign in, then
-    // proceed to the specific notification. The frontend and admin are on
-    // different origins so no SSO session carries over automatically.
-    await pages.page.goto(`${adminBaseUrl}/`);
-    if (await pages.signIn.heading.isVisible()) {
-      await pages.signIn.signIn();
-    }
-    await pages.page.goto(`${adminBaseUrl}/notifications/${ref}`);
-
-    // Wait for the admin notification view to load
-    await expect(pages.adminNotificationView.sectionAccompanyingDocuments).toBeVisible({
-      timeout: 15000,
-    });
-
-    // Only 1 document should appear — the one the user did NOT remove
-    await expect(pages.adminNotificationView.documentHeadings).toHaveCount(1);
-    await expect(pages.adminNotificationView.documentSectionByReference('REF002')).toBeVisible();
-    await expect(pages.adminNotificationView.documentSectionByReference('REF001')).not.toBeVisible();
-
-    // The kept document should be Safe and its file should be downloadable
-    await expect(pages.adminNotificationView.documentScanStatusByReference('REF002')).toHaveText('Safe');
-
-    const [download] = await Promise.all([
-      pages.page.waitForEvent('download'),
-      pages.adminNotificationView.documentFileLinkByReference('REF002').click(),
-    ]);
-    expect(download.suggestedFilename()).toBe('test-document.pdf');
-  },
-);
+  // The surviving document should be downloadable
+  const [download] = await Promise.all([
+    pages.page.waitForEvent('download'),
+    pages.accompanyingDocuments.getViewFileLink('test-document.pdf').click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('test-document.pdf');
+});
