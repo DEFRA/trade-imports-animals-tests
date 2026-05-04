@@ -8,6 +8,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixturePath = path.join(__dirname, '../../fixtures/test-document.pdf');
 const virusFixturePath = path.join(__dirname, '../../fixtures/test-virus-document.pdf');
 
+const UPLOAD_RENDER_TIMEOUT_MS = 10000;
+const VIRUS_SCAN_TIMEOUT_MS = 30000;
+
 test.describe('accompanying documents — View file', () => {
   test('View file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journeys }) => {
     await journeys.toAccompanyingDocuments();
@@ -15,10 +18,10 @@ test.describe('accompanying documents — View file', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixturePath);
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
 
     // Wait for scan to complete
-    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
+    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: VIRUS_SCAN_TIMEOUT_MS });
     await expect(pages.accompanyingDocuments.getStatusTag('test-document.pdf')).toHaveText('Safe');
 
     const viewLink = pages.accompanyingDocuments.getViewFileLink('test-document.pdf');
@@ -40,10 +43,10 @@ test.describe('accompanying documents — View file', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(virusFixturePath);
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
 
     await expect(pages.accompanyingDocuments.getStatusTag('test-virus-document.pdf')).toHaveText('Virus found', {
-      timeout: 30000,
+      timeout: VIRUS_SCAN_TIMEOUT_MS,
     });
 
     // Remove and View file are mutually exclusive of the rejected state — Remove stays, View file does not
