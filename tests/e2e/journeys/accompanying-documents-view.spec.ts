@@ -11,7 +11,7 @@ const virusFixturePath = path.join(__dirname, '../../fixtures/test-virus-documen
 const UPLOAD_RENDER_TIMEOUT_MS = 10000;
 const VIRUS_SCAN_TIMEOUT_MS = 30000;
 
-test.describe('accompanying documents — View file', () => {
+test.describe('Accompanying documents - view file', () => {
   test('View file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journeys }) => {
     await journeys.toAccompanyingDocuments();
 
