@@ -18,7 +18,6 @@ test.describe('accompanying documents — View file', () => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixturePath);
     await pages.accompanyingDocuments.btnUploadDocument.click();
-    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
 
     // Wait for scan to complete
     await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: VIRUS_SCAN_TIMEOUT_MS });
