@@ -13,8 +13,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   });
 
   test('shows notifications for deletion', async ({ pages }) => {
-    const rowCount = await pages.adminNotifications.tableRows.count();
-    expect(rowCount).toBeGreaterThan(4);
+    await expect.poll(() => pages.adminNotifications.tableRows.count()).toBeGreaterThan(4);
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000001')).toBeVisible();
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000002')).toBeVisible();
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000003')).toBeVisible();
