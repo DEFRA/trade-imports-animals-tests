@@ -40,7 +40,7 @@ export default defineConfig({
   projects: [
     {
       name: 'frontend-chromium',
-      testIgnore: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts'],
+      testIgnore: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: frontendBaseUrl,
@@ -49,7 +49,7 @@ export default defineConfig({
     },
     {
       name: 'admin-chromium',
-      testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts'],
+      testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         baseURL: adminBaseUrl,

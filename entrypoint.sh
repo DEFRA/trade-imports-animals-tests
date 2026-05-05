@@ -1,7 +1,34 @@
 #!/bin/sh
+#
+# PROFILE selects the test suite to run (case-sensitive, defaults to 'default').
+# Allowed values:
+#   default (or unset) — standard run via npm test
+#   a11y               — accessibility suite via npm run test:a11y
+#   browserstack       — not implemented (exits 1)
+#   security           — not implemented (exits 1)
 
 echo "run_id: $RUN_ID"
-npm test
+
+case "${PROFILE:-default}" in
+  default)
+    npm test
+    ;;
+  a11y)
+    npm run test:a11y
+    ;;
+  browserstack)
+    echo "browserstack profile runs are not implemented yet."
+    exit 1
+    ;;
+  security)
+    echo "security profile runs are not implemented yet."
+    exit 1
+    ;;
+  *)
+    echo "unknown PROFILE: '${PROFILE}'. Allowed values: default, a11y, browserstack, security (unset defaults to default)."
+    exit 1
+    ;;
+esac
 
 npm run report:publish
 publish_exit_code=$?
