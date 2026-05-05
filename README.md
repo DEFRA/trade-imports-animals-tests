@@ -180,6 +180,14 @@ The `/.github/workflows/e2e-tests.yml` workflow uses the composite action in `/r
 
 Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-animals-tests (requires CCoE AWS OpenVPN).
 
+In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
+If `PROFILE` is not set, the `default` profile is used.
+
+| PROFILE   | Test suite               | NPM script          |
+| --------- | ------------------------ | ------------------- |
+| `default` | e2e test suite           | `npm test`          |
+| `a11y`    | accessibility test suite | `npm run test:a11y` |
+
 Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
 
 ### CDP Portal requirements
