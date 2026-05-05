@@ -2,6 +2,7 @@ import { test } from '@fixtures/a11y';
 import { ObjectId } from 'mongodb';
 
 test.describe('Accessibility (admin) WCAG 2.2 AA', { tag: '@a11y' }, () => {
+  test.describe.configure({ mode: 'default' });
   test.describe('Initial state (no user input)', () => {
     test('each visited page has no accessibility violations on initial load', async ({ adminJourneys, pages, runA11yScan }) => {
       // Scan admin dashboard

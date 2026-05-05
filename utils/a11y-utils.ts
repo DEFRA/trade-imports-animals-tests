@@ -1,6 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Result } from 'axe-core';
-import type { Page } from '@playwright/test';
+import { errors, type Page } from '@playwright/test';
+import { timeouts } from '@config/timeouts';
 
 export type A11yScanOptions = {
   tags?: string[];
@@ -28,7 +29,15 @@ const getPathInfo = (url: string): string => {
 export async function scanPage(page: Page, options: A11yScanOptions = {}): Promise<ViolationSummary> {
   const { tags = DEFAULT_TAGS, include, exclude, disableRules } = options;
 
-  await page.waitForLoadState('networkidle');
+  // Reliable baseline: DOM is parsed and ready.
+  await page.waitForLoadState('domcontentloaded');
+
+  // Best effort: allow extra settling, but never block indefinitely.
+  try {
+    await page.waitForLoadState('networkidle', { timeout: timeouts.medium });
+  } catch (error) {
+    if (!(error instanceof errors.TimeoutError)) throw error;
+  }
 
   let builder = new AxeBuilder({ page }).withTags(tags);
 
