@@ -1,12 +1,12 @@
 export const countryCodes = {
   eu: {
-    // EU and EFTA countries
+    // EU and EEA countries
     austria: 'AT',
     belgium: 'BE',
     bulgaria: 'BG',
     croatia: 'HR',
     cyprus: 'CY',
-    czechRepublic: 'CZ',
+    czechia: 'CZ',
     denmark: 'DK',
     estonia: 'EE',
     finland: 'FI',
@@ -14,13 +14,16 @@ export const countryCodes = {
     germany: 'DE',
     greece: 'GR',
     hungary: 'HU',
+    iceland: 'IS',
     ireland: 'IE',
     italy: 'IT',
     latvia: 'LV',
+    liechtenstein: 'LI',
     lithuania: 'LT',
     luxembourg: 'LU',
     malta: 'MT',
     netherlands: 'NL',
+    norway: 'NO',
     poland: 'PL',
     portugal: 'PT',
     romania: 'RO',

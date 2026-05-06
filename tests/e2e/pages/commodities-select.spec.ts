@@ -30,6 +30,7 @@ test.describe('Select species of commodity', () => {
   });
 
   test('shows expected types in commodity type dropdown', async ({ pages }) => {
+    await expect.poll(async () => pages.speciesSelection.dropdownCommodityTypeOptions.count()).toBeGreaterThan(1);
     const commodityTypeOptions = await pages.speciesSelection.dropdownCommodityTypeOptions.allTextContents();
     const keys = Object.keys(commodityTypes);
     const expectedOptions = keys.map(camelCaseToTitleCase);
