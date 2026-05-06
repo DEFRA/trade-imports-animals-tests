@@ -9,11 +9,12 @@ const projectBaseUrls: Record<string, string> = {
 
 export default defineConfig({
   ...withProjectBaseUrls(baseConfig, projectBaseUrls, 'local'),
-  retries: 1,
+  workers: 1,
+  retries: 0,
 
   use: {
     ...baseConfig.use,
-    headless: true,
-    trace: 'on-first-retry',
+    headless: false,
+    trace: 'on',
   },
 });

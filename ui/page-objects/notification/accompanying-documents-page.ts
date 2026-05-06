@@ -34,21 +34,16 @@ export class AccompanyingDocumentsPage {
     return this.page.getByLabel('Attachment');
   }
 
-  /** The "Add attachment" button that submits the add-document form. */
-  get btnUploadDocument(): Locator {
+  get btnAddAttachment(): Locator {
     return this.page.getByRole('button', { name: 'Add attachment' });
   }
 
-  /**
-   * The continue button at the bottom of the page. Reads "Continue without documents"
-   * while the list is empty and "Save and continue" once any document has been added.
-   * Always rendered, but disabled until all scans have completed without a virus.
-   */
+  // Reads "Continue without documents" while empty and "Save and continue" once a document is added;
+  // always rendered, but disabled until all scans complete without a virus.
   get btnContinue(): Locator {
     return this.page.getByRole('button', { name: /^(Save and continue|Continue without documents)$/ });
   }
 
-  /** Locator for the continue button when it is enabled (neither native disabled nor aria-disabled). */
   get btnContinueEnabled(): Locator {
     return this.btnContinue.and(this.page.locator(':not([disabled]):not([aria-disabled="true"])'));
   }
@@ -76,37 +71,27 @@ export class AccompanyingDocumentsPage {
     return this.page.locator('#file-error');
   }
 
-  /** The "Documents added" heading — present once at least one document has been uploaded. */
   get documentsList(): Locator {
     return this.page.getByRole('heading', { level: 2, name: 'Documents added' });
   }
 
-  /** All document cards in the uploaded-documents list. */
   get documentRows(): Locator {
     return this.page.locator('[data-testid="document-card"][data-upload-id]');
   }
 
-  /** The application reference number caption shown at the top of the page. */
-  get referenceNumberCaption(): Locator {
-    return this.page.getByTestId('app-reference-number-caption');
-  }
-
-  /** A single document card, identified by filename. */
   getDocumentRow(filename: string): Locator {
     return this.page.locator('[data-testid="document-card"][data-upload-id]').filter({ hasText: filename });
   }
 
-  /** The GOV.UK tag showing scan status for a given filename. */
   getStatusTag(filename: string): Locator {
     return this.getDocumentRow(filename).locator('.govuk-tag');
   }
 
-  /** The "Remove" button for a given filename. */
   getBtnRemove(filename: string): Locator {
     return this.page.getByRole('button', { name: `Remove ${filename}` });
   }
 
-  /** The "View file" link for a given filename — only rendered once the scan is COMPLETE. */
+  // Only rendered once the scan is COMPLETE.
   getViewFileLink(filename: string): Locator {
     return this.getDocumentRow(filename).getByRole('link', { name: `View file ${filename}` });
   }

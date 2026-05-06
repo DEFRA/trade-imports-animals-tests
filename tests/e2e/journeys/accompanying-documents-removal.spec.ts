@@ -4,27 +4,19 @@ import { test, expect } from '@fixtures';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Regression test for the accompanying document removal bug.
- *
- * Verifies that removing a document in the frontend persists to the backend
- * (the page re-renders from backend state after the remove POST), so the
- * removed document does not return on a subsequent reload and the surviving
- * document remains downloadable.
- */
 test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, journeys }) => {
   await journeys.toAccompanyingDocuments();
 
   // Upload first document
   await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
   await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
-  await pages.accompanyingDocuments.btnUploadDocument.click();
+  await pages.accompanyingDocuments.btnAddAttachment.click();
   await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
   // Upload second document
   await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
   await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
-  await pages.accompanyingDocuments.btnUploadDocument.click();
+  await pages.accompanyingDocuments.btnAddAttachment.click();
   await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
   await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);

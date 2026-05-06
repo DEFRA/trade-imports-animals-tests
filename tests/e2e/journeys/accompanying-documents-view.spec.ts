@@ -17,7 +17,7 @@ test.describe('Accompanying documents - view file', () => {
 
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixturePath);
-    await pages.accompanyingDocuments.btnUploadDocument.click();
+    await pages.accompanyingDocuments.btnAddAttachment.click();
 
     // Wait for scan to complete
     await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: VIRUS_SCAN_TIMEOUT_MS });
@@ -41,7 +41,7 @@ test.describe('Accompanying documents - view file', () => {
 
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(virusFixturePath);
-    await pages.accompanyingDocuments.btnUploadDocument.click();
+    await pages.accompanyingDocuments.btnAddAttachment.click();
     await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
 
     await expect(pages.accompanyingDocuments.getStatusTag('test-virus-document.pdf')).toHaveText('Virus found', {
