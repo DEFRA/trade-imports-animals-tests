@@ -8,10 +8,13 @@ test.describe('Origin of the import', () => {
     await journeys.toOriginOfImport();
   });
 
-  test.skip('shows only EU and EFTA countries in origin dropdown', async ({ pages }) => {
+  test('shows only EU and EEA countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
     const keys = Object.keys(countryCodes.eu);
-    const expectedOptions = keys.map(camelCaseToTitleCase);
+    const countryNameOverrides: Record<string, string> = {
+      netherlands: 'Netherlands (the)',
+    };
+    const expectedOptions = keys.map((key) => countryNameOverrides[key] ?? camelCaseToTitleCase(key));
     expect(countryOptions[0]).toBe('Select a country');
     expect(countryOptions[1]).toMatch(/^─+$/);
     // Dropdown countries must match the expected list in the correct order (alphabetical).
