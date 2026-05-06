@@ -1,6 +1,6 @@
 export const countryCodes = {
   eu: {
-    // EU and EFTA countries
+    // EU and EEA countries
     austria: 'AT',
     belgium: 'BE',
     bulgaria: 'BG',
