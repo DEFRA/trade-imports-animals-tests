@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { AddressesPage } from './notification/addresses-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
@@ -27,6 +28,7 @@ import { SignOutPage } from './auth/sign-out-page';
 export function createPageObjects(page: Page) {
   return {
     page,
+    accompanyingDocuments: new AccompanyingDocumentsPage(page),
     addresses: new AddressesPage(page),
     additionalDetails: new AdditionalDetailsPage(page),
     adminDashboard: new AdminDashboardPage(page),

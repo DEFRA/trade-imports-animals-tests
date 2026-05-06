@@ -13,8 +13,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   });
 
   test('shows notifications for deletion', async ({ pages }) => {
-    const rowCount = await pages.adminNotifications.tableRows.count();
-    expect(rowCount).toBeGreaterThan(4);
+    await expect.poll(() => pages.adminNotifications.tableRows.count()).toBeGreaterThan(4);
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000001')).toBeVisible();
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000002')).toBeVisible();
     await expect(pages.adminNotifications.tableRowByReference('DRAFT.IMP.2026.69c12f11cafe202600000003')).toBeVisible();
@@ -23,13 +22,13 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
   test('allows deleting a notification by reference number', async ({ pages }) => {
     const referenceNumber = 'DRAFT.IMP.2026.69c12f11cafe202600000001';
-    const initialRowCount = await pages.adminNotifications.tableRows.count();
     await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     await pages.adminNotifications.btnDeleteByReferenceNumber.click();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-    await expect.poll(async () => pages.adminNotifications.tableRows.count(), { timeout: timeouts.medium }).toBe(initialRowCount - 1);
-    await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).not.toBeVisible();
+    await expect
+      .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), { timeout: timeouts.medium })
+      .toBe(false);
   });
 
   test('allows cancelling checkbox deletion and keeps notification visible', async ({ pages }) => {

@@ -15,5 +15,17 @@ export class NotificationDashboardPage extends BasePage {
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto('/');
     await this.signInWhenRequested(attemptSignIn);
+
+    if (attemptSignIn) {
+      // The auth stub can fail under concurrent load. If we don't land on the
+      // dashboard within a short grace period, retry the whole auth flow once.
+      try {
+        await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+      } catch {
+        console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
+        await this.page.goto('/');
+        await this.signInWhenRequested(true);
+      }
+    }
   }
 }
