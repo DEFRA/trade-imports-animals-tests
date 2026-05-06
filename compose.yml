@@ -89,12 +89,6 @@ services:
       retries: 5
       start_period: 3s
 
-  # ──────────────────────────────────────────────────────────────────────────────
-  # Trade Imports Stub
-  # Mocks the upstream MDM endpoints (e.g. /mdm/geo/countries) and the
-  # trade-platform OAuth token endpoint that trade-imports-reference-data calls.
-  # https://hub.docker.com/r/defradigital/trade-imports-stub/
-  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-stub:
     image: defradigital/trade-imports-stub:${TRADE_IMPORTS_STUB:-latest}
     platform: linux/amd64
@@ -117,12 +111,6 @@ services:
       start_period: 30s
       retries: 10
 
-  # ──────────────────────────────────────────────────────────────────────────────
-  # Trade Imports Reference Data
-  # The frontend's countries-client calls this service at /countries; it adapts
-  # MDM responses (alpha2/longName) into the {code,name} shape the frontend uses.
-  # https://hub.docker.com/r/defradigital/trade-imports-reference-data/
-  # ──────────────────────────────────────────────────────────────────────────────
   trade-imports-reference-data:
     image: defradigital/trade-imports-reference-data:${TRADE_IMPORTS_REFERENCE_DATA:-latest}
     platform: linux/amd64
