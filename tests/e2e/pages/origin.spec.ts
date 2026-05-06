@@ -18,7 +18,7 @@ test.describe('Origin of the import', () => {
     expect(countryOptions.slice(2)).toEqual(expectedOptions);
   });
 
-  test.skip('does not show any ROW countries in origin dropdown', async ({ pages }) => {
+  test('does not show any ROW countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
     const keys = Object.keys(countryCodes.row);
     const rowOptions = keys.map(camelCaseToTitleCase);
