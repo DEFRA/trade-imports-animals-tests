@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fixture = (name: string) => path.join(__dirname, '../../fixtures', name);
+const fixture = (name: string) => path.join(__dirname, '../../../resources/file-upload', name);
 
 test.describe('Accompanying documents', () => {
   test.beforeEach(async ({ journeys }) => {
@@ -138,7 +138,7 @@ test.describe('Accompanying documents', () => {
   });
 
   test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
-    // cdp-uploader's mock scanner flags by filename, not content — see tests/fixtures/README.md.
+    // cdp-uploader's mock scanner flags by filename, not content — see resources/file-upload/README.md.
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-virus-document.pdf'));
     await pages.accompanyingDocuments.btnAddAttachment.click();

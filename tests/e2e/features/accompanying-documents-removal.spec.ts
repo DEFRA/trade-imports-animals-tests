@@ -9,13 +9,13 @@ test('removed document does not return after backend refresh', { tag: ['@integra
 
   // Upload first document
   await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
-  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../../resources/file-upload/test-document.pdf'));
   await pages.accompanyingDocuments.btnAddAttachment.click();
   await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 
   // Upload second document
   await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
-  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../fixtures/test-document.pdf'));
+  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../../resources/file-upload/test-document.pdf'));
   await pages.accompanyingDocuments.btnAddAttachment.click();
   await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
 

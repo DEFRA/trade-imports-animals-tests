@@ -5,8 +5,8 @@ import { test, expect } from '@fixtures';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const fixturePath = path.join(__dirname, '../../fixtures/test-document.pdf');
-const virusFixturePath = path.join(__dirname, '../../fixtures/test-virus-document.pdf');
+const fixturePath = path.join(__dirname, '../../../resources/file-upload/test-document.pdf');
+const virusFixturePath = path.join(__dirname, '../../../resources/file-upload/test-virus-document.pdf');
 
 const UPLOAD_RENDER_TIMEOUT_MS = 10000;
 const VIRUS_SCAN_TIMEOUT_MS = 30000;
