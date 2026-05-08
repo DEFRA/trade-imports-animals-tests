@@ -56,6 +56,9 @@ jobs:
         with:
           mask-password: 'true'
 
+      - name: Login to Docker Hub
+        uses: DEFRA/cdp-build-action/docker-login@main
+
       - name: Build and push branch-tagged test image
         uses: docker/build-push-action@v7
         with:
@@ -67,6 +70,7 @@ jobs:
           no-cache: true
           tags: |
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+            defradigital/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
           labels: |
             defra.cdp.git.repo.url=${{ github.server_url }}/${{ github.repository }}
             defra.cdp.git.repo.name=${{ github.repository }}
