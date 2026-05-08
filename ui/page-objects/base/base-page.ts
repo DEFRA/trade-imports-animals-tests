@@ -1,5 +1,7 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, errors } from '@playwright/test';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
+
+const SIGN_IN_FORM_PROBE_MS = 5_000;
 
 export class BasePage {
   constructor(protected readonly page: Page) {}
@@ -21,9 +23,20 @@ export class BasePage {
   }
 
   protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {
-    if (attemptSignIn) {
-      const signInPage = new SignInPage(this.page);
-      await signInPage.signIn();
+    if (!attemptSignIn) return;
+    const signInPage = new SignInPage(this.page);
+    // Under concurrent load the auth stub can be slow; the caller may retry
+    // after a goto that landed directly on a post-auth page. Only sign in if
+    // the sign-in form is actually present.
+    try {
+      await signInPage.inputUserId.waitFor({
+        state: 'visible',
+        timeout: SIGN_IN_FORM_PROBE_MS,
+      });
+    } catch (error) {
+      if (error instanceof errors.TimeoutError) return;
+      throw error;
     }
+    await signInPage.signIn();
   }
 }

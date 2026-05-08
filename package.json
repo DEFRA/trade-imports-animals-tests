@@ -9,6 +9,7 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "scripts": {
+    "database:reseed": "docker compose up --force-recreate --renew-anon-volumes --wait mongodb",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -19,7 +20,7 @@
     "test": "npm run clean && playwright test --grep-invert \"@agent|@compose|@a11y\"",
     "test:a11y": "npm run clean && playwright test --config=playwright.a11y.config.ts --grep \"@a11y\"",
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
-    "test:local": "npm run clean && playwright test --config=playwright.local.fast.config.ts --grep-invert \"@agent|@a11y\"",
+    "test:local": "npm run database:reseed && npm run clean && playwright test --config=playwright.local.fast.config.ts --grep-invert \"@agent|@a11y\"",
     "test:local:debug": "echo \"Local debug Playwright tests not implemented yet\"",
     "test:github": "npm run clean && playwright test --config=playwright.github.config.ts --grep-invert \"@agent|@a11y\"",
     "test:github:browserstack": "echo \"GitHub BrowserStack Playwright tests not implemented yet\"",
