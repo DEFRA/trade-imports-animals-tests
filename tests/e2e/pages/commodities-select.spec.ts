@@ -24,7 +24,7 @@ test.describe('Select species of commodity', () => {
     await expect(pages.speciesSelection.rowsCommodities).toHaveCount(1);
     const commodityDetails = await pages.speciesSelection.cellsCommodities(0).allTextContents();
     expect(commodityDetails[0]).toBe('0102');
-    expect(commodityDetails[1]).toBe('Dog');
+    expect(commodityDetails[1]).toBe('Cow');
     expect(commodityDetails[2]).toBe('Live bovine animals');
   });
 
