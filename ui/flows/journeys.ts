@@ -208,5 +208,12 @@ export class Journeys {
     await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry);
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
     await this.pages.entryPoint.btnSaveAndContinue.click();
+    await this.pages.transporter.heading.waitFor();
+  }
+
+  async toContractAddress(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toTransporter(options);
+    await this.pages.transporter.btnSaveAndContinue.click();
   }
 }

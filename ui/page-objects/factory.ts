@@ -17,6 +17,7 @@ import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { SpeciesSelectionPage } from './notification/species-selection-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { TransporterPage } from './notification/transporter-page';
 
 /**
  * Factory function to create all page object instances.
@@ -46,6 +47,7 @@ export function createPageObjects(page: Page) {
     speciesSelection: new SpeciesSelectionPage(page),
     signIn: new SignInPage(page),
     signOut: new SignOutPage(page),
+    transporter: new TransporterPage(page),
   };
 }
 

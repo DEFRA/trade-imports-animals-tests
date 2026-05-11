@@ -34,11 +34,12 @@ test.describe('Entry point and arrival at destination', () => {
     expect(options.slice(1)).toEqual(expectedOptions);
   });
 
-  test('continues (to next page*) after saving valid entry', async ({ pages }) => {
+  test('continues to transporter after saving valid entry', async ({ pages }) => {
     await pages.entryPoint.dropdownPortOfEntry.selectOption('ABERDEEN');
     await pages.entryPoint.fillArrivalDate({ day: '27', month: '3', year: '2026' });
     await pages.entryPoint.btnSaveAndContinue.click();
-    // TODO: pending next page implementation (transporter page)
+    await expect(pages.page).toHaveURL(pages.transporter.expectedUrl);
+    await expect(pages.transporter.heading).toBeVisible();
   });
 
   // Basic date format/min-max validation (not in the original ACs) ensures a valid backend payload; extend coverage later.
