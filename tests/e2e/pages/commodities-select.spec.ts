@@ -23,6 +23,7 @@ test.describe('Select species of commodity', () => {
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
     await expect(pages.speciesSelection.rowsCommodities).toHaveCount(1);
     const commodityDetails = await pages.speciesSelection.cellsCommodities(0).allTextContents();
+    // Cells are hardcoded: 'Cow' is literal in commodities/select/index.njk; code/description come from select/mock-commodity-details.json. Update when that view is parameterised on the session commodity.
     expect(commodityDetails[0]).toBe('0102');
     expect(commodityDetails[1]).toBe('Cow');
     expect(commodityDetails[2]).toBe('Live bovine animals');
