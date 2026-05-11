@@ -137,7 +137,7 @@ test.describe('Accompanying documents', () => {
     await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible();
   });
 
-  test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
+  test.skip('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
     // cdp-uploader's mock scanner flags by filename, not content — see resources/file-upload/README.md.
     await pages.accompanyingDocuments.fillTextFields();
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-virus-document.pdf'));

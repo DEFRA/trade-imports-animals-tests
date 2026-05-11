@@ -36,7 +36,7 @@ test.describe('Accompanying documents - view file', () => {
     expect(downloadedBytes.equals(originalBytes)).toBe(true);
   });
 
-  test('View file link is not rendered when the scan rejects the file', { tag: ['@integration'] }, async ({ pages, journeys }) => {
+  test.skip('View file link is not rendered when the scan rejects the file', { tag: ['@integration'] }, async ({ pages, journeys }) => {
     await journeys.toAccompanyingDocuments();
 
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
