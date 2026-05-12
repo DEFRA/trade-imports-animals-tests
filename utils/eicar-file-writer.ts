@@ -16,12 +16,14 @@ export function eicarStandardFileBytes(): Buffer {
   return Buffer.from(EICAR_STANDARD_FILE_B64, 'base64');
 }
 
-/** Writes EICAR bytes to `outDir`/`fileName`. Returns {@link EicarWrittenFile} with `filePath` as the absolute path for Playwright `locator.setInputFiles(filePath)`; `fileName` is the same as the `fileName` argument. */
+/** Writes EICAR bytes under resolved `outDir` using `path.basename(fileName)`. Returns {@link EicarWrittenFile} with `filePath` for Playwright `locator.setInputFiles` and `fileName` set to that basename. */
 export async function writeEicarTestFile(outDir: string, fileName: string): Promise<EicarWrittenFile> {
-  await mkdir(outDir, { recursive: true });
-  const filePath = path.join(outDir, fileName);
+  const base = path.basename(fileName);
+  const absoluteOutDir = path.resolve(outDir);
+  await mkdir(absoluteOutDir, { recursive: true });
+  const filePath = path.join(absoluteOutDir, base);
   await writeFile(filePath, eicarStandardFileBytes());
-  return { filePath, fileName };
+  return { filePath, fileName: base };
 }
 
 /** Same as {@link writeEicarTestFile} with {@link EICAR_DEFAULT_PDF_FILENAME}. */

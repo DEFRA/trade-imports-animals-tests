@@ -2,7 +2,7 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
-import { writeEicarPdfFile } from '@utils/eicar-writer';
+import { writeEicarPdfFile } from '@utils/eicar-file-writer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -43,18 +43,18 @@ test.describe('Accompanying documents - view file', () => {
       await journeys.toAccompanyingDocuments();
 
       await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
-      const eicar = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicar.filePath);
+      const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
+      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);
       await pages.accompanyingDocuments.btnAddAttachment.click();
       await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
 
-      await expect(pages.accompanyingDocuments.getStatusTag(eicar.fileName)).toHaveText('Virus found', {
+      await expect(pages.accompanyingDocuments.getStatusTag(eicarFile.fileName)).toHaveText('Virus found', {
         timeout: VIRUS_SCAN_TIMEOUT_MS,
       });
 
       // Remove and View file are mutually exclusive of the rejected state — Remove stays, View file does not
-      await expect(pages.accompanyingDocuments.getBtnRemove(eicar.fileName)).toBeVisible();
-      await expect(pages.accompanyingDocuments.getViewFileLink(eicar.fileName)).toHaveCount(0);
+      await expect(pages.accompanyingDocuments.getBtnRemove(eicarFile.fileName)).toBeVisible();
+      await expect(pages.accompanyingDocuments.getViewFileLink(eicarFile.fileName)).toHaveCount(0);
     },
   );
 });
