@@ -214,6 +214,22 @@ export class Journeys {
   async toContractAddress(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toTransporter(options);
+    // TODO
     await this.pages.transporter.btnSaveAndContinue.click();
+    //await this.pages.contractAddress.heading.waitFor();
+  }
+
+  async toReview(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toContractAddress(options);
+    //await this.pages.contractAddress.btnSaveAndContinue.click();
+    //await this.pages.review.heading.waitFor();
+  }
+
+  async toDeclaration(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toReview(options);
+    //await this.pages.review.btnSaveAndContinue.click();
+    await this.pages.declaration.heading.waitFor();
   }
 }
