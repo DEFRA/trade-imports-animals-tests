@@ -93,6 +93,9 @@ export function getRelativeDateInput(options: RelativeDateTimeOptions = {}): Dat
   return toDateInput(getRelativeDate(options));
 }
 
+/**
+ * Formats a Date for display using en-GB locale and optional format options.
+ */
 export function toDisplayDate(
   date: Date,
   options: Intl.DateTimeFormatOptions = {
