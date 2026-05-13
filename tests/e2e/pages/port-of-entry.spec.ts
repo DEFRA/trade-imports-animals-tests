@@ -6,11 +6,10 @@ test.describe('Entry point and arrival at destination', () => {
     await journeys.toEntryPoint();
   });
 
-  test.skip('shows system-generated notification id (draft)', async () => {
-    // TODO: pending notification id implementation on page
-    //const notificationId = await pages.entryPoint.notificationId.textContent();
-    //expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
-    //expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated notification id (draft)', async ({ pages, journeyContext }) => {
+    const notificationId = await pages.entryPoint.notificationId.textContent();
+    expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to cph number', async ({ pages }) => {
