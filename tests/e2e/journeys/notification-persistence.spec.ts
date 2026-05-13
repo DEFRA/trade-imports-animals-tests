@@ -8,8 +8,29 @@ import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
+  test('persists notification as draft up to declaration', async ({ journeys, journeyContext }) => {
+    await journeys.toDeclaration();
+    const referenceNumber = journeyContext.notificationId;
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<NotificationDocument>('trade-imports-animals-backend', 'notification');
+      await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
+
+      const docs = await collection.find({ referenceNumber }).toArray();
+      const [doc] = docs;
+
+      expect(docs).toHaveLength(1);
+      expect(doc.referenceNumber).toBe(referenceNumber);
+      expect(doc.status).toBe('DRAFT');
+    } finally {
+      await client.close();
+    }
+  });
+
   test('persists notification with defaults (after full journey completion*)', async ({ journeys, journeyContext }) => {
-    await journeys.toTransporter();
+    await journeys.submitNotification();
     const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
@@ -62,6 +83,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
       expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
+      expect(doc.status).toBe('SUBMITTED');
     } finally {
       await client.close();
     }

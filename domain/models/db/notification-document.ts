@@ -52,6 +52,7 @@ export type NotificationDocument = {
     portOfEntry: string;
     arrivalDate: Date;
   };
+  status: string;
   created: Date;
   updated: Date;
   _class: string;

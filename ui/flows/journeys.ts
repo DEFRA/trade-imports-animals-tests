@@ -28,6 +28,7 @@ export type JourneyOptions = {
 
 export type JourneyContext = {
   notificationId?: string;
+  declarationDate?: string;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -231,5 +232,17 @@ export class Journeys {
     await this.toReview(options);
     //await this.pages.review.btnSaveAndContinue.click();
     await this.pages.declaration.heading.waitFor();
+  }
+
+  async submitNotification(options: JourneyOptions = {}): Promise<void> {
+    options = { ...defaultJourneyOptions, ...options };
+    await this.toDeclaration(options);
+    if (this.journeyContext) {
+      const declarationDate = await this.pages.declaration.dateOfDeclaration.textContent();
+      this.journeyContext.declarationDate = declarationDate?.replace('Date of declaration: ', '');
+    }
+    await this.pages.declaration.checkboxDeclaration.click();
+    await this.pages.declaration.btnSubmitNotification.click();
+    //await this.pages.submissionConfirmation.heading.waitFor();
   }
 }
