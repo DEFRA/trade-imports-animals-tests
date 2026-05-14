@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
+import { writeEicarPdfFile } from '@utils/eicar-file-writer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (name: string) => path.join(__dirname, '../../../resources/file-upload', name);
@@ -137,16 +138,17 @@ test.describe('Accompanying documents', () => {
     await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible();
   });
 
-  test.skip('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }) => {
+  test('shows Virus found status tag and error summary when uploaded file contains a virus', async ({ pages }, testInfo) => {
     // cdp-uploader's mock scanner flags by filename, not content — see resources/file-upload/README.md.
     await pages.accompanyingDocuments.fillTextFields();
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixture('test-virus-document.pdf'));
+    const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);
     await pages.accompanyingDocuments.btnAddAttachment.click();
 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
 
     // The page auto-refreshes every 3s while PENDING — wait for REJECTED state
-    const statusTag = pages.accompanyingDocuments.getStatusTag('test-virus-document.pdf');
+    const statusTag = pages.accompanyingDocuments.getStatusTag(eicarFile.fileName);
     await expect(statusTag).toHaveText('Virus found', { timeout: 30000 });
 
     const summaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
