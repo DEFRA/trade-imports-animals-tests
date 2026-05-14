@@ -94,6 +94,20 @@ export function getRelativeDateInput(options: RelativeDateTimeOptions = {}): Dat
 }
 
 /**
+ * Formats a Date for display using en-GB locale and optional format options.
+ */
+export function toDisplayDate(
+  date: Date,
+  options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  },
+): string {
+  return new Intl.DateTimeFormat('en-GB', options).format(date);
+}
+
+/**
  * Converts a DateInput or DateTimeInput into a UTC Date.
  * Missing time parts default to 00:00.
  */

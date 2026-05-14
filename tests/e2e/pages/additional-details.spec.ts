@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@flows/journeys';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {
@@ -16,6 +17,13 @@ test.describe('Additional details', () => {
     await pages.commodityDetails.linkBack.click();
     await expect(pages.page).toHaveURL(pages.animalIdentification.expectedUrl);
     await expect(pages.animalIdentification.heading).toBeVisible();
+
+    await test.step('previously entered animal identifiers are retained', async () => {
+      await expect(pages.animalIdentification.inputEarTag(0)).toHaveValue(new RegExp(`^${EAR_TAG_PREFIX}`));
+      await expect(pages.animalIdentification.inputPassport(0)).toHaveValue(new RegExp(`^${PASSPORT_PREFIX}`));
+      await expect(pages.animalIdentification.inputEarTag(1)).toHaveValue(new RegExp(`^${EAR_TAG_PREFIX}`));
+      await expect(pages.animalIdentification.inputPassport(1)).toHaveValue(new RegExp(`^${PASSPORT_PREFIX}`));
+    });
   });
 
   test('shows default values on first load', async ({ pages }) => {
