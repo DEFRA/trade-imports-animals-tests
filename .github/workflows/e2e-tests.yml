@@ -6,6 +6,14 @@ permissions:
   id-token: write
 
 on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   workflow_dispatch:
     inputs:
       trade-imports-animals-frontend:
@@ -35,6 +43,9 @@ jobs:
   build:
     name: Run Tests
     runs-on: ubuntu-latest
+    # Run for manual, called, and non-draft PR workflows; skip draft PRs.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
     env:
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
     steps:
