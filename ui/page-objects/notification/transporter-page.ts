@@ -13,7 +13,7 @@ export class TransporterPage extends BasePage {
   }
 
   get captionTransport(): Locator {
-    return this.page.locator('span.govuk-caption-l').filter({ hasText: /^Transport$/ });
+    return this.page.locator('span.govuk-caption-m').filter({ hasText: /^Transport$/ });
   }
 
   get heading(): Locator {

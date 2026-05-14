@@ -17,7 +17,7 @@ export class ImportReasonPage extends BasePage {
   }
 
   get radioInternalMarket(): Locator {
-    return this.page.getByRole('radio', { name: 'Internal Market' });
+    return this.page.getByRole('radio', { name: 'Internal market' });
   }
 
   get radioReEntry(): Locator {

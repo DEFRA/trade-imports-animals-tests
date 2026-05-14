@@ -6,11 +6,10 @@ test.describe('Entry point and arrival at destination', () => {
     await journeys.toEntryPoint();
   });
 
-  test.skip('shows system-generated notification id (draft)', async () => {
-    // TODO: pending notification id implementation on page
-    //const notificationId = await pages.entryPoint.notificationId.textContent();
-    //expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
-    //expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated notification id (draft)', async ({ pages, journeyContext }) => {
+    const notificationId = await pages.entryPoint.notificationId.textContent();
+    expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(journeyContext.notificationId).toBe(notificationId);
   });
 
   test('can navigate back to cph number', async ({ pages }) => {
@@ -20,7 +19,7 @@ test.describe('Entry point and arrival at destination', () => {
   });
 
   test('shows default values on first load', async ({ pages }) => {
-    await expect(pages.entryPoint.dropdownPortOfEntry.locator('option:checked')).toHaveText('Entry port of entry');
+    await expect(pages.entryPoint.dropdownPortOfEntry.locator('option:checked')).toHaveText('Select port of entry');
     await expect(pages.entryPoint.inputDay).toHaveValue('');
     await expect(pages.entryPoint.inputMonth).toHaveValue('');
     await expect(pages.entryPoint.inputYear).toHaveValue('');
@@ -29,9 +28,10 @@ test.describe('Entry point and arrival at destination', () => {
   test('shows expected points of entries', async ({ pages }) => {
     const options = await pages.entryPoint.dropdownPortOfEntryOptions.allTextContents();
     const expectedOptions = Object.values(pointOfEntries);
-    expect(options[0]).toBe('Entry port of entry');
+    expect(options[0]).toBe('Select port of entry');
+    expect(options[1]).toBe('──────────');
     // Dropdown options must match the expected list in the correct order (alphabetical).
-    expect(options.slice(1)).toEqual(expectedOptions);
+    expect(options.slice(2)).toEqual(expectedOptions);
   });
 
   test('continues to transporter after saving valid entry', async ({ pages }) => {
