@@ -11,7 +11,7 @@ set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TESTS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKSPACE_COMPOSE="$TESTS_REPO_ROOT/../../docker/stack/compose.yml"
+WORKSPACE_BOUNCE_MONGO="$TESTS_REPO_ROOT/../../scripts/stack/bounce-mongo.sh"
 WORKSPACE_PROJECT="trade-imports-animals"
 TESTS_PROJECT="trade-imports-animals-tests"
 
@@ -19,13 +19,12 @@ project="$(docker ps --filter 'label=com.docker.compose.service=mongodb' --forma
 
 case "$project" in
   "$WORKSPACE_PROJECT")
-    if [ ! -f "$WORKSPACE_COMPOSE" ]; then
-      echo "error: workspace mongo is up but compose file not found at $WORKSPACE_COMPOSE" >&2
+    if [ ! -x "$WORKSPACE_BOUNCE_MONGO" ]; then
+      echo "error: workspace mongo is up but $WORKSPACE_BOUNCE_MONGO is missing / not executable" >&2
       exit 1
     fi
-    echo "Workspace stack detected — reseeding workspace mongo"
-    exec docker compose -p "$WORKSPACE_PROJECT" -f "$WORKSPACE_COMPOSE" \
-      up --force-recreate --renew-anon-volumes --wait mongodb
+    echo "Workspace stack detected — delegating to scripts/stack/bounce-mongo.sh"
+    exec "$WORKSPACE_BOUNCE_MONGO"
     ;;
   "$TESTS_PROJECT")
     echo "Tests-repo stack detected — reseeding tests-repo mongo"
