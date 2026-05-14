@@ -9,7 +9,7 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "scripts": {
-    "database:reseed": "docker compose up --force-recreate --renew-anon-volumes --wait mongodb",
+    "database:reseed": "./bin/database-reseed.sh",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
