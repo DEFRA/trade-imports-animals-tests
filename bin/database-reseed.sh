@@ -1,22 +1,46 @@
 #!/bin/sh
 # Wipe mongo's volume and recreate the container so init scripts re-run on
-# a fresh DB. Detects which stack is currently up so this works both
-# standalone (CI / tests-repo-only dev) and inside the workspace layout
+# a fresh DB. Detects which compose stack is currently running — this works
+# both standalone (CI / tests-repo-only dev) and inside the workspace layout
 # (https://github.com/DEFRA/trade-imports-animals-workspace), where the
 # workspace stack owns port 27017 and the tests-repo compose would clash.
+#
+# Errors out if no compose stack with a mongodb service is up — this script
+# is a reseed, not a stand-up.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TESTS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKSPACE_COMPOSE="$TESTS_REPO_ROOT/../../docker/stack/compose.yml"
 WORKSPACE_PROJECT="trade-imports-animals"
+TESTS_PROJECT="trade-imports-animals-tests"
 
-if [ -n "$(docker compose -p "$WORKSPACE_PROJECT" ps -q mongodb 2>/dev/null)" ] && [ -f "$WORKSPACE_COMPOSE" ]; then
-  echo "Workspace stack detected — reseeding workspace mongo"
-  exec docker compose -p "$WORKSPACE_PROJECT" -f "$WORKSPACE_COMPOSE" \
-    up --force-recreate --renew-anon-volumes --wait mongodb
-fi
+project="$(docker ps --filter 'label=com.docker.compose.service=mongodb' --format '{{.Label "com.docker.compose.project"}}' | head -1)"
 
-echo "Reseeding tests-repo mongo"
-cd "$TESTS_REPO_ROOT"
-exec docker compose up --force-recreate --renew-anon-volumes --wait mongodb
+case "$project" in
+  "$WORKSPACE_PROJECT")
+    if [ ! -f "$WORKSPACE_COMPOSE" ]; then
+      echo "error: workspace mongo is up but compose file not found at $WORKSPACE_COMPOSE" >&2
+      exit 1
+    fi
+    echo "Workspace stack detected — reseeding workspace mongo"
+    exec docker compose -p "$WORKSPACE_PROJECT" -f "$WORKSPACE_COMPOSE" \
+      up --force-recreate --renew-anon-volumes --wait mongodb
+    ;;
+  "$TESTS_PROJECT")
+    echo "Tests-repo stack detected — reseeding tests-repo mongo"
+    cd "$TESTS_REPO_ROOT"
+    exec docker compose up --force-recreate --renew-anon-volumes --wait mongodb
+    ;;
+  "")
+    echo "error: no running compose stack with a mongodb service" >&2
+    echo "  workspace:  ./scripts/stack/run-stack.sh (from workspace root)" >&2
+    echo "  tests-repo: docker compose up -d (from $TESTS_REPO_ROOT)" >&2
+    exit 1
+    ;;
+  *)
+    echo "error: unknown compose project '$project' owns the running mongodb" >&2
+    echo "  expected: $WORKSPACE_PROJECT or $TESTS_PROJECT" >&2
+    exit 1
+    ;;
+esac
