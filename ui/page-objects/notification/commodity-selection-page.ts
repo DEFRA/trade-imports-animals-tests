@@ -9,7 +9,7 @@ export class CommoditySelectionPage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { name: 'Select a Commodity', exact: true });
+    return this.page.getByRole('heading', { name: 'Select a commodity', exact: true });
   }
 
   get dropdownCommodity(): Locator {
