@@ -26,8 +26,7 @@ test.describe('Transporter', () => {
     await expect(pages.transporter.btnSaveAndContinue).toBeVisible();
   });
 
-  // Skipped until implemented in EUDPA-51
-  test.skip('opens transport guidance link in a new tab with the expected URL', async ({ context, pages }) => {
+  test('opens transport guidance link in a new tab with the expected URL', async ({ context, pages }) => {
     const pagePromise = context.waitForEvent('page');
     await pages.transporter.linkTransportGuidance.click();
     const guidanceTab = await pagePromise;
@@ -40,11 +39,10 @@ test.describe('Transporter', () => {
     }
   });
 
-  // Skipped until implemented in EUDPA-51
-  test.skip('can navigate to transporter selection', async ({ pages }) => {
+  test('can navigate to transporter selection', async ({ pages }) => {
     await pages.transporter.linkAddTransporter.click();
-    //await expect(pages.page).toHaveURL(pages.transporterSelection.expectedUrl);
-    //await expect(pages.transporterSelection.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.transporterSelection.expectedUrl);
+    await expect(pages.transporterSelection.heading).toBeVisible();
   });
 
   // Skipped until next page is implemented in EUDPA-48
