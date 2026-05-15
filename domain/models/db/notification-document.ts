@@ -34,7 +34,7 @@ export type NotificationDocument = {
     address: {
       addressLine1: string;
       addressLine2: string;
-      addressLine3: string;
+      addressLine3?: string;
       country: string;
     };
   };
@@ -56,7 +56,7 @@ export type NotificationDocument = {
       address: {
         addressLine1: string;
         addressLine2: string;
-        addressLine3: string;
+        addressLine3?: string;
         country: string;
       };
       approvalNumber: string;
