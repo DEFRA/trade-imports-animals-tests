@@ -2,7 +2,7 @@ import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
 
 export class TransporterPage extends BasePage {
-  readonly expectedUrl = '/transporter';
+  readonly expectedUrl = '/transporters';
 
   get notificationId(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });

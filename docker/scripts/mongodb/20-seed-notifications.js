@@ -59,6 +59,17 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'ABERDEEN',
       arrivalDate: ISODate('2026-05-28T00:00:00.000Z'),
+      transporter: {
+        name: 'García Livestock Transport SL',
+        address: {
+          addressLine1: '43 East Hague Extension',
+          addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
+          addressLine3: 'Quasoccaecat ut ear, 30055',
+          country: 'Switzerland',
+        },
+        approvalNumber: 'ES-T2-45001294',
+        type: 'Commercial',
+      },
     },
     status: 'SUBMITTED',
     created: ISODate('2026-03-23T09:14:52.118Z'),
@@ -117,6 +128,16 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'EAST MIDLANDS AIRPORT',
       arrivalDate: ISODate('2026-06-02T00:00:00.000Z'),
+      transporter: {
+        name: 'J & G Campbell LTD',
+        address: {
+          addressLine1: 'Rue de la Loi 200',
+          addressLine2: '1040 Brussels',
+          country: 'Belgium',
+        },
+        approvalNumber: 'UK/BURY/T2/00104115',
+        type: 'Commercial',
+      },
     },
     status: 'SUBMITTED',
     created: ISODate('2026-03-23T08:37:09.556Z'),
@@ -176,6 +197,17 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'EDINBURGH',
       arrivalDate: ISODate('2026-06-09T00:00:00.000Z'),
+      transporter: {
+        name: 'García Livestock Transport SL',
+        address: {
+          addressLine1: '43 East Hague Extension',
+          addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
+          addressLine3: 'Quasoccaecat ut ear, 30055',
+          country: 'Switzerland',
+        },
+        approvalNumber: 'ES-T2-45001294',
+        type: 'Commercial',
+      },
     },
     status: 'SUBMITTED',
     created: ISODate('2026-03-23T07:22:41.901Z'),
@@ -242,6 +274,16 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'ABERDEEN',
       arrivalDate: ISODate('2026-06-16T00:00:00.000Z'),
+      transporter: {
+        name: 'J & G Campbell LTD',
+        address: {
+          addressLine1: 'Rue de la Loi 200',
+          addressLine2: '1040 Brussels',
+          country: 'Belgium',
+        },
+        approvalNumber: 'UK/BURY/T2/00104115',
+        type: 'Commercial',
+      },
     },
     status: 'SUBMITTED',
     created: ISODate('2026-03-23T10:05:33.774Z'),

@@ -4,7 +4,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journeys';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_NUMBER, TRANSPORTER_NAME } from '@flows/journeys';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
@@ -50,7 +50,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.referenceNumber).toBe(referenceNumber);
       expect(doc.origin.countryCode).toBe(defaults.countryCode);
       expect(doc.origin.requiresRegionCode).toBe(yesNoValues.no.toLowerCase());
-      expect(doc.origin.internalReference).toBe(undefined);
+      expect(doc.origin.internalReference).toBeUndefined();
       expect(doc.commodity.name).toBe(defaults.commodityCode);
       expect(subdocCommodityComplement.typeOfCommodity).toBe(defaults.commodityType);
       expect(subdocFirstSpecies).toBeDefined();
@@ -78,9 +78,17 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.destination.name).toBe(DESTINATION_NAME);
       expect(doc.destination.address.addressLine1).toBe('643 Main Street');
       expect(doc.destination.address.addressLine2).toBe('Birmingham G1 3AZ');
+      expect(doc.destination.address.addressLine3).toBeUndefined();
       expect(doc.destination.address.country).toBe('United Kingdom');
       expect(doc.cphNumber).toBe(CPH_NUMBER);
       expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
+      expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
+      expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
+      expect(doc.transport.transporter?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
+      expect(doc.transport.transporter?.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
+      expect(doc.transport.transporter?.address.country).toBe('Switzerland');
+      expect(doc.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
+      expect(doc.transport.transporter?.type).toBe('Commercial');
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
       expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
       expect(doc.status).toBe('SUBMITTED');

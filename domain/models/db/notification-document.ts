@@ -51,6 +51,17 @@ export type NotificationDocument = {
   transport: {
     portOfEntry: string;
     arrivalDate: Date;
+    transporter?: {
+      name: string;
+      address: {
+        addressLine1: string;
+        addressLine2: string;
+        addressLine3: string;
+        country: string;
+      };
+      approvalNumber: string;
+      type: string;
+    };
   };
   status: string;
   created: Date;
