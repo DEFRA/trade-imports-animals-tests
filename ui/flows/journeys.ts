@@ -52,6 +52,7 @@ export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const CONSIGNOR_NAME = 'Astra Rosales';
 export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
+export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 
 export class Journeys {
   constructor(
@@ -215,7 +216,8 @@ export class Journeys {
   async toContractAddress(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toTransporter(options);
-    // TODO
+    await this.pages.transporter.linkAddTransporter.click();
+    await this.pages.transporterSelection.linkSelectTransporterByName(TRANSPORTER_NAME).click();
     await this.pages.transporter.btnSaveAndContinue.click();
     //await this.pages.contractAddress.heading.waitFor();
   }

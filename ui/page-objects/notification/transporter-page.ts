@@ -30,6 +30,18 @@ export class TransporterPage extends BasePage {
     return this.page.locator('#addTransporter');
   }
 
+  get tableTransporter(): Locator {
+    return this.page.getByRole('table');
+  }
+
+  get rowsTransporter(): Locator {
+    return this.tableTransporter.locator('tbody').getByRole('row');
+  }
+
+  get cellsTransporter(): Locator {
+    return this.rowsTransporter.first().getByRole('cell');
+  }
+
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
