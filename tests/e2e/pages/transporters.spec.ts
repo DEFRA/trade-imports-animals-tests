@@ -26,7 +26,7 @@ test.describe('Transporter', () => {
     await expect(pages.transporter.btnSaveAndContinue).toBeVisible();
   });
 
-  test('opens transport guidance link in a new tab with the expected URL', async ({ context, pages }) => {
+  test('opens transport guidance link in a new tab with the expected URL', { tag: '@compose' }, async ({ context, pages }) => {
     const pagePromise = context.waitForEvent('page');
     await pages.transporter.linkTransportGuidance.click();
     const guidanceTab = await pagePromise;
@@ -46,7 +46,7 @@ test.describe('Transporter', () => {
   });
 
   // Skipped until next page is implemented in EUDPA-48
-  test.skip('continues to contract address after saving transporter', async ({ pages }) => {
+  test.skip('continues to contact address after saving transporter', async ({ pages }) => {
     // TODO: add transporter details
     await pages.transporter.btnSaveAndContinue.click();
     //await expect(pages.page).toHaveURL(pages.contactAddress.expectedUrl);
