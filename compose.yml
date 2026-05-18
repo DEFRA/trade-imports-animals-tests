@@ -26,15 +26,22 @@ services:
   # ──────────────────────────────────────────────────────────────────────────────
   mongodb:
     image: mongo:7.0
+    command: ['--replSet', 'rs0', '--bind_ip_all']
     ports:
       - '27017:27017'
     volumes:
       - ./docker/scripts/mongodb:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ['CMD', 'mongosh', '--eval', 'db.hello().ok']
+      test:
+        - CMD
+        - mongosh
+        - '--eval'
+        - >
+          try { rs.status().ok } catch(e) {
+          rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}).ok }
       interval: 5s
-      start_period: 5s
-      retries: 3
+      start_period: 15s
+      retries: 5
 
   # ──────────────────────────────────────────────────────────────────────────────
   # Localstack
@@ -107,7 +114,7 @@ services:
     environment:
       - PORT=8087
       - SPRING_PROFILES_ACTIVE=local
-      - MONGO_URI=mongodb://mongodb:27017
+      - MONGO_URI=mongodb://mongodb:27017/?directConnection=true
       - MONGO_DATABASE=trade-imports-stub
       - AWS_REGION=eu-west-2
       - AWS_EMF_AGENT_ENDPOINT=http://localstack:4566
@@ -129,7 +136,7 @@ services:
     environment:
       - PORT=8086
       - SPRING_PROFILES_ACTIVE=local
-      - MONGO_URI=mongodb://mongodb:27017
+      - MONGO_URI=mongodb://mongodb:27017/?directConnection=true
       - MONGO_DATABASE=trade-imports-reference-data
       - AWS_REGION=eu-west-2
       - AWS_EMF_AGENT_ENDPOINT=http://localstack:4566
@@ -274,7 +281,7 @@ services:
       - ./:/app
     environment:
       - CI=true
-      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_URI=mongodb://mongodb:27017/?directConnection=true
       - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123}
     command: >
       bash -lc "npm ci --ignore-scripts && npm run test:github"
