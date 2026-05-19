@@ -47,6 +47,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       const subdocSecondSpecies = subdocCommodityComplement.species.find((species) => species.text === defaults.species[1]);
 
       expect(docs).toHaveLength(1);
+      expect(String(doc._id)).toBe(referenceNumber.split('.').pop());
       expect(doc.referenceNumber).toBe(referenceNumber);
       expect(doc.origin.countryCode).toBe(defaults.countryCode);
       expect(doc.origin.requiresRegionCode).toBe(yesNoValues.no.toLowerCase());
