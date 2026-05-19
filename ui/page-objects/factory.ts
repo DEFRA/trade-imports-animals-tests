@@ -8,6 +8,7 @@ import { AnimalIdentificationPage } from './notification/animal-identification-p
 import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { ConsignorSelectionPage } from './notification/consignor-selection-page';
+import { ContactAddressPage } from './notification/contact-address-page';
 import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
 import { DestinationSelectionPage } from './notification/destination-selection-page';
@@ -40,6 +41,7 @@ export function createPageObjects(page: Page) {
     commodityDetails: new CommodityDetailsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
     consignorSelection: new ConsignorSelectionPage(page),
+    contactAddress: new ContactAddressPage(page),
     cphNumber: new CphNumberPage(page),
     declaration: new DeclarationPage(page),
     destinationSelection: new DestinationSelectionPage(page),

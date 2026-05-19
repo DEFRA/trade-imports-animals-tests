@@ -53,6 +53,7 @@ export const CONSIGNOR_NAME = 'Astra Rosales';
 export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
+export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
 
 export class Journeys {
   constructor(
@@ -213,19 +214,20 @@ export class Journeys {
     await this.pages.transporter.heading.waitFor();
   }
 
-  async toContractAddress(options: JourneyOptions = {}): Promise<void> {
+  async toContactAddress(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toTransporter(options);
     await this.pages.transporter.linkAddTransporter.click();
     await this.pages.transporterSelection.linkSelectTransporterByName(TRANSPORTER_NAME).click();
     await this.pages.transporter.btnSaveAndContinue.click();
-    //await this.pages.contractAddress.heading.waitFor();
+    await this.pages.contactAddress.heading.waitFor();
   }
 
   async toReview(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
-    await this.toContractAddress(options);
-    //await this.pages.contractAddress.btnSaveAndContinue.click();
+    await this.toContactAddress(options);
+    await this.pages.contactAddress.radioAddress(CONTACT_ADDRESS_NAME).click();
+    await this.pages.contactAddress.btnSaveAndContinue.click();
     //await this.pages.review.heading.waitFor();
   }
 
