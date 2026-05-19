@@ -69,11 +69,12 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command               | Action                             | Generates Report |
-| --------------------- | ---------------------------------- | ---------------- |
-| `npm test`            | Run CDP suite                      | ✓                |
-| `npm run test:local`  | Run local suite                    | ✓                |
-| `npm run test:github` | Run compose suite [GitHub Actions] | ✓                |
+| Command               | Test scope                                     | Target                          | Config file                       | Generates Report |
+| --------------------- | ---------------------------------------------- | ------------------------------- | --------------------------------- | ---------------- |
+| `npm test`            | e2e test suite                                 | CDP                             | `playwright.config.ts` (default)  | ✓                |
+| `npm run test:local`  | e2e + e2e integration (`@compose`) test suites | Docker Compose (localhost)      | `playwright.local.fast.config.ts` | ✓                |
+| `npm run test:github` | e2e + e2e integration (`@compose`) test suites | Docker Compose (GitHub Actions) | `playwright.github.config.ts`     | ✓                |
+| `npm run test:a11y`   | Accessibility (`@a11y`) test suite             | CDP                             | `playwright.a11y.config.ts`       | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -97,13 +98,14 @@ After tests run, Playwright results and report are generated automatically, and 
 
 ### Test Configuration
 
-The Playwright configuration is split across three files:
+The Playwright configuration is split across multiple files:
 
 | File                          | Purpose                                | URL target                              |
 | ----------------------------- | -------------------------------------- | --------------------------------------- |
 | `playwright.config.ts`        | Base config for CDP environment runs   | CDP services (CDP URLs)                 |
 | `playwright.local.config.ts`  | Local development (headed, no retries) | Localhost (localhost URLs)              |
 | `playwright.github.config.ts` | GitHub Actions runs                    | Docker Compose (service DNS/alias URLs) |
+| `playwright.a11y.config.ts`   | Accessibility (`@a11y`) runs           | CDP services (CDP URLs)                 |
 
 Note:
 
