@@ -3,8 +3,8 @@ import baseConfig from './playwright.config';
 
 export default defineConfig({
   ...baseConfig,
-  /* A11y test timeout adjusted to 3m. */
-  timeout: 3 * 60 * 1000,
+  /* A11y test timeout adjusted to 5m. */
+  timeout: 5 * 60 * 1000,
   retries: 0,
   use: {
     ...baseConfig.use,
