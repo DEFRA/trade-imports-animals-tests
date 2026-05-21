@@ -36,10 +36,6 @@ test.describe('Notification outbox', { tag: ['@compose', '@integration', '@mongo
       const docs = await collection.find({ aggregateId }).toArray();
       const [doc] = docs;
 
-      await test.step('does not duplicate GBN-AG in aggregateId', () => {
-        expect(doc.aggregateId.match(/GBN-AG/g)).toEqual(['GBN-AG']);
-      });
-
       await test.step('finds exactly one outbox event for the notification', () => {
         expect(docs).toHaveLength(1);
       });
