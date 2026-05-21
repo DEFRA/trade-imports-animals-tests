@@ -8,7 +8,7 @@ test.describe('Entry point and arrival at destination', () => {
 
   test('shows system-generated notification id (draft)', async ({ pages, journeyContext }) => {
     const notificationId = await pages.entryPoint.notificationId.textContent();
-    expect(notificationId).toMatch(/^DRAFT\.IMP\.\d{4}\.[0-9a-f]{24}$/);
+    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
     expect(journeyContext.notificationId).toBe(notificationId);
   });
 

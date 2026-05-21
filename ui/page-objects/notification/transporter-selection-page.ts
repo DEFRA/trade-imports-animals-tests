@@ -5,7 +5,7 @@ export class TransporterSelectionPage extends BasePage {
   readonly expectedUrl = '/transporters/select';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {

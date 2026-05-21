@@ -5,7 +5,7 @@ export class CommoditySelectionPage extends BasePage {
   readonly expectedUrl = '/commodities';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get heading(): Locator {

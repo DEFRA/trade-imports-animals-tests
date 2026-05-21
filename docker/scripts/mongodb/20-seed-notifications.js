@@ -8,7 +8,7 @@ db = db.getSiblingDB('trade-imports-animals-backend');
 db.notification.insertMany([
   {
     _id: ObjectId('69c12f11cafe202600000001'),
-    referenceNumber: 'DRAFT.IMP.2026.69c12f11cafe202600000001',
+    referenceNumber: 'GBN-AG-26-000001',
     origin: {
       countryCode: 'IE',
       requiresRegionCode: 'no',
@@ -78,7 +78,7 @@ db.notification.insertMany([
   },
   {
     _id: ObjectId('69c12f11cafe202600000002'),
-    referenceNumber: 'DRAFT.IMP.2026.69c12f11cafe202600000002',
+    referenceNumber: 'GBN-AG-26-000002',
     origin: {
       countryCode: 'FR',
       requiresRegionCode: 'yes',
@@ -146,7 +146,7 @@ db.notification.insertMany([
   },
   {
     _id: ObjectId('69c12f11cafe202600000003'),
-    referenceNumber: 'DRAFT.IMP.2026.69c12f11cafe202600000003',
+    referenceNumber: 'GBN-AG-26-000003',
     origin: {
       countryCode: 'NL',
       requiresRegionCode: 'no',
@@ -216,7 +216,7 @@ db.notification.insertMany([
   },
   {
     _id: ObjectId('69c12f11cafe202600000004'),
-    referenceNumber: 'DRAFT.IMP.2026.69c12f11cafe202600000004',
+    referenceNumber: 'GBN-AG-26-000004',
     origin: {
       countryCode: 'DE',
       requiresRegionCode: 'yes',

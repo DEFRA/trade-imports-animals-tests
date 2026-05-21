@@ -5,7 +5,7 @@ export class AddressesPage extends BasePage {
   readonly expectedUrl = '/addresses';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {

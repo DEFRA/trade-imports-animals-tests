@@ -26,7 +26,7 @@ test.describe('Accessibility (admin) WCAG 2.2 AA', { tag: '@a11y' }, () => {
       });
 
       await test.step('Admin notifications', async () => {
-        await pages.adminNotifications.inputReferenceNumber.fill('DRAFT.IMP.2026.69c12f11cafe202600000001');
+        await pages.adminNotifications.inputReferenceNumber.fill('GBN-AG-26-000001');
         await pages.adminNotifications.checkBoxSelectAll.check();
         await runA11yScan();
       });

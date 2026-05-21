@@ -5,7 +5,7 @@ export class ImportReasonPage extends BasePage {
   readonly expectedUrl = '/import-reason';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {
