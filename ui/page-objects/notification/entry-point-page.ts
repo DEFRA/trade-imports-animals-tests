@@ -6,7 +6,7 @@ export class EntryPointPage extends BasePage {
   readonly expectedUrl = '/port-of-entry';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {

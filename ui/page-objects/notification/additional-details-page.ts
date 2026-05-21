@@ -6,7 +6,7 @@ export class AdditionalDetailsPage extends BasePage {
   readonly expectedUrl = '/additional-details';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {

@@ -5,7 +5,7 @@ export class ConsignorSelectionPage extends BasePage {
   readonly expectedUrl = '/consignors/select';
 
   get notificationId(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'DRAFT' });
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
   get linkBack(): Locator {
