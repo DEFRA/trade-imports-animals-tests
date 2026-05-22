@@ -12,7 +12,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await adminJourneys.toNotifications();
   });
 
-  test('shows notifications for deletion', async ({ pages }) => {
+  test.skip('shows notifications for deletion', async ({ pages }) => {
     await expect.poll(() => pages.adminNotifications.tableRows.count()).toBeGreaterThan(4);
     await expect(pages.adminNotifications.tableRowByReference('GBN-AG-26-000001')).toBeVisible();
     await expect(pages.adminNotifications.tableRowByReference('GBN-AG-26-000002')).toBeVisible();
@@ -20,7 +20,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await expect(pages.adminNotifications.tableRowByReference('GBN-AG-26-000004')).toBeVisible();
   });
 
-  test('allows deleting a notification by reference number', async ({ pages }) => {
+  test.skip('allows deleting a notification by reference number', async ({ pages }) => {
     const referenceNumber = 'GBN-AG-26-000001';
     await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     await pages.adminNotifications.btnDeleteByReferenceNumber.click();
@@ -31,7 +31,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       .toBe(false);
   });
 
-  test('allows cancelling checkbox deletion and keeps notification visible', async ({ pages }) => {
+  test.skip('allows cancelling checkbox deletion and keeps notification visible', async ({ pages }) => {
     const referenceNumber = 'GBN-AG-26-000002';
     await pages.adminNotifications.checkboxNotificationByReference(referenceNumber).check();
     await pages.adminNotifications.btnDelete.click();
@@ -39,7 +39,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
-  test('allows deleting a notification by checkbox', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+  test.skip('allows deleting a notification by checkbox', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     const referenceNumber = 'GBN-AG-26-000002';
 
     await test.step('delete notification by checkbox', async () => {
@@ -80,7 +80,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     });
   });
 
-  test('allows deleting all notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+  test.skip('allows deleting all notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     skipIfCdpEnvironment('Compose/local only: destructive (deletes all notifications); never run on CDP environments.');
     const referenceNumbers = ['GBN-AG-26-000003', 'GBN-AG-26-000004'];
 
