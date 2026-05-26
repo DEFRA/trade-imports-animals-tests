@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { ObjectId } from 'mongodb';
-import { skipIfCdpEnvironment } from '@utils/playwright/environment-guards';
+import { skipIfCdpEnvironment } from '@utils/playwright/environment';
 
 // Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
 
