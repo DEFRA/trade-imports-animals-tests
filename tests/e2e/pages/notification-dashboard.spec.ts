@@ -27,10 +27,12 @@ test.describe('Import notification service', () => {
     const firstCard = pages.notificationDashboard.notificationCard(0);
 
     await expect(firstCard.heading).toBeVisible();
-    await expect(firstCard.heading).toContainText(/DRAFT\.IMP\.\d{4}\.[a-z0-9]+/);
+    await expect(firstCard.heading).toContainText(/GBN-AG-\d{2}-[A-Z0-9]+/);
     await expect(firstCard.commodity).toBeVisible();
     await expect(firstCard.origin).toBeVisible();
+    await expect(firstCard.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
     await expect(firstCard.status).toBeVisible();
+    await expect(firstCard.status).toContainText(/Draft|Submitted/);
     await expect(firstCard.dateCreated).toBeVisible();
     await expect(firstCard.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
   });
