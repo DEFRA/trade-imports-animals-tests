@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journeys';
 import { timeouts } from '@config/timeouts';
 
-test.describe('Outbox events (admin)', { tag: ['@compose'] }, () => {
+test.describe('Outbox events (admin)', () => {
   const defaults = defaultJourneyOptions;
 
   test('shows outbox event for a submitted notification', async ({ journeys, adminJourneys, journeyContext, pages }) => {
