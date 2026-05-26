@@ -3,6 +3,14 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 
 const SIGN_IN_FORM_PROBE_MS = 5_000;
 
+function requireBaseUrl(envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL'): string {
+  const baseUrl = process.env[envVar];
+  if (!baseUrl) {
+    throw new Error(`${envVar} is not set. Ensure Playwright config applies project base URLs before running tests.`);
+  }
+  return baseUrl;
+}
+
 export class BasePage {
   constructor(protected readonly page: Page) {}
 
@@ -20,6 +28,16 @@ export class BasePage {
 
   get linkSignOut(): Locator {
     return this.page.getByRole('link', { name: 'Sign out' });
+  }
+
+  async navigateToFrontend(path: string = '/'): Promise<void> {
+    const baseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
+    await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  async navigateToAdminPortal(path: string = '/'): Promise<void> {
+    const baseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL');
+    await this.page.goto(`${baseUrl}${path}`);
   }
 
   protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {

@@ -4,6 +4,7 @@ import { AddressesPage } from './notification/addresses-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
+import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
@@ -37,6 +38,7 @@ export function createPageObjects(page: Page) {
     additionalDetails: new AdditionalDetailsPage(page),
     adminDashboard: new AdminDashboardPage(page),
     adminNotifications: new AdminNotificationsPage(page),
+    adminOutboxEvents: new AdminOutboxEventsPage(page),
     animalIdentification: new AnimalIdentificationPage(page),
     commodityDetails: new CommodityDetailsPage(page),
     commoditySelection: new CommoditySelectionPage(page),

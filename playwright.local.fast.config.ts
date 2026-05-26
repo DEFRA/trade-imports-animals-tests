@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import baseConfig from './playwright.config';
+import sharedConfig from './utils/playwright/shared-config';
 import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 
 const projectBaseUrls: Record<string, string> = {
@@ -8,11 +8,11 @@ const projectBaseUrls: Record<string, string> = {
 };
 
 export default defineConfig({
-  ...withProjectBaseUrls(baseConfig, projectBaseUrls, 'local'),
+  ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'local'),
   retries: 0,
 
   use: {
-    ...baseConfig.use,
+    ...sharedConfig.use,
     trace: 'on',
   },
 });
