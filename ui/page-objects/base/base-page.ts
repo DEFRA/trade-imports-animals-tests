@@ -22,6 +22,16 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Sign out' });
   }
 
+  async navigateToFrontend(path: string = '/'): Promise<void> {
+    const baseUrl = process.env.TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL ?? 'http://localhost:3000';
+    await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  async navigateToAdminPortal(path: string = '/'): Promise<void> {
+    const baseUrl = process.env.TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL ?? 'http://localhost:3001';
+    await this.page.goto(`${baseUrl}${path}`);
+  }
+
   protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);

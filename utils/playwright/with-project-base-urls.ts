@@ -1,7 +1,14 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
+const PROJECT_ENV_VARS: Record<string, string> = {
+  'frontend-chromium': 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
+  'admin-chromium': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+};
+
 /**
  * Returns a config with per-project baseURLs overridden from a lookup map.
+ * Also sets TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL and TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL
+ * environment variables so tests can navigate cross-service using absolute URLs.
  */
 export function withProjectBaseUrls(
   baseConfig: PlaywrightTestConfig,
@@ -10,6 +17,13 @@ export function withProjectBaseUrls(
 ): PlaywrightTestConfig {
   if (!Array.isArray(baseConfig.projects)) {
     return baseConfig;
+  }
+
+  for (const [projectName, baseURL] of Object.entries(projectBaseUrls)) {
+    const envVar = PROJECT_ENV_VARS[projectName];
+    if (envVar) {
+      process.env[envVar] = baseURL;
+    }
   }
 
   return {

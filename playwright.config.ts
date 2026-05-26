@@ -12,6 +12,9 @@ if (environment?.toLowerCase() === 'prod') {
 const frontendBaseUrl = `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`;
 const adminBaseUrl = `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`;
 
+process.env.TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL = frontendBaseUrl;
+process.env.TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL = adminBaseUrl;
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */

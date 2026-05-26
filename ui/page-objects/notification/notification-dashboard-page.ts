@@ -13,7 +13,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {
-    await this.page.goto('/');
+    await this.navigateToFrontend('/');
     await this.signInWhenRequested(attemptSignIn);
 
     if (attemptSignIn) {

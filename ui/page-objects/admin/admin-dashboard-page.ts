@@ -12,8 +12,12 @@ export class AdminDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Notifications' });
   }
 
+  get btnOutboxEvents(): Locator {
+    return this.page.getByRole('button', { name: 'Outbox events' });
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
-    await this.page.goto(this.expectedUrl);
+    await this.navigateToAdminPortal(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn);
   }
 }
