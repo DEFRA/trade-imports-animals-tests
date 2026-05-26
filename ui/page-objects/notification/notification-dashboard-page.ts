@@ -12,6 +12,32 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Create an import notification' });
   }
 
+  get totalResults(): Locator {
+    return this.page.getByText(/\d+ Results/);
+  }
+
+  get notificationCards(): Locator {
+    return this.page.locator('.govuk-summary-card');
+  }
+
+  private cardField(card: Locator, term: string): Locator {
+    return card.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
+  }
+
+  notificationCard(index: number) {
+    const card = this.notificationCards.nth(index);
+    return {
+      heading: card.getByRole('heading', { level: 2 }),
+      commodity: this.cardField(card, 'Commodity'),
+      origin: this.cardField(card, 'Origin'),
+      arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
+      consignee: this.cardField(card, 'Consignee'),
+      consignor: this.cardField(card, 'Consignor'),
+      status: this.cardField(card, 'Status'),
+      dateCreated: card.getByText(/Date created:/),
+    };
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto('/');
     await this.signInWhenRequested(attemptSignIn);
