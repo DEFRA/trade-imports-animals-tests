@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { TRANSPORTER_NAME } from '@flows/journeys';
 
 test.describe('Contact address for consignment', () => {
   test.beforeEach(async ({ journeys }) => {
@@ -15,6 +16,7 @@ test.describe('Contact address for consignment', () => {
     await pages.contactAddress.linkBack.click();
     await expect(pages.page).toHaveURL(pages.transporter.expectedUrl);
     await expect(pages.transporter.heading).toBeVisible();
+    await expect(pages.transporter.cellsTransporter.nth(0)).toContainText(TRANSPORTER_NAME);
   });
 
   test('shows expected page content', async ({ pages }) => {
@@ -46,7 +48,7 @@ test.describe('Contact address for consignment', () => {
   test('continues to review after selecting a contact address', async ({ pages }) => {
     await pages.contactAddress.radioAddress('EuroStore Services').click();
     await pages.contactAddress.btnSaveAndContinue.click();
-    // TODO: pending review page implementation, temporarily navigates to declaration pages.
+    // TODO: pending view notification implementation, temporarily navigates to declaration pages.
     await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
     await expect(pages.declaration.heading).toBeVisible();
   });

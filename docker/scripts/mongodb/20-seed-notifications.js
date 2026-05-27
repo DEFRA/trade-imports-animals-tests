@@ -71,6 +71,17 @@ db.notification.insertMany([
         type: 'Commercial',
       },
     },
+    consignment: {
+      contact: {
+        name: 'Animal and Plant Health Agency',
+        address: {
+          addressLine1: 'Woodham Lane',
+          addressLine2: 'New Haw',
+          addressLine3: 'Addlestone, KT15 3NB',
+          country: 'United Kingdom',
+        },
+      },
+    },
     status: 'SUBMITTED',
     created: ISODate('2026-03-23T09:14:52.118Z'),
     updated: ISODate('2026-03-23T11:58:31.402Z'),
@@ -137,6 +148,17 @@ db.notification.insertMany([
         },
         approvalNumber: 'UK/BURY/T2/00104115',
         type: 'Private',
+      },
+    },
+    consignment: {
+      contact: {
+        name: 'EuroStore Services',
+        address: {
+          addressLine1: '8448 Gleason Creek',
+          addressLine2: 'Apt. 221',
+          addressLine3: 'Hyattmouth, 72183',
+          country: 'France',
+        },
       },
     },
     status: 'SUBMITTED',
@@ -207,6 +229,17 @@ db.notification.insertMany([
         },
         approvalNumber: 'ES-T2-45001294',
         type: 'Commercial',
+      },
+    },
+    consignment: {
+      contact: {
+        name: 'Laiterie du Nord SARL',
+        address: {
+          addressLine1: '4295 Michele Courts',
+          addressLine2: 'Suite 479',
+          addressLine3: 'Kesslerbury, 528272',
+          country: 'Albania',
+        },
       },
     },
     status: 'SUBMITTED',
@@ -283,6 +316,17 @@ db.notification.insertMany([
         },
         approvalNumber: 'UK/BURY/T2/00104115',
         type: 'Private',
+      },
+    },
+    consignment: {
+      contact: {
+        name: 'Animal and Plant Health Agency',
+        address: {
+          addressLine1: 'Woodham Lane',
+          addressLine2: 'New Haw',
+          addressLine3: 'Addlestone, KT15 3NB',
+          country: 'United Kingdom',
+        },
       },
     },
     status: 'SUBMITTED',

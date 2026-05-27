@@ -13,7 +13,8 @@ test.describe('Addresses landing page', () => {
 
   test('can navigate back to accompanying documents', async ({ pages }) => {
     await pages.addresses.linkBack.click();
-    // TODO: pending accompanying documents page implementation.
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.accompanyingDocuments.headingPage).toBeVisible();
   });
 
   test('can navigate to consignor or exporter selection', async ({ pages }) => {
@@ -37,7 +38,8 @@ test.describe('Addresses landing page', () => {
   test('continues to cph number page after saving addresses', async ({ pages }) => {
     await pages.addresses.linkAddConsignorOrExporter.click();
     await pages.consignorSelection.linkSelectConsignor(0).click();
-    // TODO: Pending implementation of place of destination page.
+    await pages.addresses.linkAddPlaceOfDestination.click();
+    await pages.destinationSelection.linkSelectDestination(0).click();
     await pages.addresses.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
     await expect(pages.cphNumber.heading).toBeVisible();
