@@ -15,6 +15,6 @@ export default defineConfig({
   use: {
     ...sharedConfig.use,
     headless: false,
-    trace: 'on',
+    trace: 'on-first-retry',
   },
 });

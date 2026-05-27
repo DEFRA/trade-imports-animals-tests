@@ -9,7 +9,7 @@ const projectBaseUrls: Record<string, string> = {
 
 export default defineConfig({
   ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'local'),
-  retries: 0,
+  retries: 1,
 
   use: {
     ...sharedConfig.use,
