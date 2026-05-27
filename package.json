@@ -35,7 +35,7 @@
     "@types/node": "25.9.1",
     "allure-commandline": "2.42.0",
     "allure-playwright": "3.9.0",
-    "dotenv": "^17.3.1",
+    "dotenv": "17.4.2",
     "eslint": "^9.39.4",
     "husky": "9.1.7",
     "lint-staged": "^16.3.3",
