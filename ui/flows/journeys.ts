@@ -238,6 +238,12 @@ export class Journeys {
     await this.pages.declaration.heading.waitFor();
   }
 
+  async toNotificationView(referenceNumber: string): Promise<void> {
+    await this.toNotificationDashboard();
+    await this.pages.notificationDashboard.viewLink(referenceNumber).click();
+    await this.pages.notificationView.heading.waitFor();
+  }
+
   async submitNotification(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toDeclaration(options);
