@@ -1,8 +1,20 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { Journeys, JourneyContext, EAR_TAG_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_NUMBER, TRANSPORTER_NAME } from '@flows/journeys';
+import {
+  Journeys,
+  JourneyContext,
+  defaultJourneyOptions,
+  EAR_TAG_PREFIX,
+  CONSIGNOR_NAME,
+  DESTINATION_NAME,
+  CPH_NUMBER,
+  TRANSPORTER_NAME,
+} from '@flows/journeys';
+import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
+import { camelCaseToSentenceCase } from '@utils/string-utils';
 
 test.describe('Notification view', () => {
+  const defaults = defaultJourneyOptions;
   let referenceNumber: string;
 
   test.beforeAll(async ({ browser }) => {
@@ -27,12 +39,14 @@ test.describe('Notification view', () => {
   });
 
   test('displays date created', async ({ pages }) => {
-    await expect(pages.notificationView.dateCreated).toContainText(/\d{1,2} \w+ \d{4}/);
+    const expectedDateCreated = toDisplayDate(getRelativeDate());
+    await expect(pages.notificationView.dateCreated).toHaveText(`Date created: ${expectedDateCreated}`);
   });
 
-  test('has a back link to the dashboard', async ({ pages }) => {
-    await expect(pages.notificationView.backLink).toBeVisible();
-    await expect(pages.notificationView.backLink).toHaveAttribute('href', '/');
+  test('can navigate back to the notification dashboard', async ({ pages }) => {
+    await pages.notificationView.backLink.click();
+    await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
+    await expect(pages.notificationDashboard.heading).toBeVisible();
   });
 
   test('displays all section headings', async ({ pages }) => {
@@ -47,20 +61,24 @@ test.describe('Notification view', () => {
   });
 
   test('shows origin details', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText('FR');
+    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode);
   });
 
   test('shows commodity name', async ({ pages }) => {
-    await expect(pages.notificationView.commodityName).toContainText(/dog/i);
+    await expect(pages.notificationView.commodityName).toContainText(defaults.commodityCode);
   });
 
   test('shows species rows with ear tag', async ({ pages }) => {
-    await expect(pages.notificationView.speciesRows).not.toHaveCount(0);
+    await expect(pages.notificationView.speciesRows).toHaveCount(defaults.species.length);
+    await expect(pages.notificationView.speciesCell(0, 0)).toContainText(defaults.species[0]);
     await expect(pages.notificationView.speciesCell(0, 1)).toContainText(EAR_TAG_PREFIX);
+    await expect(pages.notificationView.speciesCell(1, 0)).toContainText(defaults.species[1]);
+    await expect(pages.notificationView.speciesCell(1, 1)).toContainText(EAR_TAG_PREFIX);
   });
 
   test('shows reason for import', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Main reason for importing the animals')).toHaveText('Internal market');
+    const expectedImportReason = camelCaseToSentenceCase(defaults.importReason);
+    await expect(pages.notificationView.summaryValue('Main reason for importing the animals')).toHaveText(expectedImportReason);
   });
 
   test('shows consignor in addresses section', async ({ pages }) => {
@@ -80,10 +98,11 @@ test.describe('Notification view', () => {
   });
 
   test('shows port of entry', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Port of entry')).not.toBeEmpty();
+    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry);
   });
 
   test('shows no accompanying documents', async ({ pages }) => {
+    // TODO: Pending automation of accompanying documents page (upload doc).
     await expect(pages.notificationView.noDocumentsText).toBeVisible();
   });
 });
