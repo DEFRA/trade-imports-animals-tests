@@ -31,21 +31,21 @@ export type JourneyContext = {
   declarationDate?: string;
 };
 
-export const defaultJourneyOptions: Required<JourneyOptions> = {
+export const defaultJourneyOptions = {
   countryCode: countryCodes.eu.france,
-  requiresRegionCode: undefined,
-  internalReference: undefined,
+  requiresRegionCode: undefined as YesNoValue | undefined,
+  internalReference: undefined as string | undefined,
   commodityCode: commodityCodes.dog,
   commodityType: commodityTypes.domestic,
-  species: [commoditySpecies.bisonBison, commoditySpecies.bosSpp],
+  species: [commoditySpecies.bisonBison, commoditySpecies.bosSpp] as CommoditySpecies[],
   importReason: importReasons.internalMarket,
-  noOfAnimals: [5, 19],
-  noOfPackages: [13, 21],
+  noOfAnimals: [5, 19] as number[],
+  noOfPackages: [13, 21] as number[],
   certificationPurpose: certificationPurposes.approvedBodies,
-  unweanedAnimals: undefined,
+  unweanedAnimals: undefined as YesNoValue | undefined,
   pointOfEntry: pointOfEntries.aberdeen,
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
-};
+} satisfies JourneyOptions;
 
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
@@ -88,7 +88,7 @@ export class Journeys {
     await this.pages.originOfImport.btnSaveAndContinue.click();
     await this.pages.commoditySelection.heading.waitFor();
     if (this.journeyContext) {
-      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+      this.journeyContext.notificationId = (await this.pages.commodityDetails.notificationId.textContent()) ?? undefined;
     }
   }
 
