@@ -45,11 +45,11 @@ test.describe('Transporter', () => {
     await expect(pages.transporterSelection.heading).toBeVisible();
   });
 
-  // Skipped until next page is implemented in EUDPA-48
-  test.skip('continues to contact address after saving transporter', async ({ pages }) => {
-    // TODO: add transporter details
+  test('continues to contact address after saving transporter', async ({ pages }) => {
+    await pages.transporter.linkAddTransporter.click();
+    await pages.transporterSelection.linkSelectTransporter(0).click();
     await pages.transporter.btnSaveAndContinue.click();
-    //await expect(pages.page).toHaveURL(pages.contactAddress.expectedUrl);
-    //await expect(pages.contactAddress.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.contactAddress.expectedUrl);
+    await expect(pages.contactAddress.heading).toBeVisible();
   });
 });

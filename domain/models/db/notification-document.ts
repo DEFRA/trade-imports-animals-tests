@@ -63,6 +63,17 @@ export type NotificationDocument = {
       type: string;
     };
   };
+  consignment?: {
+    contact: {
+      name: string;
+      address: {
+        addressLine1: string;
+        addressLine2: string;
+        addressLine3?: string;
+        country: string;
+      };
+    };
+  };
   status: string;
   created: Date;
   updated: Date;

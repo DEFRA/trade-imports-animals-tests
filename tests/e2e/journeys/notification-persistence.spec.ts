@@ -4,7 +4,15 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX, CONSIGNOR_NAME, DESTINATION_NAME, CPH_NUMBER, TRANSPORTER_NAME } from '@flows/journeys';
+import {
+  EAR_TAG_PREFIX,
+  PASSPORT_PREFIX,
+  CONSIGNOR_NAME,
+  DESTINATION_NAME,
+  CPH_NUMBER,
+  TRANSPORTER_NAME,
+  CONTACT_ADDRESS_NAME,
+} from '@flows/journeys';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
@@ -83,6 +91,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.destination.address.country).toBe('United Kingdom');
       expect(doc.cphNumber).toBe(CPH_NUMBER);
       expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
+      const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
+      expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
       expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
       expect(doc.transport.transporter?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
@@ -90,8 +100,11 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.transport.transporter?.address.country).toBe('Switzerland');
       expect(doc.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
       expect(doc.transport.transporter?.type).toBe('Commercial');
-      const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
-      expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
+      expect(doc.consignment?.contact.name).toBe(CONTACT_ADDRESS_NAME);
+      expect(doc.consignment?.contact.address.addressLine1).toBe('Woodham Lane');
+      expect(doc.consignment?.contact.address.addressLine2).toBe('New Haw');
+      expect(doc.consignment?.contact.address.addressLine3).toBe('Addlestone, KT15 3NB');
+      expect(doc.consignment?.contact.address.country).toBe('United Kingdom');
       expect(doc.status).toBe('SUBMITTED');
     } finally {
       await client.close();
