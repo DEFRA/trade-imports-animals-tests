@@ -1,43 +1,48 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, journeys }) => {
   await journeys.toAccompanyingDocuments();
 
-  // Upload first document
-  await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF001' });
-  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../../resources/file-upload/test-document.pdf'));
-  await pages.accompanyingDocuments.btnAddAttachment.click();
-  await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+  await test.step('upload two documents', async () => {
+    const uploadCount = 2;
 
-  // Upload second document
-  await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF002' });
-  await pages.accompanyingDocuments.inputFileUpload.setInputFiles(path.join(__dirname, '../../../resources/file-upload/test-document.pdf'));
-  await pages.accompanyingDocuments.btnAddAttachment.click();
-  await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: 10000 });
+    for (let i = 1; i <= uploadCount; i++) {
+      const documentReference = `REF0${String(i).padStart(2, '0')}`;
+      await test.step(`upload document ${documentReference}`, async () => {
+        await pages.accompanyingDocuments.fillTextFields({ documentReference });
+        await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.safeFile250bPng);
+        await pages.accompanyingDocuments.btnAddAttachment.click();
+        await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
+      });
+    }
 
-  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(2);
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(uploadCount);
+  });
 
-  // Wait for all scans to complete
-  await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: 30000 });
+  await test.step('wait for all scans to complete', async () => {
+    await expect(pages.accompanyingDocuments.btnSaveAndContinue).toBeEnabled({ timeout: fileUploadTimeouts.virusScanComplete });
+  });
 
-  // Remove the first document
-  await pages.accompanyingDocuments.getBtnRemove('test-document.pdf').first().click(); // two docs share this filename
-  await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
+  await test.step('remove the first document', async () => {
+    // two docs share this filename
+    await pages.accompanyingDocuments.getBtnRemove(fileUploadNames.safeFile250bPng).first().click();
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
+  });
 
-  // Reload the page to re-fetch state from the backend — proves the removal persisted
-  await pages.page.reload();
-  await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
-  await expect(pages.accompanyingDocuments.documentRows.first()).toContainText('REF002');
+  await test.step('reload the page to re-fetch state from the backend', async () => {
+    await pages.page.reload();
+    await expect(pages.accompanyingDocuments.documentRows).toHaveCount(1);
+    await expect(pages.accompanyingDocuments.documentRows.first()).toContainText('REF002');
+  });
 
-  // The surviving document should be downloadable
-  const [download] = await Promise.all([
-    pages.page.waitForEvent('download'),
-    pages.accompanyingDocuments.getViewFileLink('test-document.pdf').click(),
-  ]);
-  expect(download.suggestedFilename()).toBe('test-document.pdf');
+  await test.step('surviving document is downloadable', async () => {
+    const [download] = await Promise.all([
+      pages.page.waitForEvent('download'),
+      pages.accompanyingDocuments.getViewFileLink(fileUploadNames.safeFile250bPng).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe(fileUploadNames.safeFile250bPng);
+  });
 });

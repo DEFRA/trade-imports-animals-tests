@@ -119,7 +119,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       unweanedAnimals: yesNoValues.yes,
     };
 
-    await journeys.toEntryPoint(options);
+    await journeys.submitNotification(options);
     const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 

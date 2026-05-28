@@ -78,6 +78,6 @@ test.describe('Notification view (DRAFT)', () => {
 
   test('Change link for accompanying documents navigates to accompanying documents page', async ({ pages }) => {
     await pages.notificationView.changeLink('Accompanying documents').click();
-    await expect(pages.accompanyingDocuments.headingPage).toBeVisible();
+    await expect(pages.accompanyingDocuments.heading).toBeVisible();
   });
 });

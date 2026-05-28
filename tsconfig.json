@@ -16,6 +16,7 @@
       "@flows/*": ["ui/flows/*"],
       "@fixtures": ["fixtures"],
       "@fixtures/*": ["fixtures/*"],
+      "@resources/*": ["resources/*"],
       "@utils/*": ["utils/*"]
     }
   }

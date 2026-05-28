@@ -6,8 +6,10 @@ import { importReasons, type ImportReason } from '@domain/constants/import-reaso
 import { certificationPurposes, type CertificationPurpose } from '@domain/constants/certification-purposes';
 import type { YesNoValue } from '@domain/constants/yes-no-values';
 import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-entries';
+import type { AccompanyingDocument } from '@domain/types/accompanying-document';
 import type { DateInput } from '@domain/types/date-time-input';
 import type { PageObjects } from '@page-objects';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { getRelativeDateInput } from '@utils/date-utils';
 
 export type JourneyOptions = {
@@ -22,6 +24,7 @@ export type JourneyOptions = {
   noOfPackages?: number | number[];
   certificationPurpose?: CertificationPurpose;
   unweanedAnimals?: YesNoValue;
+  accompanyingDocuments?: AccompanyingDocument | AccompanyingDocument[];
   pointOfEntry?: PointOfEntry;
   arrivalDate?: DateInput;
 };
@@ -43,6 +46,7 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   noOfPackages: [13, 21],
   certificationPurpose: certificationPurposes.approvedBodies,
   unweanedAnimals: undefined,
+  accompanyingDocuments: undefined,
   pointOfEntry: pointOfEntries.aberdeen,
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
 };
@@ -176,13 +180,32 @@ export class Journeys {
       await this.pages.additionalDetails.radioContainsUnweanedAnimals(unweanedAnimals).click();
     }
     await this.pages.additionalDetails.btnSaveAndContinue.click();
-    await this.pages.accompanyingDocuments.headingPage.waitFor();
+    await this.pages.accompanyingDocuments.heading.waitFor();
   }
 
   async toAddresses(options: JourneyOptions = {}): Promise<void> {
-    options = { ...defaultJourneyOptions, ...options };
+    const { accompanyingDocuments } = { ...defaultJourneyOptions, ...options };
     await this.toAccompanyingDocuments(options);
-    await this.pages.accompanyingDocuments.btnContinue.click();
+
+    const documents = accompanyingDocuments ? (Array.isArray(accompanyingDocuments) ? accompanyingDocuments : [accompanyingDocuments]) : [];
+
+    if (documents.length === 0) {
+      await this.pages.accompanyingDocuments.btnContinueWithoutDocuments.click();
+      await this.pages.addresses.heading.waitFor();
+      return;
+    }
+
+    for (const document of documents) {
+      await this.pages.accompanyingDocuments.fillTextFields({
+        documentType: document.documentType,
+        documentReference: document.documentReference,
+        issueDate: document.issueDate,
+      });
+      await this.pages.accompanyingDocuments.inputFileUpload.setInputFiles(document.filePath);
+      await this.pages.accompanyingDocuments.btnAddAttachment.click();
+    }
+
+    await this.pages.accompanyingDocuments.btnSaveAndContinue.click({ timeout: fileUploadTimeouts.virusScanComplete });
     await this.pages.addresses.heading.waitFor();
   }
 
