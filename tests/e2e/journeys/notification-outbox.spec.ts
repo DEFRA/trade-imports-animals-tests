@@ -55,7 +55,7 @@ test.describe('Notification outbox', { tag: ['@compose', '@integration', '@mongo
         expect(doc.metadata.schemaVersion).toBe('1');
         expect(doc.metadata.correlationId).toBeDefined();
         expect(data.referenceNumber).toBe(referenceNumber);
-        expect(data.origin.countryCode).toBe(defaults.countryCode.value);
+        expect(data.origin.countryCode).toBe(defaults.countryCode);
         expect(data.commodity.name).toBe(defaults.commodityCode);
         expect(data.transport.portOfEntry).toBe(defaults.pointOfEntry);
         expect(data.consignor.name).toBe(CONSIGNOR_NAME);
