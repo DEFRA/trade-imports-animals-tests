@@ -61,4 +61,31 @@ export class NotificationViewPage extends BasePage {
       .filter({ has: this.page.getByRole('heading', { level: 2, name: 'Accompanying documents' }) })
       .locator('p.govuk-body', { hasText: 'Not yet added' });
   }
+
+  async open(referenceNumber: string): Promise<void> {
+    await this.navigateToFrontend(this.expectedUrl(referenceNumber));
+    await this.signInWhenRequested(true);
+    await this.heading.waitFor();
+    await this.page.waitForLoadState('load');
+  }
+
+  get btnDelete(): Locator {
+    return this.page.getByRole('button', { name: 'Delete' });
+  }
+
+  get deleteDialog(): Locator {
+    return this.page.getByRole('dialog', { name: 'Delete this notification?' });
+  }
+
+  get btnConfirmDelete(): Locator {
+    return this.deleteDialog.getByRole('button', { name: 'Yes, delete' });
+  }
+
+  get btnCancelDelete(): Locator {
+    return this.deleteDialog.getByRole('button', { name: 'Cancel' });
+  }
+
+  get successBanner(): Locator {
+    return this.page.locator('#success-banner');
+  }
 }
