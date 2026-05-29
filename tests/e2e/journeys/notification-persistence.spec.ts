@@ -57,7 +57,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(docs).toHaveLength(1);
       expect(String(doc._id)).toMatch(/^[a-f0-9]{24}$/i);
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.origin.countryCode).toBe(defaults.countryCode);
+      expect(doc.origin.countryCode).toBe(defaults.countryCode.value);
       expect(doc.origin.requiresRegionCode).toBe(yesNoValues.no.toLowerCase());
       expect(doc.origin.internalReference).toBeUndefined();
       expect(doc.commodity.name).toBe(defaults.commodityCode);

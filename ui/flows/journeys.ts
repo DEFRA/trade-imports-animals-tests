@@ -11,7 +11,7 @@ import type { PageObjects } from '@page-objects';
 import { getRelativeDateInput } from '@utils/date-utils';
 
 export type JourneyOptions = {
-  countryCode?: CountryCode;
+  countryCode?: { key: string; value: CountryCode };
   requiresRegionCode?: YesNoValue;
   internalReference?: string;
   commodityCode?: CommodityCode;
@@ -32,7 +32,7 @@ export type JourneyContext = {
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
-  countryCode: countryCodes.eu.france,
+  countryCode: { key: 'france', value: countryCodes.eu.france },
   requiresRegionCode: undefined,
   internalReference: undefined,
   commodityCode: commodityCodes.dog,
@@ -47,7 +47,6 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
 };
 
-export const COUNTRY_OF_ORIGIN = 'France';
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const CONSIGNOR_NAME = 'Astra Rosales';
@@ -79,7 +78,7 @@ export class Journeys {
   async toCommoditySelection(options: JourneyOptions = {}): Promise<void> {
     const { countryCode, requiresRegionCode, internalReference } = { ...defaultJourneyOptions, ...options };
     await this.toOriginOfImport();
-    await this.pages.originOfImport.dropdownCountry.selectOption(countryCode);
+    await this.pages.originOfImport.dropdownCountry.selectOption(countryCode.value);
     if (requiresRegionCode !== undefined) {
       await this.pages.originOfImport.radioRequiresOriginCode(requiresRegionCode).click();
     }
