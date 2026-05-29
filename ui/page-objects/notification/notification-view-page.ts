@@ -62,6 +62,13 @@ export class NotificationViewPage extends BasePage {
       .locator('p.govuk-body', { hasText: 'Not yet added' });
   }
 
+  async open(referenceNumber: string): Promise<void> {
+    await this.navigateToFrontend(this.expectedUrl(referenceNumber));
+    await this.signInWhenRequested(true);
+    await this.heading.waitFor();
+    await this.page.waitForLoadState('load');
+  }
+
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }

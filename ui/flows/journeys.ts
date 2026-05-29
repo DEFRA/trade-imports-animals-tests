@@ -239,11 +239,7 @@ export class Journeys {
   }
 
   async toNotificationView(referenceNumber: string): Promise<void> {
-    await this.toNotificationDashboard();
-    // Increase timeout for finding and clicking the view link as there can be quite a lot for now
-    await this.pages.notificationDashboard.viewLink(referenceNumber).click({ timeout: 60000 });
-    await this.pages.notificationView.heading.waitFor({ timeout: 60000 });
-    await this.pages.page.waitForLoadState('load');
+    await this.pages.notificationView.open(referenceNumber);
   }
 
   async submitNotification(options: JourneyOptions = {}): Promise<void> {
