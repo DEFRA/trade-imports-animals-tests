@@ -11,7 +11,7 @@ import {
   TRANSPORTER_NAME,
 } from '@flows/journeys';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
-import { camelCaseToSentenceCase } from '@utils/string-utils';
+import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Notification view', () => {
   const defaults = defaultJourneyOptions;
@@ -61,7 +61,7 @@ test.describe('Notification view', () => {
   });
 
   test('shows origin details', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode);
+    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(camelCaseToTitleCase(defaults.countryCode.key));
   });
 
   test('shows commodity name', async ({ pages }) => {
