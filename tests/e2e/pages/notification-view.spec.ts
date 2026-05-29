@@ -4,6 +4,7 @@ import {
   Journeys,
   JourneyContext,
   defaultJourneyOptions,
+  COUNTRY_OF_ORIGIN,
   EAR_TAG_PREFIX,
   CONSIGNOR_NAME,
   DESTINATION_NAME,
@@ -61,7 +62,7 @@ test.describe('Notification view', () => {
   });
 
   test('shows origin details', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode);
+    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(COUNTRY_OF_ORIGIN);
   });
 
   test('shows commodity name', async ({ pages }) => {
