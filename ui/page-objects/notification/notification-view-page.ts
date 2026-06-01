@@ -69,6 +69,17 @@ export class NotificationViewPage extends BasePage {
     await this.page.waitForLoadState('load');
   }
 
+  get btnConfirmAndSubmit(): Locator {
+    return this.page.getByRole('link', { name: 'Confirm and submit' });
+  }
+
+  changeLink(sectionHeading: string): Locator {
+    return this.page
+      .locator('.govuk-summary-card')
+      .filter({ has: this.page.getByRole('heading', { level: 2, name: sectionHeading }) })
+      .getByRole('link', { name: /^Change/ });
+  }
+
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }

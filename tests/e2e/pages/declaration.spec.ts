@@ -14,9 +14,8 @@ test.describe('Declaration', () => {
 
   test('can navigate back to review', async ({ pages }) => {
     await pages.declaration.linkBack.click();
-    // TODO: pending view notification implementation, temporarily navigates to contact address page.
-    await expect(pages.page).toHaveURL(pages.contactAddress.expectedUrl);
-    await expect(pages.contactAddress.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(/\/notification-view\//);
+    await expect(pages.notificationView.heading).toBeVisible();
   });
 
   test('shows expected page content', async ({ pages }) => {

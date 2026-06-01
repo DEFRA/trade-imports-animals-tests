@@ -228,13 +228,13 @@ export class Journeys {
     await this.toContactAddress(options);
     await this.pages.contactAddress.radioAddress(CONTACT_ADDRESS_NAME).click();
     await this.pages.contactAddress.btnSaveAndContinue.click();
-    //await this.pages.review.heading.waitFor();
+    await this.pages.notificationView.heading.waitFor();
   }
 
   async toDeclaration(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toReview(options);
-    //await this.pages.review.btnSaveAndContinue.click();
+    await this.pages.notificationView.btnConfirmAndSubmit.click();
     await this.pages.declaration.heading.waitFor();
   }
 
