@@ -12,11 +12,10 @@ test.describe('Declaration', () => {
     expect(journeyContext.notificationId).toBe(notificationId);
   });
 
-  test('can navigate back to review', async ({ pages }) => {
+  test('can navigate back to review', async ({ pages, journeyContext }) => {
     await pages.declaration.linkBack.click();
-    // TODO: pending view notification implementation, temporarily navigates to contact address page.
-    await expect(pages.page).toHaveURL(pages.contactAddress.expectedUrl);
-    await expect(pages.contactAddress.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.notificationId));
+    await expect(pages.notificationView.heading).toBeVisible();
   });
 
   test('shows expected page content', async ({ pages }) => {

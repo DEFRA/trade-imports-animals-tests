@@ -45,11 +45,10 @@ test.describe('Contact address for consignment', () => {
     await expect(pages.contactAddress.radioAddress('EuroStore Services')).toBeChecked();
   });
 
-  test('continues to review after selecting a contact address', async ({ pages }) => {
+  test('continues to review after selecting a contact address', async ({ pages, journeyContext }) => {
     await pages.contactAddress.radioAddress('EuroStore Services').click();
     await pages.contactAddress.btnSaveAndContinue.click();
-    // TODO: pending view notification implementation, temporarily navigates to declaration pages.
-    await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
-    await expect(pages.declaration.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.notificationId));
+    await expect(pages.notificationView.heading).toBeVisible();
   });
 });

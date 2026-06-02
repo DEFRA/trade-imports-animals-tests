@@ -14,7 +14,7 @@ import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
 import { countryCodes } from '@domain/constants/country-codes';
 
-test.describe('Notification view', () => {
+test.describe('Notification view (SUBMITTED)', () => {
   const defaults = defaultJourneyOptions;
   let referenceNumber: string;
 
@@ -44,10 +44,14 @@ test.describe('Notification view', () => {
     await expect(pages.notificationView.dateCreated).toHaveText(`Date created: ${expectedDateCreated}`);
   });
 
-  test('can navigate back to the notification dashboard', async ({ pages }) => {
-    await pages.notificationView.backLink.click();
-    await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-    await expect(pages.notificationDashboard.heading).toBeVisible();
+  test('does not show Change links for a SUBMITTED notification', async ({ pages }) => {
+    await expect(pages.notificationView.changeLink('Where is this consignment coming from?')).not.toBeVisible();
+    await expect(pages.notificationView.changeLink('Your commodities')).not.toBeVisible();
+    await expect(pages.notificationView.changeLink('Addresses')).not.toBeVisible();
+  });
+
+  test('does not show Confirm and submit button for a SUBMITTED notification', async ({ pages }) => {
+    await expect(pages.notificationView.btnConfirmAndSubmit).not.toBeVisible();
   });
 
   test('displays all section headings', async ({ pages }) => {
