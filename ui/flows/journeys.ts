@@ -252,5 +252,9 @@ export class Journeys {
     await this.pages.declaration.checkboxDeclaration.click();
     await this.pages.declaration.btnSubmitNotification.click();
     //await this.pages.submissionConfirmation.heading.waitFor();
+
+    // Wait for the backend to process the submission (until we have a conformation page)
+    await this.pages.notificationView.open(this.journeyContext.notificationId);
+    await this.pages.notificationView.heading.waitFor({ timeout: 30000 });
   }
 }

@@ -12,9 +12,9 @@ test.describe('Declaration', () => {
     expect(journeyContext.notificationId).toBe(notificationId);
   });
 
-  test('can navigate back to review', async ({ pages }) => {
+  test('can navigate back to review', async ({ pages, journeyContext }) => {
     await pages.declaration.linkBack.click();
-    await expect(pages.page).toHaveURL(/\/notification-view\//);
+    await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.notificationId));
     await expect(pages.notificationView.heading).toBeVisible();
   });
 
