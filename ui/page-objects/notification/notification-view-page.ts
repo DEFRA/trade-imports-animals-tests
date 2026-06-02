@@ -70,7 +70,7 @@ export class NotificationViewPage extends BasePage {
   }
 
   get btnConfirmAndSubmit(): Locator {
-    return this.page.getByRole('link', { name: 'Confirm and submit' });
+    return this.page.getByRole('button', { name: 'Confirm and submit' });
   }
 
   changeLink(sectionHeading: string): Locator {
