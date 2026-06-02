@@ -31,12 +31,12 @@ test.describe('Animal identification details', () => {
     expect(firstCommodityDetails[0]).toBe('0102');
     expect(firstCommodityDetails[1]).toBe('Live bovine animals');
     expect(firstCommodityDetails[2]).toBe(BISON_DOMESTIC);
-    expect(firstCommodityDetails[3]).toBe(String((defaults.noOfAnimals as number[])[0]));
+    expect(firstCommodityDetails[3]).toBe(String(defaults.noOfAnimals[0]));
     const secondCommodityDetails = await pages.animalIdentification.cellsCommodities(1).allTextContents();
     expect(secondCommodityDetails[0]).toBe('0102');
     expect(secondCommodityDetails[1]).toBe('Live bovine animals');
     expect(secondCommodityDetails[2]).toBe(BOS_DOMESTIC);
-    expect(secondCommodityDetails[3]).toBe(String((defaults.noOfAnimals as number[])[1]));
+    expect(secondCommodityDetails[3]).toBe(String(defaults.noOfAnimals[1]));
   });
 
   test('shows empty animal identifiers for each animal by default', async ({ pages }) => {

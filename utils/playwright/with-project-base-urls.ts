@@ -37,7 +37,7 @@ export function withProjectBaseUrls(
   return {
     ...baseConfig,
     projects: baseConfig.projects.map((project) => {
-      const baseURL = projectBaseUrls[project.name];
+      const baseURL = project.name !== undefined ? projectBaseUrls[project.name] : undefined;
       if (!baseURL) {
         throw new Error(`No ${context} baseURL configured for project: ${project.name}`);
       }
