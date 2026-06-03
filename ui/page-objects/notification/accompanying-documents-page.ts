@@ -102,6 +102,11 @@ export class AccompanyingDocumentsPage {
     return this.page.getByRole('button', { name: `Remove ${filename}` });
   }
 
+  // Manual “refresh status” link while the virus check is still running; for users without automatic page updates (e.g. JavaScript off).
+  get linkRefreshVirusScanStatus(): Locator {
+    return this.page.getByRole('link', { name: 'Refresh virus scan status' });
+  }
+
   // Only rendered once the scan is COMPLETE.
   getViewFileLink(filename: string): Locator {
     return this.getDocumentRow(filename).getByRole('link', { name: `View file ${filename}` });
