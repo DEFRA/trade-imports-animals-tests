@@ -1,4 +1,7 @@
 import { Page, Locator } from '@playwright/test';
+import { documentTypes, type DocumentType } from '@domain/constants/document-types';
+import type { DateInput } from '@domain/types/date-time-input';
+import { getRelativeDateInput } from '@utils/date-utils';
 
 export class AccompanyingDocumentsPage {
   readonly expectedUrl = '/accompanying-documents';
@@ -6,7 +9,15 @@ export class AccompanyingDocumentsPage {
 
   constructor(private readonly page: Page) {}
 
-  get headingPage(): Locator {
+  get notificationId(): Locator {
+    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
+  }
+
+  get linkBack(): Locator {
+    return this.page.getByRole('link', { name: 'Back' });
+  }
+
+  get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: this.expectedHeading });
   }
 
@@ -38,14 +49,14 @@ export class AccompanyingDocumentsPage {
     return this.page.getByRole('button', { name: 'Add attachment' });
   }
 
-  // Reads "Continue without documents" while empty and "Save and continue" once a document is added;
-  // always rendered, but disabled until all scans complete without a virus.
-  get btnContinue(): Locator {
-    return this.page.getByRole('button', { name: /^(Save and continue|Continue without documents)$/ });
+  // When document(s) are not uploaded
+  get btnContinueWithoutDocuments(): Locator {
+    return this.page.getByRole('button', { name: 'Continue without documents' });
   }
 
-  get btnContinueEnabled(): Locator {
-    return this.btnContinue.and(this.page.locator(':not([disabled]):not([aria-disabled="true"])'));
+  // When document(s) are uploaded
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
   get errorSummaryItems(): Locator {
@@ -96,27 +107,27 @@ export class AccompanyingDocumentsPage {
     return this.getDocumentRow(filename).getByRole('link', { name: `View file ${filename}` });
   }
 
+  async fillIssueDate(date: DateInput): Promise<void> {
+    await this.inputIssueDateDay.fill(date.day);
+    await this.inputIssueDateMonth.fill(date.month);
+    await this.inputIssueDateYear.fill(date.year);
+  }
+
   async fillTextFields(
     options: {
-      documentType?: string;
+      documentType?: DocumentType;
       documentReference?: string;
-      day?: string;
-      month?: string;
-      year?: string;
+      issueDate?: DateInput;
     } = {},
   ): Promise<void> {
     const {
-      documentType = 'ITAHC',
+      documentType = documentTypes.itahc,
       documentReference = 'ITAHC001',
-      day = '15',
-      month = '01',
-      year = new Date().getFullYear().toString(),
+      issueDate = getRelativeDateInput({ monthOffset: -6 }),
     } = options;
 
     await this.dropdownDocumentType.selectOption(documentType);
     await this.inputDocumentReference.fill(documentReference);
-    await this.inputIssueDateDay.fill(day);
-    await this.inputIssueDateMonth.fill(month);
-    await this.inputIssueDateYear.fill(year);
+    await this.fillIssueDate(issueDate);
   }
 }

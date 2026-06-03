@@ -1,43 +1,37 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
 import { test, expect } from '@fixtures';
 import { writeEicarPdfFile } from '@utils/eicar-file-writer';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const fixturePath = path.join(__dirname, '../../../resources/file-upload/test-document.pdf');
-
-const UPLOAD_RENDER_TIMEOUT_MS = 10000;
-const VIRUS_SCAN_TIMEOUT_MS = 30000;
+import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
+import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Accompanying documents - view file', () => {
-  test('View file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journeys }) => {
+  test('view file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journeys }) => {
     await journeys.toAccompanyingDocuments();
 
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
-    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fixturePath);
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.safeFile250bPng);
     await pages.accompanyingDocuments.btnAddAttachment.click();
 
-    // Wait for scan to complete
-    await expect(pages.accompanyingDocuments.btnContinueEnabled).toBeVisible({ timeout: VIRUS_SCAN_TIMEOUT_MS });
-    await expect(pages.accompanyingDocuments.getStatusTag('test-document.pdf')).toHaveText('Safe');
+    await expect(pages.accompanyingDocuments.getStatusTag(fileUploadNames.safeFile250bPng)).toHaveText('Safe', {
+      timeout: fileUploadTimeouts.virusScanComplete,
+    });
 
-    const viewLink = pages.accompanyingDocuments.getViewFileLink('test-document.pdf');
+    const viewLink = pages.accompanyingDocuments.getViewFileLink(fileUploadNames.safeFile250bPng);
     await expect(viewLink).toBeVisible();
 
     const [download] = await Promise.all([pages.page.waitForEvent('download'), viewLink.click()]);
 
-    expect(download.suggestedFilename()).toBe('test-document.pdf');
+    expect(download.suggestedFilename()).toBe(fileUploadNames.safeFile250bPng);
 
-    // Bytes round-trip cleanly through the frontend stream
+    // Filename alone does not prove content integrity — compare bytes against the original upload.
     const downloadedPath = await download.path();
-    const [downloadedBytes, originalBytes] = await Promise.all([fs.readFile(downloadedPath), fs.readFile(fixturePath)]);
+    const [downloadedBytes, originalBytes] = await Promise.all([fs.readFile(downloadedPath), fs.readFile(fileUploadPaths.safeFile250bPng)]);
     expect(downloadedBytes.equals(originalBytes)).toBe(true);
   });
 
   test(
-    'View file link is not rendered when the scan rejects the file',
+    'view file link is not rendered when the scan rejects the file',
     { tag: ['@integration'] },
     async ({ pages, journeys }, testInfo) => {
       await journeys.toAccompanyingDocuments();
@@ -46,13 +40,13 @@ test.describe('Accompanying documents - view file', () => {
       const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
       await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);
       await pages.accompanyingDocuments.btnAddAttachment.click();
-      await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: UPLOAD_RENDER_TIMEOUT_MS });
+      await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
 
       await expect(pages.accompanyingDocuments.getStatusTag(eicarFile.fileName)).toHaveText('Virus found', {
-        timeout: VIRUS_SCAN_TIMEOUT_MS,
+        timeout: fileUploadTimeouts.virusScanComplete,
       });
 
-      // Remove and View file are mutually exclusive of the rejected state — Remove stays, View file does not
+      // Infected uploads stay removable but must not be downloadable.
       await expect(pages.accompanyingDocuments.getBtnRemove(eicarFile.fileName)).toBeVisible();
       await expect(pages.accompanyingDocuments.getViewFileLink(eicarFile.fileName)).toHaveCount(0);
     },

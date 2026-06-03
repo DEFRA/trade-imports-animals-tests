@@ -14,7 +14,7 @@ test.describe('Addresses landing page', () => {
   test('can navigate back to accompanying documents', async ({ pages }) => {
     await pages.addresses.linkBack.click();
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-    await expect(pages.accompanyingDocuments.headingPage).toBeVisible();
+    await expect(pages.accompanyingDocuments.heading).toBeVisible();
   });
 
   test('can navigate to consignor or exporter selection', async ({ pages }) => {

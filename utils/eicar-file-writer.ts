@@ -3,6 +3,8 @@ import path from 'node:path';
 
 export type EicarWrittenFile = { filePath: string; fileName: string };
 
+// Mock uploader: filename containing "virus" triggers an INFECTED result during virus scanning.
+// CDP uploader (real): detects the standard EICAR signature in the file bytes during virus scanning.
 export const EICAR_DEFAULT_PDF_FILENAME = 'eicar-virus-file.pdf';
 
 const EICAR_STANDARD_FILE_B64 = 'WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNUQU5EQVJELUFOVElWSVJVUy1URVNULUZJTEUhJEgrSCo=';
