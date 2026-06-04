@@ -31,6 +31,10 @@ test.describe('Notification view (DRAFT)', () => {
     await expect(pages.notificationView.changeLink('Accompanying documents')).toBeVisible();
   });
 
+  test('shows Copy as new button', async ({ pages }) => {
+    await expect(pages.notificationView.btnCopyAsNew).toBeVisible();
+  });
+
   test('shows Confirm and submit button', async ({ pages }) => {
     await expect(pages.notificationView.btnConfirmAndSubmit).toBeVisible();
   });

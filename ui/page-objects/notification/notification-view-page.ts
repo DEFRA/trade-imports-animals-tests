@@ -80,6 +80,10 @@ export class NotificationViewPage extends BasePage {
       .getByRole('link', { name: /^Change/ });
   }
 
+  get btnCopyAsNew(): Locator {
+    return this.page.getByRole('button', { name: 'Copy as new' });
+  }
+
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }

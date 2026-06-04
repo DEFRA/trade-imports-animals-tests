@@ -24,6 +24,10 @@ export class NotificationDashboardPage extends BasePage {
     return card.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
   }
 
+  copyAsNewButton(referenceNumber: string): Locator {
+    return this.page.getByRole('button', { name: `Copy as new ${referenceNumber}` });
+  }
+
   viewLink(referenceNumber: string): Locator {
     return this.page.getByRole('link', { name: `View ${referenceNumber}` });
   }
