@@ -83,18 +83,14 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
   test('allows deleting all current-page notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
-    const ADMIN_PAGE_SIZE = 50;
 
-    const expectedDeletes = ADMIN_PAGE_SIZE;
-    // Captured from the rendered table before select-all fires; used by the
-    // audit step to assert the recorded set of deleted refs included a row
-    // that was actually on page 1. Sort-order-independent.
+    const currentPageRefs = await pages.adminNotifications.currentPageReferences();
+    const expectedDeletes = currentPageRefs;
     let pageOneReference = '';
 
     await test.step('select all deletes only the current page', async () => {
       const initialCount = await pages.adminNotifications.getTotalElements();
 
-      const currentPageRefs = await pages.adminNotifications.currentPageReferences();
       expect(currentPageRefs.length).toBeGreaterThan(0);
       pageOneReference = currentPageRefs[0];
 
