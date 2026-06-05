@@ -48,6 +48,32 @@ export class AdminNotificationsPage extends BasePage {
     return this.page.getByRole('navigation', { name: 'Pagination' });
   }
 
+  get resultsCount(): Locator {
+    return this.page.getByTestId('results-count');
+  }
+
+  // Returns the reference numbers currently rendered in the table (i.e. the
+  // current page). Reads them from the per-row checkbox `value` attributes so
+  // the answer matches exactly what the bulk-delete handler will submit.
+  async currentPageReferences(): Promise<string[]> {
+    return this.page.locator('.notification-checkbox').evaluateAll((elements) => (elements as HTMLInputElement[]).map((el) => el.value));
+  }
+
+  // Reads the dataset-wide `totalElements` rendered next to the table
+  // (e.g. "42 notifications"). Returns 0 when the element is absent, which
+  // matches the template guard `{% if totalElements %}`.
+  async getTotalElements(): Promise<number> {
+    if ((await this.resultsCount.count()) === 0) {
+      return 0;
+    }
+    const text = (await this.resultsCount.textContent()) ?? '';
+    const match = text.match(/(\d+)/);
+    if (!match) {
+      throw new Error(`Could not parse totalElements from results-count text: "${text}"`);
+    }
+    return Number(match[1]);
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn);
