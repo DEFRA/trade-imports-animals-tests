@@ -51,7 +51,6 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
 };
 
-export const COUNTRY_OF_ORIGIN = 'France';
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const CONSIGNOR_NAME = 'Astra Rosales';

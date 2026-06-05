@@ -4,7 +4,6 @@ import {
   Journeys,
   JourneyContext,
   defaultJourneyOptions,
-  COUNTRY_OF_ORIGIN,
   EAR_TAG_PREFIX,
   CONSIGNOR_NAME,
   DESTINATION_NAME,
