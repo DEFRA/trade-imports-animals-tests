@@ -85,7 +85,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
 
     const currentPageRefs = await pages.adminNotifications.currentPageReferences();
-    const expectedDeletes = currentPageRefs;
+    const expectedDeletes = currentPageRefs.length;
     let pageOneReference = '';
 
     await test.step('select all deletes only the current page', async () => {
