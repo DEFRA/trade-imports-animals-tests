@@ -84,36 +84,34 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   test('allows deleting all current-page notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
     skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
     const ADMIN_PAGE_SIZE = 50;
-    const client = new MongoDbClient();
-    let expectedDeletes = 0;
+
+    const expectedDeletes = ADMIN_PAGE_SIZE;
     // Captured from the rendered table before select-all fires; used by the
     // audit step to assert the recorded set of deleted refs included a row
     // that was actually on page 1. Sort-order-independent.
     let pageOneReference = '';
 
-    try {
-      await client.connect();
+    await test.step('select all deletes only the current page', async () => {
+      const initialCount = await pages.adminNotifications.getTotalElements();
 
-      await test.step('select all deletes only the current page', async () => {
-        const notifications = client.collection('trade-imports-animals-backend', 'notification');
-        const initialCount = await notifications.countDocuments({});
-        expectedDeletes = ADMIN_PAGE_SIZE;
+      const currentPageRefs = await pages.adminNotifications.currentPageReferences();
+      expect(currentPageRefs.length).toBeGreaterThan(0);
+      pageOneReference = currentPageRefs[0];
 
-        const currentPageRefs = await pages.adminNotifications.currentPageReferences();
-        expect(currentPageRefs.length).toBeGreaterThan(0);
-        pageOneReference = currentPageRefs[0];
+      await pages.adminNotifications.checkBoxSelectAll.check();
+      await pages.adminNotifications.btnDelete.click();
+      await pages.adminNotifications.btnConfirm.click();
+      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
+      await expect
+        .poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium })
+        .toBe(initialCount - expectedDeletes);
+    });
 
-        await pages.adminNotifications.checkBoxSelectAll.check();
-        await pages.adminNotifications.btnDelete.click();
-        await pages.adminNotifications.btnConfirm.click();
-        await expect(pages.adminNotifications.alertSuccess).toContainText(
-          'Notifications deleted successfully. Redirecting in 3 seconds...',
-        );
+    await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
+      const client = new MongoDbClient();
 
-        await expect.poll(() => notifications.countDocuments({}), { timeout: timeouts.medium }).toBe(initialCount - expectedDeletes);
-      });
-
-      await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
+      try {
+        await client.connect();
         const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
         const docs = await auditCollection
           .find({
@@ -131,10 +129,10 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
         expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
         expect(docs[0].traceId).toBe('test-trace-id');
         expect(docs[0].userId).toBe('2100010101');
-      });
-    } finally {
-      await client.close();
-    }
+      } finally {
+        await client.close();
+      }
+    });
   });
 
   test('does not allow deleting a notification by invalid reference number', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
