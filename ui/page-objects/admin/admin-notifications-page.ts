@@ -44,6 +44,30 @@ export class AdminNotificationsPage extends BasePage {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Important' }) });
   }
 
+  get pagination(): Locator {
+    return this.page.getByRole('navigation', { name: 'Pagination' });
+  }
+
+  get resultsCount(): Locator {
+    return this.page.getByTestId('results-count');
+  }
+
+  async currentPageReferences(): Promise<string[]> {
+    return this.page.locator('.notification-checkbox').evaluateAll((elements) => (elements as HTMLInputElement[]).map((el) => el.value));
+  }
+
+  async getTotalElements(): Promise<number> {
+    if ((await this.resultsCount.count()) === 0) {
+      return 0;
+    }
+    const text = (await this.resultsCount.textContent()) ?? '';
+    const match = text.match(/(\d+)/);
+    if (!match) {
+      throw new Error(`Could not parse totalElements from results-count text: "${text}"`);
+    }
+    return Number(match[1]);
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.page.goto(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn);
@@ -55,5 +79,24 @@ export class AdminNotificationsPage extends BasePage {
 
   checkboxNotificationByReference(referenceNumber: string): Locator {
     return this.page.getByRole('checkbox', { name: `Select notification ${referenceNumber}` });
+  }
+
+  async findRowByReference(referenceNumber: string, maxPages: number = 10): Promise<void> {
+    await this.page.goto(this.expectedUrl);
+
+    const checkbox = this.checkboxNotificationByReference(referenceNumber);
+    const nextLink = this.pagination.getByRole('link', { name: 'Next page' });
+
+    for (let visited = 0; visited < maxPages; visited++) {
+      if (await checkbox.isVisible()) {
+        return;
+      }
+      if (!(await nextLink.isVisible())) {
+        throw new Error(`Notification ${referenceNumber} not found; no more pages.`);
+      }
+      await nextLink.click();
+    }
+
+    throw new Error(`Notification ${referenceNumber} not found within ${maxPages} pages.`);
   }
 }
