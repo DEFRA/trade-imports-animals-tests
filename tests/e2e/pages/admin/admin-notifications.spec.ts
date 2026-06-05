@@ -22,10 +22,12 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
   test('allows deleting a notification by reference number', async ({ pages }) => {
     const referenceNumber = 'GBN-AG-26-000001';
+    const initialTotalElements = await pages.adminNotifications.getTotalElements();
     await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     await pages.adminNotifications.btnDeleteByReferenceNumber.click();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
+    await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
     await expect
       .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), { timeout: timeouts.medium })
       .toBe(false);
