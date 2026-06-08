@@ -50,6 +50,10 @@ test.describe('Notification view (SUBMITTED)', () => {
     await expect(pages.notificationView.changeLink('Addresses')).not.toBeVisible();
   });
 
+  test('shows Copy as new button', async ({ pages }) => {
+    await expect(pages.notificationView.btnCopyAsNew).toBeVisible();
+  });
+
   test('does not show Confirm and submit button for a SUBMITTED notification', async ({ pages }) => {
     await expect(pages.notificationView.btnConfirmAndSubmit).not.toBeVisible();
   });
