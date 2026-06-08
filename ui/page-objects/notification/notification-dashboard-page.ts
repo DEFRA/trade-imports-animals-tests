@@ -35,14 +35,20 @@ export class NotificationDashboardPage extends BasePage {
   notificationCard(index: number) {
     const card = this.notificationCards.nth(index);
     return {
-      heading: card.getByRole('heading', { level: 2 }),
-      commodity: this.cardField(card, 'Commodity'),
-      origin: this.cardField(card, 'Origin'),
-      arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
-      consignee: this.cardField(card, 'Consignee'),
-      consignor: this.cardField(card, 'Consignor'),
-      status: this.cardField(card, 'Status'),
-      dateCreated: card.getByText(/Date created:/),
+      details: {
+        heading: card.getByRole('heading', { level: 2 }),
+        commodity: this.cardField(card, 'Commodity'),
+        origin: this.cardField(card, 'Origin'),
+        arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
+        consignee: this.cardField(card, 'Consignee'),
+        consignor: this.cardField(card, 'Consignor'),
+        status: this.cardField(card, 'Status'),
+        dateCreated: card.getByText(/Date created:/),
+      },
+      actions: {
+        copyAsNew: card.getByRole('button', { name: /Copy as new/ }),
+        view: card.getByRole('link', { name: /View/ }),
+      },
     };
   }
 

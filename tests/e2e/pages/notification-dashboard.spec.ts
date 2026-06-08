@@ -26,14 +26,22 @@ test.describe('Import notification service', () => {
   test('displays details on the first notification card', async ({ pages }) => {
     const firstCard = pages.notificationDashboard.notificationCard(0);
 
-    await expect(firstCard.heading).toBeVisible();
-    await expect(firstCard.heading).toContainText(/GBN-AG-\d{2}-[A-Z0-9]+/);
-    await expect(firstCard.commodity).toBeVisible();
-    await expect(firstCard.origin).toBeVisible();
-    await expect(firstCard.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
-    await expect(firstCard.status).toBeVisible();
-    await expect(firstCard.status).toContainText(/Draft|Submitted/);
-    await expect(firstCard.dateCreated).toBeVisible();
-    await expect(firstCard.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
+    await expect(firstCard.details.heading).toBeVisible();
+    await expect(firstCard.details.heading).toContainText(/GBN-AG-\d{2}-[A-Z0-9]+/);
+    await expect(firstCard.details.commodity).toBeVisible();
+    await expect(firstCard.details.origin).toBeVisible();
+    await expect(firstCard.details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
+    await expect(firstCard.details.status).toBeVisible();
+    await expect(firstCard.details.status).toContainText(/Draft|Submitted/);
+    await expect(firstCard.details.dateCreated).toBeVisible();
+    await expect(firstCard.details.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
+  });
+
+  test('displays actions on the first notification card', async ({ pages }) => {
+    // TODO: once dashboard filtering exists, add per-notification-status tests — actions may vary by status.
+    const firstCard = pages.notificationDashboard.notificationCard(0);
+
+    await expect(firstCard.actions.view).toBeVisible();
+    await expect(firstCard.actions.copyAsNew).toBeVisible();
   });
 });
