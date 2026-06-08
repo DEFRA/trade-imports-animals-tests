@@ -1,4 +1,5 @@
 import { Locator } from '@playwright/test';
+import type { SortByValue } from '@domain/constants/sort-by-values';
 import { BasePage } from '@page-objects/base/base-page';
 
 export class NotificationDashboardPage extends BasePage {
@@ -12,12 +13,25 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Create an import notification' });
   }
 
+  get dropdownSort(): Locator {
+    return this.page.getByLabel('Sort by');
+  }
+
+  get btnUpdateSort(): Locator {
+    return this.page.getByRole('button', { name: 'Update sort' });
+  }
+
   get totalResults(): Locator {
     return this.page.getByText(/\d+ Results/);
   }
 
   get notificationCards(): Locator {
     return this.page.locator('.govuk-summary-card');
+  }
+
+  async sortBy(sortByValue: SortByValue): Promise<void> {
+    await this.dropdownSort.selectOption(sortByValue);
+    await this.btnUpdateSort.click();
   }
 
   private cardField(card: Locator, term: string): Locator {

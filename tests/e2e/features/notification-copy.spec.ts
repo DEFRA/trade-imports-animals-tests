@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification copy', () => {
   test('copies draft notification from the view screen and redirects to the new draft', async ({ pages, journeys, journeyContext }) => {
@@ -22,6 +23,7 @@ test.describe('Notification copy', () => {
     const originalReferenceNumber = journeyContext.notificationId;
 
     await journeys.toNotificationDashboard();
+    await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
     await pages.notificationDashboard.btnCopyAsNew(originalReferenceNumber).click();
 
     await pages.notificationView.heading.waitFor();
