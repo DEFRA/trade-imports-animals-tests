@@ -1,99 +1,73 @@
 import path from 'path';
 import { test, expect } from '@fixtures';
-import { skipIfCdpEnvironment, skipIfComposeEnvironment } from '@utils/playwright/environment';
+import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-/** CDP infra cap (observed on dev): largest accept / smallest reject. */
-const CDP_MAX_ACCEPTED_BYTES = 10_484_904;
-const CDP_MIN_REJECTED_BYTES = 10_484_905;
+/** App-enforced cap is 10 MB decimal — matches the user-facing "10MB" hint. */
+const TEN_MB_BYTES = 10 * 1000 * 1000;
 
-/** Mock uploader limit is 50 MiB (50 × 1024² bytes), not decimal MB — express via `{ bytes }`. */
-const FIFTY_MIB_BYTES = 50 * 1024 * 1024;
+/** Above the 10 MiB CDP nginx ingress cap — used to prove the client preflight prevents a raw 413 page. */
+const ELEVEN_MIB_BYTES = 11 * 1024 * 1024;
+
+const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 10MB';
 
 test.describe('Accompanying documents - file size limit', { tag: '@integration' }, () => {
-  test.describe('CDP uploader — ~10 MiB infra cap', () => {
-    // Note: Form fields add bytes to the multipart upload payload — keep the file slightly under the infra cap.
-    test('accepts a file at 10,484,904 bytes and completes virus scan', { tag: '@slow' }, async ({ pages, journeys }, testInfo) => {
-      skipIfComposeEnvironment('CDP only: real uploader limits and over-limit behaviour differ from mock uploader.');
-      await journeys.toAccompanyingDocuments();
+  test('accepts a file at the 10 MB cap and completes virus scan', { tag: '@slow' }, async ({ pages, journeys }, testInfo) => {
+    await journeys.toAccompanyingDocuments();
 
-      const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'cdp-infra.pdf', {
-        bytes: CDP_MAX_ACCEPTED_BYTES,
-      });
-
-      await pages.accompanyingDocuments.fillTextFields({ documentReference: 'CDPINFRA01' });
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
-      await pages.accompanyingDocuments.btnAddAttachment.click();
-
-      await expect(pages.accompanyingDocuments.documentsList).toBeVisible({
-        timeout: fileUploadTimeouts.documentsListVisible,
-      });
-      await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText(/Checking|Safe/);
-      await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText('Safe', {
-        timeout: fileUploadTimeouts.virusScanComplete,
-      });
+    const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'at-cap.pdf', {
+      bytes: TEN_MB_BYTES,
     });
 
-    test('shows an error when file is 10,484,905 bytes (1 byte over cdp limit)', async ({ pages, journeys }, testInfo) => {
-      skipIfComposeEnvironment('CDP only: real uploader limits and over-limit behaviour differ from mock uploader.');
-      await journeys.toAccompanyingDocuments();
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'ATCAP01' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
+    await pages.accompanyingDocuments.btnAddAttachment.click();
 
-      const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'cdp-infra.pdf', {
-        bytes: CDP_MIN_REJECTED_BYTES,
-      });
-
-      await pages.accompanyingDocuments.fillTextFields({ documentReference: 'CDPINFRA01' });
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
-      await pages.accompanyingDocuments.btnAddAttachment.click();
-
-      await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-      await expect(pages.accompanyingDocuments.documentsList).not.toBeVisible();
-      await expect(pages.page).toHaveTitle('413 Request Entity Too Large');
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({
+      timeout: fileUploadTimeouts.documentsListVisible,
+    });
+    await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText(/Checking|Safe/);
+    await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText('Safe', {
+      timeout: fileUploadTimeouts.virusScanComplete * 2,
     });
   });
 
-  test.describe('Mock uploader - 50 MiB binary limit', { tag: ['@compose', '@integration'] }, () => {
-    test('accepts a file at exactly 50 mib and completes virus scan', { tag: '@slow' }, async ({ pages, journeys }, testInfo) => {
-      skipIfCdpEnvironment('Compose/local only: mock uploader limits and over-limit behaviour differ from CDP uploader.');
-      await journeys.toAccompanyingDocuments();
+  test('rejects a file one byte over the 10 MB cap with an inline error and no navigation', async ({ pages, journeys }, testInfo) => {
+    await journeys.toAccompanyingDocuments();
 
-      const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'mock-50mib-at-limit.pdf', {
-        bytes: FIFTY_MIB_BYTES,
-      });
-
-      await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF50MIB' });
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
-      await pages.accompanyingDocuments.btnAddAttachment.click();
-
-      await expect(pages.accompanyingDocuments.documentsList).toBeVisible({
-        timeout: fileUploadTimeouts.documentsListVisible,
-      });
-      await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText(/Checking|Safe/);
-      await expect(pages.accompanyingDocuments.getStatusTag(file.fileName)).toHaveText('Safe', {
-        timeout: fileUploadTimeouts.virusScanComplete * 2,
-      });
+    const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'one-byte-over.pdf', {
+      bytes: TEN_MB_BYTES + 1,
     });
 
-    test('shows an error when file is 1 byte over the 50 mib upload limit', async ({ pages, journeys }, testInfo) => {
-      skipIfCdpEnvironment('Compose/local only: mock uploader limits and over-limit behaviour differ from CDP uploader.');
-      await journeys.toAccompanyingDocuments();
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'OVER10MB01' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
+    await pages.accompanyingDocuments.btnAddAttachment.click();
 
-      const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'mock-50mib-one-byte-over.pdf', {
-        bytes: FIFTY_MIB_BYTES + 1,
-      });
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.accompanyingDocuments.documentsList).not.toBeVisible();
+    await expect(pages.accompanyingDocuments.errorFile).toContainText(OVERSIZE_FILE_MESSAGE);
+    const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
+    expect(errorSummaryItems).toContain(OVERSIZE_FILE_MESSAGE);
+  });
 
-      await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFOVER50MIB' });
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
-      await pages.accompanyingDocuments.btnAddAttachment.click();
+  test('keeps the user on the upload page (not a raw nginx 413) when file exceeds the CDP infra cap', async ({
+    pages,
+    journeys,
+  }, testInfo) => {
+    skipIfComposeEnvironment('CDP-only regression: Compose stack has no nginx ingress in front of the frontend pod.');
+    await journeys.toAccompanyingDocuments();
 
-      await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
-      await expect(pages.accompanyingDocuments.documentsList).not.toBeVisible();
-      const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toContain('The file could not be uploaded. Try again.');
-
-      await expect(pages.accompanyingDocuments.btnContinueWithoutDocuments).toBeVisible();
-      await expect(pages.accompanyingDocuments.btnSaveAndContinue).toHaveCount(0);
+    const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'over-nginx.pdf', {
+      bytes: ELEVEN_MIB_BYTES,
     });
+
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'OVERNGINX01' });
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(file.filePath);
+    await pages.accompanyingDocuments.btnAddAttachment.click();
+
+    await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
+    await expect(pages.page).not.toHaveTitle(/413 Request Entity Too Large/);
+    await expect(pages.accompanyingDocuments.errorFile).toContainText(OVERSIZE_FILE_MESSAGE);
   });
 });

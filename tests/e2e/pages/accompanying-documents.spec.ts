@@ -142,9 +142,10 @@ test.describe('Accompanying documents', () => {
       await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REF011' });
       await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.safeFile250bPng);
       await pages.accompanyingDocuments.btnAddAttachment.click();
-      const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('You can add a maximum of 10 documents');
+      // The over-cap response re-renders the same URL, so allTextContents
+      // alone doesn't auto-wait — anchor the assertion to a Locator first.
+      await expect(pages.accompanyingDocuments.errorSummaryItems).toHaveCount(1);
+      await expect(pages.accompanyingDocuments.errorSummaryItems.first()).toHaveText('You can add a maximum of 10 documents');
     });
   });
 
@@ -276,7 +277,7 @@ test.describe('Accompanying documents', () => {
       );
       await expect(pages.accompanyingDocuments.errorFile).toContainText('Select a file to upload');
       const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      //expect(errorSummaryItems).toHaveLength(3);
+      expect(errorSummaryItems).toHaveLength(3);
       expect(errorSummaryItems).toContain('Select a document type');
       expect(errorSummaryItems).toContain('Document reference must only contain letters and numbers');
       expect(errorSummaryItems).toContain('Select a file to upload');
