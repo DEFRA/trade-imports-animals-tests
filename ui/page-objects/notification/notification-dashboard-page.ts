@@ -27,6 +27,10 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Update sort' });
   }
 
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
   get totalResults(): Locator {
     return this.page.getByText(/(No Results|Showing .* Results)/);
   }
