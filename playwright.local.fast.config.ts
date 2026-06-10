@@ -13,6 +13,5 @@ export default defineConfig({
 
   use: {
     ...sharedConfig.use,
-    trace: 'on',
   },
 });

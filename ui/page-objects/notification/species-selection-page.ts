@@ -14,7 +14,7 @@ export class SpeciesSelectionPage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { name: 'Commodity', exact: true });
+    return this.page.getByRole('heading', { name: 'Commodity' });
   }
 
   get tableCommodities(): Locator {
