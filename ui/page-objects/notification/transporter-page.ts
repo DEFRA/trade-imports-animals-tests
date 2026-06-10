@@ -12,12 +12,12 @@ export class TransporterPage extends BasePage {
     return this.page.getByRole('link', { name: 'Back' });
   }
 
-  get captionTransport(): Locator {
-    return this.page.locator('span.govuk-caption-l').filter({ hasText: 'Transport' });
-  }
-
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Transporter' });
+  }
+
+  get caption(): Locator {
+    return this.page.locator('span.govuk-caption-m').filter({ hasText: 'Transport' });
   }
 
   get linkTransportGuidance(): Locator {
