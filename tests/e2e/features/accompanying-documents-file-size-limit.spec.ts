@@ -47,8 +47,7 @@ test.describe('Accompanying documents - file size limit', { tag: '@integration' 
     await expect(pages.page).toHaveURL(pages.accompanyingDocuments.expectedUrl);
     await expect(pages.accompanyingDocuments.documentsList).not.toBeVisible();
     await expect(pages.accompanyingDocuments.errorFile).toContainText(OVERSIZE_FILE_MESSAGE);
-    const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-    expect(errorSummaryItems).toContain(OVERSIZE_FILE_MESSAGE);
+    await expect(pages.accompanyingDocuments.errorSummaryItems.filter({ hasText: OVERSIZE_FILE_MESSAGE })).toHaveCount(1);
   });
 
   test('keeps the user on the upload page (not a raw nginx 413) when file exceeds the CDP infra cap', async ({

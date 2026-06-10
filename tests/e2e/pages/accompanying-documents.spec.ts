@@ -276,11 +276,12 @@ test.describe('Accompanying documents', () => {
         'Document reference must only contain letters and numbers',
       );
       await expect(pages.accompanyingDocuments.errorFile).toContainText('Select a file to upload');
-      const errorSummaryItems = await pages.accompanyingDocuments.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(3);
-      expect(errorSummaryItems).toContain('Select a document type');
-      expect(errorSummaryItems).toContain('Document reference must only contain letters and numbers');
-      expect(errorSummaryItems).toContain('Select a file to upload');
+      await expect(pages.accompanyingDocuments.errorSummaryItems).toHaveCount(3);
+      await expect(pages.accompanyingDocuments.errorSummaryItems.filter({ hasText: 'Select a document type' })).toHaveCount(1);
+      await expect(
+        pages.accompanyingDocuments.errorSummaryItems.filter({ hasText: 'Document reference must only contain letters and numbers' }),
+      ).toHaveCount(1);
+      await expect(pages.accompanyingDocuments.errorSummaryItems.filter({ hasText: 'Select a file to upload' })).toHaveCount(1);
     });
   });
 });
