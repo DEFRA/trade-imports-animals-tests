@@ -88,13 +88,17 @@ export class AdminNotificationsPage extends BasePage {
     const nextLink = this.pagination.getByRole('link', { name: 'Next page' });
 
     for (let visited = 0; visited < maxPages; visited++) {
+      // isVisible() does not auto-wait, so anchor each iteration on a rendered table.
+      await this.tableRows.first().waitFor();
       if (await checkbox.isVisible()) {
         return;
       }
       if (!(await nextLink.isVisible())) {
         throw new Error(`Notification ${referenceNumber} not found; no more pages.`);
       }
+      const currentUrl = this.page.url();
       await nextLink.click();
+      await this.page.waitForURL((url) => url.toString() !== currentUrl);
     }
 
     throw new Error(`Notification ${referenceNumber} not found within ${maxPages} pages.`);

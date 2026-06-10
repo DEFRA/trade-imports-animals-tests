@@ -13,7 +13,8 @@ export class TransporterPage extends BasePage {
   }
 
   get captionTransport(): Locator {
-    return this.page.locator('span.govuk-caption-l').filter({ hasText: 'Transport' });
+    // Size class differs between the pre- and post-EUDPA-209 heading component.
+    return this.page.locator('span.govuk-caption-l, span.govuk-caption-m').filter({ hasText: 'Transport' });
   }
 
   get heading(): Locator {
