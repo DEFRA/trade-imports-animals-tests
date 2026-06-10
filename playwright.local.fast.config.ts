@@ -9,7 +9,8 @@ const projectBaseUrls: Record<string, string> = {
 
 export default defineConfig({
   ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'local'),
-  retries: 0,
+  // One retry absorbs the sporadic OIDC sign-in ETIMEDOUT under parallel load.
+  retries: 1,
 
   use: {
     ...sharedConfig.use,
