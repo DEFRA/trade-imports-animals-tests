@@ -31,6 +31,7 @@ export const countryCodes = {
     slovenia: 'SI',
     spain: 'ES',
     sweden: 'SE',
+    switzerland: 'CH',
   },
   row: {
     // Rest of World countries not yet implemented in flows
