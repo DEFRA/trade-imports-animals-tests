@@ -88,8 +88,10 @@ export class AdminNotificationsPage extends BasePage {
     const nextLink = this.pagination.getByRole('link', { name: 'Next page' });
 
     for (let visited = 0; visited < maxPages; visited++) {
-      // isVisible() does not auto-wait, so anchor each iteration on a rendered table.
-      await this.tableRows.first().waitFor();
+      // isVisible() does not auto-wait, so anchor each iteration on the always-rendered
+      // heading — the page is server-rendered, so once it arrives the table (when present)
+      // is already in the DOM. The table itself only renders when notifications exist.
+      await this.heading.waitFor();
       if (await checkbox.isVisible()) {
         return;
       }
