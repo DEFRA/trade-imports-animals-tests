@@ -1,0 +1,13 @@
+import { DECIMAL_BYTES_PER_MB } from '@utils/synthetic-file-writer';
+
+/** App-enforced cap is 10 MB decimal — matches the user-facing "10 MB" hint. */
+export const TEN_MB_BYTES = 10 * DECIMAL_BYTES_PER_MB;
+
+/**
+ * Above the Hapi route payload cap (10 MB file cap + 1024 B multipart headroom) but below the
+ * 10 MiB (10,485,760 B) CDP nginx ingress cap, so Hapi's Boom 413 rejection — and the
+ * onPreResponse re-render — fires deterministically in both Compose and CDP.
+ */
+export const ABOVE_PAYLOAD_CAP_BYTES = 10_200_000;
+
+export const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 10 MB';

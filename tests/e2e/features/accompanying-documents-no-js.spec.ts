@@ -1,21 +1,10 @@
 import path from 'path';
 import { test, expect } from '@fixtures';
+import { TEN_MB_BYTES, ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { timeouts } from '@config/timeouts';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
-
-/** App-enforced cap is 10 MB decimal — matches the user-facing "10 MB" hint. */
-const TEN_MB_BYTES = 10 * 1000 * 1000;
-
-/**
- * Above the Hapi route payload cap (10 MB file cap + 1024 B multipart headroom) but below the
- * 10 MiB (10,485,760 B) CDP nginx ingress cap, so Hapi's Boom 413 rejection — and the
- * onPreResponse re-render — fires deterministically in both Compose and CDP.
- */
-const ABOVE_PAYLOAD_CAP_BYTES = 10_200_000;
-
-const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 10 MB';
 
 test.describe('Accompanying documents - without JavaScript', { tag: ['@integration', '@no-js'] }, () => {
   test.use({ javaScriptEnabled: false });

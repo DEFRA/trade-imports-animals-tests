@@ -1,16 +1,12 @@
 import path from 'path';
 import { test, expect } from '@fixtures';
+import { TEN_MB_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-/** App-enforced cap is 10 MB decimal — matches the user-facing "10 MB" hint. */
-const TEN_MB_BYTES = 10 * 1000 * 1000;
-
 /** Above the 10 MiB CDP nginx ingress cap — used to prove the client preflight prevents a raw 413 page. */
 const ELEVEN_MIB_BYTES = 11 * 1024 * 1024;
-
-const OVERSIZE_FILE_MESSAGE = 'The selected file must be smaller than 10 MB';
 
 test.describe('Accompanying documents - file size limit', { tag: '@integration' }, () => {
   test('accepts a file at the 10 MB cap and completes virus scan', { tag: '@slow' }, async ({ pages, journeys }, testInfo) => {
