@@ -1,0 +1,287 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Docker Compose stack for Trade Imports Animals journey tests.
+# This file defines the infrastructure used locally and in CI to run
+# end-to-end Playwright tests against the Trade Imports Animals frontend
+# and backend services.
+#
+# It provides infrastructure comparable to the real environment:
+#   - mongodb
+#   - redis
+#   - localstack (s3, sqs, sns)
+#
+# Both mongodb and localstack have init scripts included for setting up
+# resources on startup. These scripts are in docker/scripts.
+#
+# The Trade Imports Animals frontend and backend images are pulled from
+# Docker Hub (defradigital/*) and configured using .env files under
+# docker/config/. Services can reference each other by container name,
+# for example:
+#   - http://trade-imports-animals-frontend:3000/
+#   - http://trade-imports-animals-backend:8085/
+
+services:
+  # ──────────────────────────────────────────────────────────────────────────────
+  # MongoDB
+  # https://hub.docker.com/_/mongo/
+  # ──────────────────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    command: ['--replSet', 'rs0', '--bind_ip_all']
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./docker/scripts/mongodb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - '--eval'
+        - >
+          try { rs.status().ok } catch(e) {
+          rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}).ok }
+      interval: 5s
+      start_period: 15s
+      retries: 5
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Localstack
+  # https://hub.docker.com/r/localstack/localstack/
+  # ──────────────────────────────────────────────────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - '4566:4566'
+      - '4510-4559:4510-4559'
+    env_file:
+      - ./docker/config/defaults.env
+    environment:
+      - LS_LOG=WARN
+      - SERVICES=s3,sqs,sns,dynamodb
+      - LOCALSTACK_HOST=localstack
+      - SQS_ENDPOINT_STRATEGY=off
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4566/_localstack/health']
+      interval: 5s
+      start_period: 10s
+      retries: 6
+
+  localstack-init:
+    image: localstack/localstack:3.0.2
+    env_file:
+      - ./docker/config/defaults.env
+    volumes:
+      - ./docker/scripts/localstack:/scripts
+    entrypoint: bash /scripts/10-setup-buckets.sh
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Redis
+  # https://hub.docker.com/_/redis/
+  # ──────────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2.3-alpine3.18
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'PING']
+      interval: 5s
+      start_period: 2s
+      retries: 5
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Defra ID Stub
+  # https://hub.docker.com/r/defradigital/trade-imports-defra-id-stub/
+  # ──────────────────────────────────────────────────────────────────────────────
+  trade-imports-defra-id-stub:
+    image: defradigital/trade-imports-defra-id-stub:latest
+    platform: linux/amd64
+    environment:
+      - PORT=3007
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123}
+    ports:
+      - '3007:3007'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3007/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
+
+  trade-imports-stub:
+    image: defradigital/trade-imports-stub:${TRADE_IMPORTS_STUB:-latest}
+    platform: linux/amd64
+    environment:
+      - PORT=8087
+      - SPRING_PROFILES_ACTIVE=local
+      - MONGO_URI=mongodb://mongodb:27017/?directConnection=true
+      - MONGO_DATABASE=trade-imports-stub
+      - AWS_REGION=eu-west-2
+      - AWS_EMF_AGENT_ENDPOINT=http://localstack:4566
+      - LOG_LEVEL=INFO
+    ports:
+      - '8087:8087'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8087/health']
+      interval: 5s
+      start_period: 30s
+      retries: 10
+
+  trade-imports-reference-data:
+    image: defradigital/trade-imports-reference-data:${TRADE_IMPORTS_REFERENCE_DATA:-latest}
+    platform: linux/amd64
+    environment:
+      - PORT=8086
+      - SPRING_PROFILES_ACTIVE=local
+      - MONGO_URI=mongodb://mongodb:27017/?directConnection=true
+      - MONGO_DATABASE=trade-imports-reference-data
+      - AWS_REGION=eu-west-2
+      - AWS_EMF_AGENT_ENDPOINT=http://localstack:4566
+      - MDM_SERVICE_URL=http://trade-imports-stub:8087
+      - TRADE_PLATFORM_AUTH_URL=http://trade-imports-stub:8087/tenant/oauth2/v2.0/token
+      - TRADE_PLATFORM_CLIENT_ID=local-dev
+      - TRADE_PLATFORM_CLIENT_SECRET=local-dev
+      - TRADE_PLATFORM_SCOPE=local
+      - TRADE_PLATFORM_SUBSCRIPTION_KEY=local-dev
+      - LOG_LEVEL=INFO
+    ports:
+      - '8086:8086'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      trade-imports-stub:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8086/health']
+      interval: 5s
+      start_period: 30s
+      retries: 10
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # CDP Uploader
+  # https://hub.docker.com/r/defradigital/cdp-uploader/
+  # ──────────────────────────────────────────────────────────────────────────────
+  cdp-uploader:
+    image: defradigital/cdp-uploader:latest
+    platform: linux/amd64
+    ports:
+      - '7337:7337'
+    environment:
+      PORT: 7337
+      NODE_ENV: development
+      USE_SINGLE_INSTANCE_CACHE: 'true'
+      MOCK_VIRUS_SCAN_ENABLED: 'true'
+      MOCK_VIRUS_RESULT_DELAY: 3
+      SQS_ENDPOINT: http://localstack:4566
+      S3_ENDPOINT: http://localstack:4566
+      AWS_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      REDIS_HOST: redis
+      CONSUMER_BUCKETS: cdp-uploader-quarantine,trade-imports-animals-documents
+      SQS_SCAN_RESULTS_CALLBACK: http://localstack:4566/000000000000/cdp-uploader-scan-results-callback.fifo
+    depends_on:
+      localstack-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals frontend
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-frontend/
+  # ──────────────────────────────────────────────────────────────────────────────
+  trade-imports-animals-frontend:
+    image: defradigital/trade-imports-animals-frontend:${TRADE_IMPORTS_ANIMALS_FRONTEND:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-frontend.env
+    environment:
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      trade-imports-animals-backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      cdp-uploader:
+        condition: service_started
+      trade-imports-reference-data:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 3s
+      start_period: 2s
+      retries: 3
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals backend
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-backend/
+  # ──────────────────────────────────────────────────────────────────────────────
+  trade-imports-animals-backend:
+    image: defradigital/trade-imports-animals-backend:${TRADE_IMPORTS_ANIMALS_BACKEND:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-backend.env
+    environment:
+      - PORT=8085
+    ports:
+      - '8085:8085'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      localstack-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
+      interval: 5s
+      start_period: 60s
+      retries: 10
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Trade Imports Animals admin
+  # https://hub.docker.com/r/defradigital/trade-imports-animals-admin/
+  # ──────────────────────────────────────────────────────────────────────────────
+  trade-imports-animals-admin:
+    image: defradigital/trade-imports-animals-admin:${TRADE_IMPORTS_ANIMALS_ADMIN:-latest}
+    platform: linux/amd64
+    env_file:
+      - ./docker/config/defaults.env
+      - ./docker/config/trade-imports-animals-admin.env
+    environment:
+      - PORT=3001
+    ports:
+      - '3001:3001'
+    depends_on:
+      trade-imports-animals-backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 3s
+      start_period: 2s
+      retries: 3
+
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Playwright tests runner
+  # https://mcr.microsoft.com/en-us/artifact/mar/playwright
+  # ──────────────────────────────────────────────────────────────────────────────
+  playwright-tests:
+    image: mcr.microsoft.com/playwright:v1.60.0-jammy
+    profiles:
+      - tests
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      - CI=true
+      - MONGODB_URI=mongodb://mongodb:27017/?directConnection=true
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-Password123}
+    command: >
+      bash -lc "npm ci --ignore-scripts && npm run test:github"

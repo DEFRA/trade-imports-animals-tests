@@ -22,6 +22,8 @@
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
     "test:local": "npm run database:reseed && npm run clean && playwright test --config=playwright.local.fast.config.ts --grep-invert \"@agent|@a11y\"",
     "test:local:debug": "echo \"Local debug Playwright tests not implemented yet\"",
+    "test:github": "npm run clean && playwright test --config=playwright.github.config.ts --grep-invert \"@agent|@a11y\"",
+    "test:github:browserstack": "echo \"GitHub BrowserStack Playwright tests not implemented yet\"",
     "report": "allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"
   },
