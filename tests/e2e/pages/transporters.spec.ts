@@ -18,8 +18,8 @@ test.describe('Transporter', () => {
   });
 
   test('shows expected page content', async ({ pages }) => {
-    await expect(pages.transporter.captionTransport).toBeVisible();
     await expect(pages.transporter.heading).toBeVisible();
+    await expect(pages.transporter.caption).toBeVisible();
     await expect(pages.transporter.linkAddTransporter).toBeVisible();
     await expect(pages.transporter.linkTransportGuidance).toBeVisible();
     await expect(pages.transporter.linkTransportGuidance).toHaveAttribute('target', '_blank');
