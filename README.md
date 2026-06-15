@@ -9,6 +9,7 @@ This test suite provides a robust foundation for writing, executing, and maintai
 - [Editor Setup](#editor-setup)
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
+- [Visual Regression Tests](#visual-regression-tests)
 - [Running Tests on GitHub](#running-tests-on-github)
 - [Running Tests via CDP Portal](#running-tests-via-cdp-portal)
 - [Developer Workflow](#developer-workflow)
@@ -154,6 +155,25 @@ To run tests against a CDP environment from your local machine:
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
+
+## Visual Regression Tests
+
+Visual regression tests (tagged `@visual`) guard rendered composition — layout, spacing, colour, and typography as the user sees the page. They compare screenshots against committed baseline images and fail if any pixels differ outside the masked regions.
+
+Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
+
+### Updating macOS baselines
+
+```bash
+npm run test:local -- --grep @visual --update-snapshots
+npm run test:local -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
+```
+
+### Updating Linux baselines
+
+Note:
+
+- Linux baselines must match CI rendering. `npm run test:visual:linux` is a placeholder — not yet implemented. Once implemented, pass `--update-snapshots` to regenerate all baselines, or a specific spec file followed by `--update-snapshots` to update a single test.
 
 ## Running Tests on GitHub
 
