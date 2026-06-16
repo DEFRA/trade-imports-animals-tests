@@ -4,7 +4,7 @@ import { timeouts } from '@config/timeouts';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment } from '@utils/playwright/environment';
 
-// Requires `docker/scripts/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
+// Requires `seeds/mongodb/20-seed-notifications.js` to seed notifications into the local MongoDB.
 
 test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   test.describe.configure({ mode: 'default' });
