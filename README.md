@@ -70,12 +70,11 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command               | Test scope                                     | Target                          | Config file                       | Generates Report |
-| --------------------- | ---------------------------------------------- | ------------------------------- | --------------------------------- | ---------------- |
-| `npm test`            | e2e test suite                                 | CDP                             | `playwright.config.ts` (default)  | ✓                |
-| `npm run test:local`  | e2e + e2e integration (`@compose`) test suites | Docker Compose (localhost)      | `playwright.local.fast.config.ts` | ✓                |
-| `npm run test:github` | e2e + e2e integration (`@compose`) test suites | Docker Compose (GitHub Actions) | `playwright.github.config.ts`     | ✓                |
-| `npm run test:a11y`   | Accessibility (`@a11y`) test suite             | CDP                             | `playwright.a11y.config.ts`       | ✓                |
+| Command              | Test scope                                     | Target                      | Config file                       | Generates Report |
+| -------------------- | ---------------------------------------------- | --------------------------- | --------------------------------- | ---------------- |
+| `npm test`           | e2e test suite                                 | CDP                         | `playwright.config.ts` (default)  | ✓                |
+| `npm run test:local` | e2e + e2e integration (`@compose`) test suites | Workspace stack (localhost) | `playwright.local.fast.config.ts` | ✓                |
+| `npm run test:a11y`  | Accessibility (`@a11y`) test suite             | CDP                         | `playwright.a11y.config.ts`       | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -101,17 +100,15 @@ After tests run, Playwright results and report are generated automatically, and 
 
 The Playwright configuration is split across multiple files:
 
-| File                          | Purpose                                | URL target                              |
-| ----------------------------- | -------------------------------------- | --------------------------------------- |
-| `playwright.config.ts`        | CDP environment runs                   | CDP services (CDP URLs)                 |
-| `playwright.local.config.ts`  | Local development (headed, no retries) | Localhost (localhost URLs)              |
-| `playwright.github.config.ts` | GitHub Actions runs                    | Docker Compose (service DNS/alias URLs) |
-| `playwright.a11y.config.ts`   | Accessibility (`@a11y`) runs           | CDP services (CDP URLs)                 |
+| File                         | Purpose                                | URL target                 |
+| ---------------------------- | -------------------------------------- | -------------------------- |
+| `playwright.config.ts`       | Base config for CDP environment runs   | CDP services (CDP URLs)    |
+| `playwright.local.config.ts` | Local development (headed, no retries) | Localhost (localhost URLs) |
+| `playwright.a11y.config.ts`  | Accessibility (`@a11y`) runs           | CDP services (CDP URLs)    |
 
 Note:
 
-- Intended for local development: `playwright.local.config.ts` targets the apps via localhost (e.g. `http://localhost:3000` / `http://localhost:3001`), so ensure the local Docker stack is running before starting the tests.
-- Intended for GitHub Actions: `playwright.github.config.ts` targets the apps via Docker internal hostnames, using either service DNS names (e.g. `trade-imports-animals-frontend:3000` / `trade-imports-animals-admin:3001`) or, as the newer approach for integration with the Defra Identity stub, Docker network aliases (e.g. `http://frontend.cdp-docker.test:3000` / `http://admin.cdp-docker.test:3001`).
+- Intended for local development: `playwright.local.config.ts` targets the apps via localhost (e.g. `http://localhost:3000` / `http://localhost:3001`), so ensure the workspace stack is running before starting the tests. GitHub Actions runs use `playwright.local.fast.config.ts` against the same stack via the workspace reusable workflow.
 
 ### Test Projects
 
@@ -124,42 +121,30 @@ Tests are split across two Playwright projects targeting different services:
 
 ## Local Testing
 
-### Local Docker stack
+### Local workspace stack
 
-1. Start the local stack with `docker compose` (from this repo’s root).
+1. Start the workspace stack: `./scripts/stack/run-stack.sh` from the
+   [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace).
 2. Run tests with `npm run test:local`.
 
 The local config (`playwright.local.config.ts`) runs with 1 worker in headed mode with full tracing enabled.
 
-Note:
+`npm run test:local` reseeds the database first via `npm run database:reseed`,
+which delegates to the workspace stack's `bounce-mongo.sh`. The seed fixtures
+live in this repo under [`seeds/mongodb/`](seeds/mongodb/) and are staged into
+the stack's mongo init by `run-stack.sh`.
 
-Add the following entries to `/etc/hosts` as required by the local stack:
+#### Workspace stack commands (run from the workspace root)
 
-```text
-# No /etc/hosts entries are currently required.
-```
+| Command                             | Purpose                                                |
+| ----------------------------------- | ------------------------------------------------------ |
+| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
+| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
+| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
+| `./scripts/stack/bounce-mongo.sh`   | Recreate MongoDB and rerun the init + seed scripts     |
+| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
 
-#### Docker Compose example commands (local)
-
-| Command                                                                     | Purpose                                                | Blocks shell |
-| --------------------------------------------------------------------------- | ------------------------------------------------------ | ------------ |
-| `docker compose up`                                                         | Start services in foreground                           | ✓            |
-| `docker compose up -d`                                                      | Start services in background                           | ✗            |
-| `docker compose up --wait`                                                  | Start services and wait for health (detached)          | ✗            |
-| `docker compose up --pull=always --wait`                                    | Always pull images, then start and wait                | ✗            |
-| `docker compose up --force-recreate --wait`                                 | Recreate containers from scratch, then start and wait  | ✗            |
-| `docker compose up --force-recreate --renew-anon-volumes --wait mongodb`    | Recreate MongoDB and rerun init seed scripts           | ✗            |
-| `docker compose -f compose.yml -f compose.github.override.yml up -d --wait` | Start stack with GitHub Actions auth-domain overrides  | ✗            |
-| `docker compose pull`                                                       | Pull latest images for the stack                       | ✗            |
-| `docker compose down`                                                       | Stop and remove containers                             | ✗            |
-| `docker compose down -v`                                                    | Stop and remove containers and volumes                 | ✗            |
-| `docker compose logs -f`                                                    | Follow all service logs (tail -f style)                | ✓            |
-| `docker compose logs -f trade-imports-animals-backend`                      | Follow backend logs (tail -f style)                    | ✓            |
-| `docker compose logs --tail=200 trade-imports-animals-backend`              | Show last 200 backend log lines                        | ✗            |
-| `docker compose ps`                                                         | Show running services and health status                | ✗            |
-| `docker compose ps -a`                                                      | Show all services, including stopped                   | ✗            |
-| `docker compose config`                                                     | Validate the rendered compose config                   | ✗            |
-| `docker compose -f compose.yml -f compose.github.override.yml config`       | Validate rendered config with GitHub Actions overrides | ✗            |
+See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
 ### Target CDP environments (from local machine)
 
@@ -192,11 +177,11 @@ Note:
 
 ## Running Tests on GitHub
 
-Tests can be run as a GitHub Actions workflow against services spun up in Docker Compose. When running in GitHub Actions, CDP access is via BrowserStack only.
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it (sharded ×3, reports published to GitHub Pages).
 
 ### GitHub Actions workflow
 
-The `/.github/workflows/e2e-tests.yml` workflow uses the composite action in `/run-e2e-tests/` to start the Docker Compose stack using `compose.yml` with `compose.github.override.yml`, run the `playwright-tests` container, then publish reports.
+The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-animals-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
 
 ## Running Tests via CDP Portal
 
