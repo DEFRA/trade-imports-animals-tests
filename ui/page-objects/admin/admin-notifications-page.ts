@@ -57,9 +57,15 @@ export class AdminNotificationsPage extends BasePage {
   }
 
   async getTotalElements(): Promise<number> {
+    // Wait for the page itself to render before deciding whether the count
+    // element is absent because we're still loading, or absent because the
+    // template legitimately omitted it (empty state).
+    await this.heading.waitFor({ state: 'visible' });
+
     if ((await this.resultsCount.count()) === 0) {
       return 0;
     }
+
     const text = (await this.resultsCount.textContent()) ?? '';
     const match = text.match(/(\d+)/);
     if (!match) {
