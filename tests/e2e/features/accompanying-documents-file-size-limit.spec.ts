@@ -5,7 +5,7 @@ import { skipIfComposeEnvironment } from '@utils/playwright/environment';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-/** Above the 10 MiB CDP nginx ingress cap — used to prove the client preflight prevents a raw 413 page. */
+// Above the 10 MiB CDP nginx ingress cap, to prove the client preflight blocks a raw 413.
 const ELEVEN_MIB_BYTES = 11 * 1024 * 1024;
 
 test.describe('Accompanying documents - file size limit', { tag: '@integration' }, () => {

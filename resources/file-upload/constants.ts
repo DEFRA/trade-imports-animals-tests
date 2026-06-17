@@ -1,6 +1,5 @@
 import { DECIMAL_BYTES_PER_MB } from '@utils/synthetic-file-writer';
 
-/** App-enforced cap is 10 MB decimal — matches the user-facing "10 MB" hint. */
 export const TEN_MB_BYTES = 10 * DECIMAL_BYTES_PER_MB;
 
 /**
