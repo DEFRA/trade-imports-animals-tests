@@ -84,6 +84,14 @@ export class NotificationViewPage extends BasePage {
     return this.page.getByRole('button', { name: 'Copy as new' });
   }
 
+  get btnAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Amend this notification' });
+  }
+
+  get amendStatusTag(): Locator {
+    return this.page.locator('.govuk-tag', { hasText: 'Amend' });
+  }
+
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }
