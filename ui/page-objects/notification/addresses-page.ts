@@ -13,7 +13,7 @@ export class AddressesPage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Addresses' });
+    return this.page.getByRole('heading', { level: 1, name: 'Consignment addresses' });
   }
 
   get groupConsignorOrExporter(): Locator {
