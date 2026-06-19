@@ -11,6 +11,7 @@ const projectBaseUrls: Record<string, string> = {
 };
 
 /**
+ * Base config: e2e against the deployed CDP environment.
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'cdp'));

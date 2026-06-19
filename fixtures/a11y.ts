@@ -1,6 +1,10 @@
 import { test as base, expect } from '@fixtures';
 import { scanPage, formatSummaries, type A11yScanOptions, type ViolationSummary } from '@utils/a11y-utils';
 
+// Accessibility journeys click through several pages and run an axe scan on
+// each, so they need more headroom than the default per-test timeout.
+const A11Y_SCAN_TIMEOUT_MS = 5 * 60 * 1000;
+
 export interface A11yFixtures {
   runA11yScan: (options?: A11yScanOptions) => Promise<void>;
 }
@@ -33,6 +37,12 @@ export const test = base.extend<A11yFixtures>({
     const message = formatSummaries(results);
     if (message) throw new Error(message);
   },
+});
+
+// Playwright requires the first hook arg to be a destructuring pattern.
+// eslint-disable-next-line no-empty-pattern
+test.beforeEach(({}, testInfo) => {
+  testInfo.setTimeout(A11Y_SCAN_TIMEOUT_MS);
 });
 
 export { expect };
