@@ -12,10 +12,10 @@ test.describe('Entry point and arrival at destination', () => {
     expect(journeyContext.notificationId).toBe(notificationId);
   });
 
-  test('can navigate back to cph number', async ({ pages }) => {
+  test('can navigate back to addresses', async ({ pages }) => {
     await pages.entryPoint.linkBack.click();
-    await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-    await expect(pages.cphNumber.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
+    await expect(pages.addresses.heading).toBeVisible();
   });
 
   test('shows default values on first load', async ({ pages }) => {

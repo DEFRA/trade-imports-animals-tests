@@ -219,7 +219,13 @@ export class Journeys {
   async toEntryPoint(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAddresses(options);
-    await this.pages.addresses.btnSaveAndContinue.click();
+    await this.pages.addresses.linkAddConsignorOrExporter.click();
+    await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
+    await this.pages.addresses.linkAddPlaceOfDestination.click();
+    await this.pages.destinationSelection.linkSelectDestinationByName(DESTINATION_NAME).click();
+    await this.pages.addresses.linkAddCphNumber.click();
+    await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
+    await this.pages.cphNumber.btnSaveAndContinue.click();
     await this.pages.entryPoint.heading.waitFor();
   }
 
