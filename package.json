@@ -24,7 +24,7 @@
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
     "test:docker-compose": "npm run _reset -- --config=playwright.docker-compose.config.ts --grep-invert \"@agent|@a11y\"",
     "test:docker-compose:a11y": "npm run _reset -- --config=playwright.docker-compose.config.ts --grep \"@a11y\"",
-    "test:docker-compose:ci": "npm run _test -- --config=playwright.docker-compose.config.ts --grep-invert \"@agent|@a11y\" --reporter=blob,list,allure-playwright",
+    "test:docker-compose:ci": "playwright test --config=playwright.docker-compose.config.ts --grep-invert \"@agent|@a11y\" --reporter=blob,list,allure-playwright",
     "test:visual:linux": "echo \"Linux visual baseline generation not yet implemented\"",
     "report": "allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"

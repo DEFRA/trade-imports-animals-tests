@@ -114,7 +114,8 @@ their longer per-test timeout is set on the a11y fixture (`fixtures/a11y.ts`).
 
 The package.json scripts share a private `_test` (`clean && playwright test`),
 with `_reset` adding a DB reseed in front; each `test:*` script appends its
-`--config` and grep.
+`--config` and grep. `test:docker-compose:ci` calls Playwright directly (no
+`clean`) because CI bind-mounts the artifact directories.
 
 The `docker-compose` configs target `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
