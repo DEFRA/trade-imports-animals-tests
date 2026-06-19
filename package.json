@@ -19,6 +19,7 @@
     "clean": "rm -rf test-results playwright-report allure-results allure-report FAILED",
     "test": "npm run clean && playwright test --grep-invert \"@agent|@compose|@a11y\"",
     "test:a11y": "npm run clean && playwright test --config=playwright.a11y.config.ts --grep \"@a11y\"",
+    "test:a11y:local": "npm run database:reseed && npm run clean && playwright test --config=playwright.a11y.local.config.ts --grep \"@a11y\"",
     "test:browserstack": "echo \"BrowserStack Playwright tests not implemented yet\"",
     "test:local": "npm run database:reseed && npm run clean && playwright test --config=playwright.local.fast.config.ts --grep-invert \"@agent|@a11y\"",
     "test:local:debug": "echo \"Local debug Playwright tests not implemented yet\"",
