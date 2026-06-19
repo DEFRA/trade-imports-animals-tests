@@ -56,6 +56,10 @@ export class AddressesPage extends BasePage {
     return this.page.getByRole('link', { name: 'Add a place of destination' });
   }
 
+  get linkAddCphNumber(): Locator {
+    return this.page.getByRole('link', { name: 'Add a CPH number' });
+  }
+
   get btnSaveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
