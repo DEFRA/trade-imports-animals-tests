@@ -70,11 +70,13 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command              | Test scope                                     | Target                      | Config file                       | Generates Report |
-| -------------------- | ---------------------------------------------- | --------------------------- | --------------------------------- | ---------------- |
-| `npm test`           | e2e test suite                                 | CDP                         | `playwright.config.ts` (default)  | ✓                |
-| `npm run test:local` | e2e + e2e integration (`@compose`) test suites | Workspace stack (localhost) | `playwright.local.fast.config.ts` | ✓                |
-| `npm run test:a11y`  | Accessibility (`@a11y`) test suite             | CDP                         | `playwright.a11y.config.ts`       | ✓                |
+| Command                            | Test scope                                     | Target               | Config                                | Generates Report |
+| ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                         | e2e test suite                                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`      | e2e + e2e integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`   | e2e (CI shards)                                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -98,17 +100,26 @@ After tests run, Playwright results and report are generated automatically, and 
 
 ### Test Configuration
 
-The Playwright configuration is split across multiple files:
+Shared settings (projects, reporters, `retries: 1`, `trace: on-first-retry`)
+live in `utils/playwright/shared-config.ts`. Two configs extend it, one per
+target host:
 
-| File                         | Purpose                                | URL target                 |
-| ---------------------------- | -------------------------------------- | -------------------------- |
-| `playwright.config.ts`       | Base config for CDP environment runs   | CDP services (CDP URLs)    |
-| `playwright.local.config.ts` | Local development (headed, no retries) | Localhost (localhost URLs) |
-| `playwright.a11y.config.ts`  | Accessibility (`@a11y`) runs           | CDP services (CDP URLs)    |
+| File                                  | Target               |
+| ------------------------------------- | -------------------- |
+| `playwright.config.ts`                | CDP services         |
+| `playwright.docker-compose.config.ts` | docker-compose stack |
 
-Note:
+Runs differ only by grep tag and config. `@a11y` runs use these same configs;
+their longer per-test timeout is set on the a11y fixture (`fixtures/a11y.ts`).
 
-- Intended for local development: `playwright.local.config.ts` targets the apps via localhost (e.g. `http://localhost:3000` / `http://localhost:3001`), so ensure the workspace stack is running before starting the tests. GitHub Actions runs use `playwright.local.fast.config.ts` against the same stack via the workspace reusable workflow.
+The package.json scripts share a private `_test` (`clean && playwright test`),
+with `_reset` adding a DB reseed in front; each `test:*` script appends its
+`--config` and grep. `test:docker-compose:ci` calls Playwright directly (no
+`clean`) because CI bind-mounts the artifact directories.
+
+The `docker-compose` configs target `localhost:3000` / `localhost:3001`, so
+start the workspace stack first. CI runs `npm run test:docker-compose:ci`
+against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
@@ -125,11 +136,11 @@ Tests are split across two Playwright projects targeting different services:
 
 1. Start the workspace stack: `./scripts/stack/run-stack.sh` from the
    [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace).
-2. Run tests with `npm run test:local`.
+2. Run tests with `npm run test:docker-compose`.
 
-The local config (`playwright.local.config.ts`) runs with 1 worker in headed mode with full tracing enabled.
+To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
 
-`npm run test:local` reseeds the database first via `npm run database:reseed`,
+`npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
 which delegates to the workspace stack's `bounce-mongo.sh`. The seed fixtures
 live in this repo under [`seeds/mongodb/`](seeds/mongodb/) and are staged into
 the stack's mongo init by `run-stack.sh`.
@@ -165,8 +176,8 @@ Baselines are stored alongside their spec files in `*-snapshots/` directories an
 ### Updating macOS baselines
 
 ```bash
-npm run test:local -- --grep @visual --update-snapshots
-npm run test:local -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
+npm run test:docker-compose -- --grep @visual --update-snapshots
+npm run test:docker-compose -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
 ```
 
 ### Updating Linux baselines

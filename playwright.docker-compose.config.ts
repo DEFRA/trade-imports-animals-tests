@@ -7,14 +7,5 @@ const projectBaseUrls: Record<string, string> = {
   'admin-chromium': 'http://localhost:3001',
 };
 
-export default defineConfig({
-  ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'local'),
-  workers: 1,
-  retries: 0,
-
-  use: {
-    ...sharedConfig.use,
-    headless: false,
-    trace: 'on',
-  },
-});
+/** e2e against the workspace docker-compose stack (local dev and CI). */
+export default defineConfig(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'));
