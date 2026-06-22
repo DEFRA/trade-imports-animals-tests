@@ -13,7 +13,7 @@ export class AddressesPage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Addresses' });
+    return this.page.getByRole('heading', { level: 1, name: 'Consignment addresses' });
   }
 
   get groupConsignorOrExporter(): Locator {
@@ -54,6 +54,10 @@ export class AddressesPage extends BasePage {
 
   get linkAddPlaceOfDestination(): Locator {
     return this.page.getByRole('link', { name: 'Add a place of destination' });
+  }
+
+  get linkAddCphNumber(): Locator {
+    return this.page.getByRole('link', { name: 'Add a CPH number' });
   }
 
   get btnSaveAndContinue(): Locator {

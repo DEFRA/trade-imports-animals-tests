@@ -29,19 +29,19 @@ test.describe('Addresses landing page', () => {
     await expect(pages.destinationSelection.heading).toBeVisible();
   });
 
-  test('continues to cph number page after saving with no addresses selected', async ({ pages }) => {
+  test('continues to port of entry page after saving with no addresses selected', async ({ pages }) => {
     await pages.addresses.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-    await expect(pages.cphNumber.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
+    await expect(pages.entryPoint.heading).toBeVisible();
   });
 
-  test('continues to cph number page after saving addresses', async ({ pages }) => {
+  test('continues to port of entry page after saving addresses', async ({ pages }) => {
     await pages.addresses.linkAddConsignorOrExporter.click();
     await pages.consignorSelection.linkSelectConsignor(0).click();
     await pages.addresses.linkAddPlaceOfDestination.click();
     await pages.destinationSelection.linkSelectDestination(0).click();
     await pages.addresses.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-    await expect(pages.cphNumber.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
+    await expect(pages.entryPoint.heading).toBeVisible();
   });
 });
