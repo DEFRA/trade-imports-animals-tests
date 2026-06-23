@@ -64,14 +64,12 @@ export type NotificationDocument = {
     };
   };
   consignment?: {
-    contact: {
-      name: string;
-      address: {
-        addressLine1: string;
-        addressLine2: string;
-        addressLine3?: string;
-        country: string;
-      };
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
     };
   };
   status: string;

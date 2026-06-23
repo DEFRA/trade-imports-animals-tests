@@ -100,11 +100,11 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.transport.transporter?.address.country).toBe('Switzerland');
       expect(doc.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
       expect(doc.transport.transporter?.type).toBe('Commercial');
-      expect(doc.consignment?.contact.name).toBe(CONTACT_ADDRESS_NAME);
-      expect(doc.consignment?.contact.address.addressLine1).toBe('Woodham Lane');
-      expect(doc.consignment?.contact.address.addressLine2).toBe('New Haw');
-      expect(doc.consignment?.contact.address.addressLine3).toBe('Addlestone, KT15 3NB');
-      expect(doc.consignment?.contact.address.country).toBe('United Kingdom');
+      expect(doc.consignment?.name).toBe(CONTACT_ADDRESS_NAME);
+      expect(doc.consignment?.address.addressLine1).toBe('Woodham Lane');
+      expect(doc.consignment?.address.addressLine2).toBe('New Haw');
+      expect(doc.consignment?.address.addressLine3).toBe('Addlestone, KT15 3NB');
+      expect(doc.consignment?.address.country).toBe('United Kingdom');
       expect(doc.status).toBe('SUBMITTED');
     } finally {
       await client.close();
