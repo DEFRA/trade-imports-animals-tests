@@ -53,7 +53,10 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
 
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
+export const PLACE_OF_ORIGIN_NAME = 'Origin Farm';
 export const CONSIGNOR_NAME = 'Astra Rosales';
+export const CONSIGNEE_NAME = 'British Livestock Ltd';
+export const IMPORTER_NAME = 'Import Co UK';
 export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
@@ -219,8 +222,17 @@ export class Journeys {
   async toEntryPoint(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toAddresses(options);
+    await this.pages.addresses.linkAddPlaceOfOrigin.click();
+    await this.pages.placeOfOriginSelection.radioPlaceOfOrigin(PLACE_OF_ORIGIN_NAME).click();
+    await this.pages.placeOfOriginSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddConsignorOrExporter.click();
     await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
+    await this.pages.addresses.linkAddConsignee.click();
+    await this.pages.consigneeSelection.radioConsignee(CONSIGNEE_NAME).click();
+    await this.pages.consigneeSelection.btnSaveAndContinue.click();
+    await this.pages.addresses.linkAddImporter.click();
+    await this.pages.importerSelection.radioImporter(IMPORTER_NAME).click();
+    await this.pages.importerSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddPlaceOfDestination.click();
     await this.pages.destinationSelection.linkSelectDestinationByName(DESTINATION_NAME).click();
     await this.pages.addresses.linkAddCphNumber.click();

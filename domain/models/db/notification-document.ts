@@ -29,11 +29,38 @@ export type NotificationDocument = {
     certifiedFor: string;
     unweanedAnimals: string;
   };
+  placeOfOrigin?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
   consignor: {
     name: string;
     address: {
       addressLine1: string;
       addressLine2: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  consignee?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  importer?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
       addressLine3?: string;
       country: string;
     };
