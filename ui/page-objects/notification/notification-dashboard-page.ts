@@ -132,6 +132,10 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: `Copy as new ${referenceNumber}` });
   }
 
+  btnAmend(referenceNumber: string): Locator {
+    return this.page.getByRole('button', { name: `Amend ${referenceNumber}` });
+  }
+
   viewLink(referenceNumber: string): Locator {
     return this.page.getByRole('link', { name: `View ${referenceNumber}` });
   }

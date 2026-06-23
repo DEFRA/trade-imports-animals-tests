@@ -5,6 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 
 const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 
 test.describe('Notification outbox event', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
   test('does not write outbox event before submission', async ({ journeys, journeyContext }) => {
@@ -61,32 +62,25 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(data.consignor.name).toBe(CONSIGNOR_NAME);
       });
 
-      // TODO: remove when submission navigates away from declaration; temporary resubmit to assert aggregateVersion increment.
-      await test.step('resubmits notification from declaration page (temporary)', async () => {
-        await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
-        await expect(pages.declaration.heading).toBeVisible();
-        await expect(pages.declaration.btnSubmitNotification).toBeVisible();
-
-        if (!(await pages.declaration.checkboxDeclaration.isChecked())) {
-          await pages.declaration.checkboxDeclaration.click();
-        }
-
-        await pages.declaration.btnSubmitNotification.click();
+      await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
+        await journeys.toNotificationView(referenceNumber);
+        await pages.notificationView.btnAmend.click();
+        await expect(pages.notificationView.amendStatusTag).toBeVisible();
       });
 
       await test.step('finds two outbox events with incrementing aggregate versions', async () => {
         await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.short }).toBe(2);
 
-        const resubmissionDocs = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
-        expect(resubmissionDocs).toHaveLength(2);
-        expect(resubmissionDocs[0].aggregateVersion).toBe(1);
-        expect(resubmissionDocs[1].aggregateVersion).toBe(2);
-        expect(resubmissionDocs[0].aggregateId).toBe(aggregateId);
-        expect(resubmissionDocs[1].aggregateId).toBe(aggregateId);
-        expect(resubmissionDocs[0].eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
-        expect(resubmissionDocs[1].eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
-        expect(resubmissionDocs[0].data.referenceNumber).toBe(referenceNumber);
-        expect(resubmissionDocs[1].data.referenceNumber).toBe(referenceNumber);
+        const amendDocs = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
+        expect(amendDocs).toHaveLength(2);
+        expect(amendDocs[0].aggregateVersion).toBe(1);
+        expect(amendDocs[1].aggregateVersion).toBe(2);
+        expect(amendDocs[0].aggregateId).toBe(aggregateId);
+        expect(amendDocs[1].aggregateId).toBe(aggregateId);
+        expect(amendDocs[0].eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
+        expect(amendDocs[1].eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE);
+        expect(amendDocs[0].data.referenceNumber).toBe(referenceNumber);
+        expect(amendDocs[1].data.referenceNumber).toBe(referenceNumber);
       });
     } finally {
       await client.close();
