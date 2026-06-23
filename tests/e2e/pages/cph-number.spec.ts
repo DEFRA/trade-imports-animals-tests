@@ -23,11 +23,11 @@ test.describe('County parish holding (cph) number', () => {
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('maxlength', '9');
   });
 
-  test('continues to entry point after saving cph number', async ({ pages }) => {
+  test('returns to addresses after saving cph number', async ({ pages }) => {
     await pages.cphNumber.inputCphNumber.fill('123456789');
     await pages.cphNumber.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
-    await expect(pages.entryPoint.heading).toBeVisible();
+    await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
+    await expect(pages.addresses.heading).toBeVisible();
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {

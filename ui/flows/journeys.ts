@@ -226,6 +226,8 @@ export class Journeys {
     await this.pages.addresses.linkAddCphNumber.click();
     await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
     await this.pages.cphNumber.btnSaveAndContinue.click();
+    await this.pages.addresses.heading.waitFor();
+    await this.pages.addresses.btnSaveAndContinue.click();
     await this.pages.entryPoint.heading.waitFor();
   }
 
