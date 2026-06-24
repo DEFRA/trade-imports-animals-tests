@@ -275,6 +275,7 @@ export class Journeys {
     }
     await this.pages.declaration.checkboxDeclaration.click();
     await this.pages.declaration.btnSubmitNotification.click();
+    await this.pages.page.waitForTimeout(2000);
     //await this.pages.submissionConfirmation.heading.waitFor();
   }
 }
