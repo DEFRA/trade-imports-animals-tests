@@ -1,9 +1,9 @@
-import { commodityCodes, type CommodityCode } from '@domain/constants/commodity-codes';
+import { type CommodityCode, commodityCodes } from '@domain/constants/commodity-codes';
 import { commoditySpecies, type CommoditySpecies } from '@domain/constants/commodity-species';
-import { commodityTypes, type CommodityType } from '@domain/constants/commodity-types';
-import { countryCodes, type CountryCode } from '@domain/constants/country-codes';
-import { importReasons, type ImportReason } from '@domain/constants/import-reasons';
-import { certificationPurposes, type CertificationPurpose } from '@domain/constants/certification-purposes';
+import { type CommodityType, commodityTypes } from '@domain/constants/commodity-types';
+import { type CountryCode, countryCodes } from '@domain/constants/country-codes';
+import { type ImportReason, importReasons } from '@domain/constants/import-reasons';
+import { type CertificationPurpose, certificationPurposes } from '@domain/constants/certification-purposes';
 import type { YesNoValue } from '@domain/constants/yes-no-values';
 import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-entries';
 import type { AccompanyingDocument } from '@domain/types/accompanying-document';
@@ -274,8 +274,7 @@ export class Journeys {
       this.journeyContext.declarationDate = declarationDate?.replace('Date of declaration: ', '');
     }
     await this.pages.declaration.checkboxDeclaration.click();
-    await this.pages.declaration.btnSubmitNotification.click();
-    await this.pages.page.waitForTimeout(2000);
-    //await this.pages.submissionConfirmation.heading.waitFor();
+    // TODO: replace with submissionConfirmation.heading.waitFor() once confirmation page exists
+    await Promise.all([this.pages.page.waitForNavigation({ waitUntil: 'commit' }), this.pages.declaration.btnSubmitNotification.click()]);
   }
 }
