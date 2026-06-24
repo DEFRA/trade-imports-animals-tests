@@ -12,6 +12,7 @@ test.describe('Notification amend', () => {
     const journeyContext: JourneyContext = {};
     const journeys = new Journeys(pages, journeyContext);
     await journeys.submitNotification();
+    await page.waitForTimeout(2000);
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });
@@ -36,6 +37,7 @@ test.describe('Notification amend', () => {
     { tag: ['@integration'] },
     async ({ pages, journeys, journeyContext }) => {
       await journeys.submitNotification();
+      await pages.page.waitForTimeout(2000);
       const ref = journeyContext.notificationId;
 
       await journeys.toNotificationView(ref);
@@ -59,6 +61,7 @@ test.describe('Notification amend', () => {
     { tag: ['@integration'] },
     async ({ pages, journeys, journeyContext }) => {
       await journeys.submitNotification();
+      await pages.page.waitForTimeout(2000);
       const ref = journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
@@ -76,6 +79,7 @@ test.describe('Notification amend', () => {
     async ({ pages, journeys, journeyContext }) => {
       // 1. Start from a freshly submitted notification.
       await journeys.submitNotification();
+      await pages.page.waitForTimeout(2000);
       const ref = journeyContext.notificationId;
 
       await journeys.toNotificationView(ref);
