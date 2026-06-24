@@ -276,6 +276,6 @@ export class Journeys {
     await this.pages.declaration.checkboxDeclaration.click();
     await this.pages.declaration.btnSubmitNotification.click();
     // TODO: replace with submissionConfirmation.heading.waitFor() once confirmation page exists
-    await this.pages.page.waitForURL((url) => !url.pathname.includes('/declaration'));
+    await this.pages.page.waitForURL((url) => !url.pathname.includes('/declaration'), { waitUntil: 'commit' });
   }
 }
