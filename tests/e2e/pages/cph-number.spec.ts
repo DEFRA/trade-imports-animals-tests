@@ -20,7 +20,7 @@ test.describe('County parish holding (cph) number', () => {
   test('shows empty cph number input on first load', async ({ pages }) => {
     await expect(pages.cphNumber.inputCphNumber).toHaveValue('');
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('type', 'text');
-    await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('maxlength', '9');
+    await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('maxlength', '11');
   });
 
   test('returns to addresses after saving cph number', async ({ pages }) => {
@@ -30,10 +30,18 @@ test.describe('County parish holding (cph) number', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
+  test('accepts cph number with slashes and strips them on save', async ({ pages }) => {
+    await pages.cphNumber.inputCphNumber.fill('123/456/789');
+    await pages.cphNumber.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
+    await expect(pages.addresses.heading).toBeVisible();
+    await expect(pages.addresses.page.getByText('123456789')).toBeVisible();
+  });
+
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('limits cph number input to 9 characters', async ({ pages }) => {
+    test('limits cph number input to 11 characters', async ({ pages }) => {
       await pages.cphNumber.inputCphNumber.fill('1'.repeat(20));
-      await expect(pages.cphNumber.inputCphNumber).toHaveValue('1'.repeat(9));
+      await expect(pages.cphNumber.inputCphNumber).toHaveValue('1'.repeat(11));
     });
 
     test('shows error when cph number is not entered', async ({ pages }) => {
