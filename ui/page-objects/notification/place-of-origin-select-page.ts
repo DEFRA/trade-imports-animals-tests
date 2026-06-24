@@ -29,6 +29,9 @@ export class PlaceOfOriginSelectPage extends BasePage {
   }
 
   get errorSummaryItems(): Locator {
-    return this.page.locator('.govuk-error-summary__list li');
+    return this.page
+      .getByRole('alert')
+      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
+      .getByRole('link');
   }
 }
