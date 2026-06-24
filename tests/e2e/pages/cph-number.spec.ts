@@ -35,7 +35,7 @@ test.describe('County parish holding (cph) number', () => {
     await pages.cphNumber.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
     await expect(pages.addresses.heading).toBeVisible();
-    await expect(pages.addresses.page.getByText('123456789')).toBeVisible();
+    await expect(pages.addresses.cphNumber).toContainText('123456789');
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {

@@ -104,6 +104,14 @@ export class AddressesPage extends BasePage {
     return this.page.getByRole('link', { name: 'Add an importer' });
   }
 
+  get groupCphNumber(): Locator {
+    return this.page.getByRole('group', { name: 'County Parish Holding number (CPH)' });
+  }
+
+  get cphNumber(): Locator {
+    return this.groupCphNumber.locator('p.govuk-body').first();
+  }
+
   get linkAddCphNumber(): Locator {
     return this.page.getByRole('link', { name: 'Add a CPH number' });
   }
