@@ -32,7 +32,7 @@ test.describe('Import notification service', () => {
     await expect(firstCard.details.origin).toBeVisible();
     await expect(firstCard.details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
     await expect(firstCard.details.status).toBeVisible();
-    await expect(firstCard.details.status).toContainText(/Draft|Submitted/);
+    await expect(firstCard.details.status).toContainText(/Draft|Submitted|Amend/);
     await expect(firstCard.details.dateCreated).toBeVisible();
     await expect(firstCard.details.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
   });

@@ -16,6 +16,21 @@ test.describe('Notification amend', () => {
     await context.close();
   });
 
+  test.afterAll(async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const pages = createPageObjects(page);
+    const journeys = new Journeys(pages);
+    await journeys.deleteNotification(referenceNumber);
+    await context.close();
+  });
+
+  test.afterEach(async ({ journeys, journeyContext }) => {
+    if (journeyContext.notificationId) {
+      await journeys.deleteNotification(journeyContext.notificationId);
+    }
+  });
+
   test.describe('amend entry points', () => {
     test.beforeEach(async ({ journeys }) => {
       await journeys.toNotificationView(referenceNumber);
