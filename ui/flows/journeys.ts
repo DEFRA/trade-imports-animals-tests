@@ -280,6 +280,13 @@ export class Journeys {
     await this.pages.notificationView.open(referenceNumber);
   }
 
+  async deleteNotification(referenceNumber: string): Promise<void> {
+    await this.pages.notificationView.open(referenceNumber);
+    await this.pages.notificationView.btnDelete.click();
+    await this.pages.notificationView.btnConfirmDelete.click();
+    await this.pages.notificationView.successBanner.waitFor({ state: 'visible' });
+  }
+
   async submitNotification(options: JourneyOptions = {}): Promise<void> {
     options = { ...defaultJourneyOptions, ...options };
     await this.toDeclaration(options);
