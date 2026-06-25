@@ -7,7 +7,10 @@ import { type NotificationDocument } from '@domain/models/db/notification-docume
 import {
   EAR_TAG_PREFIX,
   PASSPORT_PREFIX,
+  PLACE_OF_ORIGIN_NAME,
   CONSIGNOR_NAME,
+  CONSIGNEE_NAME,
+  IMPORTER_NAME,
   DESTINATION_NAME,
   CPH_NUMBER,
   TRANSPORTER_NAME,
@@ -79,11 +82,20 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(subdocCommodityComplement.totalNoOfPackages).toBe(defaults.noOfPackages[0] + defaults.noOfPackages[1]);
       expect(doc.additionalDetails.certifiedFor).toBe(defaults.certificationPurpose);
       expect(doc.additionalDetails.unweanedAnimals).toBe(yesNoValues.no.toLowerCase());
+      expect(doc.placeOfOrigin.name).toBe(PLACE_OF_ORIGIN_NAME);
+      expect(doc.placeOfOrigin.address.addressLine1).toBe('1 Farm Lane');
+      expect(doc.placeOfOrigin.address.country).toBe('Ireland');
       expect(doc.consignor.name).toBe(CONSIGNOR_NAME);
       expect(doc.consignor.address.addressLine1).toBe('43 East Hague Extension');
       expect(doc.consignor.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
       expect(doc.consignor.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
       expect(doc.consignor.address.country).toBe('Switzerland');
+      expect(doc.consignee.name).toBe(CONSIGNEE_NAME);
+      expect(doc.consignee.address.addressLine1).toBe('10 Market Street');
+      expect(doc.consignee.address.country).toBe('United Kingdom');
+      expect(doc.importer.name).toBe(IMPORTER_NAME);
+      expect(doc.importer.address.addressLine1).toBe('20 Trade Road');
+      expect(doc.importer.address.country).toBe('United Kingdom');
       expect(doc.destination.name).toBe(DESTINATION_NAME);
       expect(doc.destination.address.addressLine1).toBe('643 Main Street');
       expect(doc.destination.address.addressLine2).toBe('Birmingham G1 3AZ');
@@ -100,11 +112,11 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.transport.transporter?.address.country).toBe('Switzerland');
       expect(doc.transport.transporter?.approvalNumber).toBe('ES-T2-45001294');
       expect(doc.transport.transporter?.type).toBe('Commercial');
-      expect(doc.consignment?.contact.name).toBe(CONTACT_ADDRESS_NAME);
-      expect(doc.consignment?.contact.address.addressLine1).toBe('Woodham Lane');
-      expect(doc.consignment?.contact.address.addressLine2).toBe('New Haw');
-      expect(doc.consignment?.contact.address.addressLine3).toBe('Addlestone, KT15 3NB');
-      expect(doc.consignment?.contact.address.country).toBe('United Kingdom');
+      expect(doc.consignment?.name).toBe(CONTACT_ADDRESS_NAME);
+      expect(doc.consignment?.address.addressLine1).toBe('Woodham Lane');
+      expect(doc.consignment?.address.addressLine2).toBe('New Haw');
+      expect(doc.consignment?.address.addressLine3).toBe('Addlestone, KT15 3NB');
+      expect(doc.consignment?.address.country).toBe('United Kingdom');
       expect(doc.status).toBe('SUBMITTED');
     } finally {
       await client.close();

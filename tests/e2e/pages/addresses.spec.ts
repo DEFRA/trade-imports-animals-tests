@@ -17,10 +17,28 @@ test.describe('Addresses landing page', () => {
     await expect(pages.accompanyingDocuments.heading).toBeVisible();
   });
 
+  test('can navigate to place of origin selection', async ({ pages }) => {
+    await pages.addresses.linkAddPlaceOfOrigin.click();
+    await expect(pages.page).toHaveURL(pages.placeOfOriginSelection.expectedUrl);
+    await expect(pages.placeOfOriginSelection.heading).toBeVisible();
+  });
+
   test('can navigate to consignor or exporter selection', async ({ pages }) => {
     await pages.addresses.linkAddConsignorOrExporter.click();
     await expect(pages.page).toHaveURL(pages.consignorSelection.expectedUrl);
     await expect(pages.consignorSelection.heading).toBeVisible();
+  });
+
+  test('can navigate to consignee selection', async ({ pages }) => {
+    await pages.addresses.linkAddConsignee.click();
+    await expect(pages.page).toHaveURL(pages.consigneeSelection.expectedUrl);
+    await expect(pages.consigneeSelection.heading).toBeVisible();
+  });
+
+  test('can navigate to importer selection', async ({ pages }) => {
+    await pages.addresses.linkAddImporter.click();
+    await expect(pages.page).toHaveURL(pages.importerSelection.expectedUrl);
+    await expect(pages.importerSelection.heading).toBeVisible();
   });
 
   test('can navigate to place of destination selection', async ({ pages }) => {

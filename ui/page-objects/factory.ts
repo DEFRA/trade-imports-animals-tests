@@ -8,8 +8,11 @@ import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { CommodityDetailsPage } from './notification/commodity-details-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
+import { ConsigneeSelectPage } from './notification/consignee-select-page';
 import { ConsignorSelectionPage } from './notification/consignor-selection-page';
 import { ContactAddressPage } from './notification/contact-address-page';
+import { ImporterSelectPage } from './notification/importer-select-page';
+import { PlaceOfOriginSelectPage } from './notification/place-of-origin-select-page';
 import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
 import { DestinationSelectionPage } from './notification/destination-selection-page';
@@ -43,8 +46,11 @@ export function createPageObjects(page: Page) {
     animalIdentification: new AnimalIdentificationPage(page),
     commodityDetails: new CommodityDetailsPage(page),
     commoditySelection: new CommoditySelectionPage(page),
+    consigneeSelection: new ConsigneeSelectPage(page),
     consignorSelection: new ConsignorSelectionPage(page),
     contactAddress: new ContactAddressPage(page),
+    importerSelection: new ImporterSelectPage(page),
+    placeOfOriginSelection: new PlaceOfOriginSelectPage(page),
     cphNumber: new CphNumberPage(page),
     declaration: new DeclarationPage(page),
     destinationSelection: new DestinationSelectionPage(page),
