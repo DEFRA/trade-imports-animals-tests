@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "strict": false,
     "target": "ESNext",
     "module": "esnext",
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": ".",
