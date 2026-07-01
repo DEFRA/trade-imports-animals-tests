@@ -140,26 +140,6 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('link', { name: `View ${referenceNumber}` });
   }
 
-  /**
-   * Walks the dashboard forward from the current page until a notification
-   * with the given reference is on the page. Needed because default sort
-   * is `arrivalDate,desc` at day granularity — parallel workers can produce
-   * many notifications tied on the same arrival date and MongoDB has no
-   * defined order for ties, so a freshly-created notification is not
-   * guaranteed to be on page 1. Once this returns, per-reference locators
-   * (btnAmend, btnCopyAsNew, viewLink) resolve on the current page.
-   */
-  async goToPageWithReference(referenceNumber: string): Promise<void> {
-    await this.heading.waitFor({ state: 'visible' });
-    const marker = this.viewLink(referenceNumber);
-
-    while (!(await marker.isVisible())) {
-      if (!(await this.linkNextPage.isVisible())) return;
-      await this.linkNextPage.click();
-      await this.heading.waitFor({ state: 'visible' });
-    }
-  }
-
   notificationCard(index: number) {
     const card = this.notificationCards.nth(index);
     return {
