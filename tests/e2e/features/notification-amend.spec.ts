@@ -42,6 +42,7 @@ test.describe('Notification amend', () => {
 
     test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages }) => {
       await pages.notificationDashboard.open();
+      await pages.notificationDashboard.goToPageWithReference(referenceNumber);
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).toBeVisible();
     });
   });
@@ -77,6 +78,7 @@ test.describe('Notification amend', () => {
       const ref = journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
+      await pages.notificationDashboard.goToPageWithReference(ref);
       await pages.notificationDashboard.btnAmend(ref).click();
 
       // Lands on /notification-view/{ref} with AMEND state
@@ -120,6 +122,7 @@ test.describe('Notification amend', () => {
       // And the dashboard exposes the SUBMITTED-state Amend action against
       // the same reference, confirming the round-trip.
       await pages.notificationDashboard.open();
+      await pages.notificationDashboard.goToPageWithReference(ref);
       await expect(pages.notificationDashboard.btnAmend(ref)).toBeVisible();
     },
   );
