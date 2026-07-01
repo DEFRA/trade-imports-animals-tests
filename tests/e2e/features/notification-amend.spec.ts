@@ -1,6 +1,7 @@
 import { expect, test } from '@fixtures';
 import { createPageObjects } from '@page-objects';
 import { type JourneyContext, Journeys } from '@flows/journeys';
+import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification amend', () => {
   let referenceNumber: string;
@@ -42,7 +43,7 @@ test.describe('Notification amend', () => {
 
     test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages }) => {
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.goToPageWithReference(referenceNumber);
+      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).toBeVisible();
     });
   });
@@ -78,7 +79,7 @@ test.describe('Notification amend', () => {
       const ref = journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.goToPageWithReference(ref);
+      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
       await pages.notificationDashboard.btnAmend(ref).click();
 
       // Lands on /notification-view/{ref} with AMEND state
@@ -122,7 +123,7 @@ test.describe('Notification amend', () => {
       // And the dashboard exposes the SUBMITTED-state Amend action against
       // the same reference, confirming the round-trip.
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.goToPageWithReference(ref);
+      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
       await expect(pages.notificationDashboard.btnAmend(ref)).toBeVisible();
     },
   );
