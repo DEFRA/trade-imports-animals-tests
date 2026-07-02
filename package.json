@@ -26,7 +26,8 @@
     "test:docker-compose": "npm run _reset_and_clean_and_test_docker_compose -- --grep-invert '@agent|@a11y'",
     "test:docker-compose:a11y": "npm run _reset_and_clean_and_test_docker_compose -- --grep '@a11y'",
     "test:docker-compose:ci": "npm run _test_docker_compose -- --grep-invert '@agent|@a11y' --reporter=blob,list,allure-playwright",
-    "test:visual:linux": "echo 'Linux visual baseline generation not yet implemented'",
+    "test:docker-compose:visual": "npm run _reset_and_clean_and_test_docker_compose -- --grep '@visual'",
+    "test:docker-compose:visual:container": "./bin/container-compose-tests.sh --grep '@visual'",
     "report": "allure generate allure-results --single-file --clean",
     "report:publish": "npm run report; ./bin/publish-tests.sh"
   },

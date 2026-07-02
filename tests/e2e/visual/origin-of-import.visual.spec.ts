@@ -8,7 +8,6 @@ test.describe('Origin of import (visual regression)', { tag: '@visual' }, () => 
     await journeys.toOriginOfImport();
   });
 
-  // If failing in CI, skip — Linux baselines pending (Martyn, back 30 Jun 2026).
   test('shows expected page appearance on first load', async ({ page, pages }) => {
     await expect(page).toHaveScreenshot('origin-of-import.png', { fullPage: true, mask: [pages.originOfImport.user()] });
   });

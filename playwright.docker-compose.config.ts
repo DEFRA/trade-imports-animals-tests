@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 import sharedConfig from './utils/playwright/shared-config';
+import { withContainerHostResolver } from './utils/playwright/with-container-host-resolver';
 import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 
 const projectBaseUrls: Record<string, string> = {
@@ -7,5 +8,13 @@ const projectBaseUrls: Record<string, string> = {
   'admin-chromium': 'http://localhost:3001',
 };
 
-/** e2e against the workspace docker-compose stack (local dev and CI). */
-export default defineConfig(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'));
+const dockerComposeConfig = withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose');
+
+/**
+ * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).
+ * In-container runs (PLAYWRIGHT_IN_CONTAINER=1) add a Chromium host-resolver rule for OIDC localhost redirects.
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig(
+  process.env.PLAYWRIGHT_IN_CONTAINER === '1' ? withContainerHostResolver(dockerComposeConfig) : dockerComposeConfig,
+);

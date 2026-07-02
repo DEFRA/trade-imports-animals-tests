@@ -109,15 +109,10 @@ target host:
 | `playwright.config.ts`                | CDP services         |
 | `playwright.docker-compose.config.ts` | docker-compose stack |
 
-Runs differ only by grep tag and config. `@a11y` runs use these same configs;
-their longer per-test timeout is set on the a11y fixture (`fixtures/a11y.ts`).
+`@a11y` tests use the same configs; per-test timeout is longer in
+`fixtures/a11y.ts`.
 
-The package.json scripts share a private `_test` (`clean && playwright test`),
-with `_reset` adding a DB reseed in front; each `test:*` script appends its
-`--config` and grep. `test:docker-compose:ci` calls Playwright directly (no
-`clean`) because CI bind-mounts the artifact directories.
-
-The `docker-compose` configs target `localhost:3000` / `localhost:3001`, so
+The `docker-compose` config target `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
 against that stack via the workspace reusable workflow.
 
@@ -176,15 +171,23 @@ Baselines are stored alongside their spec files in `*-snapshots/` directories an
 ### Updating macOS baselines
 
 ```bash
-npm run test:docker-compose -- --grep @visual --update-snapshots
-npm run test:docker-compose -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
+npm run test:docker-compose:visual -- --update-snapshots
+npm run test:docker-compose:visual -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
 ```
+
+Produces `*-darwin.png` on local macOS. Host Playwright runs against the workspace
+stack; updated snapshots are written to your working tree for commit.
 
 ### Updating Linux baselines
 
-Note:
+```bash
+npm run test:docker-compose:visual:container -- --update-snapshots
+npm run test:docker-compose:visual:container -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
+```
 
-- Linux baselines must match CI rendering. `npm run test:visual:linux` is a placeholder — not yet implemented. Once implemented, pass `--update-snapshots` to regenerate all baselines, or a specific spec file followed by `--update-snapshots` to update a single test.
+Produces `*-linux.png` files that match CI rendering. Playwright runs in a Linux
+container against the workspace stack; updated snapshots are written into your
+working tree for commit.
 
 ## Running Tests on GitHub
 
