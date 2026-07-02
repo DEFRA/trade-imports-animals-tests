@@ -18,8 +18,9 @@ test.describe('Consignor selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows matching consignor details when selecting the first consignor', async ({ pages }) => {
-    await pages.consignorSelection.linkSelectConsignor(0).click();
+  test('shows matching consignor details when selecting Astra Rosales', async ({ pages }) => {
+    await pages.consignorSelection.radioConsignorOrExporter('Astra Rosales').click();
+    await pages.consignorSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
@@ -31,7 +32,8 @@ test.describe('Consignor selection', () => {
 
   test('shows matching consignor details when selecting a different consignor', async ({ pages }) => {
     const consignorName = 'Laiterie du Nord SARL';
-    await pages.consignorSelection.linkSelectConsignorByName(consignorName).click();
+    await pages.consignorSelection.radioConsignorOrExporter(consignorName).click();
+    await pages.consignorSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
@@ -39,5 +41,10 @@ test.describe('Consignor selection', () => {
     await expect(cells.nth(0)).toHaveText(consignorName);
     await expect(cells.nth(1)).toHaveText('12 Rue de la Gare, 59000 Lille');
     await expect(cells.nth(2)).toHaveText('	France');
+  });
+
+  test('shows validation error when no consignor is selected', async ({ pages }) => {
+    await pages.consignorSelection.btnSaveAndContinue.click();
+    await expect(pages.consignorSelection.errorSummaryItems.first()).toContainText('Select a consignor or exporter');
   });
 });

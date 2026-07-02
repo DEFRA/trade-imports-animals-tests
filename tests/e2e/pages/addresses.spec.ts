@@ -55,9 +55,11 @@ test.describe('Addresses landing page', () => {
 
   test('continues to port of entry page after saving addresses', async ({ pages }) => {
     await pages.addresses.linkAddConsignorOrExporter.click();
-    await pages.consignorSelection.linkSelectConsignor(0).click();
+    await pages.consignorSelection.radioConsignorOrExporter('Astra Rosales').click();
+    await pages.consignorSelection.btnSaveAndContinue.click();
     await pages.addresses.linkAddPlaceOfDestination.click();
-    await pages.destinationSelection.linkSelectDestination(0).click();
+    await pages.destinationSelection.radioPlaceOfDestination('Tech Imports Ltd').click();
+    await pages.destinationSelection.btnSaveAndContinue.click();
     await pages.addresses.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
     await expect(pages.entryPoint.heading).toBeVisible();

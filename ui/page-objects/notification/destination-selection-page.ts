@@ -16,19 +16,22 @@ export class DestinationSelectionPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Search for a place of destination' });
   }
 
-  get tableDestinations(): Locator {
-    return this.page.getByRole('table');
+  get groupSelectPlaceOfDestination(): Locator {
+    return this.page.getByRole('group', { name: 'Select a place of destination' });
   }
 
-  get rowsDestinations(): Locator {
-    return this.tableDestinations.locator('tbody').getByRole('row');
+  radioPlaceOfDestination(name: string): Locator {
+    return this.groupSelectPlaceOfDestination.getByRole('radio', { name: new RegExp(name) });
   }
 
-  linkSelectDestination(rowIndex: number): Locator {
-    return this.rowsDestinations.nth(rowIndex).getByRole('link', { name: 'Select' });
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  linkSelectDestinationByName(name: string): Locator {
-    return this.rowsDestinations.filter({ hasText: name }).getByRole('link', { name: 'Select' });
+  get errorSummaryItems(): Locator {
+    return this.page
+      .getByRole('alert')
+      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
+      .getByRole('link');
   }
 }

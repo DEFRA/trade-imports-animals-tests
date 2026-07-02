@@ -18,8 +18,9 @@ test.describe('Destination selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows matching destination details when selecting the first destination', async ({ pages }) => {
-    await pages.destinationSelection.linkSelectDestination(0).click();
+  test('shows matching destination details when selecting Tech Imports Ltd', async ({ pages }) => {
+    await pages.destinationSelection.radioPlaceOfDestination('Tech Imports Ltd').click();
+    await pages.destinationSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
@@ -31,7 +32,8 @@ test.describe('Destination selection', () => {
 
   test('shows matching destination details when selecting a different destination', async ({ pages }) => {
     const destinationName = 'Global Trading Co';
-    await pages.destinationSelection.linkSelectDestinationByName(destinationName).click();
+    await pages.destinationSelection.radioPlaceOfDestination(destinationName).click();
+    await pages.destinationSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
@@ -39,5 +41,10 @@ test.describe('Destination selection', () => {
     await expect(cells.nth(0)).toHaveText(destinationName);
     await expect(cells.nth(1)).toHaveText('945 Main Street, London LS1 5AB');
     await expect(cells.nth(2)).toHaveText('United Kingdom');
+  });
+
+  test('shows validation error when no destination is selected', async ({ pages }) => {
+    await pages.destinationSelection.btnSaveAndContinue.click();
+    await expect(pages.destinationSelection.errorSummaryItems.first()).toContainText('Select a place of destination');
   });
 });
