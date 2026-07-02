@@ -16,19 +16,22 @@ export class ConsignorSelectionPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Search for an existing consignor or exporter' });
   }
 
-  get tableConsignors(): Locator {
-    return this.page.getByRole('table');
+  get groupSelectConsignorOrExporter(): Locator {
+    return this.page.getByRole('group', { name: 'Select a consignor or exporter' });
   }
 
-  get rowsConsignors(): Locator {
-    return this.tableConsignors.locator('tbody').getByRole('row');
+  radioConsignorOrExporter(name: string): Locator {
+    return this.groupSelectConsignorOrExporter.getByRole('radio', { name: new RegExp(name) });
   }
 
-  linkSelectConsignor(rowIndex: number): Locator {
-    return this.rowsConsignors.nth(rowIndex).getByRole('link', { name: 'Select' });
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
-  linkSelectConsignorByName(name: string): Locator {
-    return this.rowsConsignors.filter({ hasText: name }).getByRole('link', { name: 'Select' });
+  get errorSummaryItems(): Locator {
+    return this.page
+      .getByRole('alert')
+      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
+      .getByRole('link');
   }
 }

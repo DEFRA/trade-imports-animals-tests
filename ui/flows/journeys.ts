@@ -226,7 +226,8 @@ export class Journeys {
     await this.pages.placeOfOriginSelection.radioPlaceOfOrigin(PLACE_OF_ORIGIN_NAME).click();
     await this.pages.placeOfOriginSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddConsignorOrExporter.click();
-    await this.pages.consignorSelection.linkSelectConsignorByName(CONSIGNOR_NAME).click();
+    await this.pages.consignorSelection.radioConsignorOrExporter(CONSIGNOR_NAME).click();
+    await this.pages.consignorSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddConsignee.click();
     await this.pages.consigneeSelection.radioConsignee(CONSIGNEE_NAME).click();
     await this.pages.consigneeSelection.btnSaveAndContinue.click();
@@ -234,7 +235,8 @@ export class Journeys {
     await this.pages.importerSelection.radioImporter(IMPORTER_NAME).click();
     await this.pages.importerSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddPlaceOfDestination.click();
-    await this.pages.destinationSelection.linkSelectDestinationByName(DESTINATION_NAME).click();
+    await this.pages.destinationSelection.radioPlaceOfDestination(DESTINATION_NAME).click();
+    await this.pages.destinationSelection.btnSaveAndContinue.click();
     await this.pages.addresses.linkAddCphNumber.click();
     await this.pages.cphNumber.inputCphNumber.fill(CPH_NUMBER);
     await this.pages.cphNumber.btnSaveAndContinue.click();
