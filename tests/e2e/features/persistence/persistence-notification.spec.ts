@@ -102,7 +102,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.destination.address.addressLine3).toBeUndefined();
       expect(doc.destination.address.country).toBe('United Kingdom');
       expect(doc.cphNumber).toBe(CPH_NUMBER);
-      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry);
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
       expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
