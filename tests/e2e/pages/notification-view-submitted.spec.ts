@@ -108,7 +108,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('shows port of entry', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry);
+    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.code);
   });
 
   test('shows no accompanying documents', async ({ pages }) => {
