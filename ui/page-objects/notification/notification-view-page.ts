@@ -92,6 +92,14 @@ export class NotificationViewPage extends BasePage {
     return this.page.locator('.govuk-tag', { hasText: 'Amend' });
   }
 
+  get btnCancelAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Cancel amendment' });
+  }
+
+  get amendCancelledBanner(): Locator {
+    return this.page.locator('#amend-cancelled-banner');
+  }
+
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }
