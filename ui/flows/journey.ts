@@ -6,6 +6,7 @@ import { type ImportReason, importReasons } from '@domain/constants/import-reaso
 import { type CertificationPurpose, certificationPurposes } from '@domain/constants/certification-purposes';
 import type { YesNoValue } from '@domain/constants/yes-no-values';
 import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-entries';
+import { meansOfTransport, type MeansOfTransport } from '@domain/constants/means-of-transport';
 import type { AccompanyingDocument } from '@domain/types/accompanying-document';
 import type { DateInput } from '@domain/types/date-time-input';
 import type { PageObjects } from '@page-objects';
@@ -27,6 +28,7 @@ export type JourneyOptions = {
   accompanyingDocuments?: AccompanyingDocument | AccompanyingDocument[];
   pointOfEntry?: PointOfEntry;
   arrivalDate?: DateInput;
+  meansOfTransport?: MeansOfTransport;
 };
 
 export type JourneyContext = {
@@ -49,6 +51,7 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   accompanyingDocuments: undefined,
   pointOfEntry: pointOfEntries.aberdeen,
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
+  meansOfTransport: meansOfTransport.vessel,
 };
 
 export const EAR_TAG_PREFIX = 'FR';
@@ -408,9 +411,10 @@ export class Journey {
   }
 
   async fillEntryPoint(options: JourneyOptions = {}): Promise<void> {
-    const { pointOfEntry, arrivalDate } = { ...defaultJourneyOptions, ...options };
+    const { pointOfEntry, arrivalDate, meansOfTransport } = { ...defaultJourneyOptions, ...options };
     await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry.code);
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
+    await this.pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.code);
   }
 
   async saveEntryPoint(): Promise<void> {
