@@ -1,9 +1,9 @@
-import { test } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
-test.describe('Accessibility WCAG 2.2 AA', { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
   test('the notification dashboard has no accessibility violations in its default and sorted views', async ({ pages, runA11yScan }) => {

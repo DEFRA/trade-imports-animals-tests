@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/notification-journey';
+import { defaultJourneyOptions } from '@flows/journey';
 import { commoditySpecies } from '@domain/constants/commodity-species';
 import { commodityTypes } from '@domain/constants/commodity-types';
 
@@ -7,8 +7,8 @@ const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domesti
 const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;
 
 test.describe('Animal identification details', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toAnimalIdentification();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toAnimalIdentification();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

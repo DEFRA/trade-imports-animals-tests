@@ -1,6 +1,6 @@
 import { expect, test } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { type JourneyContext, NotificationJourney } from '@flows/notification-journey';
+import { type JourneyContext, Journey } from '@flows/journey';
 import { NotificationActions } from '@flows/notification-actions';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
@@ -12,8 +12,8 @@ test.describe('Notification amend', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const notificationJourney = new NotificationJourney(pages, journeyContext);
-    await notificationJourney.submitNotification();
+    const journey = new Journey(pages, journeyContext);
+    await journey.submitNotification();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });
@@ -52,8 +52,8 @@ test.describe('Notification amend', () => {
   test(
     'amends from the view page and shows Change links + CTAs',
     { tag: ['@integration'] },
-    async ({ pages, notificationJourney, journeyContext, notificationActions }) => {
-      await notificationJourney.submitNotification();
+    async ({ pages, journey, journeyContext, notificationActions }) => {
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
       await notificationActions.toNotificationView(ref);
@@ -75,8 +75,8 @@ test.describe('Notification amend', () => {
   test(
     'amends from the dashboard and lands on the view page in AMEND state',
     { tag: ['@integration'] },
-    async ({ pages, notificationJourney, journeyContext }) => {
-      await notificationJourney.submitNotification();
+    async ({ pages, journey, journeyContext }) => {
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
@@ -92,9 +92,9 @@ test.describe('Notification amend', () => {
   test(
     'walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED',
     { tag: ['@integration'] },
-    async ({ pages, notificationJourney, journeyContext, notificationActions }) => {
+    async ({ pages, journey, journeyContext, notificationActions }) => {
       // 1. Start from a freshly submitted notification.
-      await notificationJourney.submitNotification();
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
       await notificationActions.toNotificationView(ref);

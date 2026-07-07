@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Addresses landing page', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toAddresses();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toAddresses();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

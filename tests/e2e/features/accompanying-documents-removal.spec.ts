@@ -2,8 +2,8 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, notificationJourney }) => {
-  await notificationJourney.toAccompanyingDocuments();
+test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, journey }) => {
+  await journey.toAccompanyingDocuments();
 
   await test.step('upload two documents', async () => {
     const uploadCount = 2;

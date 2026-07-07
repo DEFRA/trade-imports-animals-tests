@@ -3,8 +3,8 @@ import { commodityCodes } from '@domain/constants/commodity-codes';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Commodities', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toCommoditySelection();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toCommoditySelection();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

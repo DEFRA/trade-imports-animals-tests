@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { NotificationJourney, JourneyContext } from '@flows/notification-journey';
+import { Journey, JourneyContext } from '@flows/journey';
 
 test.describe('Notification view (DRAFT)', () => {
   let referenceNumber: string;
@@ -10,8 +10,8 @@ test.describe('Notification view (DRAFT)', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const notificationJourney = new NotificationJourney(pages, journeyContext);
-    await notificationJourney.toReview();
+    const journey = new Journey(pages, journeyContext);
+    await journey.toReview();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });

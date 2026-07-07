@@ -1,10 +1,10 @@
 import { test, expect } from '@fixtures';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@flows/notification-journey';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@flows/journey';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toAdditionalDetails();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toAdditionalDetails();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

@@ -1,13 +1,13 @@
 import { test as base, expect } from '@playwright/test';
 import { createPageObjects, type PageObjects } from '@page-objects';
-import { NotificationJourney, type JourneyContext } from '@flows/notification-journey';
+import { Journey, type JourneyContext } from '@flows/journey';
 import { AdminNavigation } from '@flows/admin-navigation';
 import { NotificationActions } from '@flows/notification-actions';
 
 export interface PageFixtures {
   pages: PageObjects;
   journeyContext: JourneyContext;
-  notificationJourney: NotificationJourney;
+  journey: Journey;
   adminNavigation: AdminNavigation;
   notificationActions: NotificationActions;
 }
@@ -20,8 +20,8 @@ export const test = base.extend<PageFixtures>({
   journeyContext: async ({}, use) => {
     await use({});
   },
-  notificationJourney: async ({ pages, journeyContext }, use) => {
-    await use(new NotificationJourney(pages, journeyContext));
+  journey: async ({ pages, journeyContext }, use) => {
+    await use(new Journey(pages, journeyContext));
   },
   adminNavigation: async ({ pages }, use) => {
     await use(new AdminNavigation(pages));

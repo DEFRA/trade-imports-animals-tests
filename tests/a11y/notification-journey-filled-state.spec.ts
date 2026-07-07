@@ -1,133 +1,143 @@
-import { test } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { documentTypes } from '@domain/constants/document-types';
+import { fileUploadPaths } from '@resources/file-upload/paths';
 
-test.describe('Accessibility WCAG 2.2 AA', { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
-  test('each notification journey page has no accessibility violations after user input', async ({ notificationJourney, runA11yScan }) => {
+  test('each notification journey page has no accessibility violations after user input', async ({ journey, runA11yScan }) => {
     await test.step('Origin of import', async () => {
-      await notificationJourney.toOriginOfImport();
-      await notificationJourney.fillOriginOfImport({ internalReference: 'InternalReference123' });
+      await journey.toOriginOfImport();
+      await journey.fillOriginOfImport({ internalReference: 'InternalReference123' });
       await runA11yScan();
-      await notificationJourney.saveOriginOfImport();
+      await journey.saveOriginOfImport();
     });
 
     await test.step('Commodity selection', async () => {
-      await notificationJourney.fillCommoditySelection();
+      await journey.fillCommoditySelection();
       await runA11yScan();
-      await notificationJourney.saveCommoditySelection();
+      await journey.saveCommoditySelection();
     });
 
     await test.step('Species selection', async () => {
-      await notificationJourney.fillSpeciesSelection();
+      await journey.fillSpeciesSelection();
       await runA11yScan();
-      await notificationJourney.saveSpeciesSelection();
+      await journey.saveSpeciesSelection();
     });
 
     await test.step('Import reason', async () => {
-      await notificationJourney.fillImportReason();
+      await journey.fillImportReason();
       await runA11yScan();
-      await notificationJourney.saveImportReason();
+      await journey.saveImportReason();
     });
 
     await test.step('Commodity details', async () => {
-      await notificationJourney.fillCommodityDetails();
+      await journey.fillCommodityDetails();
       await runA11yScan();
-      await notificationJourney.saveCommodityDetails();
+      await journey.saveCommodityDetails();
     });
 
     await test.step('Animal identification', async () => {
-      await notificationJourney.fillAnimalIdentification();
+      await journey.fillAnimalIdentification();
       await runA11yScan();
-      await notificationJourney.saveAnimalIdentification();
+      await journey.saveAnimalIdentification();
     });
 
     await test.step('Additional details', async () => {
-      await notificationJourney.fillAdditionalDetails();
+      await journey.fillAdditionalDetails();
       await runA11yScan();
-      await notificationJourney.saveAdditionalDetails();
+      await journey.saveAdditionalDetails();
     });
 
     await test.step('Accompanying documents', async () => {
-      await notificationJourney.saveAccompanyingDocuments();
+      const accompanyingDocuments = {
+        filePath: fileUploadPaths.safeFile250bPng,
+        documentType: documentTypes.veterinaryHealthCertificate,
+        documentReference: 'InternalReference123',
+        issueDate: { day: '02', month: '12', year: '2025' },
+      };
+      await journey.fillAccompanyingDocuments({ accompanyingDocuments });
+      await runA11yScan();
+      await journey.saveAccompanyingDocuments({ accompanyingDocuments });
     });
 
     await test.step('Place of origin selection', async () => {
-      await notificationJourney.openPlaceOfOrigin();
-      await notificationJourney.fillPlaceOfOrigin();
+      await journey.openPlaceOfOrigin();
+      await journey.fillPlaceOfOrigin();
       await runA11yScan();
-      await notificationJourney.savePlaceOfOrigin();
+      await journey.savePlaceOfOrigin();
     });
 
     await test.step('Consignor selection', async () => {
-      await notificationJourney.openConsignor();
-      await notificationJourney.fillConsignor();
+      await journey.openConsignor();
+      await journey.fillConsignor();
       await runA11yScan();
-      await notificationJourney.saveConsignor();
+      await journey.saveConsignor();
     });
 
     await test.step('Consignee selection', async () => {
-      await notificationJourney.openConsignee();
-      await notificationJourney.fillConsignee();
+      await journey.openConsignee();
+      await journey.fillConsignee();
       await runA11yScan();
-      await notificationJourney.saveConsignee();
+      await journey.saveConsignee();
     });
 
     await test.step('Importer selection', async () => {
-      await notificationJourney.openImporter();
-      await notificationJourney.fillImporter();
+      await journey.openImporter();
+      await journey.fillImporter();
       await runA11yScan();
-      await notificationJourney.saveImporter();
+      await journey.saveImporter();
     });
 
     await test.step('Place of destination selection', async () => {
-      await notificationJourney.openPlaceOfDestination();
-      await notificationJourney.fillPlaceOfDestination();
+      await journey.openPlaceOfDestination();
+      await journey.fillPlaceOfDestination();
       await runA11yScan();
-      await notificationJourney.savePlaceOfDestination();
+      await journey.savePlaceOfDestination();
     });
 
     await test.step('CPH number', async () => {
-      await notificationJourney.openCphNumber();
-      await notificationJourney.fillCphNumber();
+      await journey.openCphNumber();
+      await journey.fillCphNumber();
       await runA11yScan();
-      await notificationJourney.saveCphNumber();
+      await journey.saveCphNumber();
     });
 
     await test.step('Consignment addresses with all addresses added', async () => {
       await runA11yScan();
-      await notificationJourney.saveAddresses();
+      await journey.saveAddresses();
     });
 
     await test.step('Entry point', async () => {
-      await notificationJourney.fillEntryPoint();
+      await journey.fillEntryPoint();
       await runA11yScan();
-      await notificationJourney.saveEntryPoint();
+      await journey.saveEntryPoint();
     });
 
     await test.step('Transporter with transporter added', async () => {
-      await notificationJourney.openTransporterSelection();
-      await notificationJourney.selectTransporter();
+      await journey.openTransporterSelection();
+      await journey.selectTransporter();
       await runA11yScan();
-      await notificationJourney.saveTransporter();
+      await journey.saveTransporter();
     });
 
     await test.step('Contact address', async () => {
-      await notificationJourney.fillContactAddress();
+      await journey.fillContactAddress();
       await runA11yScan();
-      await notificationJourney.saveContactAddress();
+      await journey.saveContactAddress();
     });
 
     await test.step('Review notification', async () => {
       await runA11yScan();
-      await notificationJourney.confirmReview();
+      await journey.confirmReview();
     });
 
     await test.step('Declaration', async () => {
-      await notificationJourney.fillDeclaration();
+      await journey.fillDeclaration();
       await runA11yScan();
-      await notificationJourney.submitDeclaration();
+      await journey.submitDeclaration();
     });
   });
 });

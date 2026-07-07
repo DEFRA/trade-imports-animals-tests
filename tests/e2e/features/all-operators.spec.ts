@@ -1,14 +1,7 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { NotificationJourney, JourneyContext } from '@flows/notification-journey';
-import {
-  PLACE_OF_ORIGIN_NAME,
-  CONSIGNOR_NAME,
-  CONSIGNEE_NAME,
-  IMPORTER_NAME,
-  DESTINATION_NAME,
-  CPH_NUMBER,
-} from '@flows/notification-journey';
+import { Journey, JourneyContext } from '@flows/journey';
+import { PLACE_OF_ORIGIN_NAME, CONSIGNOR_NAME, CONSIGNEE_NAME, IMPORTER_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journey';
 
 test.describe('All operator addresses', () => {
   let referenceNumber: string;
@@ -18,8 +11,8 @@ test.describe('All operator addresses', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const notificationJourney = new NotificationJourney(pages, journeyContext);
-    await notificationJourney.toReview();
+    const journey = new Journey(pages, journeyContext);
+    await journey.toReview();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });

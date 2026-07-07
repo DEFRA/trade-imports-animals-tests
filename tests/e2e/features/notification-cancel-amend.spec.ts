@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { CPH_NUMBER, NotificationJourney, type JourneyContext } from '@flows/notification-journey';
+import { CPH_NUMBER, Journey, type JourneyContext } from '@flows/journey';
 import { NotificationActions } from '@flows/notification-actions';
 
 const EDITED_CPH_NUMBER = '987654321';
@@ -14,8 +14,8 @@ test.describe('Notification cancel amend', () => {
       const page = await context.newPage();
       const pages = createPageObjects(page);
       const journeyContext: JourneyContext = {};
-      const notificationJourney = new NotificationJourney(pages, journeyContext);
-      await notificationJourney.submitNotification();
+      const journey = new Journey(pages, journeyContext);
+      await journey.submitNotification();
       referenceNumber = journeyContext.notificationId;
       const notificationActions = new NotificationActions(pages);
       await notificationActions.amendNotification(referenceNumber);
@@ -55,8 +55,8 @@ test.describe('Notification cancel amend', () => {
   test(
     'does not show the Cancel amendment option when notification is Submitted',
     { tag: ['@integration'] },
-    async ({ pages, notificationJourney, notificationActions, journeyContext }) => {
-      await notificationJourney.submitNotification();
+    async ({ pages, journey, notificationActions, journeyContext }) => {
+      await journey.submitNotification();
       const submittedReference = journeyContext.notificationId;
       await notificationActions.toNotificationView(submittedReference);
 
@@ -68,8 +68,8 @@ test.describe('Notification cancel amend', () => {
   test(
     'cancels the amendment and restores the submitted notification',
     { tag: ['@integration'] },
-    async ({ pages, notificationJourney, notificationActions, journeyContext }) => {
-      await notificationJourney.submitNotification();
+    async ({ pages, journey, notificationActions, journeyContext }) => {
+      await journey.submitNotification();
       const referenceNumber = journeyContext.notificationId;
 
       await notificationActions.amendNotification(referenceNumber);

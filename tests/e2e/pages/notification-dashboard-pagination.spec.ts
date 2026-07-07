@@ -4,8 +4,8 @@ import { test, expect } from '@fixtures';
 const NOTIFICATION_LIST_PAGE_SIZE = 25;
 
 test.describe('Import notification service - dashboard pagination', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
   test.describe('Dashboard pagination', () => {

@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
-import { TRANSPORTER_NAME } from '@flows/notification-journey';
+import { TRANSPORTER_NAME } from '@flows/journey';
 
 test.describe('Contact address for consignment', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toContactAddress();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toContactAddress();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

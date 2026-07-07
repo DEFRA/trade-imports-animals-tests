@@ -6,8 +6,8 @@ const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domesti
 const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;
 
 test.describe('Commodity details', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toCommodityDetails();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toCommodityDetails();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

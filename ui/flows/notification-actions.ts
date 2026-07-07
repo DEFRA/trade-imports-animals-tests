@@ -3,7 +3,7 @@ import type { PageObjects } from '@page-objects';
 /**
  * Operations on an existing notification's view page, reached directly by
  * reference number rather than by walking the creation wizard. Use
- * `NotificationJourney` instead for anything that progresses through wizard pages.
+ * `Journey` instead for anything that progresses through wizard pages.
  */
 export class NotificationActions {
   constructor(private readonly pages: PageObjects) {}

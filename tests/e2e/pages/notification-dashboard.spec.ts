@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Import notification service', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
   test('lands on the notification dashboard', async ({ pages }) => {

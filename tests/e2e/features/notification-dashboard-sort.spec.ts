@@ -2,8 +2,8 @@ import { test, expect } from '@fixtures';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification dashboard sort', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
   test('default sort option is "Arrival (newest to oldest)"', async ({ pages }) => {

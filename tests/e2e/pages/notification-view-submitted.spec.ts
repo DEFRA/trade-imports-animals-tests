@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
 import {
-  NotificationJourney,
+  Journey,
   JourneyContext,
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
@@ -9,7 +9,7 @@ import {
   DESTINATION_NAME,
   CPH_NUMBER,
   TRANSPORTER_NAME,
-} from '@flows/notification-journey';
+} from '@flows/journey';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
 import { countryCodes } from '@domain/constants/country-codes';
@@ -23,8 +23,8 @@ test.describe('Notification view (SUBMITTED)', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const notificationJourney = new NotificationJourney(pages, journeyContext);
-    await notificationJourney.submitNotification();
+    const journey = new Journey(pages, journeyContext);
+    await journey.submitNotification();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });

@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transporter', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toTransporter();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toTransporter();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

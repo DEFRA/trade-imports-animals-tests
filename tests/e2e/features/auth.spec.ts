@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Authentication', { tag: '@auth' }, () => {
-  test.beforeEach(async ({ notificationJourney, pages }) => {
-    await notificationJourney.toSignIn((attemptSignIn) => pages.notificationDashboard.open(attemptSignIn));
+  test.beforeEach(async ({ journey, pages }) => {
+    await journey.toSignIn((attemptSignIn) => pages.notificationDashboard.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening the notification dashboard', async ({ pages }) => {
@@ -49,8 +49,8 @@ test.describe('Authentication', { tag: '@auth' }, () => {
   });
 
   test.describe('Origin of the import (unauthenticated entry)', () => {
-    test.beforeEach(async ({ notificationJourney, pages }) => {
-      await notificationJourney.toSignIn((attemptSignIn) => pages.originOfImport.open(attemptSignIn));
+    test.beforeEach(async ({ journey, pages }) => {
+      await journey.toSignIn((attemptSignIn) => pages.originOfImport.open(attemptSignIn));
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

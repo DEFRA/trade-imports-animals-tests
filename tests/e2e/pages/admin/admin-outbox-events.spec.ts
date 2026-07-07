@@ -1,12 +1,12 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/notification-journey';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Outbox events (admin)', () => {
   const defaults = defaultJourneyOptions;
 
-  test('shows outbox event for a submitted notification', async ({ notificationJourney, adminNavigation, journeyContext, pages }) => {
-    await notificationJourney.submitNotification();
+  test('shows outbox event for a submitted notification', async ({ journey, adminNavigation, journeyContext, pages }) => {
+    await journey.submitNotification();
     const referenceNumber = journeyContext.notificationId;
 
     await adminNavigation.toOutboxEvents(referenceNumber);

@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('County parish holding (cph) number', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toCphNumber();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toCphNumber();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

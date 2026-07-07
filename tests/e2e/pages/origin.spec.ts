@@ -4,8 +4,8 @@ import { yesNoValues } from '@domain/constants/yes-no-values';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Origin of the import', () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toOriginOfImport();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toOriginOfImport();
   });
 
   test('shows only EU and EEA countries in origin dropdown', async ({ pages }) => {

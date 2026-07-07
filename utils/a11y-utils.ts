@@ -15,9 +15,6 @@ export interface ViolationSummary {
   violations: Result[];
 }
 
-// Tags are discrete filters, not cumulative — all five are required for full WCAG 2.2 AA coverage.
-const DEFAULT_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
-
 const getPathInfo = (url: string): string => {
   try {
     return new URL(url).pathname || '/';
@@ -27,7 +24,7 @@ const getPathInfo = (url: string): string => {
 };
 
 export async function scanPage(page: Page, options: A11yScanOptions = {}): Promise<ViolationSummary> {
-  const { tags = DEFAULT_TAGS, include, exclude, disableRules } = options;
+  const { tags, include, exclude, disableRules } = options;
 
   // Reliable baseline: DOM is parsed and ready.
   await page.waitForLoadState('domcontentloaded');
@@ -39,7 +36,9 @@ export async function scanPage(page: Page, options: A11yScanOptions = {}): Promi
     if (!(error instanceof errors.TimeoutError)) throw error;
   }
 
-  let builder = new AxeBuilder({ page }).withTags(tags);
+  // Without tags axe runs its own default ruleset, which omits target-size — see WCAG_STANDARD in @fixtures/a11y.
+  let builder = new AxeBuilder({ page });
+  if (tags?.length) builder = builder.withTags(tags);
 
   if (include !== undefined) builder = builder.include([include].flat());
   if (exclude !== undefined) builder = builder.exclude([exclude].flat());

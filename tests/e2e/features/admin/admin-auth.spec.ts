@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Authentication (admin)', { tag: '@auth' }, () => {
-  test.beforeEach(async ({ notificationJourney, pages }) => {
-    await notificationJourney.toSignIn((attemptSignIn) => pages.adminDashboard.open(attemptSignIn));
+  test.beforeEach(async ({ journey, pages }) => {
+    await journey.toSignIn((attemptSignIn) => pages.adminDashboard.open(attemptSignIn));
   });
 
   test('lands on the sign in page when opening the admin dashboard', async ({ pages }) => {
@@ -49,8 +49,8 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   });
 
   test.describe('Notifications (admin) (unauthenticated entry)', () => {
-    test.beforeEach(async ({ notificationJourney, pages }) => {
-      await notificationJourney.toSignIn((attemptSignIn) => pages.adminNotifications.open(attemptSignIn));
+    test.beforeEach(async ({ journey, pages }) => {
+      await journey.toSignIn((attemptSignIn) => pages.adminNotifications.open(attemptSignIn));
     });
 
     test('lands on the sign in page when opening a page further in the journey', async ({ pages }) => {

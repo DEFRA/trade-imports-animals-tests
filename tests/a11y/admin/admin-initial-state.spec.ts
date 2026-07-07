@@ -1,6 +1,6 @@
-import { test } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
-test.describe('Accessibility (admin) WCAG 2.2 AA', { tag: '@a11y' }, () => {
+test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('each admin page has no accessibility violations on initial load', async ({ adminNavigation, pages, runA11yScan }) => {
     await test.step('Admin dashboard', async () => {
       await adminNavigation.toAdminDashboard();

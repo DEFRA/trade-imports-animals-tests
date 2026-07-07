@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/notification-journey';
+import { defaultJourneyOptions } from '@flows/journey';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
@@ -15,12 +15,12 @@ import {
   CPH_NUMBER,
   TRANSPORTER_NAME,
   CONTACT_ADDRESS_NAME,
-} from '@flows/notification-journey';
+} from '@flows/journey';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists notification as draft up to declaration', async ({ notificationJourney, journeyContext }) => {
-    await notificationJourney.toDeclaration();
+  test('persists notification as draft up to declaration', async ({ journey, journeyContext }) => {
+    await journey.toDeclaration();
     const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 
@@ -40,8 +40,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     }
   });
 
-  test('persists notification with defaults (after full journey completion*)', async ({ notificationJourney, journeyContext }) => {
-    await notificationJourney.submitNotification();
+  test('persists notification with defaults (after full journey completion*)', async ({ journey, journeyContext }) => {
+    await journey.submitNotification();
     const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
@@ -123,10 +123,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     }
   });
 
-  test('persists notification with defaults overidden (after full journey completion*)', async ({
-    notificationJourney,
-    journeyContext,
-  }) => {
+  test('persists notification with defaults overidden (after full journey completion*)', async ({ journey, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       requiresRegionCode: yesNoValues.yes,
@@ -134,7 +131,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       unweanedAnimals: yesNoValues.yes,
     };
 
-    await notificationJourney.submitNotification(options);
+    await journey.submitNotification(options);
     const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 

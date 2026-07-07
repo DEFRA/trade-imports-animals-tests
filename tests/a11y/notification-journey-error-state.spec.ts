@@ -1,67 +1,67 @@
-import { test } from '@fixtures/a11y';
+import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 // Only pages with server-side validation are scanned in the error state; the
 // invalid inputs mirror the @validation tests in tests/e2e/pages/. The other
 // pages are walked through with valid input to reach the next validation page.
-test.describe('Accessibility WCAG 2.2 AA', { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ notificationJourney }) => {
-    await notificationJourney.toNotificationDashboard();
+test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
+  test.beforeEach(async ({ journey }) => {
+    await journey.toNotificationDashboard();
   });
 
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({
-    notificationJourney,
+    journey,
     pages,
     runA11yScan,
   }) => {
     await test.step('Origin of import with validation errors', async () => {
-      await notificationJourney.toOriginOfImport();
+      await journey.toOriginOfImport();
       await pages.originOfImport.inputInternalReferenceNumber.fill('!');
       await pages.originOfImport.btnSaveAndContinue.click();
       await pages.originOfImport.errorSummaryItems.first().waitFor();
       await runA11yScan();
-      await notificationJourney.fillOriginOfImport({ internalReference: 'InternalReference123' });
-      await notificationJourney.saveOriginOfImport();
+      await journey.fillOriginOfImport({ internalReference: 'InternalReference123' });
+      await journey.saveOriginOfImport();
     });
 
     await test.step('Continue to accompanying documents', async () => {
-      await notificationJourney.fillCommoditySelection();
-      await notificationJourney.saveCommoditySelection();
-      await notificationJourney.fillSpeciesSelection();
-      await notificationJourney.saveSpeciesSelection();
-      await notificationJourney.fillImportReason();
-      await notificationJourney.saveImportReason();
-      await notificationJourney.fillCommodityDetails();
-      await notificationJourney.saveCommodityDetails();
-      await notificationJourney.fillAnimalIdentification();
-      await notificationJourney.saveAnimalIdentification();
-      await notificationJourney.fillAdditionalDetails();
-      await notificationJourney.saveAdditionalDetails();
+      await journey.fillCommoditySelection();
+      await journey.saveCommoditySelection();
+      await journey.fillSpeciesSelection();
+      await journey.saveSpeciesSelection();
+      await journey.fillImportReason();
+      await journey.saveImportReason();
+      await journey.fillCommodityDetails();
+      await journey.saveCommodityDetails();
+      await journey.fillAnimalIdentification();
+      await journey.saveAnimalIdentification();
+      await journey.fillAdditionalDetails();
+      await journey.saveAdditionalDetails();
     });
 
     await test.step('Accompanying documents with validation errors', async () => {
       await pages.accompanyingDocuments.btnAddAttachment.click();
       await pages.accompanyingDocuments.errorSummaryItems.first().waitFor();
       await runA11yScan();
-      await notificationJourney.saveAccompanyingDocuments();
+      await journey.saveAccompanyingDocuments();
     });
 
     await test.step('Continue to CPH number', async () => {
-      await notificationJourney.openPlaceOfOrigin();
-      await notificationJourney.fillPlaceOfOrigin();
-      await notificationJourney.savePlaceOfOrigin();
-      await notificationJourney.openConsignor();
-      await notificationJourney.fillConsignor();
-      await notificationJourney.saveConsignor();
-      await notificationJourney.openConsignee();
-      await notificationJourney.fillConsignee();
-      await notificationJourney.saveConsignee();
-      await notificationJourney.openImporter();
-      await notificationJourney.fillImporter();
-      await notificationJourney.saveImporter();
-      await notificationJourney.openPlaceOfDestination();
-      await notificationJourney.fillPlaceOfDestination();
-      await notificationJourney.savePlaceOfDestination();
-      await notificationJourney.openCphNumber();
+      await journey.openPlaceOfOrigin();
+      await journey.fillPlaceOfOrigin();
+      await journey.savePlaceOfOrigin();
+      await journey.openConsignor();
+      await journey.fillConsignor();
+      await journey.saveConsignor();
+      await journey.openConsignee();
+      await journey.fillConsignee();
+      await journey.saveConsignee();
+      await journey.openImporter();
+      await journey.fillImporter();
+      await journey.saveImporter();
+      await journey.openPlaceOfDestination();
+      await journey.fillPlaceOfDestination();
+      await journey.savePlaceOfDestination();
+      await journey.openCphNumber();
     });
 
     await test.step('CPH number with validation errors', async () => {
@@ -69,36 +69,36 @@ test.describe('Accessibility WCAG 2.2 AA', { tag: '@a11y' }, () => {
       await pages.cphNumber.btnSaveAndContinue.click();
       await pages.cphNumber.errorSummaryItems.first().waitFor();
       await runA11yScan();
-      await notificationJourney.fillCphNumber();
-      await notificationJourney.saveCphNumber();
+      await journey.fillCphNumber();
+      await journey.saveCphNumber();
     });
 
     await test.step('Entry point with validation errors', async () => {
-      await notificationJourney.saveAddresses();
-      await notificationJourney.fillEntryPoint();
+      await journey.saveAddresses();
+      await journey.fillEntryPoint();
       await pages.entryPoint.fillArrivalDate({ day: '32', month: '1', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await pages.entryPoint.errorSummaryItems.first().waitFor();
       await runA11yScan();
-      await notificationJourney.fillEntryPoint();
-      await notificationJourney.saveEntryPoint();
+      await journey.fillEntryPoint();
+      await journey.saveEntryPoint();
     });
 
     await test.step('Continue to declaration', async () => {
-      await notificationJourney.openTransporterSelection();
-      await notificationJourney.selectTransporter();
-      await notificationJourney.saveTransporter();
-      await notificationJourney.fillContactAddress();
-      await notificationJourney.saveContactAddress();
-      await notificationJourney.confirmReview();
+      await journey.openTransporterSelection();
+      await journey.selectTransporter();
+      await journey.saveTransporter();
+      await journey.fillContactAddress();
+      await journey.saveContactAddress();
+      await journey.confirmReview();
     });
 
     await test.step('Declaration with validation errors', async () => {
       await pages.declaration.btnSubmitNotification.click();
       await pages.declaration.errorSummaryItems.first().waitFor();
       await runA11yScan();
-      await notificationJourney.fillDeclaration();
-      await notificationJourney.submitDeclaration();
+      await journey.fillDeclaration();
+      await journey.submitDeclaration();
     });
   });
 });

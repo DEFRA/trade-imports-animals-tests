@@ -76,7 +76,7 @@ export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
  * The to* helpers compose fill + save down the chain. Tests that need to act on
  * a page before it is saved (e.g. accessibility scans) call fill/save directly.
  */
-export class NotificationJourney {
+export class Journey {
   constructor(
     private readonly pages: PageObjects,
     private readonly journeyContext?: JourneyContext,
