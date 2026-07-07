@@ -1,15 +1,15 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journeys';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/notification-journey';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Outbox events (admin)', () => {
   const defaults = defaultJourneyOptions;
 
-  test('shows outbox event for a submitted notification', async ({ journeys, adminJourneys, journeyContext, pages }) => {
-    await journeys.submitNotification();
+  test('shows outbox event for a submitted notification', async ({ notificationJourney, adminNavigation, journeyContext, pages }) => {
+    await notificationJourney.submitNotification();
     const referenceNumber = journeyContext.notificationId;
 
-    await adminJourneys.toOutboxEvents(referenceNumber);
+    await adminNavigation.toOutboxEvents(referenceNumber);
 
     await test.step('renders the outbox events table with one row', async () => {
       await expect(pages.adminOutboxEvents.heading).toBeVisible();
@@ -33,9 +33,9 @@ test.describe('Outbox events (admin)', () => {
     });
   });
 
-  test('shows empty state for an unknown reference number', async ({ adminJourneys, pages }) => {
+  test('shows empty state for an unknown reference number', async ({ adminNavigation, pages }) => {
     const unknownRef = 'GBN-AG-00-000000';
-    await adminJourneys.toOutboxEvents(unknownRef);
+    await adminNavigation.toOutboxEvents(unknownRef);
     await expect(pages.adminOutboxEvents.emptyStateMessage).toBeVisible();
     await expect(pages.adminOutboxEvents.emptyStateMessage).toContainText(unknownRef);
   });

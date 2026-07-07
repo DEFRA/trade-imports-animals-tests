@@ -14,8 +14,8 @@ async function fillValidAddAttachmentForm(pages: PageObjects): Promise<void> {
 }
 
 test.describe('Accompanying documents', () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toAccompanyingDocuments();
+  test.beforeEach(async ({ notificationJourney }) => {
+    await notificationJourney.toAccompanyingDocuments();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

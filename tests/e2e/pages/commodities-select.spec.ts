@@ -4,8 +4,8 @@ import { commoditySpecies } from '@domain/constants/commodity-species';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Select species of commodity', () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toSpeciesSelection();
+  test.beforeEach(async ({ notificationJourney }) => {
+    await notificationJourney.toSpeciesSelection();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

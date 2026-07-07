@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Importer selection', () => {
-  test.beforeEach(async ({ journeys, pages }) => {
-    await journeys.toAddresses();
+  test.beforeEach(async ({ notificationJourney, pages }) => {
+    await notificationJourney.toAddresses();
     await pages.addresses.linkAddImporter.click();
     await pages.importerSelection.heading.waitFor();
   });

@@ -8,8 +8,8 @@ import { skipIfCdpEnvironment } from '@utils/playwright/environment';
 
 test.describe('Notifications (admin)', { tag: '@compose' }, () => {
   test.describe.configure({ mode: 'default' });
-  test.beforeEach(async ({ adminJourneys }) => {
-    await adminJourneys.toNotifications();
+  test.beforeEach(async ({ adminNavigation }) => {
+    await adminNavigation.toNotifications();
   });
 
   test('shows notifications for deletion', async ({ pages }) => {

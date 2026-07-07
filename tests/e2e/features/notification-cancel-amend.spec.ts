@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { CPH_NUMBER, Journeys, type JourneyContext } from '@flows/journeys';
+import { CPH_NUMBER, NotificationJourney, type JourneyContext } from '@flows/notification-journey';
+import { NotificationActions } from '@flows/notification-actions';
 
 const EDITED_CPH_NUMBER = '987654321';
 
@@ -13,15 +14,16 @@ test.describe('Notification cancel amend', () => {
       const page = await context.newPage();
       const pages = createPageObjects(page);
       const journeyContext: JourneyContext = {};
-      const journeys = new Journeys(pages, journeyContext);
-      await journeys.submitNotification();
+      const notificationJourney = new NotificationJourney(pages, journeyContext);
+      await notificationJourney.submitNotification();
       referenceNumber = journeyContext.notificationId;
-      await journeys.amendNotification(referenceNumber);
+      const notificationActions = new NotificationActions(pages);
+      await notificationActions.amendNotification(referenceNumber);
       await context.close();
     });
 
-    test.beforeEach(async ({ journeys }) => {
-      await journeys.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ notificationActions }) => {
+      await notificationActions.toNotificationView(referenceNumber);
     });
 
     test('shows the Cancel amendment option when notification is in Amend status', async ({ pages }) => {
@@ -53,10 +55,10 @@ test.describe('Notification cancel amend', () => {
   test(
     'does not show the Cancel amendment option when notification is Submitted',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
-      await journeys.submitNotification();
+    async ({ pages, notificationJourney, notificationActions, journeyContext }) => {
+      await notificationJourney.submitNotification();
       const submittedReference = journeyContext.notificationId;
-      await journeys.toNotificationView(submittedReference);
+      await notificationActions.toNotificationView(submittedReference);
 
       await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
       await expect(pages.notificationView.btnAmend).toBeVisible();
@@ -66,11 +68,11 @@ test.describe('Notification cancel amend', () => {
   test(
     'cancels the amendment and restores the submitted notification',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
-      await journeys.submitNotification();
+    async ({ pages, notificationJourney, notificationActions, journeyContext }) => {
+      await notificationJourney.submitNotification();
       const referenceNumber = journeyContext.notificationId;
 
-      await journeys.amendNotification(referenceNumber);
+      await notificationActions.amendNotification(referenceNumber);
       await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);
 
       await pages.notificationView.changeLink('County Parish Holding number (CPH)').click();
@@ -79,7 +81,7 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.addresses.heading).toBeVisible();
       await expect(pages.addresses.cphNumber).toContainText(EDITED_CPH_NUMBER);
 
-      await journeys.toNotificationView(referenceNumber);
+      await notificationActions.toNotificationView(referenceNumber);
       await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(EDITED_CPH_NUMBER);
 
       await pages.notificationView.btnCancelAmend.click();

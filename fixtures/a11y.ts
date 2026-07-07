@@ -1,7 +1,7 @@
 import { test as base, expect } from '@fixtures';
 import { scanPage, formatSummaries, type A11yScanOptions, type ViolationSummary } from '@utils/a11y-utils';
 
-// Accessibility journeys click through several pages and run an axe scan on
+// Accessibility tests click through several pages and run an axe scan on
 // each, so they need more headroom than the default per-test timeout.
 const A11Y_SCAN_TIMEOUT_MS = 5 * 60 * 1000;
 

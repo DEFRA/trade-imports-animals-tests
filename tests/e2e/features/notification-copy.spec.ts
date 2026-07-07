@@ -2,11 +2,16 @@ import { test, expect } from '@fixtures';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification copy', () => {
-  test('copies draft notification from the view screen and redirects to the new draft', async ({ pages, journeys, journeyContext }) => {
-    await journeys.toDeclaration();
+  test('copies draft notification from the view screen and redirects to the new draft', async ({
+    pages,
+    notificationJourney,
+    journeyContext,
+    notificationActions,
+  }) => {
+    await notificationJourney.toDeclaration();
     const originalReferenceNumber = journeyContext.notificationId;
 
-    await journeys.toNotificationView(originalReferenceNumber);
+    await notificationActions.toNotificationView(originalReferenceNumber);
     await pages.notificationView.btnCopyAsNew.click();
 
     await pages.notificationView.heading.waitFor();
@@ -18,11 +23,15 @@ test.describe('Notification copy', () => {
     // Field retention/reset is covered by lower-level tests; this spec validates the copy feature only.
   });
 
-  test('copies submitted notification from the dashboard and redirects to the new draft', async ({ pages, journeys, journeyContext }) => {
-    await journeys.submitNotification();
+  test('copies submitted notification from the dashboard and redirects to the new draft', async ({
+    pages,
+    notificationJourney,
+    journeyContext,
+  }) => {
+    await notificationJourney.submitNotification();
     const originalReferenceNumber = journeyContext.notificationId;
 
-    await journeys.toNotificationDashboard();
+    await notificationJourney.toNotificationDashboard();
     await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
     await pages.notificationDashboard.btnCopyAsNew(originalReferenceNumber).click();
 

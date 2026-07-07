@@ -4,8 +4,8 @@ import { test, expect } from '@fixtures';
 test.use({ headless: true });
 
 test.describe('Origin of import (visual regression)', { tag: '@visual' }, () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toOriginOfImport();
+  test.beforeEach(async ({ notificationJourney }) => {
+    await notificationJourney.toOriginOfImport();
   });
 
   test('shows expected page appearance on first load', async ({ page, pages }) => {

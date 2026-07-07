@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/journeys';
+import { defaultJourneyOptions } from '@flows/notification-journey';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { documentTypes } from '@domain/constants/document-types';
@@ -8,7 +8,7 @@ import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Accompanying document persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists accompanying document (after full journey completion*)', async ({ journeys, journeyContext }) => {
+  test('persists accompanying document (after full journey completion*)', async ({ notificationJourney, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       accompanyingDocuments: {
@@ -23,7 +23,7 @@ test.describe('Accompanying document persistence', { tag: ['@compose', '@integra
       },
     };
 
-    await journeys.submitNotification(options);
+    await notificationJourney.submitNotification(options);
     const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 

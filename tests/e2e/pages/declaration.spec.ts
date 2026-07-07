@@ -2,8 +2,8 @@ import { test, expect } from '@fixtures';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
 
 test.describe('Declaration', () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toDeclaration();
+  test.beforeEach(async ({ notificationJourney }) => {
+    await notificationJourney.toDeclaration();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Admin service', () => {
-  test.beforeEach(async ({ adminJourneys }) => {
-    await adminJourneys.toAdminDashboard();
+  test.beforeEach(async ({ adminNavigation }) => {
+    await adminNavigation.toAdminDashboard();
   });
 
   test('lands on the admin dashboard', async ({ pages }) => {
