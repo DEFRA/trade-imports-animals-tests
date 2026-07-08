@@ -29,22 +29,6 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.notificationView.btnCancelAmend).toBeVisible();
     });
 
-    test('does not show the Cancel amendment option when notification is Submitted', async ({ browser }) => {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pages = createPageObjects(page);
-      const journeyContext: JourneyContext = {};
-      const journeys = new Journeys(pages, journeyContext);
-      await journeys.submitNotification();
-      const submittedReference = journeyContext.notificationId;
-      await journeys.toNotificationView(submittedReference);
-
-      await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
-      await expect(pages.notificationView.btnAmend).toBeVisible();
-
-      await context.close();
-    });
-
     test('shows the confirmation page when Cancel amendment is selected', async ({ pages }) => {
       await pages.notificationView.btnCancelAmend.click();
 
@@ -65,6 +49,19 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.notificationView.changeLink('County Parish Holding number (CPH)')).toBeVisible();
     });
   });
+
+  test(
+    'does not show the Cancel amendment option when notification is Submitted',
+    { tag: ['@integration'] },
+    async ({ pages, journeys, journeyContext }) => {
+      await journeys.submitNotification();
+      const submittedReference = journeyContext.notificationId;
+      await journeys.toNotificationView(submittedReference);
+
+      await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
+      await expect(pages.notificationView.btnAmend).toBeVisible();
+    },
+  );
 
   test(
     'cancels the amendment and restores the submitted notification',
@@ -91,7 +88,7 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.notificationView.amendCancelledBanner).toBeVisible();
       await expect(pages.notificationView.amendCancelledBanner).toContainText('The amendment has been cancelled');
 
-      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(referenceNumber)}(\\?cancelled=1)?$`), {
+      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(referenceNumber)}$`), {
         timeout: 10000,
       });
 
