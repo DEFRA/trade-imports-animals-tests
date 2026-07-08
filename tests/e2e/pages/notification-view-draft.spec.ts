@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { Journeys, JourneyContext } from '@flows/journeys';
+import { Journey, JourneyContext } from '@flows/journey';
 
 test.describe('Notification view (DRAFT)', () => {
   let referenceNumber: string;
@@ -10,14 +10,14 @@ test.describe('Notification view (DRAFT)', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const journeys = new Journeys(pages, journeyContext);
-    await journeys.toReview();
+    const journey = new Journey(pages, journeyContext);
+    await journey.toReview();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });
 
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toNotificationView(referenceNumber);
+  test.beforeEach(async ({ notificationActions }) => {
+    await notificationActions.toNotificationView(referenceNumber);
   });
 
   test('shows Change links for all sections', async ({ pages }) => {

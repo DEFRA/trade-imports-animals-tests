@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { Journeys, type JourneyContext } from '@flows/journeys';
+import { Journey, type JourneyContext } from '@flows/journey';
 
 test.describe('Notification delete', () => {
   test.describe('delete button and dialog', () => {
@@ -11,14 +11,14 @@ test.describe('Notification delete', () => {
       const page = await context.newPage();
       const pages = createPageObjects(page);
       const journeyContext: JourneyContext = {};
-      const journeys = new Journeys(pages, journeyContext);
-      await journeys.submitNotification();
+      const journey = new Journey(pages, journeyContext);
+      await journey.submitNotification();
       referenceNumber = journeyContext.notificationId;
       await context.close();
     });
 
-    test.beforeEach(async ({ journeys }) => {
-      await journeys.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ notificationActions }) => {
+      await notificationActions.toNotificationView(referenceNumber);
     });
 
     test('shows the delete button for a submitted notification', async ({ pages }) => {
@@ -41,11 +41,11 @@ test.describe('Notification delete', () => {
   test(
     'deletes the notification and removes it from the dashboard',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
-      await journeys.submitNotification();
+    async ({ pages, journey, journeyContext, notificationActions }) => {
+      await journey.submitNotification();
       const referenceNumber = journeyContext.notificationId;
 
-      await journeys.toNotificationView(referenceNumber);
+      await notificationActions.toNotificationView(referenceNumber);
 
       await pages.notificationView.btnDelete.click();
       await pages.notificationView.btnConfirmDelete.click();

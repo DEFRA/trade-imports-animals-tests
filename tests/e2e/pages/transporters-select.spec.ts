@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transporter selection', () => {
-  test.beforeEach(async ({ journeys, pages }) => {
-    await journeys.toTransporter();
+  test.beforeEach(async ({ journey, pages }) => {
+    await journey.toTransporter();
     await pages.transporter.linkAddTransporter.click();
   });
 

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journeys';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
@@ -8,8 +8,8 @@ const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.Not
 const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 
 test.describe('Notification outbox event', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('does not write outbox event before submission', async ({ journeys, journeyContext }) => {
-    await journeys.toDeclaration();
+  test('does not write outbox event before submission', async ({ journey, journeyContext }) => {
+    await journey.toDeclaration();
     const referenceNumber = journeyContext.notificationId;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const client = new MongoDbClient();
@@ -23,8 +23,13 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
     }
   });
 
-  test('records notification submitted event in outbox after submission', async ({ journeys, journeyContext, pages }) => {
-    await journeys.submitNotification();
+  test('records notification submitted event in outbox after submission', async ({
+    journey,
+    journeyContext,
+    pages,
+    notificationActions,
+  }) => {
+    await journey.submitNotification();
     const referenceNumber = journeyContext.notificationId;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const defaults = defaultJourneyOptions;
@@ -63,7 +68,7 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
       });
 
       await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
-        await journeys.toNotificationView(referenceNumber);
+        await notificationActions.toNotificationView(referenceNumber);
         await pages.notificationView.btnAmend.click();
         await expect(pages.notificationView.amendStatusTag).toBeVisible();
       });

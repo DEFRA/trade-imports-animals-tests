@@ -6,8 +6,8 @@ import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Accompanying documents - view file', () => {
-  test('view file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journeys }) => {
-    await journeys.toAccompanyingDocuments();
+  test('view file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journey }) => {
+    await journey.toAccompanyingDocuments();
 
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.safeFile250bPng);
@@ -30,25 +30,21 @@ test.describe('Accompanying documents - view file', () => {
     expect(downloadedBytes.equals(originalBytes)).toBe(true);
   });
 
-  test(
-    'view file link is not rendered when the scan rejects the file',
-    { tag: ['@integration'] },
-    async ({ pages, journeys }, testInfo) => {
-      await journeys.toAccompanyingDocuments();
+  test('view file link is not rendered when the scan rejects the file', { tag: ['@integration'] }, async ({ pages, journey }, testInfo) => {
+    await journey.toAccompanyingDocuments();
 
-      await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
-      const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
-      await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);
-      await pages.accompanyingDocuments.btnAddAttachment.click();
-      await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
+    await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
+    const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
+    await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);
+    await pages.accompanyingDocuments.btnAddAttachment.click();
+    await expect(pages.accompanyingDocuments.documentsList).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
 
-      await expect(pages.accompanyingDocuments.getStatusTag(eicarFile.fileName)).toHaveText('Virus found', {
-        timeout: fileUploadTimeouts.virusScanComplete,
-      });
+    await expect(pages.accompanyingDocuments.getStatusTag(eicarFile.fileName)).toHaveText('Virus found', {
+      timeout: fileUploadTimeouts.virusScanComplete,
+    });
 
-      // Infected uploads stay removable but must not be downloadable.
-      await expect(pages.accompanyingDocuments.getBtnRemove(eicarFile.fileName)).toBeVisible();
-      await expect(pages.accompanyingDocuments.getViewFileLink(eicarFile.fileName)).toHaveCount(0);
-    },
-  );
+    // Infected uploads stay removable but must not be downloadable.
+    await expect(pages.accompanyingDocuments.getBtnRemove(eicarFile.fileName)).toBeVisible();
+    await expect(pages.accompanyingDocuments.getViewFileLink(eicarFile.fileName)).toHaveCount(0);
+  });
 });

@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Reason for import', () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toImportReason();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toImportReason();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

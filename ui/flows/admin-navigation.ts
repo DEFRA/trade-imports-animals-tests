@@ -1,6 +1,6 @@
 import type { PageObjects } from '@page-objects';
 
-export class AdminJourneys {
+export class AdminNavigation {
   constructor(private readonly pages: PageObjects) {}
 
   async toAdminDashboard(): Promise<void> {

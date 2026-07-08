@@ -1,8 +1,8 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Consignee selection', () => {
-  test.beforeEach(async ({ journeys, pages }) => {
-    await journeys.toAddresses();
+  test.beforeEach(async ({ journey, pages }) => {
+    await journey.toAddresses();
     await pages.addresses.linkAddConsignee.click();
     await pages.consigneeSelection.heading.waitFor();
   });

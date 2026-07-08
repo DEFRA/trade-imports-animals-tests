@@ -1,6 +1,7 @@
 import { expect, test } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { type JourneyContext, Journeys } from '@flows/journeys';
+import { type JourneyContext, Journey } from '@flows/journey';
+import { NotificationActions } from '@flows/notification-actions';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification amend', () => {
@@ -11,8 +12,8 @@ test.describe('Notification amend', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const journeys = new Journeys(pages, journeyContext);
-    await journeys.submitNotification();
+    const journey = new Journey(pages, journeyContext);
+    await journey.submitNotification();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });
@@ -21,20 +22,20 @@ test.describe('Notification amend', () => {
     const context = await browser.newContext();
     const page = await context.newPage();
     const pages = createPageObjects(page);
-    const journeys = new Journeys(pages);
-    await journeys.deleteNotification(referenceNumber);
+    const notificationActions = new NotificationActions(pages);
+    await notificationActions.deleteNotification(referenceNumber);
     await context.close();
   });
 
-  test.afterEach(async ({ journeys, journeyContext }) => {
+  test.afterEach(async ({ journeyContext, notificationActions }) => {
     if (journeyContext.notificationId) {
-      await journeys.deleteNotification(journeyContext.notificationId);
+      await notificationActions.deleteNotification(journeyContext.notificationId);
     }
   });
 
   test.describe('amend entry points', () => {
-    test.beforeEach(async ({ journeys }) => {
-      await journeys.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ notificationActions }) => {
+      await notificationActions.toNotificationView(referenceNumber);
     });
 
     test('shows the Amend button on the notification view page when SUBMITTED', async ({ pages }) => {
@@ -51,11 +52,11 @@ test.describe('Notification amend', () => {
   test(
     'amends from the view page and shows Change links + CTAs',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
-      await journeys.submitNotification();
+    async ({ pages, journey, journeyContext, notificationActions }) => {
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
-      await journeys.toNotificationView(ref);
+      await notificationActions.toNotificationView(ref);
       await pages.notificationView.btnAmend.click();
 
       // status pill is "Amend" and a Change link is shown per section
@@ -74,8 +75,8 @@ test.describe('Notification amend', () => {
   test(
     'amends from the dashboard and lands on the view page in AMEND state',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
-      await journeys.submitNotification();
+    async ({ pages, journey, journeyContext }) => {
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
@@ -91,12 +92,12 @@ test.describe('Notification amend', () => {
   test(
     'walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED',
     { tag: ['@integration'] },
-    async ({ pages, journeys, journeyContext }) => {
+    async ({ pages, journey, journeyContext, notificationActions }) => {
       // 1. Start from a freshly submitted notification.
-      await journeys.submitNotification();
+      await journey.submitNotification();
       const ref = journeyContext.notificationId;
 
-      await journeys.toNotificationView(ref);
+      await notificationActions.toNotificationView(ref);
       await expect(pages.notificationView.btnAmend).toBeVisible();
       await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
 
@@ -116,7 +117,7 @@ test.describe('Notification amend', () => {
 
       // 5. Re-open the view page and assert we're back in SUBMITTED:
       //    the AMEND status pill is gone and the Amend CTA is offered again.
-      await journeys.toNotificationView(ref);
+      await notificationActions.toNotificationView(ref);
       await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
       await expect(pages.notificationView.btnAmend).toBeVisible();
 

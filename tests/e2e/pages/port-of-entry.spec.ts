@@ -2,8 +2,8 @@ import { test, expect } from '@fixtures';
 import { pointOfEntries } from '@domain/constants/point-of-entries';
 
 test.describe('Entry point and arrival at destination', () => {
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toEntryPoint();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toEntryPoint();
   });
 
   test('shows system-generated notification id (draft)', async ({ pages, journeyContext }) => {

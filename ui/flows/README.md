@@ -1,6 +1,6 @@
 # flows
 
-This folder contains flow helpers to support journey tests with shared page objects.
+This folder contains flow helpers that support tests by interacting with multiple pages.
 
 ## Notes
 

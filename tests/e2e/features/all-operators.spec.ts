@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { Journeys, JourneyContext } from '@flows/journeys';
-import { PLACE_OF_ORIGIN_NAME, CONSIGNOR_NAME, CONSIGNEE_NAME, IMPORTER_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journeys';
+import { Journey, JourneyContext } from '@flows/journey';
+import { PLACE_OF_ORIGIN_NAME, CONSIGNOR_NAME, CONSIGNEE_NAME, IMPORTER_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journey';
 
 test.describe('All operator addresses', () => {
   let referenceNumber: string;
@@ -11,14 +11,14 @@ test.describe('All operator addresses', () => {
     const page = await context.newPage();
     const pages = createPageObjects(page);
     const journeyContext: JourneyContext = {};
-    const journeys = new Journeys(pages, journeyContext);
-    await journeys.toReview();
+    const journey = new Journey(pages, journeyContext);
+    await journey.toReview();
     referenceNumber = journeyContext.notificationId;
     await context.close();
   });
 
-  test.beforeEach(async ({ journeys }) => {
-    await journeys.toNotificationView(referenceNumber);
+  test.beforeEach(async ({ notificationActions }) => {
+    await notificationActions.toNotificationView(referenceNumber);
   });
 
   test('all six operators appear in the addresses section of the notification view', async ({ pages }) => {

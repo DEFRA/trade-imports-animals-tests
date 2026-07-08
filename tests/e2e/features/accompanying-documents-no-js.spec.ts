@@ -9,8 +9,8 @@ import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 test.describe('Accompanying documents - without JavaScript', { tag: ['@integration', '@no-js'] }, () => {
   test.use({ javaScriptEnabled: false });
 
-  test('shows manual refresh link instead of polling when virus scan is pending', async ({ pages, journeys }) => {
-    await journeys.toAccompanyingDocuments();
+  test('shows manual refresh link instead of polling when virus scan is pending', async ({ pages, journey }) => {
+    await journey.toAccompanyingDocuments();
 
     await test.step('upload a document', async () => {
       await pages.accompanyingDocuments.fillTextFields();
@@ -54,8 +54,8 @@ test.describe('Accompanying documents - without JavaScript', { tag: ['@integrati
   // JS-enabled size-limit tests never hit. The file is one byte over the 10 MB file cap but
   // (with its multipart envelope) still inside the route payload cap's 1024-byte headroom,
   // so the request parses and the controller renders the inline error.
-  test('rejects a file one byte over the 10 MB cap with a server-rendered inline error', async ({ pages, journeys }, testInfo) => {
-    await journeys.toAccompanyingDocuments();
+  test('rejects a file one byte over the 10 MB cap with a server-rendered inline error', async ({ pages, journey }, testInfo) => {
+    await journey.toAccompanyingDocuments();
 
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'one-byte-over-no-js.pdf', {
       bytes: TEN_MB_BYTES + 1,
@@ -74,11 +74,8 @@ test.describe('Accompanying documents - without JavaScript', { tag: ['@integrati
   // A payload above the route cap is rejected by Hapi with Boom 413 before the handler runs;
   // the route's onPreResponse ext re-renders the upload page with the inline error and a
   // valid crumb (the 413 fires before crumb's onPostAuth, so the ext must supply one itself).
-  test('rejects a file above the route payload cap by re-rendering the page with an inline error', async ({
-    pages,
-    journeys,
-  }, testInfo) => {
-    await journeys.toAccompanyingDocuments();
+  test('rejects a file above the route payload cap by re-rendering the page with an inline error', async ({ pages, journey }, testInfo) => {
+    await journey.toAccompanyingDocuments();
 
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'above-payload-cap-no-js.pdf', {
       bytes: ABOVE_PAYLOAD_CAP_BYTES,
