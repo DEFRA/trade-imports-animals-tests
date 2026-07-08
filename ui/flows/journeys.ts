@@ -248,7 +248,7 @@ export class Journeys {
   async toTransporter(options: JourneyOptions = {}): Promise<void> {
     const { pointOfEntry, arrivalDate } = { ...defaultJourneyOptions, ...options };
     await this.toEntryPoint(options);
-    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry);
+    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry.code);
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
     await this.pages.entryPoint.btnSaveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
