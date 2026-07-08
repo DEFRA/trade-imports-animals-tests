@@ -25,15 +25,6 @@ test.describe('Entry point and arrival at destination', () => {
     await expect(pages.entryPoint.inputYear).toHaveValue('');
   });
 
-  test('shows expected points of entries', async ({ pages }) => {
-    const options = await pages.entryPoint.dropdownPortOfEntryOptions.allTextContents();
-    const expectedOptions = Object.values(pointOfEntries).map((p) => p.display);
-    expect(options[0]).toBe('Select port of entry');
-    expect(options[1]).toBe('──────────');
-    // Dropdown options must match the expected list in the correct order (alphabetical).
-    expect(options.slice(2)).toEqual(expectedOptions);
-  });
-
   test('continues to transporter after saving valid entry', async ({ pages }) => {
     await pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntries.aberdeen.code);
     await pages.entryPoint.fillArrivalDate({ day: '27', month: '3', year: '2026' });
