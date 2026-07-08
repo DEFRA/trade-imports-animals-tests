@@ -282,6 +282,17 @@ export class Journeys {
     await this.pages.notificationView.open(referenceNumber);
   }
 
+  async amendNotification(referenceNumber: string): Promise<void> {
+    await this.pages.notificationView.open(referenceNumber);
+    await Promise.all([
+      this.pages.page.waitForURL(new RegExp(this.pages.notificationView.expectedUrl(referenceNumber)), {
+        waitUntil: 'commit',
+      }),
+      this.pages.notificationView.btnAmend.click(),
+    ]);
+    await this.pages.notificationView.amendStatusTag.waitFor();
+  }
+
   async deleteNotification(referenceNumber: string): Promise<void> {
     await this.pages.notificationView.open(referenceNumber);
     await this.pages.notificationView.btnDelete.click();

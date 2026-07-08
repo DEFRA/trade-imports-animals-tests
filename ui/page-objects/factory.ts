@@ -25,6 +25,7 @@ import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
 import { TransporterPage } from './notification/transporter-page';
 import { TransporterSelectionPage } from './notification/transporter-selection-page';
+import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
 import { NotificationViewPage } from './notification/notification-view-page';
 
 /**
@@ -63,6 +64,7 @@ export function createPageObjects(page: Page) {
     signOut: new SignOutPage(page),
     transporter: new TransporterPage(page),
     transporterSelection: new TransporterSelectionPage(page),
+    notificationCancelAmend: new NotificationCancelAmendPage(page),
     notificationView: new NotificationViewPage(page),
   };
 }
