@@ -28,7 +28,7 @@ test.describe('Outbox events (admin)', () => {
       expect(json).toContain(referenceNumber);
       expect(json).toContain(defaults.countryCode);
       expect(json).toContain(defaults.commodityCode);
-      expect(json).toContain(defaults.pointOfEntry);
+      expect(json).toContain(defaults.pointOfEntry.code);
       expect(json).toContain(CONSIGNOR_NAME);
     });
   });
