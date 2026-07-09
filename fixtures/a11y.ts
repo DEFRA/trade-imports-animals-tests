@@ -62,6 +62,9 @@ export interface A11yFixtures {
 
 export const test = base.extend<A11yFixtures>({
   runA11yScan: async ({ page }, use, testInfo) => {
+    // Before test: extend the timeout
+    testInfo.setTimeout(A11Y_SCAN_TIMEOUT_MS);
+
     // Before test: initialise results collection
     const results: ViolationSummary[] = [];
 
@@ -88,12 +91,6 @@ export const test = base.extend<A11yFixtures>({
     const message = formatSummaries(results);
     if (message) throw new Error(message);
   },
-});
-
-// Playwright requires the first hook arg to be a destructuring pattern.
-// eslint-disable-next-line no-empty-pattern
-test.beforeEach(({}, testInfo) => {
-  testInfo.setTimeout(A11Y_SCAN_TIMEOUT_MS);
 });
 
 export { expect };
