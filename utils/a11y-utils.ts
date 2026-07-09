@@ -9,14 +9,14 @@ export type A11yScanOptions = {
   exclude?: string | string[];
   disableRules?: string[];
   /**
-   * Defaults to true — axe-core-npm opens a temporary blank window as part
+   * Defaults to false — axe-core-npm opens a temporary blank window as part
    * of analyze() (since v4.3.0) to process results outside the page's
-   * context, and that window-open can hang indefinitely under some
+   * context, which is what allows testing content inside cross-origin
+   * iframes, but that window-open can hang indefinitely under some
    * conditions: a long-standing, unresolved upstream issue —
    * https://github.com/dequelabs/axe-core-npm/issues/707
    * setLegacyMode() skips that mechanism entirely, at the cost of not
-   * testing content inside cross-origin iframes. Set to `false` for scans
-   * where that coverage matters.
+   * testing cross-origin iframes. Set to `true` for scans that hit the hang.
    */
   legacyMode?: boolean;
 };
@@ -35,7 +35,7 @@ const getPathInfo = (url: string): string => {
 };
 
 export async function scanPage(page: Page, options: A11yScanOptions = {}): Promise<ViolationSummary> {
-  const { tags, include, exclude, disableRules, legacyMode = true } = options;
+  const { tags, include, exclude, disableRules, legacyMode = false } = options;
 
   // Reliable baseline: DOM is parsed and ready.
   await page.waitForLoadState('domcontentloaded');
