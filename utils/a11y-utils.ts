@@ -8,6 +8,17 @@ export type A11yScanOptions = {
   include?: string | string[];
   exclude?: string | string[];
   disableRules?: string[];
+  /**
+   * Defaults to true — axe-core-npm opens a temporary blank window as part
+   * of analyze() (since v4.3.0) to process results outside the page's
+   * context, and that window-open can hang indefinitely under some
+   * conditions: a long-standing, unresolved upstream issue —
+   * https://github.com/dequelabs/axe-core-npm/issues/707
+   * setLegacyMode() skips that mechanism entirely, at the cost of not
+   * testing content inside cross-origin iframes. Set to `false` for scans
+   * where that coverage matters.
+   */
+  legacyMode?: boolean;
 };
 
 export interface ViolationSummary {
@@ -24,7 +35,7 @@ const getPathInfo = (url: string): string => {
 };
 
 export async function scanPage(page: Page, options: A11yScanOptions = {}): Promise<ViolationSummary> {
-  const { tags, include, exclude, disableRules } = options;
+  const { tags, include, exclude, disableRules, legacyMode = true } = options;
 
   // Reliable baseline: DOM is parsed and ready.
   await page.waitForLoadState('domcontentloaded');
@@ -37,7 +48,7 @@ export async function scanPage(page: Page, options: A11yScanOptions = {}): Promi
   }
 
   // Without tags axe runs its own default ruleset, which omits target-size — see WCAG_STANDARD in @fixtures/a11y.
-  let builder = new AxeBuilder({ page });
+  let builder = new AxeBuilder({ page }).setLegacyMode(legacyMode);
   if (tags?.length) builder = builder.withTags(tags);
 
   if (include !== undefined) builder = builder.include([include].flat());
