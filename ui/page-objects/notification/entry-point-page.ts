@@ -14,7 +14,7 @@ export class EntryPointPage extends BasePage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Entry point and arrival at destination' });
+    return this.page.getByRole('heading', { level: 1, name: 'Arrival details' });
   }
 
   get dropdownPortOfEntry(): Locator {
@@ -23,6 +23,34 @@ export class EntryPointPage extends BasePage {
 
   get dropdownPortOfEntryOptions(): Locator {
     return this.dropdownPortOfEntry.locator('option');
+  }
+
+  get dropdownMeansOfTransport(): Locator {
+    return this.page.getByRole('combobox', { name: 'Means of transport' });
+  }
+
+  get dropdownMeansOfTransportOptions(): Locator {
+    return this.dropdownMeansOfTransport.locator('option');
+  }
+
+  get inputTransportIdentification(): Locator {
+    return this.page.getByRole('textbox', { name: 'Transport identification' });
+  }
+
+  get inputTransportDocumentReference(): Locator {
+    return this.page.getByRole('textbox', { name: 'Transport document reference' });
+  }
+
+  get errorMeansOfTransport(): Locator {
+    return this.page.locator('#meansOfTransport-error');
+  }
+
+  get errorTransportIdentification(): Locator {
+    return this.page.locator('#transportIdentification-error');
+  }
+
+  get errorTransportDocumentReference(): Locator {
+    return this.page.locator('#transportDocumentReference-error');
   }
 
   get inputDay(): Locator {
