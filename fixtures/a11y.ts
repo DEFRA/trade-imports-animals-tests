@@ -64,15 +64,15 @@ export const test = base.extend<A11yFixtures>({
     await use(async (options) => {
       const originalViewport = page.viewportSize();
       const viewports = [...(originalViewport ? [originalViewport] : []), ...Object.values(scanViewports)];
-      try {
-        for (const viewport of viewports) {
-          await page.setViewportSize(viewport);
-          await waitForViewportSettle(page);
-          const summary = await scanPage(page, { ...options, tags: options?.tags ?? [...WCAG_STANDARD.tags] });
-          results.push({ ...summary, path: `${summary.path} @${viewport.width}x${viewport.height}` });
-        }
-      } finally {
-        if (originalViewport) await page.setViewportSize(originalViewport);
+      for (const viewport of viewports) {
+        await page.setViewportSize(viewport);
+        await waitForViewportSettle(page);
+        const summary = await scanPage(page, { ...options, tags: options?.tags ?? [...WCAG_STANDARD.tags] });
+        results.push({ ...summary, path: `${summary.path} @${viewport.width}x${viewport.height}` });
+      }
+      if (originalViewport) {
+        await page.setViewportSize(originalViewport);
+        await waitForViewportSettle(page);
       }
     });
 
