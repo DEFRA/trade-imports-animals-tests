@@ -26,7 +26,7 @@ export type NotificationDocument = {
   };
   reasonForImport: string;
   additionalDetails: {
-    certifiedFor: string;
+    certifiedFor?: string;
     unweanedAnimals: string;
   };
   placeOfOrigin?: {
@@ -38,7 +38,7 @@ export type NotificationDocument = {
       country: string;
     };
   };
-  consignor: {
+  consignor?: {
     name: string;
     address: {
       addressLine1: string;
@@ -65,7 +65,7 @@ export type NotificationDocument = {
       country: string;
     };
   };
-  destination: {
+  destination?: {
     name: string;
     address: {
       addressLine1: string;
@@ -74,10 +74,13 @@ export type NotificationDocument = {
       country: string;
     };
   };
-  cphNumber: string;
+  cphNumber?: string;
   transport: {
-    portOfEntry: string;
-    arrivalDate: Date;
+    portOfEntry?: string;
+    arrivalDate?: Date;
+    meansOfTransport: string;
+    transportIdentification?: string;
+    transportDocumentReference?: string;
     transporter?: {
       name: string;
       address: {

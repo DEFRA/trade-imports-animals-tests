@@ -67,6 +67,7 @@ function buildNotification(index) {
     transport: {
       portOfEntry: 'ABERDEEN',
       arrivalDate: ISODate(`2026-06-${String((index % 28) + 1).padStart(2, '0')}T00:00:00.000Z`),
+      meansOfTransport: 'VESSEL',
       transporter: {
         name: 'Seed Livestock Transport',
         address: {
@@ -78,14 +79,12 @@ function buildNotification(index) {
       },
     },
     consignment: {
-      contact: {
-        name: 'Animal and Plant Health Agency',
-        address: {
-          addressLine1: 'Woodham Lane',
-          addressLine2: 'New Haw',
-          addressLine3: 'Addlestone, KT15 3NB',
-          country: 'United Kingdom',
-        },
+      name: 'Animal and Plant Health Agency',
+      address: {
+        addressLine1: 'Woodham Lane',
+        addressLine2: 'New Haw',
+        addressLine3: 'Addlestone, KT15 3NB',
+        country: 'United Kingdom',
       },
     },
     status: 'SUBMITTED',

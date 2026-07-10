@@ -29,6 +29,8 @@ export type JourneyOptions = {
   pointOfEntry?: PointOfEntry;
   arrivalDate?: DateInput;
   meansOfTransport?: MeansOfTransport;
+  transportIdentification?: string;
+  transportDocumentReference?: string;
 };
 
 export type JourneyContext = {
@@ -52,6 +54,8 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   pointOfEntry: pointOfEntries.aberdeen,
   arrivalDate: getRelativeDateInput({ dayOffset: 14 }),
   meansOfTransport: meansOfTransport.vessel,
+  transportIdentification: undefined,
+  transportDocumentReference: undefined,
 };
 
 export const EAR_TAG_PREFIX = 'FR';
@@ -411,10 +415,19 @@ export class Journey {
   }
 
   async fillEntryPoint(options: JourneyOptions = {}): Promise<void> {
-    const { pointOfEntry, arrivalDate, meansOfTransport } = { ...defaultJourneyOptions, ...options };
+    const { pointOfEntry, arrivalDate, meansOfTransport, transportIdentification, transportDocumentReference } = {
+      ...defaultJourneyOptions,
+      ...options,
+    };
     await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry.code);
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
     await this.pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.code);
+    if (transportIdentification !== undefined) {
+      await this.pages.entryPoint.inputTransportIdentification.fill(transportIdentification);
+    }
+    if (transportDocumentReference !== undefined) {
+      await this.pages.entryPoint.inputTransportDocumentReference.fill(transportDocumentReference);
+    }
   }
 
   async saveEntryPoint(): Promise<void> {
