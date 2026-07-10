@@ -85,26 +85,27 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.placeOfOrigin.name).toBe(PLACE_OF_ORIGIN_NAME);
       expect(doc.placeOfOrigin.address.addressLine1).toBe('1 Farm Lane');
       expect(doc.placeOfOrigin.address.country).toBe('Ireland');
-      expect(doc.consignor.name).toBe(CONSIGNOR_NAME);
-      expect(doc.consignor.address.addressLine1).toBe('43 East Hague Extension');
-      expect(doc.consignor.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
-      expect(doc.consignor.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
-      expect(doc.consignor.address.country).toBe('Switzerland');
+      expect(doc.consignor?.name).toBe(CONSIGNOR_NAME);
+      expect(doc.consignor?.address.addressLine1).toBe('43 East Hague Extension');
+      expect(doc.consignor?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
+      expect(doc.consignor?.address.addressLine3).toBe('Quasoccaecat ut ear, 30055');
+      expect(doc.consignor?.address.country).toBe('Switzerland');
       expect(doc.consignee.name).toBe(CONSIGNEE_NAME);
       expect(doc.consignee.address.addressLine1).toBe('10 Market Street');
       expect(doc.consignee.address.country).toBe('United Kingdom');
       expect(doc.importer.name).toBe(IMPORTER_NAME);
       expect(doc.importer.address.addressLine1).toBe('20 Trade Road');
       expect(doc.importer.address.country).toBe('United Kingdom');
-      expect(doc.destination.name).toBe(DESTINATION_NAME);
-      expect(doc.destination.address.addressLine1).toBe('643 Main Street');
-      expect(doc.destination.address.addressLine2).toBe('Birmingham G1 3AZ');
-      expect(doc.destination.address.addressLine3).toBeUndefined();
-      expect(doc.destination.address.country).toBe('United Kingdom');
+      expect(doc.destination?.name).toBe(DESTINATION_NAME);
+      expect(doc.destination?.address.addressLine1).toBe('643 Main Street');
+      expect(doc.destination?.address.addressLine2).toBe('Birmingham G1 3AZ');
+      expect(doc.destination?.address.addressLine3).toBeUndefined();
+      expect(doc.destination?.address.country).toBe('United Kingdom');
       expect(doc.cphNumber).toBe(CPH_NUMBER);
-      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
-      expect(doc.transport.arrivalDate.getTime()).toBe(expectedArrivalDate.getTime());
+      expect(doc.transport.arrivalDate?.getTime()).toBe(expectedArrivalDate.getTime());
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
+      expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.code);
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
       expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
       expect(doc.transport.transporter?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
@@ -129,6 +130,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       requiresRegionCode: yesNoValues.yes,
       internalReference: 'AnimalsTesting123',
       unweanedAnimals: yesNoValues.yes,
+      transportIdentification: 'Vessel Poseidon',
+      transportDocumentReference: 'BILL-OF-LADING-001',
     };
 
     await journey.submitNotification(options);
@@ -148,6 +151,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.origin.requiresRegionCode).toBe(options.requiresRegionCode.toLowerCase());
       expect(doc.origin.internalReference).toBe(options.internalReference);
       expect(doc.additionalDetails.unweanedAnimals).toBe(options.unweanedAnimals.toLowerCase());
+      expect(doc.transport.transportIdentification).toBe(options.transportIdentification);
+      expect(doc.transport.transportDocumentReference).toBe(options.transportDocumentReference);
     } finally {
       await client.close();
     }

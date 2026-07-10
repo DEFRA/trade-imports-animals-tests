@@ -59,6 +59,9 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'ABERDEEN',
       arrivalDate: ISODate('2026-05-28T00:00:00.000Z'),
+      meansOfTransport: 'VESSEL',
+      transportIdentification: 'Vessel Poseidon',
+      transportDocumentReference: 'BILL-OF-LADING-001',
       transporter: {
         name: 'García Livestock Transport SL',
         address: {
@@ -72,14 +75,12 @@ db.notification.insertMany([
       },
     },
     consignment: {
-      contact: {
-        name: 'Animal and Plant Health Agency',
-        address: {
-          addressLine1: 'Woodham Lane',
-          addressLine2: 'New Haw',
-          addressLine3: 'Addlestone, KT15 3NB',
-          country: 'United Kingdom',
-        },
+      name: 'Animal and Plant Health Agency',
+      address: {
+        addressLine1: 'Woodham Lane',
+        addressLine2: 'New Haw',
+        addressLine3: 'Addlestone, KT15 3NB',
+        country: 'United Kingdom',
       },
     },
     status: 'SUBMITTED',
@@ -139,6 +140,7 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'EAST MIDLANDS AIRPORT',
       arrivalDate: ISODate('2026-06-02T00:00:00.000Z'),
+      meansOfTransport: 'AIRPLANE',
       transporter: {
         name: 'J & G Campbell LTD',
         address: {
@@ -151,14 +153,12 @@ db.notification.insertMany([
       },
     },
     consignment: {
-      contact: {
-        name: 'EuroStore Services',
-        address: {
-          addressLine1: '8448 Gleason Creek',
-          addressLine2: 'Apt. 221',
-          addressLine3: 'Hyattmouth, 72183',
-          country: 'France',
-        },
+      name: 'EuroStore Services',
+      address: {
+        addressLine1: '8448 Gleason Creek',
+        addressLine2: 'Apt. 221',
+        addressLine3: 'Hyattmouth, 72183',
+        country: 'France',
       },
     },
     status: 'SUBMITTED',
@@ -219,6 +219,7 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'EDINBURGH',
       arrivalDate: ISODate('2026-06-09T00:00:00.000Z'),
+      meansOfTransport: 'RAILWAY',
       transporter: {
         name: 'García Livestock Transport SL',
         address: {
@@ -232,14 +233,12 @@ db.notification.insertMany([
       },
     },
     consignment: {
-      contact: {
-        name: 'Laiterie du Nord SARL',
-        address: {
-          addressLine1: '4295 Michele Courts',
-          addressLine2: 'Suite 479',
-          addressLine3: 'Kesslerbury, 528272',
-          country: 'Albania',
-        },
+      name: 'Laiterie du Nord SARL',
+      address: {
+        addressLine1: '4295 Michele Courts',
+        addressLine2: 'Suite 479',
+        addressLine3: 'Kesslerbury, 528272',
+        country: 'Albania',
       },
     },
     status: 'SUBMITTED',
@@ -307,6 +306,7 @@ db.notification.insertMany([
     transport: {
       portOfEntry: 'ABERDEEN',
       arrivalDate: ISODate('2026-06-16T00:00:00.000Z'),
+      meansOfTransport: 'ROAD_VEHICLE',
       transporter: {
         name: 'J & G Campbell LTD',
         address: {
@@ -319,14 +319,12 @@ db.notification.insertMany([
       },
     },
     consignment: {
-      contact: {
-        name: 'Animal and Plant Health Agency',
-        address: {
-          addressLine1: 'Woodham Lane',
-          addressLine2: 'New Haw',
-          addressLine3: 'Addlestone, KT15 3NB',
-          country: 'United Kingdom',
-        },
+      name: 'Animal and Plant Health Agency',
+      address: {
+        addressLine1: 'Woodham Lane',
+        addressLine2: 'New Haw',
+        addressLine3: 'Addlestone, KT15 3NB',
+        country: 'United Kingdom',
       },
     },
     status: 'SUBMITTED',
