@@ -69,6 +69,10 @@ export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
 
+function requiresTransitedCountries(meansOfTransport: MeansOfTransport): boolean {
+  return meansOfTransport.code === 'RAILWAY' || meansOfTransport.code === 'ROAD_VEHICLE';
+}
+
 /**
  * Walks the notification wizard, one method group per page in journey order:
  *
@@ -430,8 +434,35 @@ export class Journey {
     }
   }
 
-  async saveEntryPoint(): Promise<void> {
+  async saveEntryPoint(options: JourneyOptions = {}): Promise<void> {
+    const { meansOfTransport } = { ...defaultJourneyOptions, ...options };
     await this.pages.entryPoint.btnSaveAndContinue.click();
+    if (requiresTransitedCountries(meansOfTransport)) {
+      await this.pages.transitedCountries.heading.waitFor();
+    } else {
+      await this.pages.transporter.heading.waitFor();
+    }
+  }
+
+  async toTransitedCountries(options: JourneyOptions = {}): Promise<void> {
+    const mergedOptions = {
+      ...defaultJourneyOptions,
+      ...options,
+      meansOfTransport: options.meansOfTransport ?? meansOfTransport.railway,
+    };
+    await this.toEntryPoint(mergedOptions);
+    await this.fillEntryPoint(mergedOptions);
+    await this.saveEntryPoint(mergedOptions);
+  }
+
+  async addTransitedCountry(countryName: string): Promise<void> {
+    await this.pages.transitedCountries.checkboxForCountry(countryName).check();
+    await this.pages.transitedCountries.btnAddSelectedCountries.click();
+    await this.pages.transitedCountries.selectedCountry(countryName).waitFor();
+  }
+
+  async saveTransitedCountries(): Promise<void> {
+    await this.pages.transitedCountries.btnSaveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
 
