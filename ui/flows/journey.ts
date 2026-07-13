@@ -36,6 +36,7 @@ export type JourneyOptions = {
 export type JourneyContext = {
   notificationId?: string;
   declarationDate?: string;
+  meansOfTransport?: MeansOfTransport;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -432,12 +433,15 @@ export class Journey {
     if (transportDocumentReference !== undefined) {
       await this.pages.entryPoint.inputTransportDocumentReference.fill(transportDocumentReference);
     }
+    if (this.journeyContext) {
+      this.journeyContext.meansOfTransport = meansOfTransport;
+    }
   }
 
-  async saveEntryPoint(options: JourneyOptions = {}): Promise<void> {
-    const { meansOfTransport } = { ...defaultJourneyOptions, ...options };
+  async saveEntryPoint(): Promise<void> {
+    const selectedMeansOfTransport = this.journeyContext?.meansOfTransport ?? defaultJourneyOptions.meansOfTransport;
     await this.pages.entryPoint.btnSaveAndContinue.click();
-    if (requiresTransitedCountries(meansOfTransport)) {
+    if (requiresTransitedCountries(selectedMeansOfTransport)) {
       await this.pages.transitedCountries.heading.waitFor();
     } else {
       await this.pages.transporter.heading.waitFor();
@@ -452,7 +456,7 @@ export class Journey {
     };
     await this.toEntryPoint(mergedOptions);
     await this.fillEntryPoint(mergedOptions);
-    await this.saveEntryPoint(mergedOptions);
+    await this.saveEntryPoint();
   }
 
   async addTransitedCountry(countryName: string): Promise<void> {
