@@ -69,6 +69,7 @@ export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
+export const TRANSIT_COUNTRY_NAME = 'Germany';
 
 function requiresTransitedCountries(meansOfTransport: MeansOfTransport): boolean {
   return meansOfTransport.code === 'RAILWAY' || meansOfTransport.code === 'ROAD_VEHICLE';
@@ -449,11 +450,7 @@ export class Journey {
   }
 
   async toTransitedCountries(options: JourneyOptions = {}): Promise<void> {
-    const mergedOptions = {
-      ...defaultJourneyOptions,
-      ...options,
-      meansOfTransport: options.meansOfTransport ?? meansOfTransport.railway,
-    };
+    const mergedOptions = { ...defaultJourneyOptions, ...options };
     await this.toEntryPoint(mergedOptions);
     await this.fillEntryPoint(mergedOptions);
     await this.saveEntryPoint();
@@ -471,9 +468,12 @@ export class Journey {
   }
 
   async toTransporter(options: JourneyOptions = {}): Promise<void> {
-    await this.toEntryPoint(options);
-    await this.fillEntryPoint(options);
-    await this.saveEntryPoint();
+    const mergedOptions = { ...defaultJourneyOptions, ...options };
+    await this.toTransitedCountries(mergedOptions);
+    if (requiresTransitedCountries(mergedOptions.meansOfTransport)) {
+      await this.addTransitedCountry(TRANSIT_COUNTRY_NAME);
+      await this.saveTransitedCountries();
+    }
   }
 
   async openTransporterSelection(): Promise<void> {
