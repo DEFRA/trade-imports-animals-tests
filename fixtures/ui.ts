@@ -3,6 +3,8 @@ import { createPageObjects, type PageObjects } from '@page-objects';
 import { Journey, type JourneyContext } from '@flows/journey';
 import { AdminNavigation } from '@flows/admin-navigation';
 import { NotificationActions } from '@flows/notification-actions';
+import { ApiJourney } from '@flows/api-journey';
+import { NotificationApiClient } from '@adapters/http/notification-api-client';
 
 export interface PageFixtures {
   pages: PageObjects;
@@ -10,6 +12,8 @@ export interface PageFixtures {
   journey: Journey;
   adminNavigation: AdminNavigation;
   notificationActions: NotificationActions;
+  notificationApi: NotificationApiClient;
+  apiJourney: ApiJourney;
 }
 
 export const test = base.extend<PageFixtures>({
@@ -28,6 +32,12 @@ export const test = base.extend<PageFixtures>({
   },
   notificationActions: async ({ pages }, use) => {
     await use(new NotificationActions(pages));
+  },
+  notificationApi: async ({ request }, use) => {
+    await use(new NotificationApiClient(request));
+  },
+  apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
+    await use(new ApiJourney(pages, notificationApi, journeyContext));
   },
 });
 

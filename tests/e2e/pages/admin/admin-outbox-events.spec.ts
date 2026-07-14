@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Outbox events (admin)', () => {

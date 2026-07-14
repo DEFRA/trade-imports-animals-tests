@@ -6,6 +6,16 @@ export function getEnvironment(): string | undefined {
   return process.env.ENVIRONMENT ?? process.env.PLAYWRIGHT_ENVIRONMENT;
 }
 
+/**
+ * True when Playwright is running locally (not CI, not from inside CDP)
+ * against a CDP environment. Backend services aren't reachable from outside
+ * CDP's network via their direct URL, so this switches to the protected
+ * ephemeral gateway instead — see cdpServiceUrl().
+ */
+export function isCdpLocal(): boolean {
+  return process.env.CDP_LOCAL === 'true';
+}
+
 export function throwIfProdEnvironment(environment = getEnvironment()): void {
   if (environment?.toLowerCase() === PROD_ENVIRONMENT) {
     throw new Error(

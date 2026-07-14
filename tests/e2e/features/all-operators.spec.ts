@@ -1,7 +1,14 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
 import { Journey, JourneyContext } from '@flows/journey';
-import { PLACE_OF_ORIGIN_NAME, CONSIGNOR_NAME, CONSIGNEE_NAME, IMPORTER_NAME, DESTINATION_NAME, CPH_NUMBER } from '@flows/journey';
+import {
+  PLACE_OF_ORIGIN_NAME,
+  CONSIGNOR_NAME,
+  CONSIGNEE_NAME,
+  IMPORTER_NAME,
+  DESTINATION_NAME,
+  CPH_NUMBER,
+} from '@domain/constants/journey-options';
 
 test.describe('All operator addresses', () => {
   let referenceNumber: string;
