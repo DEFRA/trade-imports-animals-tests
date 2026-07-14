@@ -7,5 +7,8 @@ const projectBaseUrls: Record<string, string> = {
   'admin-chromium': 'http://localhost:3001',
 };
 
+process.env.TRADE_IMPORTS_ANIMALS_BACKEND_BASE_URL ??= 'http://localhost:8085';
+process.env.TRADE_IMPORTS_REFERENCE_DATA_BASE_URL ??= 'http://localhost:8086';
+
 /** e2e against the workspace docker-compose stack (local dev and CI). */
 export default defineConfig(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'));

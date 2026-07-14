@@ -10,6 +10,9 @@ const projectBaseUrls: Record<string, string> = {
   'admin-chromium': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
 };
 
+process.env.TRADE_IMPORTS_ANIMALS_BACKEND_BASE_URL ??= `https://trade-imports-animals-backend.${environment}.cdp-int.defra.cloud`;
+process.env.TRADE_IMPORTS_REFERENCE_DATA_BASE_URL ??= `https://trade-imports-reference-data.${environment}.cdp-int.defra.cloud`;
+
 /**
  * Base config: e2e against the deployed CDP environment.
  * See https://playwright.dev/docs/test-configuration.
