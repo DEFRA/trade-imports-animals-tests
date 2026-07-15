@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@flows/journey';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@domain/constants/journey-options';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {

@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';

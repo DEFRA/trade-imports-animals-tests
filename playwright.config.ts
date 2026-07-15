@@ -2,6 +2,8 @@ import { defineConfig } from '@playwright/test';
 import sharedConfig from './utils/playwright/shared-config';
 import { getEnvironment } from './utils/playwright/environment';
 import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
+import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
+import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
 
 const environment = getEnvironment();
 
@@ -10,8 +12,12 @@ const projectBaseUrls: Record<string, string> = {
   'admin-chromium': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
 };
 
+const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'cdp'), {
+  TRADE_IMPORTS_ANIMALS_BACKEND_URL: cdpServiceUrl('trade-imports-animals-backend', environment),
+});
+
 /**
  * Base config: e2e against the deployed CDP environment.
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'cdp'));
+export default defineConfig(cdpConfig);

@@ -1,15 +1,14 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
+import { Journey, JourneyContext } from '@flows/journey';
 import {
-  Journey,
-  JourneyContext,
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
   CONSIGNOR_NAME,
   DESTINATION_NAME,
   CPH_NUMBER,
   TRANSPORTER_NAME,
-} from '@flows/journey';
+} from '@domain/constants/journey-options';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
 import { countryCodes } from '@domain/constants/country-codes';

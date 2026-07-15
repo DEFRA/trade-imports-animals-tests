@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/journey';
+import { defaultJourneyOptions } from '@domain/constants/journey-options';
 import { commoditySpecies } from '@domain/constants/commodity-species';
 import { commodityTypes } from '@domain/constants/commodity-types';
 

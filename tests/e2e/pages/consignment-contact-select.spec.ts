@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { TRANSPORTER_NAME } from '@flows/journey';
+import { TRANSPORTER_NAME } from '@domain/constants/journey-options';
 
 test.describe('Contact address for consignment', () => {
   test.beforeEach(async ({ journey }) => {

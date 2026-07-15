@@ -1,10 +1,10 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/journey';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import {
+  defaultJourneyOptions,
   EAR_TAG_PREFIX,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
@@ -15,7 +15,7 @@ import {
   CPH_NUMBER,
   TRANSPORTER_NAME,
   CONTACT_ADDRESS_NAME,
-} from '@flows/journey';
+} from '@domain/constants/journey-options';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {

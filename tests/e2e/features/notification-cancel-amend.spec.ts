@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { createPageObjects } from '@page-objects';
-import { CPH_NUMBER, Journey, type JourneyContext } from '@flows/journey';
+import { Journey, type JourneyContext } from '@flows/journey';
+import { CPH_NUMBER } from '@domain/constants/journey-options';
 import { NotificationActions } from '@flows/notification-actions';
 
 const EDITED_CPH_NUMBER = '987654321';
