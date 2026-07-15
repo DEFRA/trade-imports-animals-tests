@@ -17,6 +17,7 @@ import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
 import { DestinationSelectionPage } from './notification/destination-selection-page';
 import { EntryPointPage } from './notification/entry-point-page';
+import { TransitedCountriesPage } from './notification/transited-countries-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
@@ -56,6 +57,7 @@ export function createPageObjects(page: Page) {
     declaration: new DeclarationPage(page),
     destinationSelection: new DestinationSelectionPage(page),
     entryPoint: new EntryPointPage(page),
+    transitedCountries: new TransitedCountriesPage(page),
     importReason: new ImportReasonPage(page),
     notificationDashboard: new NotificationDashboardPage(page),
     originOfImport: new OriginOfImportPage(page),

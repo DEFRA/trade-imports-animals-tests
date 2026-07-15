@@ -36,6 +36,7 @@ export type JourneyOptions = {
 export type JourneyContext = {
   notificationId?: string;
   declarationDate?: string;
+  meansOfTransport?: MeansOfTransport;
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -68,6 +69,11 @@ export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
+export const TRANSIT_COUNTRY_NAME = 'Germany';
+
+function requiresTransitedCountries(meansOfTransport: MeansOfTransport): boolean {
+  return meansOfTransport.code === 'RAILWAY' || meansOfTransport.code === 'ROAD_VEHICLE';
+}
 
 /**
  * Walks the notification wizard, one method group per page in journey order:
@@ -428,17 +434,46 @@ export class Journey {
     if (transportDocumentReference !== undefined) {
       await this.pages.entryPoint.inputTransportDocumentReference.fill(transportDocumentReference);
     }
+    if (this.journeyContext) {
+      this.journeyContext.meansOfTransport = meansOfTransport;
+    }
   }
 
   async saveEntryPoint(): Promise<void> {
+    const selectedMeansOfTransport = this.journeyContext?.meansOfTransport ?? defaultJourneyOptions.meansOfTransport;
     await this.pages.entryPoint.btnSaveAndContinue.click();
+    if (requiresTransitedCountries(selectedMeansOfTransport)) {
+      await this.pages.transitedCountries.heading.waitFor();
+    } else {
+      await this.pages.transporter.heading.waitFor();
+    }
+  }
+
+  async toTransitedCountries(options: JourneyOptions = {}): Promise<void> {
+    const mergedOptions = { ...defaultJourneyOptions, ...options };
+    await this.toEntryPoint(mergedOptions);
+    await this.fillEntryPoint(mergedOptions);
+    await this.saveEntryPoint();
+  }
+
+  async addTransitedCountry(countryName: string): Promise<void> {
+    await this.pages.transitedCountries.checkboxForCountry(countryName).check();
+    await this.pages.transitedCountries.btnAddSelectedCountries.click();
+    await this.pages.transitedCountries.selectedCountry(countryName).waitFor();
+  }
+
+  async saveTransitedCountries(): Promise<void> {
+    await this.pages.transitedCountries.btnSaveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
 
   async toTransporter(options: JourneyOptions = {}): Promise<void> {
-    await this.toEntryPoint(options);
-    await this.fillEntryPoint(options);
-    await this.saveEntryPoint();
+    const mergedOptions = { ...defaultJourneyOptions, ...options };
+    await this.toTransitedCountries(mergedOptions);
+    if (requiresTransitedCountries(mergedOptions.meansOfTransport)) {
+      await this.addTransitedCountry(TRANSIT_COUNTRY_NAME);
+      await this.saveTransitedCountries();
+    }
   }
 
   async openTransporterSelection(): Promise<void> {
