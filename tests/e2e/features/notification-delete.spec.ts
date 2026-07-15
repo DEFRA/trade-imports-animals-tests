@@ -1,24 +1,10 @@
 import { test, expect } from '@fixtures';
-import { createPageObjects } from '@page-objects';
-import { Journey, type JourneyContext } from '@flows/journey';
 
 test.describe('Notification delete', () => {
   test.describe('delete button and dialog', () => {
-    let referenceNumber: string;
-
-    test.beforeAll(async ({ browser }) => {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pages = createPageObjects(page);
-      const journeyContext: JourneyContext = {};
-      const journey = new Journey(pages, journeyContext);
-      await journey.submitNotification();
-      referenceNumber = journeyContext.notificationId;
-      await context.close();
-    });
-
-    test.beforeEach(async ({ notificationActions }) => {
-      await notificationActions.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ apiJourney, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      await notificationActions.toNotificationView(created.referenceNumber);
     });
 
     test('shows the delete button for a submitted notification', async ({ pages }) => {
@@ -41,9 +27,9 @@ test.describe('Notification delete', () => {
   test(
     'deletes the notification and removes it from the dashboard',
     { tag: ['@integration'] },
-    async ({ pages, journey, journeyContext, notificationActions }) => {
-      await journey.submitNotification();
-      const referenceNumber = journeyContext.notificationId;
+    async ({ pages, apiJourney, journeyContext, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const referenceNumber = created.referenceNumber ?? journeyContext.notificationId;
 
       await notificationActions.toNotificationView(referenceNumber);
 

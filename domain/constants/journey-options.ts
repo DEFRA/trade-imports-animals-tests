@@ -67,3 +67,5 @@ export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
+export const TRANSIT_COUNTRY_NAME = 'Germany';
+export const TRANSIT_COUNTRY_CODE = countryCodes.eu.germany;

@@ -6,6 +6,7 @@ import type { PageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
 import type { DateInput } from '@domain/types/date-time-input';
 import { commoditySpecies, type CommoditySpecies } from '@domain/constants/commodity-species';
+import { requiresTransitedCountries } from '@domain/constants/means-of-transport';
 import type { YesNoValue } from '@domain/constants/yes-no-values';
 import {
   CONSIGNEE_NAME,
@@ -17,6 +18,7 @@ import {
   IMPORTER_NAME,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
+  TRANSIT_COUNTRY_CODE,
   TRANSPORTER_NAME,
   defaultJourneyOptions,
   type JourneyOptions,
@@ -115,6 +117,7 @@ export const journeyPages = [
   'destinationSelection',
   'cphNumber',
   'entryPoint',
+  'transitedCountries',
   'transporter',
   'contactAddress',
 ] as const satisfies readonly (keyof PageObjects)[];
@@ -237,6 +240,16 @@ const pageContributions: Record<JourneyPage, PageContribution> = {
     };
   },
 
+  transitedCountries(draft, options) {
+    if (!requiresTransitedCountries(options.meansOfTransport)) {
+      return;
+    }
+    draft.transport = {
+      ...draft.transport,
+      transitedCountries: [TRANSIT_COUNTRY_CODE],
+    };
+  },
+
   transporter(draft) {
     draft.transport = { ...draft.transport, transporter: CANNED_TRANSPORTER };
   },
@@ -263,12 +276,22 @@ function deepMerge<T>(target: T, overrides: DeepPartial<T>): T {
   return result as T;
 }
 
-function buildNotificationUpToPage(upToPage: JourneyPage, options: JourneyOptions, overrides?: NotificationOverrides): Notification {
+/**
+ * Builds a draft with every prior page's contribution applied, stopping
+ * before `stopBeforePage` — i.e. every field a user would have saved
+ * arriving fresh at that page, but not the page's own answer. Omit
+ * `stopBeforePage` to apply every page's contribution (a complete draft).
+ */
+function buildNotificationBeforePage(
+  stopBeforePage: JourneyPage | undefined,
+  options: JourneyOptions,
+  overrides?: NotificationOverrides,
+): Notification {
   const merged: Options = { ...defaultJourneyOptions, ...options };
   const draft: Notification = {};
   for (const page of journeyPages) {
+    if (page === stopBeforePage) break;
     pageContributions[page](draft, merged);
-    if (page === upToPage) break;
   }
   return overrides ? deepMerge(draft, overrides) : draft;
 }
@@ -302,8 +325,10 @@ async function retryTransientTransitionErrors<T>(action: () => Promise<T>): Prom
 /**
  * Seeds notification state through the backend API instead of driving the UI
  * wizard page by page. A partial draft carries exactly the fields a user
- * would have saved by the given page, using the same defaults as `Journey`
- * (both draw from `domain/constants/journey-options.ts`).
+ * would have saved arriving fresh at the given page, using the same defaults
+ * as `Journey` (both draw from `domain/constants/journey-options.ts`) — so
+ * `createUpToPage(page)` pairs with `resumeInUi(ref, pages.<page>)`, landing
+ * on that page with its own answer not yet filled in.
  */
 export class ApiJourney {
   constructor(
@@ -312,15 +337,19 @@ export class ApiJourney {
     private readonly journeyContext: JourneyContext,
   ) {}
 
-  async createUpToPage(upToPage: JourneyPage, options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    const notification = await this.api.saveNotification(buildNotificationUpToPage(upToPage, options, overrides));
+  private async save(draft: Notification): Promise<Notification> {
+    const notification = await this.api.saveNotification(draft);
     this.journeyContext.notificationId = notification.referenceNumber;
     return notification;
   }
 
+  async createUpToPage(page: JourneyPage, options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
+    return this.save(buildNotificationBeforePage(page, options, overrides));
+  }
+
   /** Complete DRAFT: every journey page's fields populated. */
   async createFullNotification(options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    return this.createUpToPage('contactAddress', options, overrides);
+    return this.save(buildNotificationBeforePage(undefined, options, overrides));
   }
 
   async createSubmittedNotification(options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {

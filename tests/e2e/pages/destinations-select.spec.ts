@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Destination selection', () => {
-  test.beforeEach(async ({ journey, pages }) => {
-    await journey.toAddresses();
-    await pages.addresses.linkAddPlaceOfDestination.click();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('destinationSelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.destinationSelection);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

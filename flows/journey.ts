@@ -1,6 +1,6 @@
 import { importReasons } from '@domain/constants/import-reasons';
 import { certificationPurposes } from '@domain/constants/certification-purposes';
-import type { MeansOfTransport } from '@domain/constants/means-of-transport';
+import { requiresTransitedCountries, type MeansOfTransport } from '@domain/constants/means-of-transport';
 import type { AccompanyingDocument } from '@domain/types/accompanying-document';
 import type { PageObjects } from '@page-objects';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
@@ -14,6 +14,7 @@ import {
   IMPORTER_NAME,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
+  TRANSIT_COUNTRY_NAME,
   TRANSPORTER_NAME,
   defaultJourneyOptions,
   type JourneyOptions,
@@ -24,12 +25,6 @@ export type JourneyContext = {
   declarationDate?: string;
   meansOfTransport?: MeansOfTransport;
 };
-
-export const TRANSIT_COUNTRY_NAME = 'Germany';
-
-function requiresTransitedCountries(meansOfTransport: MeansOfTransport): boolean {
-  return meansOfTransport.code === 'RAILWAY' || meansOfTransport.code === 'ROAD_VEHICLE';
-}
 
 /**
  * Walks the notification wizard, one method group per page in journey order:

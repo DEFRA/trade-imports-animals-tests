@@ -1,6 +1,4 @@
 import { test, expect } from '@fixtures';
-import { createPageObjects } from '@page-objects';
-import { Journey, JourneyContext } from '@flows/journey';
 import {
   PLACE_OF_ORIGIN_NAME,
   CONSIGNOR_NAME,
@@ -11,21 +9,9 @@ import {
 } from '@domain/constants/journey-options';
 
 test.describe('All operator addresses', () => {
-  let referenceNumber: string;
-
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const pages = createPageObjects(page);
-    const journeyContext: JourneyContext = {};
-    const journey = new Journey(pages, journeyContext);
-    await journey.toReview();
-    referenceNumber = journeyContext.notificationId;
-    await context.close();
-  });
-
-  test.beforeEach(async ({ notificationActions }) => {
-    await notificationActions.toNotificationView(referenceNumber);
+  test.beforeEach(async ({ apiJourney, notificationActions }) => {
+    const created = await apiJourney.createFullNotification();
+    await notificationActions.toNotificationView(created.referenceNumber);
   });
 
   test('all six operators appear in the addresses section of the notification view', async ({ pages }) => {

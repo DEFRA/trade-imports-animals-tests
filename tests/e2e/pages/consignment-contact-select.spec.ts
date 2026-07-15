@@ -2,8 +2,9 @@ import { test, expect } from '@fixtures';
 import { TRANSPORTER_NAME } from '@domain/constants/journey-options';
 
 test.describe('Contact address for consignment', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toContactAddress();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('contactAddress');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.contactAddress);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

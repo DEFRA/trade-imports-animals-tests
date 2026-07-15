@@ -1,15 +1,20 @@
 import { test, expect } from '@fixtures';
 import { meansOfTransport } from '@domain/constants/means-of-transport';
 import { pointOfEntries } from '@domain/constants/point-of-entries';
-import { TRANSIT_COUNTRY_NAME } from '@flows/journey';
+import { TRANSIT_COUNTRY_NAME } from '@domain/constants/journey-options';
 
 test.describe('Transited countries', () => {
   const transitMeansOfTransport = [meansOfTransport.roadVehicle, meansOfTransport.railway] as const;
   const skipTransitMeansOfTransport = [meansOfTransport.airplane, meansOfTransport.vessel] as const;
 
   for (const transport of transitMeansOfTransport) {
-    test(`routes ${transport.display.toLowerCase()} transport to transited countries after arrival details`, async ({ pages, journey }) => {
-      await journey.toEntryPoint();
+    test(`routes ${transport.display.toLowerCase()} transport to transited countries after arrival details`, async ({
+      pages,
+      journey,
+      apiJourney,
+    }) => {
+      const created = await apiJourney.createUpToPage('entryPoint');
+      await apiJourney.resumeInUi(created.referenceNumber, pages.entryPoint);
       await journey.fillEntryPoint({
         pointOfEntry: pointOfEntries.aberdeen,
         meansOfTransport: transport,
@@ -25,8 +30,10 @@ test.describe('Transited countries', () => {
     test(`routes ${transport.display.toLowerCase()} transport directly to transporter after arrival details`, async ({
       pages,
       journey,
+      apiJourney,
     }) => {
-      await journey.toEntryPoint();
+      const created = await apiJourney.createUpToPage('entryPoint');
+      await apiJourney.resumeInUi(created.referenceNumber, pages.entryPoint);
       await journey.fillEntryPoint({ meansOfTransport: transport });
       await journey.saveEntryPoint();
 
@@ -35,8 +42,9 @@ test.describe('Transited countries', () => {
     });
   }
 
-  test('can search, add, remove and save transited countries', async ({ pages, journey }) => {
-    await journey.toTransitedCountries({ meansOfTransport: meansOfTransport.railway });
+  test('can search, add, remove and save transited countries', async ({ pages, journey, apiJourney }) => {
+    const created = await apiJourney.createUpToPage('transitedCountries', { meansOfTransport: meansOfTransport.railway });
+    await apiJourney.resumeInUi(created.referenceNumber, pages.transitedCountries);
 
     await expect(pages.transitedCountries.checkboxForCountry('France')).toBeVisible();
 
@@ -64,8 +72,9 @@ test.describe('Transited countries', () => {
     await expect(pages.page).toHaveURL(pages.transporter.expectedUrl);
   });
 
-  test('clears selected transited countries when means of transport no longer requires transit', async ({ pages, journey }) => {
-    await journey.toTransitedCountries({ meansOfTransport: meansOfTransport.roadVehicle });
+  test('clears selected transited countries when means of transport no longer requires transit', async ({ pages, journey, apiJourney }) => {
+    const created = await apiJourney.createUpToPage('transitedCountries', { meansOfTransport: meansOfTransport.roadVehicle });
+    await apiJourney.resumeInUi(created.referenceNumber, pages.transitedCountries);
     await journey.addTransitedCountry(TRANSIT_COUNTRY_NAME);
     await expect(pages.transitedCountries.selectedCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
 

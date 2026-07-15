@@ -1,10 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Importer selection', () => {
-  test.beforeEach(async ({ journey, pages }) => {
-    await journey.toAddresses();
-    await pages.addresses.linkAddImporter.click();
-    await pages.importerSelection.heading.waitFor();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('importerSelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.importerSelection);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
