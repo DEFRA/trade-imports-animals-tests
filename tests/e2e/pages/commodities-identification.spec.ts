@@ -7,8 +7,9 @@ const BISON_DOMESTIC = `${commoditySpecies.bisonBison}, ${commodityTypes.domesti
 const BOS_DOMESTIC = `${commoditySpecies.bosSpp}, ${commodityTypes.domestic}`;
 
 test.describe('Animal identification details', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAnimalIdentification();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('animalIdentification');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.animalIdentification);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

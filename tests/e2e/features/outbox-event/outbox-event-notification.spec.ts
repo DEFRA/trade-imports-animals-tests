@@ -8,9 +8,9 @@ const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.Not
 const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 
 test.describe('Notification outbox event', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('does not write outbox event before submission', async ({ journey, journeyContext }) => {
-    await journey.toDeclaration();
-    const referenceNumber = journeyContext.notificationId;
+  test('does not write outbox event before submission', async ({ apiJourney }) => {
+    const created = await apiJourney.createFullNotification();
+    const referenceNumber = created.referenceNumber;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const client = new MongoDbClient();
 
@@ -23,14 +23,9 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
     }
   });
 
-  test('records notification submitted event in outbox after submission', async ({
-    journey,
-    journeyContext,
-    pages,
-    notificationActions,
-  }) => {
-    await journey.submitNotification();
-    const referenceNumber = journeyContext.notificationId;
+  test('records notification submitted event in outbox after submission', async ({ apiJourney, pages, notificationActions }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();

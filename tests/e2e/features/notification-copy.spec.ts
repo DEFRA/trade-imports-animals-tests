@@ -4,12 +4,11 @@ import { sortByValues } from '@domain/constants/sort-by-values';
 test.describe('Notification copy', () => {
   test('copies draft notification from the view screen and redirects to the new draft', async ({
     pages,
-    journey,
-    journeyContext,
+    apiJourney,
     notificationActions,
   }) => {
-    await journey.toDeclaration();
-    const originalReferenceNumber = journeyContext.notificationId;
+    const created = await apiJourney.createFullNotification();
+    const originalReferenceNumber = created.referenceNumber;
 
     await notificationActions.toNotificationView(originalReferenceNumber);
     await pages.notificationView.btnCopyAsNew.click();
@@ -23,9 +22,9 @@ test.describe('Notification copy', () => {
     // Field retention/reset is covered by lower-level tests; this spec validates the copy feature only.
   });
 
-  test('copies submitted notification from the dashboard and redirects to the new draft', async ({ pages, journey, journeyContext }) => {
-    await journey.submitNotification();
-    const originalReferenceNumber = journeyContext.notificationId;
+  test('copies submitted notification from the dashboard and redirects to the new draft', async ({ pages, apiJourney, journey }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const originalReferenceNumber = created.referenceNumber;
 
     await journey.toNotificationDashboard();
     await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);

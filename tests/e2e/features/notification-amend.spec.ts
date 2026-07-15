@@ -1,32 +1,7 @@
 import { expect, test } from '@fixtures';
-import { createPageObjects } from '@page-objects';
-import { type JourneyContext, Journey } from '@flows/journey';
-import { NotificationActions } from '@flows/notification-actions';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification amend', () => {
-  let referenceNumber: string;
-
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const pages = createPageObjects(page);
-    const journeyContext: JourneyContext = {};
-    const journey = new Journey(pages, journeyContext);
-    await journey.submitNotification();
-    referenceNumber = journeyContext.notificationId;
-    await context.close();
-  });
-
-  test.afterAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const pages = createPageObjects(page);
-    const notificationActions = new NotificationActions(pages);
-    await notificationActions.deleteNotification(referenceNumber);
-    await context.close();
-  });
-
   test.afterEach(async ({ journeyContext, notificationActions }) => {
     if (journeyContext.notificationId) {
       await notificationActions.deleteNotification(journeyContext.notificationId);
@@ -34,27 +9,28 @@ test.describe('Notification amend', () => {
   });
 
   test.describe('amend entry points', () => {
-    test.beforeEach(async ({ notificationActions }) => {
-      await notificationActions.toNotificationView(referenceNumber);
+    test.beforeEach(async ({ apiJourney, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      await notificationActions.toNotificationView(created.referenceNumber);
     });
 
     test('shows the Amend button on the notification view page when SUBMITTED', async ({ pages }) => {
       await expect(pages.notificationView.btnAmend).toBeVisible();
     });
 
-    test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages }) => {
+    test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages, journeyContext }) => {
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
-      await expect(pages.notificationDashboard.btnAmend(referenceNumber)).toBeVisible();
+      await expect(pages.notificationDashboard.btnAmend(journeyContext.notificationId)).toBeVisible();
     });
   });
 
   test(
     'amends from the view page and shows Change links + CTAs',
     { tag: ['@integration'] },
-    async ({ pages, journey, journeyContext, notificationActions }) => {
-      await journey.submitNotification();
-      const ref = journeyContext.notificationId;
+    async ({ pages, apiJourney, journeyContext, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const ref = created.referenceNumber ?? journeyContext.notificationId;
 
       await notificationActions.toNotificationView(ref);
       await pages.notificationView.btnAmend.click();
@@ -75,9 +51,9 @@ test.describe('Notification amend', () => {
   test(
     'amends from the dashboard and lands on the view page in AMEND state',
     { tag: ['@integration'] },
-    async ({ pages, journey, journeyContext }) => {
-      await journey.submitNotification();
-      const ref = journeyContext.notificationId;
+    async ({ pages, apiJourney, journeyContext }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const ref = created.referenceNumber ?? journeyContext.notificationId;
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
@@ -92,10 +68,10 @@ test.describe('Notification amend', () => {
   test(
     'walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED',
     { tag: ['@integration'] },
-    async ({ pages, journey, journeyContext, notificationActions }) => {
+    async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       // 1. Start from a freshly submitted notification.
-      await journey.submitNotification();
-      const ref = journeyContext.notificationId;
+      const created = await apiJourney.createSubmittedNotification();
+      const ref = created.referenceNumber ?? journeyContext.notificationId;
 
       await notificationActions.toNotificationView(ref);
       await expect(pages.notificationView.btnAmend).toBeVisible();

@@ -1,10 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Consignee selection', () => {
-  test.beforeEach(async ({ journey, pages }) => {
-    await journey.toAddresses();
-    await pages.addresses.linkAddConsignee.click();
-    await pages.consigneeSelection.heading.waitFor();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('consigneeSelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.consigneeSelection);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

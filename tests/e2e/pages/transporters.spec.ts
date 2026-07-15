@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Transporter', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
-    const created = await apiJourney.createUpToPage('entryPoint');
+    const created = await apiJourney.createUpToPage('transporter');
     await apiJourney.resumeInUi(created.referenceNumber, pages.transporter);
   });
 

@@ -18,10 +18,13 @@ const safeFileUploadCases = [
 }>;
 
 test.describe('Accompanying documents - supported file types', { tag: '@integration' }, () => {
-  for (const { fileKey, documentReference } of safeFileUploadCases) {
-    test(`accepts ${fileUploadNames[fileKey]} and completes virus scan`, async ({ pages, journey }) => {
-      await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('accompanyingDocuments');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
+  });
 
+  for (const { fileKey, documentReference } of safeFileUploadCases) {
+    test(`accepts ${fileUploadNames[fileKey]} and completes virus scan`, async ({ pages }) => {
       await pages.accompanyingDocuments.fillTextFields({ documentReference });
       await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths[fileKey]);
       await pages.accompanyingDocuments.btnAddAttachment.click();
@@ -37,9 +40,7 @@ test.describe('Accompanying documents - supported file types', { tag: '@integrat
     });
   }
 
-  test('accepts a .pdf file when the filename contains multiple dots and completes virus scan', async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
-
+  test('accepts a .pdf file when the filename contains multiple dots and completes virus scan', async ({ pages }, testInfo) => {
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'hello.world.pdf', {
       kb: 1,
     });
@@ -58,9 +59,7 @@ test.describe('Accompanying documents - supported file types', { tag: '@integrat
     });
   });
 
-  test('accepts a .doc file when the filename contains spaces and allowed special characters', async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
-
+  test('accepts a .doc file when the filename contains spaces and allowed special characters', async ({ pages }, testInfo) => {
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'hello world__test-(v1)+copy.doc', {
       kb: 1,
     });
@@ -81,9 +80,12 @@ test.describe('Accompanying documents - supported file types', { tag: '@integrat
 });
 
 test.describe('Accompanying documents - restricted file types', { tag: '@integration' }, () => {
-  test(`rejects ${fileUploadNames.restrictedFile10bTxt} as an unsupported file type`, async ({ pages, journey }) => {
-    await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('accompanyingDocuments');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
+  });
 
+  test(`rejects ${fileUploadNames.restrictedFile10bTxt} as an unsupported file type`, async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFTXT' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.restrictedFile10bTxt);
     await pages.accompanyingDocuments.btnAddAttachment.click();
@@ -98,9 +100,7 @@ test.describe('Accompanying documents - restricted file types', { tag: '@integra
     await expect(pages.accompanyingDocuments.btnSaveAndContinue).toHaveCount(0);
   });
 
-  test('rejects a .zip file as an unsupported file type', async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
-
+  test('rejects a .zip file as an unsupported file type', async ({ pages }, testInfo) => {
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'restricted-synthetic.zip', {
       kb: 1,
     });

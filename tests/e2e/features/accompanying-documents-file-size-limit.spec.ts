@@ -9,9 +9,12 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 const ELEVEN_MIB_BYTES = 11 * 1024 * 1024;
 
 test.describe('Accompanying documents - file size limit', { tag: '@integration' }, () => {
-  test('accepts a file at the 10 MB cap and completes virus scan', { tag: '@slow' }, async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('accompanyingDocuments');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
+  });
 
+  test('accepts a file at the 10 MB cap and completes virus scan', { tag: '@slow' }, async ({ pages }, testInfo) => {
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'at-cap.pdf', {
       bytes: TEN_MB_BYTES,
     });
@@ -29,9 +32,7 @@ test.describe('Accompanying documents - file size limit', { tag: '@integration' 
     });
   });
 
-  test('rejects a file one byte over the 10 MB cap with an inline error and no navigation', async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
-
+  test('rejects a file one byte over the 10 MB cap with an inline error and no navigation', async ({ pages }, testInfo) => {
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'one-byte-over.pdf', {
       bytes: TEN_MB_BYTES + 1,
     });
@@ -46,12 +47,8 @@ test.describe('Accompanying documents - file size limit', { tag: '@integration' 
     await expect(pages.accompanyingDocuments.errorSummaryItems.filter({ hasText: OVERSIZE_FILE_MESSAGE })).toHaveCount(1);
   });
 
-  test('keeps the user on the upload page (not a raw nginx 413) when file exceeds the CDP infra cap', async ({
-    pages,
-    journey,
-  }, testInfo) => {
+  test('keeps the user on the upload page (not a raw nginx 413) when file exceeds the CDP infra cap', async ({ pages }, testInfo) => {
     skipIfComposeEnvironment('CDP-only regression: Compose stack has no nginx ingress in front of the frontend pod.');
-    await journey.toAccompanyingDocuments();
 
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'over-nginx.pdf', {
       bytes: ELEVEN_MIB_BYTES,

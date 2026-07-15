@@ -3,8 +3,9 @@ import { pointOfEntries } from '@domain/constants/point-of-entries';
 import { meansOfTransport } from '@domain/constants/means-of-transport';
 
 test.describe('Arrival details', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toEntryPoint();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('entryPoint');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.entryPoint);
   });
 
   test('shows system-generated notification id (draft)', async ({ pages, journeyContext }) => {

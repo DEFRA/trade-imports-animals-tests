@@ -67,6 +67,7 @@ export type Transport = {
   meansOfTransport?: string;
   transportIdentification?: string;
   transportDocumentReference?: string;
+  transitedCountries?: string[];
   transporter?: Transporter;
 };
 

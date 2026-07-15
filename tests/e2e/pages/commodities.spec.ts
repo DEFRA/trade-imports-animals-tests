@@ -3,8 +3,9 @@ import { commodityCodes } from '@domain/constants/commodity-codes';
 import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Commodities', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toCommoditySelection();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('commoditySelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.commoditySelection);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

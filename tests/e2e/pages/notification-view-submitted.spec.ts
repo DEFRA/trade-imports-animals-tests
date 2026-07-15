@@ -1,6 +1,4 @@
 import { test, expect } from '@fixtures';
-import { createPageObjects } from '@page-objects';
-import { Journey, JourneyContext } from '@flows/journey';
 import {
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
@@ -15,24 +13,14 @@ import { countryCodes } from '@domain/constants/country-codes';
 
 test.describe('Notification view (SUBMITTED)', () => {
   const defaults = defaultJourneyOptions;
-  let referenceNumber: string;
 
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const pages = createPageObjects(page);
-    const journeyContext: JourneyContext = {};
-    const journey = new Journey(pages, journeyContext);
-    await journey.submitNotification();
-    referenceNumber = journeyContext.notificationId;
-    await context.close();
+  test.beforeEach(async ({ apiJourney, notificationActions }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    await notificationActions.toNotificationView(created.referenceNumber);
   });
 
-  test.beforeEach(async ({ notificationActions }) => {
-    await notificationActions.toNotificationView(referenceNumber);
-  });
-
-  test('lands on the notification view page', async ({ pages }) => {
+  test('lands on the notification view page', async ({ pages, journeyContext }) => {
+    const referenceNumber = journeyContext.notificationId;
     await expect(pages.page).toHaveURL(new RegExp(pages.notificationView.expectedUrl(referenceNumber)));
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.referenceNumberCaption).toContainText(referenceNumber);
