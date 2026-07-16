@@ -78,7 +78,7 @@ async function addOperator(pages: PageObjects, name: string, type: string = 'CON
   return name;
 }
 
-test.describe('Address book', { tag: '@compose' }, () => {
+test.describe('Address book', { tag: ['@compose', '@demo'] }, () => {
   test.beforeEach(async ({ pages }) => {
     await signInAsSeedOwner(pages);
   });

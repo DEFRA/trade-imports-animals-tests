@@ -116,7 +116,7 @@ async function reselectConsignor(pages: PageObjects, referenceNumber: string, co
   await selectConsignorAndPersist(pages, consignorName);
 }
 
-test.describe('Address book journey', { tag: '@compose' }, () => {
+test.describe('Address book journey', { tag: ['@compose', '@demo'] }, () => {
   test.beforeEach(async ({ pages }) => {
     await signInAsSeedOwner(pages);
   });
