@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { CONSIGNOR_NAME, DESTINATION_NAME } from '@domain/constants/journey-options';
 
 test.describe('Addresses landing page', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
@@ -56,10 +57,10 @@ test.describe('Addresses landing page', () => {
 
   test('continues to port of entry page after saving addresses', async ({ pages }) => {
     await pages.addresses.linkAddConsignorOrExporter.click();
-    await pages.consignorSelection.radioConsignorOrExporter('Astra Rosales').click();
+    await pages.consignorSelection.radioConsignorOrExporter(CONSIGNOR_NAME).click();
     await pages.consignorSelection.btnSaveAndContinue.click();
     await pages.addresses.linkAddPlaceOfDestination.click();
-    await pages.destinationSelection.radioPlaceOfDestination('Tech Imports Ltd').click();
+    await pages.destinationSelection.radioPlaceOfDestination(DESTINATION_NAME).click();
     await pages.destinationSelection.btnSaveAndContinue.click();
     await pages.addresses.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
