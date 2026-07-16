@@ -46,11 +46,13 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(docs).toHaveLength(1);
       });
 
-      await test.step('asserts outbox event envelope and payload smoke checks', () => {
+      await test.step('asserts outbox event envelope and GBN-AG payload smoke checks', () => {
         const data = doc.data;
 
-        // Outbox E2E: assert envelope and payload identity — not full notification parity
-        // (see notification-persistence.spec.ts). One smoke field per major payload section.
+        // Outbox E2E: assert envelope and GBN-AG payload identity — not full notification
+        // parity (see notification-persistence.spec.ts). One smoke field per major payload
+        // section. The trade-line commodity name/description are not yet mapped (EUDPA-274
+        // trade-line data gap), so the commodity section is smoke-checked structurally.
         expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
         expect(doc.aggregateId).toBe(aggregateId);
         expect(doc.aggregateType).toBe('Notification');
@@ -60,11 +62,14 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(doc.timestamp).toBeInstanceOf(Date);
         expect(doc.metadata.schemaVersion).toBe('1');
         expect(doc.metadata.correlationId).toBeDefined();
-        expect(data.referenceNumber).toBe(referenceNumber);
-        expect(data.origin.countryCode).toBe(defaults.countryCode);
-        expect(data.commodity.name).toBe(defaults.commodityCode);
-        expect(data.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
-        expect(data.consignor.name).toBe(CONSIGNOR_NAME);
+        expect(data.$model).toBe('defra/certificate-internal/1');
+        expect(data.$type).toBe('gbn-ag');
+        expect(data.exchangedDocument.identifier).toBe(referenceNumber);
+        expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+        expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
+        expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaults.countryCode);
+        expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(defaults.pointOfEntry.code);
+        expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       });
 
       await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
@@ -84,8 +89,8 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(amendDocs[1].aggregateId).toBe(aggregateId);
         expect(amendDocs[0].eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
         expect(amendDocs[1].eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE);
-        expect(amendDocs[0].data.referenceNumber).toBe(referenceNumber);
-        expect(amendDocs[1].data.referenceNumber).toBe(referenceNumber);
+        expect(amendDocs[0].data.exchangedDocument.identifier).toBe(referenceNumber);
+        expect(amendDocs[1].data.exchangedDocument.identifier).toBe(referenceNumber);
       });
     } finally {
       await client.close();
