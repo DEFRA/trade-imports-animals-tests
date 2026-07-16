@@ -10,6 +10,7 @@
   "license": "OGL-UK-3.0",
   "scripts": {
     "database:reseed": "./bin/database-reseed.sh",
+    "db:query": "node bin/db-query.mjs",
     "prepare": "husky",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
