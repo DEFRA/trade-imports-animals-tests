@@ -1,4 +1,9 @@
 import { Page } from '@playwright/test';
+import { AddressBookListPage } from './address-book/list-page';
+import { AddOperatorTypePage } from './address-book/add-type-page';
+import { OperatorFormPage } from './address-book/operator-form-page';
+import { ViewOperatorPage } from './address-book/view-page';
+import { DeleteOperatorPage } from './address-book/delete-page';
 import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { AddressesPage } from './notification/addresses-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
@@ -39,6 +44,11 @@ import { NotificationViewPage } from './notification/notification-view-page';
 export function createPageObjects(page: Page) {
   return {
     page,
+    addressBook: new AddressBookListPage(page),
+    addOperatorType: new AddOperatorTypePage(page),
+    operatorForm: new OperatorFormPage(page),
+    viewOperator: new ViewOperatorPage(page),
+    deleteOperator: new DeleteOperatorPage(page),
     accompanyingDocuments: new AccompanyingDocumentsPage(page),
     addresses: new AddressesPage(page),
     additionalDetails: new AdditionalDetailsPage(page),

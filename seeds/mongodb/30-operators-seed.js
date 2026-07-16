@@ -14,25 +14,11 @@
 
 db = db.getSiblingDB('trade-imports-operators');
 
-const CRN = '1100014934';
+const CRN = '2100010101';
 const ORGANISATION_ID = '5a8d2b19-6f4e-4d21-9c1b-7e3f0a2d5c88';
 
-const operatorTypes = [
-  'PLACE_OF_ORIGIN',
-  'CONSIGNOR',
-  'CONSIGNEE',
-  'IMPORTER',
-  'PLACE_OF_DESTINATION',
-  'TRANSPORTER',
-  'BRANCH_ADDRESS',
-];
-const names = [
-  'Highland Livestock Ltd',
-  'Lowland Cattle Co',
-  'Border Beef Partners',
-  'Glen Valley Farms',
-  'Coastal Poultry Ltd',
-];
+const operatorTypes = ['PLACE_OF_ORIGIN', 'CONSIGNOR', 'CONSIGNEE', 'IMPORTER', 'PLACE_OF_DESTINATION', 'TRANSPORTER', 'BRANCH_ADDRESS'];
+const names = ['Highland Livestock Ltd', 'Lowland Cattle Co', 'Border Beef Partners', 'Glen Valley Farms', 'Coastal Poultry Ltd'];
 const towns = ['Inverness', 'Perth', 'Aberdeen', 'Stirling', 'Dumfries'];
 const counties = ['Highland', 'Perthshire', 'Aberdeenshire', 'Stirlingshire', ''];
 const countries = ['United Kingdom', 'Ireland', 'France', 'Germany'];
