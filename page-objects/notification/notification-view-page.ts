@@ -119,4 +119,12 @@ export class NotificationViewPage extends BasePage {
   get successBanner(): Locator {
     return this.page.locator('#success-banner');
   }
+
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
+  errorSummaryLink(text: string | RegExp): Locator {
+    return this.errorSummary.getByRole('link', { name: text });
+  }
 }
