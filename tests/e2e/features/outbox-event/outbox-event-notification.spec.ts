@@ -53,7 +53,7 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(doc.aggregateVersion).toBe(1);
         expect(doc.eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
         expect(doc.timestamp).toBeInstanceOf(Date);
-        expect(doc.metadata.schemaVersion).toBe('1');
+        expect(doc.metadata.schemaVersion).toBe('2');
         expect(doc.metadata.correlationId).toBeDefined();
         expect(data.referenceNumber).toBe(referenceNumber);
         expect(data.origin.countryCode).toBe(defaults.countryCode);
