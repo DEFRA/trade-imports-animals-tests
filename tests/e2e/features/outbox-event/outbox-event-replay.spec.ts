@@ -57,7 +57,8 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
         expect(doc?.action).toBe('REPLAY_EVENTS');
         expect(doc?.result).toBe('SUCCESS');
         expect(doc?.notificationReferenceNumbers).toEqual([referenceNumber]);
-        expect(doc?.numberOfNotifications).toBe(2);
+        expect(doc?.numberOfNotifications).toBe(1);
+        expect(doc?.numberOfEvents).toBe(2);
         expect(doc?.userId).toBeDefined();
         expect(doc?.timestamp).toBeDefined();
       } finally {
