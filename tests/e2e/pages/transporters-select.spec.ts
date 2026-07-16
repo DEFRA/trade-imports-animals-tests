@@ -24,26 +24,24 @@ test.describe('Transporter selection', () => {
     await expect(pages.transporter.heading).toBeVisible();
 
     const cells = pages.transporter.cellsTransporter;
-    await expect(cells.nth(0)).toContainText('García Livestock Transport SL');
-    await expect(cells.nth(0)).toContainText(
-      '43 East Hague Extension, Delectus sitodio p. Laborum Odio tempor, Quasoccaecat ut ear, 30055',
-    );
-    await expect(cells.nth(0)).toContainText('Switzerland');
-    await expect(cells.nth(1)).toHaveText('ES-T2-45001294');
+    await expect(cells.nth(0)).toContainText('Lowland Cattle Co 26');
+    await expect(cells.nth(0)).toContainText("26 Drover's Way, Unit 26, Perth, Perthshire, PH1 5AA");
+    await expect(cells.nth(0)).toContainText('France');
+    await expect(cells.nth(1)).toHaveText('APR-0026');
     await expect(cells.nth(2)).toHaveText('Commercial');
   });
 
   test('shows matching transporter details when selecting a different transporter', async ({ pages }) => {
-    const transporterName = 'J & G Campbell LTD';
+    const transporterName = 'Highland Livestock Ltd 5';
     await pages.transporterSelection.linkSelectTransporterByName(transporterName).click();
     await expect(pages.page).toHaveURL(new RegExp(pages.transporter.expectedUrl));
     await expect(pages.transporter.heading).toBeVisible();
 
     const cells = pages.transporter.cellsTransporter;
     await expect(cells.nth(0)).toContainText(transporterName);
-    await expect(cells.nth(0)).toContainText('Rue de la Loi 200, 1040 Brussels');
-    await expect(cells.nth(0)).toContainText('Belgium');
-    await expect(cells.nth(1)).toHaveText('UK/BURY/T2/00104115');
-    await expect(cells.nth(2)).toHaveText('Commercial');
+    await expect(cells.nth(0)).toContainText("5 Drover's Way, Unit 5, Inverness, Highland, IV2 3JH");
+    await expect(cells.nth(0)).toContainText('Ireland');
+    await expect(cells.nth(1)).toHaveText('APR-0005');
+    await expect(cells.nth(2)).toHaveText('Private');
   });
 });

@@ -18,20 +18,20 @@ test.describe('Destination selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows matching destination details when selecting Tech Imports Ltd', async ({ pages }) => {
-    await pages.destinationSelection.radioPlaceOfDestination('Tech Imports Ltd').click();
+  test('shows matching destination details when selecting Coastal Poultry Ltd 4', async ({ pages }) => {
+    await pages.destinationSelection.radioPlaceOfDestination('Coastal Poultry Ltd 4').click();
     await pages.destinationSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
     const cells = pages.addresses.cellsPlaceOfDestination;
-    await expect(cells.nth(0)).toHaveText('Tech Imports Ltd');
-    await expect(cells.nth(1)).toHaveText('643 Main Street, Birmingham G1 3AZ');
+    await expect(cells.nth(0)).toHaveText('Coastal Poultry Ltd 4');
+    await expect(cells.nth(1)).toHaveText("4 Drover's Way, Unit 4");
     await expect(cells.nth(2)).toHaveText('United Kingdom');
   });
 
   test('shows matching destination details when selecting a different destination', async ({ pages }) => {
-    const destinationName = 'Global Trading Co';
+    const destinationName = 'Lowland Cattle Co 11';
     await pages.destinationSelection.radioPlaceOfDestination(destinationName).click();
     await pages.destinationSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
@@ -39,8 +39,8 @@ test.describe('Destination selection', () => {
 
     const cells = pages.addresses.cellsPlaceOfDestination;
     await expect(cells.nth(0)).toHaveText(destinationName);
-    await expect(cells.nth(1)).toHaveText('945 Main Street, London LS1 5AB');
-    await expect(cells.nth(2)).toHaveText('United Kingdom');
+    await expect(cells.nth(1)).toHaveText("11 Drover's Way, Unit 11");
+    await expect(cells.nth(2)).toHaveText('Germany');
   });
 
   test('shows validation error when no destination is selected', async ({ pages }) => {

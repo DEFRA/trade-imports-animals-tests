@@ -26,25 +26,25 @@ test.describe('All operator addresses', () => {
   test('place of origin shows name and country', async ({ pages }) => {
     const value = pages.notificationView.summaryValue('Place of origin');
     await expect(value).toContainText(PLACE_OF_ORIGIN_NAME);
-    await expect(value).toContainText('Ireland');
+    await expect(value).toContainText('Germany');
   });
 
   test('consignor shows name and country', async ({ pages }) => {
     const value = pages.notificationView.summaryValue('Consignor');
     await expect(value).toContainText(CONSIGNOR_NAME);
-    await expect(value).toContainText('Switzerland');
+    await expect(value).toContainText('Ireland');
   });
 
   test('consignee shows name and country', async ({ pages }) => {
     const value = pages.notificationView.summaryValue('Consignee');
     await expect(value).toContainText(CONSIGNEE_NAME);
-    await expect(value).toContainText('United Kingdom');
+    await expect(value).toContainText('France');
   });
 
   test('importer shows name and country', async ({ pages }) => {
     const value = pages.notificationView.summaryValue('Importer');
     await expect(value).toContainText(IMPORTER_NAME);
-    await expect(value).toContainText('United Kingdom');
+    await expect(value).toContainText('Germany');
   });
 
   test('place of destination shows name and country', async ({ pages }) => {

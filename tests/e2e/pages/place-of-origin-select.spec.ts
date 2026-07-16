@@ -19,21 +19,21 @@ test.describe('Place of origin selection', () => {
   });
 
   test('shows operators unchecked by default', async ({ pages }) => {
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Ferme des Alpes SARL')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Ferme des Alpes SARL')).not.toBeChecked();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7')).toBeVisible();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7')).not.toBeChecked();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Lowland Cattle Co 21')).toBeVisible();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Lowland Cattle Co 21')).not.toBeChecked();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Coastal Poultry Ltd 14')).toBeVisible();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Coastal Poultry Ltd 14')).not.toBeChecked();
   });
 
   test('can select only one place of origin at a time', async ({ pages }) => {
-    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm').click();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).not.toBeChecked();
-    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS').click();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).toBeChecked();
+    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7').click();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7')).toBeChecked();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Lowland Cattle Co 21')).not.toBeChecked();
+    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Lowland Cattle Co 21').click();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7')).not.toBeChecked();
+    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Lowland Cattle Co 21')).toBeChecked();
   });
 
   test('shows error when no selection made', async ({ pages }) => {
@@ -44,12 +44,12 @@ test.describe('Place of origin selection', () => {
   });
 
   test('returns to addresses after selecting a place of origin', async ({ pages }) => {
-    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm').click();
+    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Border Beef Partners 7').click();
     await pages.placeOfOriginSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
     await expect(pages.addresses.heading).toBeVisible();
     const cells = pages.addresses.cellsPlaceOfOrigin;
-    await expect(cells.nth(0)).toHaveText('Origin Farm');
-    await expect(cells.nth(2)).toHaveText('Ireland');
+    await expect(cells.nth(0)).toHaveText('Border Beef Partners 7');
+    await expect(cells.nth(2)).toHaveText('Germany');
   });
 });

@@ -18,20 +18,20 @@ test.describe('Consignor selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows matching consignor details when selecting Astra Rosales', async ({ pages }) => {
-    await pages.consignorSelection.radioConsignorOrExporter('Astra Rosales').click();
+  test('shows matching consignor details when selecting Lowland Cattle Co 1', async ({ pages }) => {
+    await pages.consignorSelection.radioConsignorOrExporter('Lowland Cattle Co 1').click();
     await pages.consignorSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
     await expect(pages.addresses.heading).toBeVisible();
 
     const cells = pages.addresses.cellsConsignorOrExporter;
-    await expect(cells.nth(0)).toHaveText('Astra Rosales');
-    await expect(cells.nth(1)).toHaveText('43 East Hague Extension, Delectus sitodio p. Laborum Odio tempor, Quasoccaecat ut ear, 30055');
-    await expect(cells.nth(2)).toHaveText('Switzerland');
+    await expect(cells.nth(0)).toHaveText('Lowland Cattle Co 1');
+    await expect(cells.nth(1)).toHaveText("1 Drover's Way, Unit 1");
+    await expect(cells.nth(2)).toHaveText('Ireland');
   });
 
   test('shows matching consignor details when selecting a different consignor', async ({ pages }) => {
-    const consignorName = 'Laiterie du Nord SARL';
+    const consignorName = 'Glen Valley Farms 8';
     await pages.consignorSelection.radioConsignorOrExporter(consignorName).click();
     await pages.consignorSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(new RegExp(pages.addresses.expectedUrl));
@@ -39,8 +39,8 @@ test.describe('Consignor selection', () => {
 
     const cells = pages.addresses.cellsConsignorOrExporter;
     await expect(cells.nth(0)).toHaveText(consignorName);
-    await expect(cells.nth(1)).toHaveText('12 Rue de la Gare, 59000 Lille');
-    await expect(cells.nth(2)).toHaveText('	France');
+    await expect(cells.nth(1)).toHaveText("8 Drover's Way, Unit 8");
+    await expect(cells.nth(2)).toHaveText('United Kingdom');
   });
 
   test('shows validation error when no consignor is selected', async ({ pages }) => {

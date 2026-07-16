@@ -34,50 +34,35 @@ import {
 const CANNED_OPERATORS: Record<'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'destination' | 'contact', Operator> = {
   placeOfOrigin: {
     name: PLACE_OF_ORIGIN_NAME,
-    address: { addressLine1: '1 Farm Lane', addressLine2: 'County Clare', country: 'Ireland' },
+    address: { addressLine1: "7 Drover's Way", addressLine2: 'Unit 7', city: 'Aberdeen', country: 'Germany' },
   },
   consignor: {
     name: CONSIGNOR_NAME,
-    address: {
-      addressLine1: '43 East Hague Extension',
-      addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
-      addressLine3: 'Quasoccaecat ut ear, 30055',
-      country: 'Switzerland',
-    },
+    address: { addressLine1: "1 Drover's Way", addressLine2: 'Unit 1', city: 'Perth', country: 'Ireland' },
   },
   consignee: {
     name: CONSIGNEE_NAME,
-    address: { addressLine1: '10 Market Street', addressLine2: 'Leeds LS1 6HB', country: 'United Kingdom' },
+    address: { addressLine1: "2 Drover's Way", addressLine2: 'Unit 2', city: 'Aberdeen', country: 'France' },
   },
   importer: {
     name: IMPORTER_NAME,
-    address: { addressLine1: '20 Trade Road', addressLine2: 'London EC1A 1BB', country: 'United Kingdom' },
+    address: { addressLine1: "3 Drover's Way", addressLine2: 'Unit 3', city: 'Stirling', country: 'Germany' },
   },
   destination: {
     name: DESTINATION_NAME,
-    address: { addressLine1: '643 Main Street', addressLine2: 'Birmingham G1 3AZ', country: 'United Kingdom' },
+    address: { addressLine1: "4 Drover's Way", addressLine2: 'Unit 4', city: 'Dumfries', country: 'United Kingdom' },
   },
   contact: {
     name: CONTACT_ADDRESS_NAME,
-    address: {
-      addressLine1: 'Woodham Lane',
-      addressLine2: 'New Haw',
-      addressLine3: 'Addlestone, KT15 3NB',
-      country: 'United Kingdom',
-    },
+    address: { addressLine1: "6 Drover's Way", addressLine2: 'Unit 6', city: 'Perth', country: 'France' },
   },
 };
 
 const CANNED_TRANSPORTER: Transporter = {
   name: TRANSPORTER_NAME,
-  address: {
-    addressLine1: '43 East Hague Extension',
-    addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
-    addressLine3: 'Quasoccaecat ut ear, 30055',
-    country: 'Switzerland',
-  },
-  approvalNumber: 'ES-T2-45001294',
-  type: 'Commercial',
+  address: { addressLine1: "5 Drover's Way", addressLine2: 'Unit 5', city: 'Inverness', country: 'Ireland' },
+  approvalNumber: 'APR-0005',
+  type: 'Private',
 };
 
 /** The frontend's mock-species.json `value` id for each `commoditySpecies` text. */

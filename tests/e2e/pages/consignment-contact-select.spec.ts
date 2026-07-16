@@ -29,25 +29,25 @@ test.describe('Contact address for consignment', () => {
   });
 
   test('shows addresses unchecked by default', async ({ pages }) => {
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('Laiterie du Nord SARL')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('Laiterie du Nord SARL')).not.toBeChecked();
+    await expect(pages.contactAddress.radioAddress('Lowland Cattle Co 6')).toBeVisible();
+    await expect(pages.contactAddress.radioAddress('Lowland Cattle Co 6')).not.toBeChecked();
+    await expect(pages.contactAddress.radioAddress('Highland Livestock Ltd 20')).toBeVisible();
+    await expect(pages.contactAddress.radioAddress('Highland Livestock Ltd 20')).not.toBeChecked();
+    await expect(pages.contactAddress.radioAddress('Glen Valley Farms 13')).toBeVisible();
+    await expect(pages.contactAddress.radioAddress('Glen Valley Farms 13')).not.toBeChecked();
   });
 
   test('can select only one address at a time', async ({ pages }) => {
-    await pages.contactAddress.radioAddress('Animal and Plant Health Agency').click();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).not.toBeChecked();
-    await pages.contactAddress.radioAddress('EuroStore Services').click();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).toBeChecked();
+    await pages.contactAddress.radioAddress('Lowland Cattle Co 6').click();
+    await expect(pages.contactAddress.radioAddress('Lowland Cattle Co 6')).toBeChecked();
+    await expect(pages.contactAddress.radioAddress('Highland Livestock Ltd 20')).not.toBeChecked();
+    await pages.contactAddress.radioAddress('Highland Livestock Ltd 20').click();
+    await expect(pages.contactAddress.radioAddress('Lowland Cattle Co 6')).not.toBeChecked();
+    await expect(pages.contactAddress.radioAddress('Highland Livestock Ltd 20')).toBeChecked();
   });
 
   test('continues to review after selecting a contact address', async ({ pages, journeyContext }) => {
-    await pages.contactAddress.radioAddress('EuroStore Services').click();
+    await pages.contactAddress.radioAddress('Lowland Cattle Co 6').click();
     await pages.contactAddress.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.notificationId));
     await expect(pages.notificationView.heading).toBeVisible();

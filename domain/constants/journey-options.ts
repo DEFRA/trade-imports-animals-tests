@@ -59,13 +59,16 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
 
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
-export const PLACE_OF_ORIGIN_NAME = 'Origin Farm';
-export const CONSIGNOR_NAME = 'Astra Rosales';
-export const CONSIGNEE_NAME = 'British Livestock Ltd';
-export const IMPORTER_NAME = 'Import Co UK';
-export const DESTINATION_NAME = 'Tech Imports Ltd';
+// Party names are seeded operators of the matching operatorType
+// (seeds/mongodb/30-operators-seed.js) — since EUDPA-58 the party select pages
+// list real address-book operators, scoped by type, not hardcoded mock rows.
+export const PLACE_OF_ORIGIN_NAME = 'Border Beef Partners 7';
+export const CONSIGNOR_NAME = 'Lowland Cattle Co 1';
+export const CONSIGNEE_NAME = 'Border Beef Partners 2';
+export const IMPORTER_NAME = 'Glen Valley Farms 3';
+export const DESTINATION_NAME = 'Coastal Poultry Ltd 4';
 export const CPH_NUMBER = '123456789';
-export const TRANSPORTER_NAME = 'García Livestock Transport SL';
-export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
+export const TRANSPORTER_NAME = 'Highland Livestock Ltd 5';
+export const CONTACT_ADDRESS_NAME = 'Lowland Cattle Co 6';
 export const TRANSIT_COUNTRY_NAME = 'Germany';
 export const TRANSIT_COUNTRY_CODE = countryCodes.eu.germany;

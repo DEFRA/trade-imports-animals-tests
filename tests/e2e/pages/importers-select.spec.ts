@@ -19,21 +19,21 @@ test.describe('Importer selection', () => {
   });
 
   test('shows operators unchecked by default', async ({ pages }) => {
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('Highland Import Services')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('Highland Import Services')).not.toBeChecked();
+    await expect(pages.importerSelection.radioImporter('Glen Valley Farms 3')).toBeVisible();
+    await expect(pages.importerSelection.radioImporter('Glen Valley Farms 3')).not.toBeChecked();
+    await expect(pages.importerSelection.radioImporter('Highland Livestock Ltd 10')).toBeVisible();
+    await expect(pages.importerSelection.radioImporter('Highland Livestock Ltd 10')).not.toBeChecked();
+    await expect(pages.importerSelection.radioImporter('Border Beef Partners 17')).toBeVisible();
+    await expect(pages.importerSelection.radioImporter('Border Beef Partners 17')).not.toBeChecked();
   });
 
   test('can select only one importer at a time', async ({ pages }) => {
-    await pages.importerSelection.radioImporter('Import Co UK').click();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).not.toBeChecked();
-    await pages.importerSelection.radioImporter('GB Animal Imports').click();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).toBeChecked();
+    await pages.importerSelection.radioImporter('Glen Valley Farms 3').click();
+    await expect(pages.importerSelection.radioImporter('Glen Valley Farms 3')).toBeChecked();
+    await expect(pages.importerSelection.radioImporter('Highland Livestock Ltd 10')).not.toBeChecked();
+    await pages.importerSelection.radioImporter('Highland Livestock Ltd 10').click();
+    await expect(pages.importerSelection.radioImporter('Glen Valley Farms 3')).not.toBeChecked();
+    await expect(pages.importerSelection.radioImporter('Highland Livestock Ltd 10')).toBeChecked();
   });
 
   test('shows error when no selection made', async ({ pages }) => {
@@ -44,12 +44,12 @@ test.describe('Importer selection', () => {
   });
 
   test('returns to addresses after selecting an importer', async ({ pages }) => {
-    await pages.importerSelection.radioImporter('Import Co UK').click();
+    await pages.importerSelection.radioImporter('Glen Valley Farms 3').click();
     await pages.importerSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.addresses.expectedUrl);
     await expect(pages.addresses.heading).toBeVisible();
     const cells = pages.addresses.cellsImporter;
-    await expect(cells.nth(0)).toHaveText('Import Co UK');
-    await expect(cells.nth(2)).toHaveText('United Kingdom');
+    await expect(cells.nth(0)).toHaveText('Glen Valley Farms 3');
+    await expect(cells.nth(2)).toHaveText('Germany');
   });
 });
