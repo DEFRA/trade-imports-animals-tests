@@ -18,7 +18,7 @@ import {
   IMPORTER_NAME,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
-  TRANSIT_COUNTRY_CODE,
+  TRANSITED_COUNTRIES,
   TRANSPORTER_NAME,
   defaultJourneyOptions,
   type JourneyOptions,
@@ -246,7 +246,7 @@ const pageContributions: Record<JourneyPage, PageContribution> = {
     }
     draft.transport = {
       ...draft.transport,
-      transitedCountries: [TRANSIT_COUNTRY_CODE],
+      transitedCountries: TRANSITED_COUNTRIES.map((country) => country.code),
     };
   },
 

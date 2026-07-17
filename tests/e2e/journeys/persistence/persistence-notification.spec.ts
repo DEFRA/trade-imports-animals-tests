@@ -3,6 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
+import { meansOfTransport } from '@domain/constants/means-of-transport';
 import {
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
@@ -15,6 +16,7 @@ import {
   CPH_NUMBER,
   TRANSPORTER_NAME,
   CONTACT_ADDRESS_NAME,
+  TRANSITED_COUNTRIES,
 } from '@domain/constants/journey-options';
 import { toUtcDate } from '@utils/date-utils';
 
@@ -106,6 +108,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.transport.arrivalDate?.getTime()).toBe(expectedArrivalDate.getTime());
       expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
       expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.code);
+      expect(doc.transport.transitedCountries).toBeUndefined();
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
       expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
       expect(doc.transport.transporter?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
@@ -130,7 +133,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       requiresRegionCode: yesNoValues.yes,
       internalReference: 'AnimalsTesting123',
       unweanedAnimals: yesNoValues.yes,
-      transportIdentification: 'Vessel Poseidon',
+      meansOfTransport: meansOfTransport.railway,
+      transportIdentification: 'Train 4521',
       transportDocumentReference: 'BILL-OF-LADING-001',
     };
 
@@ -153,6 +157,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.additionalDetails.unweanedAnimals).toBe(options.unweanedAnimals.toLowerCase());
       expect(doc.transport.transportIdentification).toBe(options.transportIdentification);
       expect(doc.transport.transportDocumentReference).toBe(options.transportDocumentReference);
+      expect(doc.transport.transitedCountries).toEqual(TRANSITED_COUNTRIES.map((country) => country.code));
     } finally {
       await client.close();
     }

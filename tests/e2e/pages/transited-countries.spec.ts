@@ -1,7 +1,9 @@
 import { test, expect } from '@fixtures';
 import { meansOfTransport } from '@domain/constants/means-of-transport';
 import { pointOfEntries } from '@domain/constants/point-of-entries';
-import { TRANSIT_COUNTRY_NAME } from '@domain/constants/journey-options';
+import { TRANSITED_COUNTRIES } from '@domain/constants/journey-options';
+
+const [germany, france] = TRANSITED_COUNTRIES;
 
 test.describe('Transited countries', () => {
   const transitMeansOfTransport = [meansOfTransport.roadVehicle, meansOfTransport.railway] as const;
@@ -46,27 +48,27 @@ test.describe('Transited countries', () => {
     const created = await apiJourney.createUpToPage('transitedCountries', { meansOfTransport: meansOfTransport.railway });
     await apiJourney.resumeInUi(created.referenceNumber, pages.transitedCountries);
 
-    await expect(pages.transitedCountries.checkboxForCountry('France')).toBeVisible();
+    await expect(pages.transitedCountries.checkboxForCountry(france.name)).toBeVisible();
 
     await pages.transitedCountries.searchForCountry('ger');
     await expect(pages.page).toHaveURL(/[?&]q=ger(?:&|$)/);
-    await expect(pages.transitedCountries.checkboxForCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
-    await expect(pages.transitedCountries.checkboxForCountry('France')).toHaveCount(0);
+    await expect(pages.transitedCountries.checkboxForCountry(germany.name)).toBeVisible();
+    await expect(pages.transitedCountries.checkboxForCountry(france.name)).toHaveCount(0);
 
     // Clear search so all countries are available for add
     await pages.transitedCountries.searchForCountry('');
-    await expect(pages.transitedCountries.checkboxForCountry('France')).toBeVisible();
-    await expect(pages.transitedCountries.checkboxForCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
+    await expect(pages.transitedCountries.checkboxForCountry(france.name)).toBeVisible();
+    await expect(pages.transitedCountries.checkboxForCountry(germany.name)).toBeVisible();
 
-    await journey.addTransitedCountry(TRANSIT_COUNTRY_NAME);
-    await journey.addTransitedCountry('France');
+    await journey.addTransitedCountry(germany.name);
+    await journey.addTransitedCountry(france.name);
 
-    await expect(pages.transitedCountries.selectedCountry('France')).toBeVisible();
-    await expect(pages.transitedCountries.selectedCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
+    await expect(pages.transitedCountries.selectedCountry(france.name)).toBeVisible();
+    await expect(pages.transitedCountries.selectedCountry(germany.name)).toBeVisible();
 
-    await pages.transitedCountries.removeButtonForCountry('France').click();
-    await expect(pages.transitedCountries.selectedCountry('France')).toHaveCount(0);
-    await expect(pages.transitedCountries.selectedCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
+    await pages.transitedCountries.removeButtonForCountry(france.name).click();
+    await expect(pages.transitedCountries.selectedCountry(france.name)).toHaveCount(0);
+    await expect(pages.transitedCountries.selectedCountry(germany.name)).toBeVisible();
 
     await journey.saveTransitedCountries();
     await expect(pages.page).toHaveURL(pages.transporter.expectedUrl);
@@ -75,8 +77,8 @@ test.describe('Transited countries', () => {
   test('clears selected transited countries when means of transport no longer requires transit', async ({ pages, journey, apiJourney }) => {
     const created = await apiJourney.createUpToPage('transitedCountries', { meansOfTransport: meansOfTransport.roadVehicle });
     await apiJourney.resumeInUi(created.referenceNumber, pages.transitedCountries);
-    await journey.addTransitedCountry(TRANSIT_COUNTRY_NAME);
-    await expect(pages.transitedCountries.selectedCountry(TRANSIT_COUNTRY_NAME)).toBeVisible();
+    await journey.addTransitedCountry(germany.name);
+    await expect(pages.transitedCountries.selectedCountry(germany.name)).toBeVisible();
 
     // Revisit arrival details (session-scoped URL) and switch to a means that skips transit
     await pages.page.goto(pages.entryPoint.expectedUrl);
@@ -91,6 +93,6 @@ test.describe('Transited countries', () => {
     await journey.fillEntryPoint({ meansOfTransport: meansOfTransport.roadVehicle });
     await journey.saveEntryPoint();
     await expect(pages.page).toHaveURL(pages.transitedCountries.expectedUrl);
-    await expect(pages.transitedCountries.selectedCountry(TRANSIT_COUNTRY_NAME)).toHaveCount(0);
+    await expect(pages.transitedCountries.selectedCountry(germany.name)).toHaveCount(0);
   });
 });
