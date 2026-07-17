@@ -25,6 +25,22 @@ export function getMongoDbUri(): string {
 }
 
 /**
+ * Endpoint for the local SQS emulator (Floci in the compose stack), used to seed
+ * messages directly onto a queue ahead of a test.
+ */
+export function getSqsEndpoint(): string {
+  return getServiceBaseUrl('AWS_SQS_ENDPOINT');
+}
+
+/**
+ * URL of the notification-gateway dead-letter queue, seeded directly by the DLQ
+ * operator-UI specs.
+ */
+export function getDlqUrl(): string {
+  return getServiceBaseUrl('NOTIFICATION_SQS_DLQ_URL');
+}
+
+/**
  * x-api-key for the CDP ephemeral gateway, shared by every service reached
  * through it (not just the backend). Required when CDP_LOCAL=true; unset
  * (undefined) otherwise — CI and docker-compose reach services directly and

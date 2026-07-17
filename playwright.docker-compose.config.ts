@@ -12,6 +12,10 @@ const projectBaseUrls: Record<string, string> = {
 const dockerComposeConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'), {
   MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
   TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
+  AWS_SQS_ENDPOINT: process.env.AWS_SQS_ENDPOINT ?? 'http://localhost:4566',
+  NOTIFICATION_SQS_DLQ_URL:
+    process.env.NOTIFICATION_SQS_DLQ_URL ??
+    'http://localhost:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo',
 });
 
 /**
