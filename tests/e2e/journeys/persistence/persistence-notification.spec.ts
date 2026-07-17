@@ -4,6 +4,7 @@ import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { meansOfTransport } from '@domain/constants/means-of-transport';
+import { countryCodes } from '@domain/constants/country-codes';
 import {
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
@@ -16,7 +17,6 @@ import {
   CPH_NUMBER,
   TRANSPORTER_NAME,
   CONTACT_ADDRESS_NAME,
-  TRANSITED_COUNTRIES,
 } from '@domain/constants/journey-options';
 import { toUtcDate } from '@utils/date-utils';
 
@@ -42,7 +42,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     }
   });
 
-  test('persists notification with defaults (after full journey completion*)', async ({ journey, journeyContext }) => {
+  test('persists submitted notification with defaults', async ({ journey, journeyContext }) => {
     await journey.submitNotification();
     const referenceNumber = journeyContext.notificationId;
     const defaults = defaultJourneyOptions;
@@ -127,7 +127,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     }
   });
 
-  test('persists notification with defaults overidden (after full journey completion*)', async ({ journey, journeyContext }) => {
+  test('persists submitted notification with defaults overidden', async ({ journey, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       requiresRegionCode: yesNoValues.yes,
@@ -136,6 +136,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       meansOfTransport: meansOfTransport.railway,
       transportIdentification: 'Train 4521',
       transportDocumentReference: 'BILL-OF-LADING-001',
+      transitedCountries: [countryCodes.eu.italy, countryCodes.eu.spain],
     };
 
     await journey.submitNotification(options);
@@ -157,7 +158,10 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.additionalDetails.unweanedAnimals).toBe(options.unweanedAnimals.toLowerCase());
       expect(doc.transport.transportIdentification).toBe(options.transportIdentification);
       expect(doc.transport.transportDocumentReference).toBe(options.transportDocumentReference);
-      expect(doc.transport.transitedCountries).toEqual(TRANSITED_COUNTRIES.map((country) => country.value));
+      const expectedTransitedCountries = Array.isArray(options.transitedCountries)
+        ? options.transitedCountries
+        : [options.transitedCountries];
+      expect(doc.transport.transitedCountries).toEqual(expectedTransitedCountries.map((country) => country.value));
     } finally {
       await client.close();
     }

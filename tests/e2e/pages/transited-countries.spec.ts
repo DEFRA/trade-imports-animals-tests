@@ -1,9 +1,10 @@
 import { test, expect } from '@fixtures';
 import { meansOfTransport } from '@domain/constants/means-of-transport';
 import { pointOfEntries } from '@domain/constants/point-of-entries';
-import { TRANSITED_COUNTRIES } from '@domain/constants/journey-options';
+import { countryCodes } from '@domain/constants/country-codes';
 
-const [germany, france] = TRANSITED_COUNTRIES;
+const germany = countryCodes.eu.germany;
+const france = countryCodes.eu.france;
 
 test.describe('Transited countries', () => {
   const transitMeansOfTransport = [meansOfTransport.roadVehicle, meansOfTransport.railway] as const;

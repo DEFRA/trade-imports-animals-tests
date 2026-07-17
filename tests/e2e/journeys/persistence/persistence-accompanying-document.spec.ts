@@ -8,7 +8,7 @@ import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Accompanying document persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('persists accompanying document (after full journey completion*)', async ({ journey, journeyContext }) => {
+  test('persists uploaded accompanying document', async ({ journey, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,
       accompanyingDocuments: {
@@ -23,7 +23,8 @@ test.describe('Accompanying document persistence', { tag: ['@compose', '@integra
       },
     };
 
-    await journey.submitNotification(options);
+    // Addresses is the page directly after accompanying documents — saves the upload without submitting.
+    await journey.toAddresses(options);
     const referenceNumber = journeyContext.notificationId;
     const client = new MongoDbClient();
 

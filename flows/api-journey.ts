@@ -18,7 +18,6 @@ import {
   IMPORTER_NAME,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
-  TRANSITED_COUNTRIES,
   TRANSPORTER_NAME,
   defaultJourneyOptions,
   type JourneyOptions,
@@ -241,12 +240,12 @@ const pageContributions: Record<JourneyPage, PageContribution> = {
   },
 
   transitedCountries(draft, options) {
-    if (!requiresTransitedCountries(options.meansOfTransport)) {
+    if (!requiresTransitedCountries(options.meansOfTransport) || options.transitedCountries === undefined) {
       return;
     }
     draft.transport = {
       ...draft.transport,
-      transitedCountries: TRANSITED_COUNTRIES.map((country) => country.value),
+      transitedCountries: toArray(options.transitedCountries).map((country) => country.value),
     };
   },
 

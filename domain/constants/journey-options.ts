@@ -35,6 +35,7 @@ export type JourneyOptions = {
   meansOfTransport?: MeansOfTransport;
   transportIdentification?: string;
   transportDocumentReference?: string;
+  transitedCountries?: CountryCode | CountryCode[];
 };
 
 export const defaultJourneyOptions: Required<JourneyOptions> = {
@@ -55,6 +56,7 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   meansOfTransport: meansOfTransport.vessel,
   transportIdentification: undefined,
   transportDocumentReference: undefined,
+  transitedCountries: undefined,
 };
 
 export const EAR_TAG_PREFIX = 'FR';
@@ -67,4 +69,3 @@ export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';
-export const TRANSITED_COUNTRIES = [countryCodes.eu.germany, countryCodes.eu.france] as const;

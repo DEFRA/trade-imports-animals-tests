@@ -14,7 +14,6 @@ import {
   IMPORTER_NAME,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
-  TRANSITED_COUNTRIES,
   TRANSPORTER_NAME,
   defaultJourneyOptions,
   type JourneyOptions,
@@ -422,7 +421,10 @@ export class Journey {
     const mergedOptions = { ...defaultJourneyOptions, ...options };
     await this.toTransitedCountries(mergedOptions);
     if (requiresTransitedCountries(mergedOptions.meansOfTransport)) {
-      for (const country of TRANSITED_COUNTRIES) {
+      const transitedCountries = Array.isArray(mergedOptions.transitedCountries)
+        ? mergedOptions.transitedCountries
+        : [mergedOptions.transitedCountries];
+      for (const country of transitedCountries) {
         await this.addTransitedCountry(country.display);
       }
       await this.saveTransitedCountries();
