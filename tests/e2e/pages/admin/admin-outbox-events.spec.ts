@@ -26,9 +26,9 @@ test.describe('Outbox events (admin)', () => {
       await pages.adminOutboxEvents.linkViewJson(0).click();
       const json = await pages.adminOutboxEvents.cellDataPre(0).textContent();
       expect(json).toContain(referenceNumber);
-      expect(json).toContain(defaults.countryCode);
+      expect(json).toContain(defaults.countryCode.value);
       expect(json).toContain(defaults.commodityCode);
-      expect(json).toContain(defaults.pointOfEntry.code);
+      expect(json).toContain(defaults.pointOfEntry.value);
       expect(json).toContain(CONSIGNOR_NAME);
     });
   });

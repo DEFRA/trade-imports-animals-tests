@@ -62,7 +62,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(docs).toHaveLength(1);
       expect(String(doc._id)).toMatch(/^[a-f0-9]{24}$/i);
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.origin.countryCode).toBe(defaults.countryCode);
+      expect(doc.origin.countryCode).toBe(defaults.countryCode.value);
       expect(doc.origin.requiresRegionCode).toBe(yesNoValues.no.toLowerCase());
       expect(doc.origin.internalReference).toBeUndefined();
       expect(doc.commodity.name).toBe(defaults.commodityCode);
@@ -106,8 +106,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.cphNumber).toBe(CPH_NUMBER);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
       expect(doc.transport.arrivalDate?.getTime()).toBe(expectedArrivalDate.getTime());
-      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
-      expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.code);
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.value);
+      expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.value);
       expect(doc.transport.transitedCountries).toBeUndefined();
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
       expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
@@ -157,7 +157,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.additionalDetails.unweanedAnimals).toBe(options.unweanedAnimals.toLowerCase());
       expect(doc.transport.transportIdentification).toBe(options.transportIdentification);
       expect(doc.transport.transportDocumentReference).toBe(options.transportDocumentReference);
-      expect(doc.transport.transitedCountries).toEqual(TRANSITED_COUNTRIES.map((country) => country.code));
+      expect(doc.transport.transitedCountries).toEqual(TRANSITED_COUNTRIES.map((country) => country.value));
     } finally {
       await client.close();
     }

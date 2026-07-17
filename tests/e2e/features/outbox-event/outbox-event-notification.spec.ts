@@ -56,9 +56,9 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(doc.metadata.schemaVersion).toBe('1');
         expect(doc.metadata.correlationId).toBeDefined();
         expect(data.referenceNumber).toBe(referenceNumber);
-        expect(data.origin.countryCode).toBe(defaults.countryCode);
+        expect(data.origin.countryCode).toBe(defaults.countryCode.value);
         expect(data.commodity.name).toBe(defaults.commodityCode);
-        expect(data.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
+        expect(data.transport.portOfEntry).toBe(defaults.pointOfEntry.value);
         expect(data.consignor.name).toBe(CONSIGNOR_NAME);
       });
 

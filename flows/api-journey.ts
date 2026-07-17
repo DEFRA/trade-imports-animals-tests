@@ -138,7 +138,7 @@ type PageContribution = (draft: Notification, options: Options) => void;
 const pageContributions: Record<JourneyPage, PageContribution> = {
   originOfImport(draft, options) {
     draft.origin = {
-      countryCode: options.countryCode,
+      countryCode: options.countryCode.value,
       requiresRegionCode: toWireYesNo(options.requiresRegionCode),
       internalReference: options.internalReference,
     };
@@ -232,9 +232,9 @@ const pageContributions: Record<JourneyPage, PageContribution> = {
   entryPoint(draft, options) {
     draft.transport = {
       ...draft.transport,
-      portOfEntry: options.pointOfEntry.code,
+      portOfEntry: options.pointOfEntry.value,
       arrivalDate: toIsoDate(options.arrivalDate),
-      meansOfTransport: options.meansOfTransport.code,
+      meansOfTransport: options.meansOfTransport.value,
       transportIdentification: options.transportIdentification,
       transportDocumentReference: options.transportDocumentReference,
     };
@@ -246,7 +246,7 @@ const pageContributions: Record<JourneyPage, PageContribution> = {
     }
     draft.transport = {
       ...draft.transport,
-      transitedCountries: TRANSITED_COUNTRIES.map((country) => country.code),
+      transitedCountries: TRANSITED_COUNTRIES.map((country) => country.value),
     };
   },
 

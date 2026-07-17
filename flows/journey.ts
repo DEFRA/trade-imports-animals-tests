@@ -62,7 +62,7 @@ export class Journey {
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
     const { countryCode, requiresRegionCode, internalReference } = { ...defaultJourneyOptions, ...options };
-    await this.pages.originOfImport.dropdownCountry.selectOption(countryCode);
+    await this.pages.originOfImport.dropdownCountry.selectOption(countryCode.value);
     if (requiresRegionCode !== undefined) {
       await this.pages.originOfImport.radioRequiresOriginCode(requiresRegionCode).click();
     }
@@ -376,9 +376,9 @@ export class Journey {
       ...defaultJourneyOptions,
       ...options,
     };
-    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry.code);
+    await this.pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntry.value);
     await this.pages.entryPoint.fillArrivalDate(arrivalDate);
-    await this.pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.code);
+    await this.pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.value);
     if (transportIdentification !== undefined) {
       await this.pages.entryPoint.inputTransportIdentification.fill(transportIdentification);
     }
@@ -423,7 +423,7 @@ export class Journey {
     await this.toTransitedCountries(mergedOptions);
     if (requiresTransitedCountries(mergedOptions.meansOfTransport)) {
       for (const country of TRANSITED_COUNTRIES) {
-        await this.addTransitedCountry(country.name);
+        await this.addTransitedCountry(country.display);
       }
       await this.saveTransitedCountries();
     }

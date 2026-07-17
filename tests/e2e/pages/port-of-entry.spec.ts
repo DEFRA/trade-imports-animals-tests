@@ -37,9 +37,9 @@ test.describe('Arrival details', () => {
   });
 
   test('continues to transporter after saving valid entry', async ({ pages }) => {
-    await pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntries.aberdeen.code);
+    await pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntries.aberdeen.value);
     await pages.entryPoint.fillArrivalDate({ day: '27', month: '3', year: '2026' });
-    await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.code);
+    await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
     await pages.entryPoint.inputTransportIdentification.fill('Vessel Poseidon');
     await pages.entryPoint.inputTransportDocumentReference.fill('BILL-OF-LADING-001');
     await pages.entryPoint.btnSaveAndContinue.click();
@@ -49,7 +49,7 @@ test.describe('Arrival details', () => {
 
   test.describe('Input validation', { tag: '@validation' }, () => {
     test('shows error when means of transport is not selected', async ({ pages }) => {
-      await pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntries.aberdeen.code);
+      await pages.entryPoint.dropdownPortOfEntry.selectOption(pointOfEntries.aberdeen.value);
       await pages.entryPoint.fillArrivalDate({ day: '27', month: '3', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
@@ -60,7 +60,7 @@ test.describe('Arrival details', () => {
 
     // The date-range tests select a means of transport first so only the date error is asserted.
     test('shows error when arrival date day is out of range', async ({ pages }) => {
-      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.code);
+      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
       await pages.entryPoint.fillArrivalDate({ day: '32', month: '1', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
@@ -71,7 +71,7 @@ test.describe('Arrival details', () => {
     });
 
     test('shows error when arrival date month is out of range', async ({ pages }) => {
-      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.code);
+      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
       await pages.entryPoint.fillArrivalDate({ day: '1', month: '13', year: '2026' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
@@ -82,7 +82,7 @@ test.describe('Arrival details', () => {
     });
 
     test('shows error when arrival date year is out of range (three digits)', async ({ pages }) => {
-      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.code);
+      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
       await pages.entryPoint.fillArrivalDate({ day: '1', month: '1', year: '202' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);
@@ -93,7 +93,7 @@ test.describe('Arrival details', () => {
     });
 
     test('shows all errors when all arrival date fields are out of range', async ({ pages }) => {
-      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.code);
+      await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
       await pages.entryPoint.fillArrivalDate({ day: '0', month: '13', year: '20266' });
       await pages.entryPoint.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.entryPoint.expectedUrl);

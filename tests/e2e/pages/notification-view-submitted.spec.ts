@@ -8,8 +8,7 @@ import {
   TRANSPORTER_NAME,
 } from '@domain/constants/journey-options';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
-import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
-import { countryCodes } from '@domain/constants/country-codes';
+import { camelCaseToSentenceCase } from '@utils/string-utils';
 
 test.describe('Notification view (SUBMITTED)', () => {
   const defaults = defaultJourneyOptions;
@@ -57,8 +56,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('shows origin details', async ({ pages }) => {
-    const country = Object.entries(countryCodes.eu).find(([, code]) => code === defaults.countryCode)[0];
-    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(camelCaseToTitleCase(country));
+    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode.display);
   });
 
   test('shows commodity name', async ({ pages }) => {
@@ -95,7 +93,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('shows port of entry', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.code);
+    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.value);
   });
 
   test('shows no accompanying documents', async ({ pages }) => {

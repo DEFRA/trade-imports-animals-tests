@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { countryCodes } from '@domain/constants/country-codes';
 import { yesNoValues } from '@domain/constants/yes-no-values';
-import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Origin of the import', () => {
   test.beforeEach(async ({ journey }) => {
@@ -10,11 +9,7 @@ test.describe('Origin of the import', () => {
 
   test('shows only EU and EEA countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
-    const keys = Object.keys(countryCodes.eu);
-    const countryNameOverrides: Record<string, string> = {
-      netherlands: 'Netherlands (the)',
-    };
-    const expectedOptions = keys.map((key) => countryNameOverrides[key] ?? camelCaseToTitleCase(key));
+    const expectedOptions = Object.values(countryCodes.eu).map((country) => country.display);
     expect(countryOptions[0]).toBe('Select a country');
     expect(countryOptions[1]).toMatch(/^─+$/);
     // Dropdown countries must match the expected list in the correct order (alphabetical).
@@ -23,8 +18,7 @@ test.describe('Origin of the import', () => {
 
   test('does not show any ROW countries in origin dropdown', async ({ pages }) => {
     const countryOptions = await pages.originOfImport.dropdownCountryOptions.allTextContents();
-    const keys = Object.keys(countryCodes.row);
-    const rowOptions = keys.map(camelCaseToTitleCase);
+    const rowOptions = Object.values(countryCodes.row).map((country) => country.display);
 
     for (const rowOption of rowOptions) {
       expect(countryOptions).not.toContain(rowOption);
@@ -48,14 +42,14 @@ test.describe('Origin of the import', () => {
   });
 
   test('continues to commodity selection with defaults and required fields only', async ({ pages }) => {
-    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.austria);
+    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.austria.value);
     await pages.originOfImport.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.commoditySelection.expectedUrl);
     await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
   test('continues to commodity selection when all fields are valid', async ({ pages }) => {
-    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.sweden);
+    await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.sweden.value);
     await pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes).click();
     await pages.originOfImport.inputInternalReferenceNumber.fill('B'.repeat(58));
     await pages.originOfImport.btnSaveAndContinue.click();
