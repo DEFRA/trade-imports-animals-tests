@@ -2,8 +2,11 @@ import { test, expect } from '@fixtures';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
 
 test.describe('Declaration', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toDeclaration();
+  test.beforeEach(async ({ apiJourney, notificationActions, pages }) => {
+    const created = await apiJourney.createFullNotification();
+    await notificationActions.toNotificationView(created.referenceNumber);
+    await pages.notificationView.btnConfirmAndSubmit.click();
+    await pages.declaration.heading.waitFor();
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

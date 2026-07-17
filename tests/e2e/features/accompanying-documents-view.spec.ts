@@ -6,9 +6,12 @@ import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 test.describe('Accompanying documents - view file', () => {
-  test('view file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages, journey }) => {
-    await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('accompanyingDocuments');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
+  });
 
+  test('view file link downloads the uploaded file when the scan is complete', { tag: ['@integration'] }, async ({ pages }) => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIEW' });
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(fileUploadPaths.safeFile250bPng);
     await pages.accompanyingDocuments.btnAddAttachment.click();
@@ -30,9 +33,7 @@ test.describe('Accompanying documents - view file', () => {
     expect(downloadedBytes.equals(originalBytes)).toBe(true);
   });
 
-  test('view file link is not rendered when the scan rejects the file', { tag: ['@integration'] }, async ({ pages, journey }, testInfo) => {
-    await journey.toAccompanyingDocuments();
-
+  test('view file link is not rendered when the scan rejects the file', { tag: ['@integration'] }, async ({ pages }, testInfo) => {
     await pages.accompanyingDocuments.fillTextFields({ documentReference: 'REFVIRUS' });
     const eicarFile = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
     await pages.accompanyingDocuments.inputFileUpload.setInputFiles(eicarFile.filePath);

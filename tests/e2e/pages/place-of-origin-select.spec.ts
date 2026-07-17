@@ -1,10 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Place of origin selection', () => {
-  test.beforeEach(async ({ journey, pages }) => {
-    await journey.toAddresses();
-    await pages.addresses.linkAddPlaceOfOrigin.click();
-    await pages.placeOfOriginSelection.heading.waitFor();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('placeOfOriginSelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.placeOfOriginSelection);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

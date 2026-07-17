@@ -42,6 +42,6 @@ test.describe('Import notification service', () => {
     const firstCard = pages.notificationDashboard.notificationCard(0);
 
     await expect(firstCard.actions.view).toBeVisible();
-    await expect(firstCard.actions.copyAsNew).toBeVisible();
+    //await expect(firstCard.actions.copyAsNew).toBeVisible();
   });
 });

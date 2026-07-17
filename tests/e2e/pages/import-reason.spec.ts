@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Reason for import', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toImportReason();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('importReason');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.importReason);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

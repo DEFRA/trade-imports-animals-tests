@@ -81,6 +81,7 @@ export type NotificationDocument = {
     meansOfTransport: string;
     transportIdentification?: string;
     transportDocumentReference?: string;
+    transitedCountries?: string[];
     transporter?: {
       name: string;
       address: {

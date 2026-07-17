@@ -1,9 +1,10 @@
 import { Collection, Document, MongoClient } from 'mongodb';
+import { getMongoDbUri } from '@config/service-base-urls';
 
 export class MongoDbClient {
   private readonly client: MongoClient;
 
-  constructor(uri: string = process.env.MONGODB_URI ?? 'mongodb://localhost:27017') {
+  constructor(uri: string = getMongoDbUri()) {
     this.client = new MongoClient(uri);
   }
 

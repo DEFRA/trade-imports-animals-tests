@@ -1,10 +1,11 @@
 import { test, expect } from '@fixtures';
-import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@flows/journey';
+import { EAR_TAG_PREFIX, PASSPORT_PREFIX } from '@domain/constants/journey-options';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 
 test.describe('Additional details', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAdditionalDetails();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('additionalDetails');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.additionalDetails);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

@@ -43,4 +43,20 @@ export class AdminOutboxEventsPage extends BasePage {
   cellDataPre(rowIndex: number): Locator {
     return this.tableRows.nth(rowIndex).locator('pre');
   }
+
+  get btnReplay(): Locator {
+    return this.page.getByRole('button', { name: 'Replay all events' });
+  }
+
+  get bannerSuccess(): Locator {
+    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
+  }
+
+  get bannerError(): Locator {
+    return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) });
+  }
+
+  get dlqWarning(): Locator {
+    return this.page.locator('.govuk-warning-text');
+  }
 }

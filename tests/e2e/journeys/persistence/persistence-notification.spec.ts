@@ -1,10 +1,11 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/journey';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { yesNoValues } from '@domain/constants/yes-no-values';
 import { timeouts } from '@config/timeouts';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
+import { meansOfTransport } from '@domain/constants/means-of-transport';
 import {
+  defaultJourneyOptions,
   EAR_TAG_PREFIX,
   PASSPORT_PREFIX,
   PLACE_OF_ORIGIN_NAME,
@@ -15,7 +16,8 @@ import {
   CPH_NUMBER,
   TRANSPORTER_NAME,
   CONTACT_ADDRESS_NAME,
-} from '@flows/journey';
+  TRANSITED_COUNTRIES,
+} from '@domain/constants/journey-options';
 import { toUtcDate } from '@utils/date-utils';
 
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
@@ -60,7 +62,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(docs).toHaveLength(1);
       expect(String(doc._id)).toMatch(/^[a-f0-9]{24}$/i);
       expect(doc.referenceNumber).toBe(referenceNumber);
-      expect(doc.origin.countryCode).toBe(defaults.countryCode);
+      expect(doc.origin.countryCode).toBe(defaults.countryCode.value);
       expect(doc.origin.requiresRegionCode).toBe(yesNoValues.no.toLowerCase());
       expect(doc.origin.internalReference).toBeUndefined();
       expect(doc.commodity.name).toBe(defaults.commodityCode);
@@ -104,8 +106,9 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.cphNumber).toBe(CPH_NUMBER);
       const expectedArrivalDate = toUtcDate(defaults.arrivalDate);
       expect(doc.transport.arrivalDate?.getTime()).toBe(expectedArrivalDate.getTime());
-      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.code);
-      expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.code);
+      expect(doc.transport.portOfEntry).toBe(defaults.pointOfEntry.value);
+      expect(doc.transport.meansOfTransport).toBe(defaults.meansOfTransport.value);
+      expect(doc.transport.transitedCountries).toBeUndefined();
       expect(doc.transport.transporter?.name).toBe(TRANSPORTER_NAME);
       expect(doc.transport.transporter?.address.addressLine1).toBe('43 East Hague Extension');
       expect(doc.transport.transporter?.address.addressLine2).toBe('Delectus sitodio p. Laborum Odio tempor');
@@ -130,7 +133,8 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       requiresRegionCode: yesNoValues.yes,
       internalReference: 'AnimalsTesting123',
       unweanedAnimals: yesNoValues.yes,
-      transportIdentification: 'Vessel Poseidon',
+      meansOfTransport: meansOfTransport.railway,
+      transportIdentification: 'Train 4521',
       transportDocumentReference: 'BILL-OF-LADING-001',
     };
 
@@ -153,6 +157,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
       expect(doc.additionalDetails.unweanedAnimals).toBe(options.unweanedAnimals.toLowerCase());
       expect(doc.transport.transportIdentification).toBe(options.transportIdentification);
       expect(doc.transport.transportDocumentReference).toBe(options.transportDocumentReference);
+      expect(doc.transport.transitedCountries).toEqual(TRANSITED_COUNTRIES.map((country) => country.value));
     } finally {
       await client.close();
     }

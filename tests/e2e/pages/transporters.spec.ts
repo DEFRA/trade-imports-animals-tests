@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transporter', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toTransporter();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('transporter');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.transporter);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

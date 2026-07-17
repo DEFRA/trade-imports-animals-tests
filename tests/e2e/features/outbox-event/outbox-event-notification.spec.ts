@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
@@ -8,9 +8,9 @@ const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.Not
 const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 
 test.describe('Notification outbox event', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
-  test('does not write outbox event before submission', async ({ journey, journeyContext }) => {
-    await journey.toDeclaration();
-    const referenceNumber = journeyContext.notificationId;
+  test('does not write outbox event before submission', async ({ apiJourney }) => {
+    const created = await apiJourney.createFullNotification();
+    const referenceNumber = created.referenceNumber;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const client = new MongoDbClient();
 
@@ -23,14 +23,9 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
     }
   });
 
-  test('records notification submitted event in outbox after submission', async ({
-    journey,
-    journeyContext,
-    pages,
-    notificationActions,
-  }) => {
-    await journey.submitNotification();
-    const referenceNumber = journeyContext.notificationId;
+  test('records notification submitted event in outbox after submission', async ({ apiJourney, pages, notificationActions }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber;
     const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
@@ -67,8 +62,8 @@ test.describe('Notification outbox event', { tag: ['@compose', '@integration', '
         expect(data.exchangedDocument.identifier).toBe(referenceNumber);
         expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
         expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
-        expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaults.countryCode);
-        expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(defaults.pointOfEntry.code);
+        expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaults.countryCode.value);
+        expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(defaults.pointOfEntry.value);
         expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       });
 

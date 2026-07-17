@@ -1,13 +1,13 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@flows/journey';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Outbox events (admin)', () => {
   const defaults = defaultJourneyOptions;
 
-  test('shows outbox event for a submitted notification', async ({ journey, adminNavigation, journeyContext, pages }) => {
-    await journey.submitNotification();
-    const referenceNumber = journeyContext.notificationId;
+  test('shows outbox event for a submitted notification', async ({ apiJourney, adminNavigation, pages }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber;
 
     await adminNavigation.toOutboxEvents(referenceNumber);
 
@@ -26,11 +26,11 @@ test.describe('Outbox events (admin)', () => {
       await pages.adminOutboxEvents.linkViewJson(0).click();
       const json = await pages.adminOutboxEvents.cellDataPre(0).textContent();
       expect(json).toContain(referenceNumber);
-      expect(json).toContain(defaults.countryCode);
+      expect(json).toContain(defaults.countryCode.value);
       // The trade-line commodity name/description are not yet mapped into the GBN-AG payload
       // (EUDPA-274 trade-line data gap), so defaults.commodityCode is not asserted here — see
       // outbox-event-notification.spec.ts, which smoke-checks the commodity section structurally.
-      expect(json).toContain(defaults.pointOfEntry.code);
+      expect(json).toContain(defaults.pointOfEntry.value);
       expect(json).toContain(CONSIGNOR_NAME);
     });
   });

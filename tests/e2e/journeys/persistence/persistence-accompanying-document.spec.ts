@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions } from '@flows/journey';
+import { defaultJourneyOptions } from '@domain/constants/journey-options';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 import { documentTypes } from '@domain/constants/document-types';

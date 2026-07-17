@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Addresses landing page', () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAddresses();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const created = await apiJourney.createUpToPage('placeOfOriginSelection');
+    await apiJourney.resumeInUi(created.referenceNumber, pages.addresses);
   });
 
   test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {

@@ -1,39 +1,25 @@
 import { test, expect } from '@fixtures';
-import { createPageObjects } from '@page-objects';
 import {
-  Journey,
-  JourneyContext,
   defaultJourneyOptions,
   EAR_TAG_PREFIX,
   CONSIGNOR_NAME,
   DESTINATION_NAME,
   CPH_NUMBER,
   TRANSPORTER_NAME,
-} from '@flows/journey';
+} from '@domain/constants/journey-options';
 import { getRelativeDate, toDisplayDate } from '@utils/date-utils';
-import { camelCaseToSentenceCase, camelCaseToTitleCase } from '@utils/string-utils';
-import { countryCodes } from '@domain/constants/country-codes';
+import { camelCaseToSentenceCase } from '@utils/string-utils';
 
 test.describe('Notification view (SUBMITTED)', () => {
   const defaults = defaultJourneyOptions;
-  let referenceNumber: string;
 
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const pages = createPageObjects(page);
-    const journeyContext: JourneyContext = {};
-    const journey = new Journey(pages, journeyContext);
-    await journey.submitNotification();
-    referenceNumber = journeyContext.notificationId;
-    await context.close();
+  test.beforeEach(async ({ apiJourney, notificationActions }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    await notificationActions.toNotificationView(created.referenceNumber);
   });
 
-  test.beforeEach(async ({ notificationActions }) => {
-    await notificationActions.toNotificationView(referenceNumber);
-  });
-
-  test('lands on the notification view page', async ({ pages }) => {
+  test('lands on the notification view page', async ({ pages, journeyContext }) => {
+    const referenceNumber = journeyContext.notificationId;
     await expect(pages.page).toHaveURL(new RegExp(pages.notificationView.expectedUrl(referenceNumber)));
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.referenceNumberCaption).toContainText(referenceNumber);
@@ -70,8 +56,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('shows origin details', async ({ pages }) => {
-    const country = Object.entries(countryCodes.eu).find(([, code]) => code === defaults.countryCode)[0];
-    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(camelCaseToTitleCase(country));
+    await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode.display);
   });
 
   test('shows commodity name', async ({ pages }) => {
@@ -108,7 +93,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('shows port of entry', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.code);
+    await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.value);
   });
 
   test('shows no accompanying documents', async ({ pages }) => {
