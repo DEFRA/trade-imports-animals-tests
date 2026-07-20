@@ -4,7 +4,7 @@ import { BasePage } from '@page-objects/base/base-page';
 export class DeclarationPage extends BasePage {
   readonly expectedUrl = '/declaration';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.getByTestId('app-reference-number-caption');
   }
 

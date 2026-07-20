@@ -5,7 +5,7 @@ import { BasePage } from '@page-objects/base/base-page';
 export class CphNumberPage extends BasePage {
   readonly expectedUrl = '/cph-number';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

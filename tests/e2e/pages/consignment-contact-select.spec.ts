@@ -7,10 +7,10 @@ test.describe('Contact address for consignment', () => {
     await apiJourney.resumeInUi(created.referenceNumber, pages.contactAddress);
   });
 
-  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
-    const notificationId = await pages.contactAddress.notificationId.textContent();
-    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
+    const referenceNumber = await pages.contactAddress.referenceNumber.textContent();
+    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+    expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
   test('can navigate back to transporter', async ({ pages }) => {
@@ -49,7 +49,7 @@ test.describe('Contact address for consignment', () => {
   test('continues to review after selecting a contact address', async ({ pages, journeyContext }) => {
     await pages.contactAddress.radioAddress('EuroStore Services').click();
     await pages.contactAddress.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.notificationId));
+    await expect(pages.page).toHaveURL(pages.notificationView.expectedUrl(journeyContext.referenceNumber));
     await expect(pages.notificationView.heading).toBeVisible();
   });
 });

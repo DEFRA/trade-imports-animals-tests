@@ -327,7 +327,7 @@ async function retryTransientTransitionErrors<T>(action: () => Promise<T>): Prom
  * `resumeInUi(ref, pages.<page>)` to land on that page unanswered.
  *
  * One instance creates at most one notification per test; `save()` enforces
- * this, and the reference is recorded on `journeyContext.notificationId` —
+ * this, and the reference is recorded on `journeyContext.referenceNumber` —
  * mirroring `Journey`, that's the default way to read it back, not the
  * returned `Notification`. For bulk/throwaway seeding, use
  * `seedNotifications` instead.
@@ -340,14 +340,14 @@ export class ApiJourney {
   ) {}
 
   private async save(draft: Notification): Promise<Notification> {
-    if (this.journeyContext.notificationId !== undefined) {
+    if (this.journeyContext.referenceNumber !== undefined) {
       throw new Error(
         'ApiJourney already created a notification for this journeyContext (at most one create*() call per instance, ' +
           'mirroring Journey). For bulk/throwaway seeding, use seedNotifications() instead.',
       );
     }
     const notification = await this.api.saveNotification(draft);
-    this.journeyContext.notificationId = notification.referenceNumber;
+    this.journeyContext.referenceNumber = notification.referenceNumber;
     return notification;
   }
 

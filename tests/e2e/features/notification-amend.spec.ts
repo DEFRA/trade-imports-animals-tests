@@ -3,8 +3,8 @@ import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification amend', () => {
   test.afterEach(async ({ journeyContext, notificationActions }) => {
-    if (journeyContext.notificationId) {
-      await notificationActions.deleteNotification(journeyContext.notificationId);
+    if (journeyContext.referenceNumber) {
+      await notificationActions.deleteNotification(journeyContext.referenceNumber);
     }
   });
 
@@ -21,7 +21,7 @@ test.describe('Notification amend', () => {
     test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages, journeyContext }) => {
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
-      await expect(pages.notificationDashboard.btnAmend(journeyContext.notificationId)).toBeVisible();
+      await expect(pages.notificationDashboard.btnAmend(journeyContext.referenceNumber)).toBeVisible();
     });
   });
 
@@ -30,7 +30,7 @@ test.describe('Notification amend', () => {
     { tag: ['@integration'] },
     async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const ref = created.referenceNumber ?? journeyContext.notificationId;
+      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
       await notificationActions.toNotificationView(ref);
       await pages.notificationView.btnAmend.click();
@@ -53,7 +53,7 @@ test.describe('Notification amend', () => {
     { tag: ['@integration'] },
     async ({ pages, apiJourney, journeyContext }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const ref = created.referenceNumber ?? journeyContext.notificationId;
+      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
@@ -71,7 +71,7 @@ test.describe('Notification amend', () => {
     async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       // 1. Start from a freshly submitted notification.
       const created = await apiJourney.createSubmittedNotification();
-      const ref = created.referenceNumber ?? journeyContext.notificationId;
+      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
       await notificationActions.toNotificationView(ref);
       await expect(pages.notificationView.btnAmend).toBeVisible();

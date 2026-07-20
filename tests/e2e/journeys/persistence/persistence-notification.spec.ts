@@ -23,7 +23,7 @@ import { toUtcDate } from '@utils/date-utils';
 test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
   test('persists notification as draft up to declaration', async ({ journey, journeyContext }) => {
     await journey.toDeclaration();
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
     try {
@@ -44,7 +44,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
 
   test('persists submitted notification with defaults', async ({ journey, journeyContext }) => {
     await journey.submitNotification();
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     const defaults = defaultJourneyOptions;
     const client = new MongoDbClient();
 
@@ -140,7 +140,7 @@ test.describe('Notification persistence', { tag: ['@compose', '@integration', '@
     };
 
     await journey.submitNotification(options);
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
     try {

@@ -18,7 +18,7 @@ test.describe('Notification cancel amend', () => {
     test('shows the confirmation page when Cancel amendment is selected', async ({ pages, journeyContext }) => {
       await pages.notificationView.btnCancelAmend.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(pages.notificationCancelAmend.expectedUrl(journeyContext.notificationId)));
+      await expect(pages.page).toHaveURL(new RegExp(pages.notificationCancelAmend.expectedUrl(journeyContext.referenceNumber)));
       await expect(pages.notificationCancelAmend.heading).toBeVisible();
       await expect(pages.notificationCancelAmend.confirmationQuestion).toBeVisible();
       await expect(pages.notificationCancelAmend.btnYesCancelAmendment).toBeVisible();
@@ -26,7 +26,7 @@ test.describe('Notification cancel amend', () => {
     });
 
     test('returns to the notification view without cancelling when No is selected', async ({ pages, journeyContext }) => {
-      const referenceNumber = journeyContext.notificationId;
+      const referenceNumber = journeyContext.referenceNumber;
       await pages.notificationCancelAmend.open(referenceNumber);
       await pages.notificationCancelAmend.btnNoReturnToNotification.click();
 
@@ -42,7 +42,7 @@ test.describe('Notification cancel amend', () => {
     { tag: ['@integration'] },
     async ({ pages, apiJourney, notificationActions, journeyContext }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const submittedReference = created.referenceNumber ?? journeyContext.notificationId;
+      const submittedReference = created.referenceNumber ?? journeyContext.referenceNumber;
       await notificationActions.toNotificationView(submittedReference);
 
       await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
@@ -55,7 +55,7 @@ test.describe('Notification cancel amend', () => {
     { tag: ['@integration'] },
     async ({ pages, apiJourney, notificationActions, journeyContext }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber ?? journeyContext.notificationId;
+      const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
 
       await notificationActions.amendNotification(referenceNumber);
       await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);

@@ -6,10 +6,10 @@ test.describe('Reason for import', () => {
     await apiJourney.resumeInUi(created.referenceNumber, pages.importReason);
   });
 
-  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
-    const notificationId = await pages.importReason.notificationId.textContent();
-    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
+    const referenceNumber = await pages.importReason.referenceNumber.textContent();
+    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+    expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
   test('can navigate back to species selection', async ({ pages }) => {

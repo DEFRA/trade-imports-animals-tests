@@ -19,7 +19,7 @@ test.describe('Notification view (SUBMITTED)', () => {
   });
 
   test('lands on the notification view page', async ({ pages, journeyContext }) => {
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     await expect(pages.page).toHaveURL(new RegExp(pages.notificationView.expectedUrl(referenceNumber)));
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.referenceNumberCaption).toContainText(referenceNumber);

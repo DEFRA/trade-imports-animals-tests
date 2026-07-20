@@ -10,7 +10,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     await test.step('Notification view (SUBMITTED)', async () => {
       await journey.submitNotification();
-      await notificationActions.toNotificationView(journeyContext.notificationId);
+      await notificationActions.toNotificationView(journeyContext.referenceNumber);
       await runA11yScan();
     });
 

@@ -25,7 +25,7 @@ test.describe('Accompanying document persistence', { tag: ['@compose', '@integra
 
     // Addresses is the page directly after accompanying documents — saves the upload without submitting.
     await journey.toAddresses(options);
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     const client = new MongoDbClient();
 
     try {

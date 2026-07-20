@@ -4,7 +4,7 @@ import { BasePage } from '@page-objects/base/base-page';
 export class ImporterSelectPage extends BasePage {
   readonly expectedUrl = '/importers/select';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

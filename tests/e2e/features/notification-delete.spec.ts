@@ -29,7 +29,7 @@ test.describe('Notification delete', () => {
     { tag: ['@integration'] },
     async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber ?? journeyContext.notificationId;
+      const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
 
       await notificationActions.toNotificationView(referenceNumber);
 

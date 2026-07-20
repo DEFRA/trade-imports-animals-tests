@@ -6,10 +6,10 @@ test.describe('County parish holding (cph) number', () => {
     await apiJourney.resumeInUi(created.referenceNumber, pages.cphNumber);
   });
 
-  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
-    const notificationId = await pages.cphNumber.notificationId.textContent();
-    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
+    const referenceNumber = await pages.cphNumber.referenceNumber.textContent();
+    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+    expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
   test('can navigate back to addresses', async ({ pages }) => {

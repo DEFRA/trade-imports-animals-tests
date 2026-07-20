@@ -9,7 +9,7 @@ export class AccompanyingDocumentsPage {
 
   constructor(private readonly page: Page) {}
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

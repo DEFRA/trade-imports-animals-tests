@@ -9,7 +9,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
     runA11yScan,
   }) => {
     await apiJourney.createSubmittedNotification();
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
 
     await test.step('Admin notifications', async () => {
       await adminNavigation.toNotifications();

@@ -13,7 +13,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
   test('allows deleting a notification by reference number', async ({ apiJourney, journeyContext, pages }) => {
     await apiJourney.createSubmittedNotification();
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     await pages.adminNotifications.open(false);
 
     const initialTotalElements = await pages.adminNotifications.getTotalElements();
@@ -29,7 +29,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
   test('allows cancelling checkbox deletion and keeps notification visible', async ({ apiJourney, journeyContext, pages }) => {
     await apiJourney.createSubmittedNotification();
-    const referenceNumber = journeyContext.notificationId;
+    const referenceNumber = journeyContext.referenceNumber;
     await pages.adminNotifications.open(false);
 
     await pages.adminNotifications.findRowByReference(referenceNumber);
@@ -44,7 +44,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     { tag: ['@integration', '@mongodb'] },
     async ({ apiJourney, journeyContext, pages }) => {
       await apiJourney.createSubmittedNotification();
-      const referenceNumber = journeyContext.notificationId;
+      const referenceNumber = journeyContext.referenceNumber;
       await pages.adminNotifications.open(false);
 
       await test.step('delete notification by checkbox', async () => {

@@ -5,7 +5,7 @@ import type { DateInput } from '@domain/types/date-time-input';
 export class EntryPointPage extends BasePage {
   readonly expectedUrl = '/port-of-entry';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
