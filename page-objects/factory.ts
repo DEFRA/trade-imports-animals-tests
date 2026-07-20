@@ -3,6 +3,7 @@ import { AccompanyingDocumentsPage } from './notification/accompanying-documents
 import { AddressesPage } from './notification/addresses-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
+import { AdminDlqEventsPage } from './admin/admin-dlq-events-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
@@ -43,6 +44,7 @@ export function createPageObjects(page: Page) {
     addresses: new AddressesPage(page),
     additionalDetails: new AdditionalDetailsPage(page),
     adminDashboard: new AdminDashboardPage(page),
+    adminDlqEvents: new AdminDlqEventsPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     adminOutboxEvents: new AdminOutboxEventsPage(page),
     animalIdentification: new AnimalIdentificationPage(page),

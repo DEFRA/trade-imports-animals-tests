@@ -20,4 +20,8 @@ export class AdminNavigation {
       await this.pages.adminOutboxEvents.btnSearch.click();
     }
   }
+
+  async toDlqEvents(): Promise<void> {
+    await this.pages.adminDlqEvents.open();
+  }
 }
