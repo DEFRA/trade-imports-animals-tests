@@ -136,9 +136,12 @@ Tests are split across two Playwright projects targeting different services:
 To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
 
 `npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
-which delegates to the workspace stack's `bounce-mongo.sh`. The seed fixtures
-live in this repo under [`seeds/mongodb/`](seeds/mongodb/) and are staged into
-the stack's mongo init by `run-stack.sh`.
+which delegates to the workspace stack's `bounce-mongo.sh`. Seed fixtures for
+this repo are staged from [`seeds/mongodb/`](seeds/mongodb/) into the stack's
+mongo init by `run-stack.sh` — the directory may hold no active fixtures,
+since the preference is to seed notification state at test level through the
+front door (the backend API) rather than the back door (writing directly
+into Mongo).
 
 #### Workspace stack commands (run from the workspace root)
 

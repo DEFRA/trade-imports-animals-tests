@@ -8,10 +8,10 @@ test.describe('Commodities', () => {
     await apiJourney.resumeInUi(created.referenceNumber, pages.commoditySelection);
   });
 
-  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
-    const notificationId = await pages.commoditySelection.notificationId.textContent();
-    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
+    const referenceNumber = await pages.commoditySelection.referenceNumber.textContent();
+    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+    expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
   test('shows expected commodities in commodity dropdown', async ({ pages }) => {

@@ -20,9 +20,9 @@ import {
 } from '@domain/constants/journey-options';
 
 export type JourneyContext = {
-  notificationId?: string;
-  declarationDate?: string;
+  referenceNumber?: string;
   meansOfTransport?: MeansOfTransport;
+  declarationDate?: string;
 };
 
 /**
@@ -74,7 +74,7 @@ export class Journey {
     await this.pages.originOfImport.btnSaveAndContinue.click();
     await this.pages.commoditySelection.heading.waitFor();
     if (this.journeyContext) {
-      this.journeyContext.notificationId = await this.pages.commodityDetails.notificationId.textContent();
+      this.journeyContext.referenceNumber = await this.pages.commodityDetails.referenceNumber.textContent();
     }
   }
 

@@ -5,7 +5,7 @@ import { CommoditySpecies } from '@domain/constants/commodity-species';
 export class SpeciesSelectionPage extends BasePage {
   readonly expectedUrl = '/commodities/select';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

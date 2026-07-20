@@ -8,13 +8,13 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
   });
 
   test.afterEach(async ({ journeyContext, notificationActions }) => {
-    if (journeyContext.notificationId) {
-      await notificationActions.deleteNotification(journeyContext.notificationId);
+    if (journeyContext.referenceNumber) {
+      await notificationActions.deleteNotification(journeyContext.referenceNumber);
     }
   });
 
   test('replays outbox events and shows success banner', async ({ adminNavigation, pages, journeyContext }) => {
-    await adminNavigation.toOutboxEvents(journeyContext.notificationId);
+    await adminNavigation.toOutboxEvents(journeyContext.referenceNumber);
 
     await test.step('shows two outbox events before replay', async () => {
       await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(2);
@@ -34,7 +34,7 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
     'writes a REPLAY_EVENTS audit record covering both outbox events',
     { tag: '@mongodb' },
     async ({ adminNavigation, pages, journeyContext }) => {
-      const referenceNumber = journeyContext.notificationId;
+      const referenceNumber = journeyContext.referenceNumber;
 
       await adminNavigation.toOutboxEvents(referenceNumber);
       await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(2);

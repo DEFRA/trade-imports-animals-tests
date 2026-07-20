@@ -1,7 +1,20 @@
 /**
+ * Example only, not an active init script — the mongo image only executes
+ * files ending in `.js`/`.sh`, which `.example` deliberately doesn't. Kept as
+ * a reference for seeding many notifications directly into Mongo, back-door
+ * style, in case that's ever needed again; tests now seed notification state
+ * through the front door (the backend API) instead — see README.md.
+ */
+
+/**
  * Seeds additional notifications so the dashboard spans multiple pages locally.
  * Runs after 20-seed-notifications.js (page size is 25 in the backend).
  * Seeds through GBN-AG-26-000055 (55 total with 20-seed) for three dashboard pages.
+ *
+ * These specifics — page size, notification shape, notification count — reflect
+ * the backend's behaviour as of when this last ran for real; now that it's an
+ * inert example, nothing keeps them in sync, so treat them as illustrative
+ * rather than current.
  */
 
 db = db.getSiblingDB('trade-imports-animals-backend');

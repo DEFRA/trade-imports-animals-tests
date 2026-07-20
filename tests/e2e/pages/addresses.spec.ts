@@ -6,10 +6,10 @@ test.describe('Addresses landing page', () => {
     await apiJourney.resumeInUi(created.referenceNumber, pages.addresses);
   });
 
-  test('shows system-generated notification id (draft)', async ({ journeyContext, pages }) => {
-    const notificationId = await pages.addresses.notificationId.textContent();
-    expect(notificationId).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.notificationId).toBe(notificationId);
+  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
+    const referenceNumber = await pages.addresses.referenceNumber.textContent();
+    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+    expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
   test('can navigate back to accompanying documents', async ({ pages }) => {

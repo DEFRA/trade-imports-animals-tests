@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test';
+import { request, type Locator } from '@playwright/test';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { RestClientError } from '@adapters/http/rest-client';
 import type { Notification, Operator, SpeciesEntry, Transporter } from '@domain/models/api/notification';
@@ -323,11 +323,14 @@ async function retryTransientTransitionErrors<T>(action: () => Promise<T>): Prom
 
 /**
  * Seeds notification state through the backend API instead of driving the UI
- * wizard page by page. A partial draft carries exactly the fields a user
- * would have saved arriving fresh at the given page, using the same defaults
- * as `Journey` (both draw from `domain/constants/journey-options.ts`) — so
- * `createUpToPage(page)` pairs with `resumeInUi(ref, pages.<page>)`, landing
- * on that page with its own answer not yet filled in.
+ * wizard page by page — `createUpToPage(page)` pairs with
+ * `resumeInUi(ref, pages.<page>)` to land on that page unanswered.
+ *
+ * One instance creates at most one notification per test; `save()` enforces
+ * this, and the reference is recorded on `journeyContext.referenceNumber` —
+ * mirroring `Journey`, that's the default way to read it back, not the
+ * returned `Notification`. For bulk/throwaway seeding, use
+ * `seedNotifications` instead.
  */
 export class ApiJourney {
   constructor(
@@ -337,8 +340,14 @@ export class ApiJourney {
   ) {}
 
   private async save(draft: Notification): Promise<Notification> {
+    if (this.journeyContext.referenceNumber !== undefined) {
+      throw new Error(
+        'ApiJourney already created a notification for this journeyContext (at most one create*() call per instance, ' +
+          'mirroring Journey). For bulk/throwaway seeding, use seedNotifications() instead.',
+      );
+    }
     const notification = await this.api.saveNotification(draft);
-    this.journeyContext.notificationId = notification.referenceNumber;
+    this.journeyContext.referenceNumber = notification.referenceNumber;
     return notification;
   }
 
@@ -374,5 +383,27 @@ export class ApiJourney {
     await this.pages.notificationView.navigateToFrontend(targetPage.expectedUrl);
     await targetPage.heading.waitFor();
     return targetPage;
+  }
+}
+
+/**
+ * Seeds `count` throwaway DRAFT notifications for list-population scenarios
+ * with no single notification under test — bypasses `apiJourney`/
+ * `journeyContext` and owns its own request context, so it also works from
+ * `test.beforeAll`.
+ */
+export async function seedNotifications(
+  count: number,
+  options: JourneyOptions = {},
+  overrides?: NotificationOverrides,
+): Promise<Notification[]> {
+  const requestContext = await request.newContext();
+  const api = new NotificationApiClient(requestContext);
+  try {
+    return await Promise.all(
+      Array.from({ length: count }, () => api.saveNotification(buildNotificationBeforePage(undefined, options, overrides))),
+    );
+  } finally {
+    await requestContext.dispose();
   }
 }

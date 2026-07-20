@@ -4,7 +4,7 @@ import { BasePage } from '@page-objects/base/base-page';
 export class PlaceOfOriginSelectPage extends BasePage {
   readonly expectedUrl = '/place-of-origin/select';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

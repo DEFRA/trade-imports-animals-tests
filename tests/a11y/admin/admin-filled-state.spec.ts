@@ -1,12 +1,19 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
-const REFERENCE_NUMBER = 'GBN-AG-26-000001';
-
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('each admin page has no accessibility violations after user input', async ({ adminNavigation, pages, runA11yScan }) => {
+  test('each admin page has no accessibility violations after user input', async ({
+    apiJourney,
+    journeyContext,
+    adminNavigation,
+    pages,
+    runA11yScan,
+  }) => {
+    await apiJourney.createSubmittedNotification();
+    const referenceNumber = journeyContext.referenceNumber;
+
     await test.step('Admin notifications', async () => {
       await adminNavigation.toNotifications();
-      await pages.adminNotifications.inputReferenceNumber.fill(REFERENCE_NUMBER);
+      await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
       await pages.adminNotifications.checkBoxSelectAll.check();
       await runA11yScan();
     });
@@ -18,7 +25,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
     });
 
     await test.step('Admin outbox events search results', async () => {
-      await adminNavigation.toOutboxEvents(REFERENCE_NUMBER);
+      await adminNavigation.toOutboxEvents(referenceNumber);
       await pages.adminOutboxEvents.heading.waitFor();
       await runA11yScan();
     });

@@ -5,7 +5,7 @@ import type { YesNoValue } from '@domain/constants/yes-no-values';
 export class AdditionalDetailsPage extends BasePage {
   readonly expectedUrl = '/additional-details';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 

@@ -4,7 +4,7 @@ import { BasePage } from '@page-objects/base/base-page';
 export class AnimalIdentificationPage extends BasePage {
   readonly expectedUrl = '/commodities/identification';
 
-  get notificationId(): Locator {
+  get referenceNumber(): Locator {
     return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
   }
 
