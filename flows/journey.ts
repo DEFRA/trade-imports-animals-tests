@@ -21,8 +21,8 @@ import {
 
 export type JourneyContext = {
   notificationId?: string;
-  declarationDate?: string;
   meansOfTransport?: MeansOfTransport;
+  declarationDate?: string;
 };
 
 /**

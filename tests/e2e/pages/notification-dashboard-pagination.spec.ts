@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { seedNotifications } from '@flows/api-journey';
 
 /** Matches `notification.list.page-size` in trade-imports-animals-backend application.yml */
 const NOTIFICATION_LIST_PAGE_SIZE = 25;
@@ -9,12 +10,11 @@ test.describe('Import notification service - dashboard pagination', () => {
   });
 
   test.describe('Dashboard pagination', () => {
-    test.beforeEach(async ({ pages }) => {
-      const hasPagination = await pages.notificationDashboard.pagination.isVisible();
-      test.skip(
-        !hasPagination,
-        'Requires more than one page of notifications (seeded in compose; CDP environments normally have sufficient data).',
-      );
+    // beforeAll can't use the test-scoped apiJourney fixture.
+    test.beforeAll(async () => {
+      /** Enough to guarantee a second page regardless of how much other data already exists. */
+      const seedCount = NOTIFICATION_LIST_PAGE_SIZE + 1;
+      await seedNotifications(seedCount);
     });
 
     test('starts on page one when opening the dashboard', async ({ pages }) => {
