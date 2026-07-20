@@ -63,7 +63,7 @@ test.describe('DLQ operator actions', { tag: ['@compose', '@integration'] }, () 
     sqs.destroy();
   });
 
-  test('FS-1: replays all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
+  test('replays all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await adminNavigation.toDlqEvents();
@@ -76,7 +76,7 @@ test.describe('DLQ operator actions', { tag: ['@compose', '@integration'] }, () 
     await expect(pages.adminDlqEvents.bannerSuccess).toContainText('Replay-all started');
   });
 
-  test('FS-3: deletes all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
+  test('deletes all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await adminNavigation.toDlqEvents();
