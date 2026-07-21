@@ -29,5 +29,17 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
       await pages.adminOutboxEvents.heading.waitFor();
       await runA11yScan();
     });
+
+    await test.step('Admin outbox events replay success', async () => {
+      await pages.adminOutboxEvents.btnReplay.click();
+      await pages.adminOutboxEvents.bannerSuccess.waitFor();
+      await runA11yScan();
+    });
+
+    await test.step('Admin outbox events with no results', async () => {
+      await adminNavigation.toOutboxEvents('GBN-AG-00-000000');
+      await pages.adminOutboxEvents.emptyStateMessage.waitFor();
+      await runA11yScan();
+    });
   });
 });
