@@ -1,5 +1,7 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { countryCodes } from '@domain/constants/country-codes';
 import { documentTypes } from '@domain/constants/document-types';
+import { meansOfTransport } from '@domain/constants/means-of-transport';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
@@ -111,9 +113,15 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Entry point', async () => {
-      await journey.fillEntryPoint();
+      await journey.fillEntryPoint({ meansOfTransport: meansOfTransport.roadVehicle });
       await runA11yScan();
       await journey.saveEntryPoint();
+    });
+
+    await test.step('Transited countries with a country added', async () => {
+      await journey.addTransitedCountry(countryCodes.eu.germany.display);
+      await runA11yScan();
+      await journey.saveTransitedCountries();
     });
 
     await test.step('Transporter with transporter added', async () => {
