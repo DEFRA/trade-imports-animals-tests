@@ -27,6 +27,26 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Update sort' });
   }
 
+  get filterHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'Filter notifications' });
+  }
+
+  get searchForm(): Locator {
+    return this.page.getByTestId('notification-search-form');
+  }
+
+  get inputReferenceSearch(): Locator {
+    return this.searchForm.getByLabel('Keyword or reference');
+  }
+
+  get btnSearch(): Locator {
+    return this.searchForm.getByRole('button', { name: 'Search' });
+  }
+
+  get resultsLabel(): Locator {
+    return this.page.getByTestId('notification-results-label');
+  }
+
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }
@@ -100,6 +120,7 @@ export class NotificationDashboardPage extends BasePage {
     const path = pageNumber <= 1 ? '/' : `/?page=${pageNumber}`;
     await this.navigateToFrontend(path);
     await this.heading.waitFor({ state: 'visible' });
+    await this.waitForNotificationList();
   }
 
   /** Opens the final page directly using the total shown on the next link (page one only). */
@@ -116,12 +137,30 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get notificationCards(): Locator {
-    return this.page.locator('.govuk-summary-card');
+    return this.page.locator('.notification-list__main .govuk-summary-card');
+  }
+
+  async waitForNotificationList(): Promise<void> {
+    await this.resultsLabel.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async sortBy(sortByValue: SortByValue): Promise<void> {
     await this.dropdownSort.selectOption(sortByValue);
     await this.btnUpdateSort.click();
+  }
+
+  /**
+   * Server-side dashboard search via GET ?referenceNumber= (works with JS disabled; CI-safe).
+   */
+  async searchForReference(referenceNumber: string): Promise<void> {
+    await this.inputReferenceSearch.fill(referenceNumber);
+    await Promise.all([
+      this.page.waitForURL((url) => {
+        const reference = url.searchParams.get('referenceNumber') ?? '';
+        return reference === referenceNumber;
+      }),
+      this.btnSearch.click(),
+    ]);
   }
 
   private cardField(card: Locator, term: string): Locator {
@@ -169,10 +208,13 @@ export class NotificationDashboardPage extends BasePage {
       // dashboard within a short grace period, retry the whole auth flow once.
       try {
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+        await this.waitForNotificationList();
       } catch {
         console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
         await this.page.goto('/');
         await this.signInWhenRequested(true);
+        await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+        await this.waitForNotificationList();
       }
     }
   }

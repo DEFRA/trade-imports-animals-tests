@@ -1,6 +1,11 @@
 import { test, expect } from '@fixtures';
+import { seedNotifications } from '@flows/api-journey';
 
 test.describe('Import notification service', () => {
+  test.beforeAll(async () => {
+    await seedNotifications(1);
+  });
+
   test.beforeEach(async ({ journey }) => {
     await journey.toNotificationDashboard();
   });
@@ -24,6 +29,7 @@ test.describe('Import notification service', () => {
   });
 
   test('displays details on the first notification card', async ({ pages }) => {
+    await expect(pages.notificationDashboard.notificationCards.first()).toBeVisible();
     const firstCard = pages.notificationDashboard.notificationCard(0);
 
     await expect(firstCard.details.heading).toBeVisible();
@@ -39,6 +45,7 @@ test.describe('Import notification service', () => {
 
   test('displays actions on the first notification card', async ({ pages }) => {
     // TODO: once dashboard filtering exists, add per-notification-status tests — actions may vary by status.
+    await expect(pages.notificationDashboard.notificationCards.first()).toBeVisible();
     const firstCard = pages.notificationDashboard.notificationCard(0);
 
     await expect(firstCard.actions.view).toBeVisible();
