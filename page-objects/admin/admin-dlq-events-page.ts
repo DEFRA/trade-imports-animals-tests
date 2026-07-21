@@ -9,6 +9,10 @@ export class AdminDlqEventsPage extends BasePage {
     await this.signInWhenRequested(attemptSignIn);
   }
 
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'DLQ process' });
+  }
+
   get tableRows(): Locator {
     return this.page.getByRole('table').locator('tbody tr');
   }

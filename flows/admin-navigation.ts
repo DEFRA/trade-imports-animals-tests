@@ -22,6 +22,7 @@ export class AdminNavigation {
   }
 
   async toDlqEvents(): Promise<void> {
-    await this.pages.adminDlqEvents.open();
+    await this.toAdminDashboard();
+    await this.pages.adminDashboard.btnDlqProcess.click();
   }
 }
