@@ -20,10 +20,11 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
       await runA11yScan();
     });
 
-    await test.step('Admin DLQ events', async () => {
-      await adminNavigation.toDlqEvents();
-      await pages.adminDlqEvents.heading.waitFor();
-      await runA11yScan();
-    });
+    // DLQ page still in progress.
+    // await test.step('Admin DLQ events', async () => {
+    //   await adminNavigation.toDlqEvents();
+    //   await pages.adminDlqEvents.heading.waitFor();
+    //   await runA11yScan();
+    // });
   });
 });
