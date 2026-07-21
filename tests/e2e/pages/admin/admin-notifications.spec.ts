@@ -18,7 +18,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
     const initialTotalElements = await pages.adminNotifications.getTotalElements();
     await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
-    await pages.adminNotifications.btnDeleteByReferenceNumber.click();
+    await pages.adminNotifications.deleteByReferenceNumber();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
     await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
@@ -147,7 +147,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
 
     await test.step('attempt delete by invalid reference number shows an error', async () => {
       await pages.adminNotifications.inputReferenceNumber.fill(invalidReference);
-      await pages.adminNotifications.btnDeleteByReferenceNumber.click();
+      await pages.adminNotifications.deleteByReferenceNumber();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertImportant).toContainText(
         'There was a problem deleting the notifications. Please try again.',

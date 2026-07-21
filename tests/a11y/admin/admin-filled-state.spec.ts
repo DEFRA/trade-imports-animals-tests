@@ -20,7 +20,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
 
     await test.step('Admin notifications delete confirmation', async () => {
       await pages.adminNotifications.checkBoxSelectAll.uncheck();
-      await pages.adminNotifications.btnDeleteByReferenceNumber.click();
+      await pages.adminNotifications.deleteByReferenceNumber();
       await runA11yScan();
     });
 

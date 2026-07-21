@@ -79,6 +79,14 @@ export class AdminNotificationsPage extends BasePage {
     await this.signInWhenRequested(attemptSignIn);
   }
 
+  async deleteByReferenceNumber(): Promise<void> {
+    // The delete button's confirmation dialog is wired up by a client-side module
+    // script. Wait for the network to settle first so the click doesn't race the
+    // script attaching its listener, which would otherwise leave the dialog closed.
+    await this.page.waitForLoadState('networkidle');
+    await this.btnDeleteByReferenceNumber.click();
+  }
+
   tableRowByReference(referenceNumber: string): Locator {
     return this.page.getByRole('table').getByRole('row', { name: referenceNumber });
   }

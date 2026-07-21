@@ -11,7 +11,7 @@ test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, (
       await adminNavigation.toNotifications();
       const invalidReference = `EXIST.NON.2026.${new ObjectId().toString()}`;
       await pages.adminNotifications.inputReferenceNumber.fill(invalidReference);
-      await pages.adminNotifications.btnDeleteByReferenceNumber.click();
+      await pages.adminNotifications.deleteByReferenceNumber();
       await pages.adminNotifications.btnConfirm.click();
       await runA11yScan();
     });
