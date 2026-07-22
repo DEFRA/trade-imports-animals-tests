@@ -35,6 +35,15 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('No notifications found');
   });
 
+  test('shows no notifications found when search text is free text', async ({ pages }) => {
+    await pages.notificationDashboard.searchForReference('not-a-valid-reference');
+
+    await expect(pages.page).toHaveURL(/referenceNumber=not-a-valid-reference/);
+    await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
+    await expect(pages.notificationDashboard.resultsLabel).toHaveText('No notifications found');
+    await expect(pages.notificationDashboard.errorSummary).not.toBeVisible();
+  });
+
   test('preserves referenceNumber when updating sort after search', async ({ pages, apiJourney, journey }) => {
     const created = await apiJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
