@@ -5,7 +5,7 @@ test.describe('Admin service', () => {
     await adminNavigation.toAdminDashboard();
   });
 
-  test('lands on the admin dashboard', async ({ pages }) => {
+  test('lands on the admin dashboard', { tag: '@smoke' }, async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
     await expect(pages.adminDashboard.heading).toBeVisible();
   });

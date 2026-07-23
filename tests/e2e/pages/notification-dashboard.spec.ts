@@ -10,7 +10,7 @@ test.describe('Import notification service', () => {
     await journey.toNotificationDashboard();
   });
 
-  test('lands on the notification dashboard', async ({ pages }) => {
+  test('lands on the notification dashboard', { tag: '@smoke' }, async ({ pages }) => {
     await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
     await expect(pages.notificationDashboard.heading).toBeVisible();
   });

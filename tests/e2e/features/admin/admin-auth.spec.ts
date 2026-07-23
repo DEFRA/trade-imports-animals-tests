@@ -10,7 +10,7 @@ test.describe('Authentication (admin)', { tag: '@auth' }, () => {
     await expect(pages.signIn.heading).toBeVisible();
   });
 
-  test('allows signing into the admin dashboard', async ({ pages }) => {
+  test('allows signing into the admin dashboard', { tag: '@smoke' }, async ({ pages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
     await expect(pages.adminDashboard.heading).toBeVisible();

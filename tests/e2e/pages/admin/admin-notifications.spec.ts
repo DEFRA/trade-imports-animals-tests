@@ -11,7 +11,9 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await adminNavigation.toNotifications();
   });
 
-  test('allows deleting a notification by reference number', async ({ apiJourney, journeyContext, pages }) => {
+  // TODO: promote to @smoke once this stops relying on an exact global count delta and a
+  // current-page-only row check, both of which are unreliable under parallel test execution.
+  test('allows deleting a notification by reference number', { tag: '@flaky' }, async ({ apiJourney, journeyContext, pages }) => {
     await apiJourney.createSubmittedNotification();
     const referenceNumber = journeyContext.referenceNumber;
     await pages.adminNotifications.open(false);
