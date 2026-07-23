@@ -7,7 +7,7 @@ import { type AccompanyingDocumentModel } from '@domain/models/db/accompanying-d
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { toUtcDate } from '@utils/date-utils';
 
-test.describe('Accompanying document persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
+test.describe('Accompanying document persistence', { tag: '@compose' }, () => {
   test('persists uploaded accompanying document', async ({ journey, journeyContext }) => {
     const options = {
       ...defaultJourneyOptions,

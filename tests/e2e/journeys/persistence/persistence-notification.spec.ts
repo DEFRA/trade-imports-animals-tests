@@ -20,7 +20,7 @@ import {
 } from '@domain/constants/journey-options';
 import { toUtcDate } from '@utils/date-utils';
 
-test.describe('Notification persistence', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
+test.describe('Notification persistence', { tag: '@compose' }, () => {
   test('persists notification as draft up to declaration', async ({ journey, journeyContext }) => {
     await journey.toDeclaration();
     const referenceNumber = journeyContext.referenceNumber;

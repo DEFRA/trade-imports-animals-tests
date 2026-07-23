@@ -48,7 +48,7 @@ async function expectSeededRowListed(pages: PageObjects, eventId: string): Promi
   }).toPass({ timeout: timeouts.medium });
 }
 
-test.describe('DLQ operator actions', { tag: ['@compose', '@integration'] }, () => {
+test.describe('DLQ operator actions', { tag: '@compose' }, () => {
   // Serial: both tests act on the whole DLQ (replay-all / delete-all), so they must not run
   // concurrently against the one shared queue.
   test.describe.configure({ mode: 'serial' });

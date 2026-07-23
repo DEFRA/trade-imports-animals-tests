@@ -7,7 +7,7 @@ import { type OutboxEventDocument } from '@domain/models/db/outbox-event-documen
 const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 
-test.describe('Notification outbox event', { tag: ['@compose', '@integration', '@mongodb'] }, () => {
+test.describe('Notification outbox event', { tag: '@compose' }, () => {
   test('does not write outbox event before submission', async ({ apiJourney }) => {
     const created = await apiJourney.createFullNotification();
     const referenceNumber = created.referenceNumber;

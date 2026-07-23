@@ -25,23 +25,19 @@ test.describe('Notification delete', () => {
     });
   });
 
-  test(
-    'deletes the notification and removes it from the dashboard',
-    { tag: ['@integration'] },
-    async ({ pages, apiJourney, journeyContext, notificationActions }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
+  test('deletes the notification and removes it from the dashboard', async ({ pages, apiJourney, journeyContext, notificationActions }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
 
-      await notificationActions.toNotificationView(referenceNumber);
+    await notificationActions.toNotificationView(referenceNumber);
 
-      await pages.notificationView.btnDelete.click();
-      await pages.notificationView.btnConfirmDelete.click();
+    await pages.notificationView.btnDelete.click();
+    await pages.notificationView.btnConfirmDelete.click();
 
-      await expect(pages.notificationView.successBanner).toBeVisible();
+    await expect(pages.notificationView.successBanner).toBeVisible();
 
-      // The JS redirects to / after 3 seconds
-      await pages.notificationDashboard.heading.waitFor({ timeout: timeouts.medium });
-      await expect(pages.notificationDashboard.viewLink(referenceNumber)).not.toBeVisible();
-    },
-  );
+    // The JS redirects to / after 3 seconds
+    await pages.notificationDashboard.heading.waitFor({ timeout: timeouts.medium });
+    await expect(pages.notificationDashboard.viewLink(referenceNumber)).not.toBeVisible();
+  });
 });

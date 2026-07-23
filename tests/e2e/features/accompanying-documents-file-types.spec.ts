@@ -17,7 +17,7 @@ const safeFileUploadCases = [
   documentReference: string;
 }>;
 
-test.describe('Accompanying documents - supported file types', { tag: '@integration' }, () => {
+test.describe('Accompanying documents - supported file types', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
     const created = await apiJourney.createUpToPage('accompanyingDocuments');
     await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
@@ -79,7 +79,7 @@ test.describe('Accompanying documents - supported file types', { tag: '@integrat
   });
 });
 
-test.describe('Accompanying documents - restricted file types', { tag: '@integration' }, () => {
+test.describe('Accompanying documents - restricted file types', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
     const created = await apiJourney.createUpToPage('accompanyingDocuments');
     await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);

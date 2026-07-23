@@ -6,7 +6,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { timeouts } from '@config/timeouts';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 
-test.describe('Accompanying documents - without JavaScript', { tag: ['@integration', '@no-js'] }, () => {
+test.describe('Accompanying documents - without JavaScript', { tag: '@no-js' }, () => {
   test.use({ javaScriptEnabled: false });
 
   test.beforeEach(async ({ apiJourney, pages }) => {

@@ -39,56 +39,50 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
-  test(
-    'allows deleting a notification by checkbox',
-    { tag: ['@integration', '@mongodb'] },
-    async ({ apiJourney, journeyContext, pages }) => {
-      await apiJourney.createSubmittedNotification();
-      const referenceNumber = journeyContext.referenceNumber;
-      await pages.adminNotifications.open(false);
+  test('allows deleting a notification by checkbox', async ({ apiJourney, journeyContext, pages }) => {
+    await apiJourney.createSubmittedNotification();
+    const referenceNumber = journeyContext.referenceNumber;
+    await pages.adminNotifications.open(false);
 
-      await test.step('delete notification by checkbox', async () => {
-        const initialTotalElements = await pages.adminNotifications.getTotalElements();
-        await pages.adminNotifications.findRowByReference(referenceNumber);
-        await pages.adminNotifications.checkboxNotificationByReference(referenceNumber).check();
-        await pages.adminNotifications.btnDelete.click();
-        await pages.adminNotifications.btnConfirm.click();
-        await expect(pages.adminNotifications.alertSuccess).toContainText(
-          'Notifications deleted successfully. Redirecting in 3 seconds...',
-        );
-        await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
-      });
+    await test.step('delete notification by checkbox', async () => {
+      const initialTotalElements = await pages.adminNotifications.getTotalElements();
+      await pages.adminNotifications.findRowByReference(referenceNumber);
+      await pages.adminNotifications.checkboxNotificationByReference(referenceNumber).check();
+      await pages.adminNotifications.btnDelete.click();
+      await pages.adminNotifications.btnConfirm.click();
+      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
+      await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
+    });
 
-      await test.step('writes a successful delete audit record for one notification delete', async () => {
-        const client = new MongoDbClient();
+    await test.step('writes a successful delete audit record for one notification delete', async () => {
+      const client = new MongoDbClient();
 
-        try {
-          await client.connect();
-          const collection = client.collection('trade-imports-animals-backend', 'audit');
+      try {
+        await client.connect();
+        const collection = client.collection('trade-imports-animals-backend', 'audit');
 
-          const docs = await collection
-            .find({
-              notificationReferenceNumbers: referenceNumber,
-            })
-            .toArray();
+        const docs = await collection
+          .find({
+            notificationReferenceNumbers: referenceNumber,
+          })
+          .toArray();
 
-          expect(docs).toHaveLength(1);
-          expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-          expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-          expect(docs[0].result).toBe('SUCCESS');
-          expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-          expect(docs[0].numberOfNotifications).toBe(1);
-          expect(docs[0].notificationReferenceNumbers).toEqual([referenceNumber]);
-          expect(docs[0].traceId).toBe('test-trace-id');
-          expect(docs[0].userId).toBe('2100010101');
-        } finally {
-          await client.close();
-        }
-      });
-    },
-  );
+        expect(docs).toHaveLength(1);
+        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+        expect(docs[0].result).toBe('SUCCESS');
+        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+        expect(docs[0].numberOfNotifications).toBe(1);
+        expect(docs[0].notificationReferenceNumbers).toEqual([referenceNumber]);
+        expect(docs[0].traceId).toBe('test-trace-id');
+        expect(docs[0].userId).toBe('2100010101');
+      } finally {
+        await client.close();
+      }
+    });
+  });
 
-  test('allows deleting all current-page notifications by select all', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+  test('allows deleting all current-page notifications by select all', async ({ pages }) => {
     skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
 
     await seedNotifications(4);
@@ -141,7 +135,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     });
   });
 
-  test('does not allow deleting a notification by invalid reference number', { tag: ['@integration', '@mongodb'] }, async ({ pages }) => {
+  test('does not allow deleting a notification by invalid reference number', async ({ pages }) => {
     const randomId = new ObjectId().toString();
     const invalidReference = `EXIST.NON.2026.${randomId}`;
 

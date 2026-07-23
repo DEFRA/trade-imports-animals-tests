@@ -8,7 +8,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 // Above the 10 MiB CDP nginx ingress cap, to prove the client preflight blocks a raw 413.
 const ELEVEN_MIB_BYTES = 11 * 1024 * 1024;
 
-test.describe('Accompanying documents - file size limit', { tag: '@integration' }, () => {
+test.describe('Accompanying documents - file size limit', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
     const created = await apiJourney.createUpToPage('accompanyingDocuments');
     await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);

@@ -38,53 +38,55 @@ test.describe('Notification cancel amend', () => {
     });
   });
 
-  test(
-    'does not show the Cancel amendment option when notification is Submitted',
-    { tag: ['@integration'] },
-    async ({ pages, apiJourney, notificationActions, journeyContext }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const submittedReference = created.referenceNumber ?? journeyContext.referenceNumber;
-      await notificationActions.toNotificationView(submittedReference);
+  test('does not show the Cancel amendment option when notification is Submitted', async ({
+    pages,
+    apiJourney,
+    notificationActions,
+    journeyContext,
+  }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const submittedReference = created.referenceNumber ?? journeyContext.referenceNumber;
+    await notificationActions.toNotificationView(submittedReference);
 
-      await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
-      await expect(pages.notificationView.btnAmend).toBeVisible();
-    },
-  );
+    await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
+    await expect(pages.notificationView.btnAmend).toBeVisible();
+  });
 
-  test(
-    'cancels the amendment and restores the submitted notification',
-    { tag: ['@integration'] },
-    async ({ pages, apiJourney, notificationActions, journeyContext }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
+  test('cancels the amendment and restores the submitted notification', async ({
+    pages,
+    apiJourney,
+    notificationActions,
+    journeyContext,
+  }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
 
-      await notificationActions.amendNotification(referenceNumber);
-      await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);
+    await notificationActions.amendNotification(referenceNumber);
+    await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);
 
-      await pages.notificationView.changeLink('County Parish Holding number (CPH)').click();
-      await pages.cphNumber.inputCphNumber.fill(EDITED_CPH_NUMBER);
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.addresses.heading).toBeVisible();
-      await expect(pages.addresses.cphNumber).toContainText(EDITED_CPH_NUMBER);
+    await pages.notificationView.changeLink('County Parish Holding number (CPH)').click();
+    await pages.cphNumber.inputCphNumber.fill(EDITED_CPH_NUMBER);
+    await pages.cphNumber.btnSaveAndContinue.click();
+    await expect(pages.addresses.heading).toBeVisible();
+    await expect(pages.addresses.cphNumber).toContainText(EDITED_CPH_NUMBER);
 
-      await notificationActions.toNotificationView(referenceNumber);
-      await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(EDITED_CPH_NUMBER);
+    await notificationActions.toNotificationView(referenceNumber);
+    await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(EDITED_CPH_NUMBER);
 
-      await pages.notificationView.btnCancelAmend.click();
-      await pages.notificationCancelAmend.btnYesCancelAmendment.click();
+    await pages.notificationView.btnCancelAmend.click();
+    await pages.notificationCancelAmend.btnYesCancelAmendment.click();
 
-      await expect(pages.notificationView.amendCancelledBanner).toBeVisible();
-      await expect(pages.notificationView.amendCancelledBanner).toContainText('The amendment has been cancelled');
+    await expect(pages.notificationView.amendCancelledBanner).toBeVisible();
+    await expect(pages.notificationView.amendCancelledBanner).toContainText('The amendment has been cancelled');
 
-      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(referenceNumber)}$`), {
-        timeout: timeouts.medium,
-      });
+    await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(referenceNumber)}$`), {
+      timeout: timeouts.medium,
+    });
 
-      await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
-      await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
-      await expect(pages.notificationView.btnAmend).toBeVisible();
-      await expect(pages.notificationView.changeLink('Where is this consignment coming from?')).not.toBeVisible();
-      await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);
-    },
-  );
+    await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
+    await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
+    await expect(pages.notificationView.btnAmend).toBeVisible();
+    await expect(pages.notificationView.changeLink('Where is this consignment coming from?')).not.toBeVisible();
+    await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toHaveText(CPH_NUMBER);
+  });
 });

@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-test('removed document does not return after backend refresh', { tag: ['@integration'] }, async ({ pages, apiJourney }) => {
+test('removed document does not return after backend refresh', async ({ pages, apiJourney }) => {
   const created = await apiJourney.createUpToPage('accompanyingDocuments');
   await apiJourney.resumeInUi(created.referenceNumber, pages.accompanyingDocuments);
 
