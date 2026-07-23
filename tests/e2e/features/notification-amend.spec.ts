@@ -18,7 +18,10 @@ test.describe('Notification amend', () => {
       await expect(pages.notificationView.btnAmend).toBeVisible();
     });
 
-    test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages, journeyContext }) => {
+    // TODO: use the dashboard search feature (in progress) to locate the notification by
+    // reference instead of sorting + relying on it landing on the first page — the sort-based
+    // lookup can miss the target under parallel test execution.
+    test('shows the Amend action on the dashboard for the SUBMITTED notification', { tag: '@flaky' }, async ({ pages, journeyContext }) => {
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
       await expect(pages.notificationDashboard.btnAmend(journeyContext.referenceNumber)).toBeVisible();
@@ -44,57 +47,66 @@ test.describe('Notification amend', () => {
     await expect(pages.notificationView.btnDelete).toBeVisible();
   });
 
-  test('amends from the dashboard and lands on the view page in AMEND state', async ({ pages, apiJourney, journeyContext }) => {
-    const created = await apiJourney.createSubmittedNotification();
-    const ref = created.referenceNumber ?? journeyContext.referenceNumber;
+  // TODO: use the dashboard search feature (in progress) to locate the notification by
+  // reference instead of sorting + relying on it landing on the first page — the sort-based
+  // lookup can miss the target under parallel test execution.
+  test(
+    'amends from the dashboard and lands on the view page in AMEND state',
+    { tag: '@flaky' },
+    async ({ pages, apiJourney, journeyContext }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
-    await pages.notificationDashboard.open();
-    await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
-    await pages.notificationDashboard.btnAmend(ref).click();
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+      await pages.notificationDashboard.btnAmend(ref).click();
 
-    // Lands on /notification-view/{ref} with AMEND state
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.amendStatusTag).toBeVisible();
-  });
+      // Lands on /notification-view/{ref} with AMEND state
+      await expect(pages.notificationView.heading).toBeVisible();
+      await expect(pages.notificationView.amendStatusTag).toBeVisible();
+    },
+  );
 
-  test('walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED', async ({
-    pages,
-    apiJourney,
-    journeyContext,
-    notificationActions,
-  }) => {
-    // 1. Start from a freshly submitted notification.
-    const created = await apiJourney.createSubmittedNotification();
-    const ref = created.referenceNumber ?? journeyContext.referenceNumber;
+  // TODO: use the dashboard search feature (in progress) to locate the notification by
+  // reference instead of sorting + relying on it landing on the first page — the sort-based
+  // lookup can miss the target under parallel test execution.
+  test(
+    'walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED',
+    { tag: ['@smoke', '@flaky'] },
+    async ({ pages, apiJourney, journeyContext, notificationActions }) => {
+      // 1. Start from a freshly submitted notification.
+      const created = await apiJourney.createSubmittedNotification();
+      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
-    await notificationActions.toNotificationView(ref);
-    await expect(pages.notificationView.btnAmend).toBeVisible();
-    await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
+      await notificationActions.toNotificationView(ref);
+      await expect(pages.notificationView.btnAmend).toBeVisible();
+      await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
 
-    // 2. Enter amend mode (SUBMITTED → AMEND).
-    await pages.notificationView.btnAmend.click();
-    await expect(pages.notificationView.amendStatusTag).toBeVisible();
-    await expect(pages.notificationView.btnAmend).not.toBeVisible();
+      // 2. Enter amend mode (SUBMITTED → AMEND).
+      await pages.notificationView.btnAmend.click();
+      await expect(pages.notificationView.amendStatusTag).toBeVisible();
+      await expect(pages.notificationView.btnAmend).not.toBeVisible();
 
-    // 3. Save the amendments — view-page CTA navigates to /declaration.
-    await pages.notificationView.btnConfirmAndSubmit.click();
-    await expect(pages.declaration.heading).toBeVisible();
+      // 3. Save the amendments — view-page CTA navigates to /declaration.
+      await pages.notificationView.btnConfirmAndSubmit.click();
+      await expect(pages.declaration.heading).toBeVisible();
 
-    // 4. Confirm the declaration and submit (AMEND → SUBMITTED via the
-    //    extended backend submitNotification that now accepts AMEND).
-    await pages.declaration.checkboxDeclaration.click();
-    await pages.declaration.btnSubmitNotification.click();
+      // 4. Confirm the declaration and submit (AMEND → SUBMITTED via the
+      //    extended backend submitNotification that now accepts AMEND).
+      await pages.declaration.checkboxDeclaration.click();
+      await pages.declaration.btnSubmitNotification.click();
 
-    // 5. Re-open the view page and assert we're back in SUBMITTED:
-    //    the AMEND status pill is gone and the Amend CTA is offered again.
-    await notificationActions.toNotificationView(ref);
-    await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
-    await expect(pages.notificationView.btnAmend).toBeVisible();
+      // 5. Re-open the view page and assert we're back in SUBMITTED:
+      //    the AMEND status pill is gone and the Amend CTA is offered again.
+      await notificationActions.toNotificationView(ref);
+      await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
+      await expect(pages.notificationView.btnAmend).toBeVisible();
 
-    // And the dashboard exposes the SUBMITTED-state Amend action against
-    // the same reference, confirming the round-trip.
-    await pages.notificationDashboard.open();
-    await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
-    await expect(pages.notificationDashboard.btnAmend(ref)).toBeVisible();
-  });
+      // And the dashboard exposes the SUBMITTED-state Amend action against
+      // the same reference, confirming the round-trip.
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+      await expect(pages.notificationDashboard.btnAmend(ref)).toBeVisible();
+    },
+  );
 });

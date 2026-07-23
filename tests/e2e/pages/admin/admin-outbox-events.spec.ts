@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 test.describe('Outbox events (admin)', () => {
   const defaults = defaultJourneyOptions;
 
-  test('shows outbox event for a submitted notification', async ({ apiJourney, adminNavigation, pages }) => {
+  test('shows outbox event for a submitted notification', { tag: '@smoke' }, async ({ apiJourney, adminNavigation, pages }) => {
     const created = await apiJourney.createSubmittedNotification();
     const referenceNumber = created.referenceNumber;
 
