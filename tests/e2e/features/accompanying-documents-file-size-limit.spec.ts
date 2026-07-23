@@ -15,6 +15,8 @@ test.describe('Accompanying documents - file size limit', { tag: '@integration' 
   });
 
   test('accepts a file at the 10 MB cap and completes virus scan', { tag: '@slow' }, async ({ pages }, testInfo) => {
+    test.slow();
+
     const file = await writeSyntheticFile(path.join(testInfo.outputDir, 'file-upload'), 'at-cap.pdf', {
       bytes: TEN_MB_BYTES,
     });

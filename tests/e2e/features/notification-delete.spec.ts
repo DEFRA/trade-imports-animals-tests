@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { timeouts } from '@config/timeouts';
 
 test.describe('Notification delete', () => {
   test.describe('delete button and dialog', () => {
@@ -39,7 +40,7 @@ test.describe('Notification delete', () => {
       await expect(pages.notificationView.successBanner).toBeVisible();
 
       // The JS redirects to / after 3 seconds
-      await pages.notificationDashboard.heading.waitFor({ timeout: 10000 });
+      await pages.notificationDashboard.heading.waitFor({ timeout: timeouts.medium });
       await expect(pages.notificationDashboard.viewLink(referenceNumber)).not.toBeVisible();
     },
   );

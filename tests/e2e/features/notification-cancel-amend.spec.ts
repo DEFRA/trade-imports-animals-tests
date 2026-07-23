@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { CPH_NUMBER } from '@domain/constants/journey-options';
+import { timeouts } from '@config/timeouts';
 
 const EDITED_CPH_NUMBER = '987654321';
 
@@ -76,7 +77,7 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.notificationView.amendCancelledBanner).toContainText('The amendment has been cancelled');
 
       await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(referenceNumber)}$`), {
-        timeout: 10000,
+        timeout: timeouts.medium,
       });
 
       await expect(pages.notificationView.amendStatusTag).not.toBeVisible();
