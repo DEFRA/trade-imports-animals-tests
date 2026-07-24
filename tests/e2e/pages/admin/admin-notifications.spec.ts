@@ -1,11 +1,10 @@
 import { expect, test } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
-import { skipIfCdpEnvironment } from '@utils/playwright/environment';
+import { skipIfCdpEnvironment, isComposeEnvironment } from '@utils/playwright/environment';
 import { seedNotifications } from '@flows/api-journey';
 
-test.describe('Notifications (admin)', { tag: '@compose' }, () => {
-  test.describe.configure({ mode: 'default' });
+test.describe('Notifications (admin)', () => {
   test.beforeEach(async ({ adminNavigation }) => {
     await adminNavigation.toNotifications();
   });
@@ -54,7 +53,9 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     });
 
-    await test.step('writes a successful delete audit record for one notification delete', async () => {
+    await test.step('writes a successful delete audit record for one notification delete', async (step) => {
+      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+
       const client = new MongoDbClient();
 
       try {
@@ -82,53 +83,60 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     });
   });
 
-  test('allows deleting all current-page notifications by select all', async ({ pages }) => {
-    skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
+  test.describe('destructive select-all delete', () => {
+    test.describe.configure({ mode: 'default' });
 
-    await seedNotifications(4);
-    await pages.adminNotifications.open(false);
+    // TODO: deletes the whole page of notifications — unsafe under parallel runs.
+    test.skip('allows deleting all current-page notifications by select all', { tag: '@compose' }, async ({ pages }) => {
+      skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
 
-    const currentPageRefs = await pages.adminNotifications.currentPageReferences();
-    const expectedDeletes = currentPageRefs.length;
-    let pageOneReference = '';
+      await seedNotifications(4);
+      await pages.adminNotifications.open(false);
 
-    await test.step('select all deletes only the current page', async () => {
-      expect(await pages.adminNotifications.getTotalElements()).toBeGreaterThanOrEqual(4);
+      const currentPageRefs = await pages.adminNotifications.currentPageReferences();
+      const expectedDeletes = currentPageRefs.length;
+      let pageOneReference = '';
 
-      expect(currentPageRefs.length).toBeGreaterThan(0);
-      pageOneReference = currentPageRefs[0];
+      await test.step('select all deletes only the current page', async () => {
+        expect(await pages.adminNotifications.getTotalElements()).toBeGreaterThanOrEqual(4);
 
-      await pages.adminNotifications.checkBoxSelectAll.check();
-      await pages.adminNotifications.btnDelete.click();
-      await pages.adminNotifications.btnConfirm.click();
-      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-    });
+        expect(currentPageRefs.length).toBeGreaterThan(0);
+        pageOneReference = currentPageRefs[0];
 
-    await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
-      const client = new MongoDbClient();
+        await pages.adminNotifications.checkBoxSelectAll.check();
+        await pages.adminNotifications.btnDelete.click();
+        await pages.adminNotifications.btnConfirm.click();
+        await expect(pages.adminNotifications.alertSuccess).toContainText(
+          'Notifications deleted successfully. Redirecting in 3 seconds...',
+        );
+      });
 
-      try {
-        await client.connect();
-        const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
-        const docs = await auditCollection
-          .find({
-            action: 'DELETE_NOTIFICATIONS',
-            notificationReferenceNumbers: pageOneReference,
-          })
-          .toArray();
+      await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
+        const client = new MongoDbClient();
 
-        expect(docs).toHaveLength(1);
-        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(docs[0].result).toBe('SUCCESS');
-        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
-        expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
-        expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe('2100010101');
-      } finally {
-        await client.close();
-      }
+        try {
+          await client.connect();
+          const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
+          const docs = await auditCollection
+            .find({
+              action: 'DELETE_NOTIFICATIONS',
+              notificationReferenceNumbers: pageOneReference,
+            })
+            .toArray();
+
+          expect(docs).toHaveLength(1);
+          expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+          expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+          expect(docs[0].result).toBe('SUCCESS');
+          expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+          expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
+          expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
+          expect(docs[0].traceId).toBe('test-trace-id');
+          expect(docs[0].userId).toBe('2100010101');
+        } finally {
+          await client.close();
+        }
+      });
     });
   });
 
@@ -145,7 +153,9 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       );
     });
 
-    await test.step('writes a failed delete audit record for one notification delete', async () => {
+    await test.step('writes a failed delete audit record for one notification delete', async (step) => {
+      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+
       const client = new MongoDbClient();
 
       try {
