@@ -25,12 +25,9 @@ test.describe('Notification delete', () => {
     });
   });
 
-  // TODO: use the dashboard search feature (in progress) to confirm the notification is gone
-  // instead of checking viewLink's visibility on the currently-rendered page — a real deletion
-  // failure could otherwise go unnoticed if the row is simply on a different page.
   test(
     'deletes the notification and removes it from the dashboard',
-    { tag: '@flaky' },
+    { tag: '@smoke' },
     async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       const created = await apiJourney.createSubmittedNotification();
       const referenceNumber = created.referenceNumber ?? journeyContext.referenceNumber;
@@ -44,7 +41,8 @@ test.describe('Notification delete', () => {
 
       // The JS redirects to / after 3 seconds
       await pages.notificationDashboard.heading.waitFor({ timeout: timeouts.medium });
-      await expect(pages.notificationDashboard.viewLink(referenceNumber)).not.toBeVisible();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     },
   );
 });
