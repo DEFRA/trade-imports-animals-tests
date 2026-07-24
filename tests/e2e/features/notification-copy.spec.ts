@@ -1,5 +1,4 @@
 import { test, expect } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification copy', () => {
   test('copies draft notification from the view screen and redirects to the new draft', async ({
@@ -22,18 +21,15 @@ test.describe('Notification copy', () => {
     // Field retention/reset is covered by lower-level tests; this spec validates the copy feature only.
   });
 
-  // TODO: use the dashboard search feature (in progress) to locate the notification by
-  // reference instead of sorting + relying on it landing on the first page — the sort-based
-  // lookup can miss the target under parallel test execution.
   test(
     'copies submitted notification from the dashboard and redirects to the new draft',
-    { tag: ['@smoke', '@flaky'] },
+    { tag: '@smoke' },
     async ({ pages, apiJourney, journey }) => {
       const created = await apiJourney.createSubmittedNotification();
       const originalReferenceNumber = created.referenceNumber;
 
       await journey.toNotificationDashboard();
-      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+      await pages.notificationDashboard.searchForReference(originalReferenceNumber);
       await pages.notificationDashboard.btnCopyAsNew(originalReferenceNumber).click();
 
       await pages.notificationView.heading.waitFor();

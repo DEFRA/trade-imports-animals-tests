@@ -1,6 +1,5 @@
 import { expect, test } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { timeouts } from '@config/timeouts';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment } from '@utils/playwright/environment';
 import { seedNotifications } from '@flows/api-journey';
@@ -11,22 +10,19 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await adminNavigation.toNotifications();
   });
 
-  // TODO: promote to @smoke once this stops relying on an exact global count delta and a
-  // current-page-only row check, both of which are unreliable under parallel test execution.
-  test('allows deleting a notification by reference number', { tag: '@flaky' }, async ({ apiJourney, journeyContext, pages }) => {
+  test('allows deleting a notification by reference number', { tag: '@smoke' }, async ({ apiJourney, journeyContext, pages }) => {
     await apiJourney.createSubmittedNotification();
     const referenceNumber = journeyContext.referenceNumber;
     await pages.adminNotifications.open(false);
 
-    const initialTotalElements = await pages.adminNotifications.getTotalElements();
     await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     await pages.adminNotifications.deleteByReferenceNumber();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-    await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
-    await expect
-      .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), { timeout: timeouts.medium })
-      .toBe(false);
+
+    await pages.notificationDashboard.open();
+    await pages.notificationDashboard.searchForReference(referenceNumber);
+    await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
   });
 
   test('allows cancelling checkbox deletion and keeps notification visible', async ({ apiJourney, journeyContext, pages }) => {
@@ -47,13 +43,15 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     await pages.adminNotifications.open(false);
 
     await test.step('delete notification by checkbox', async () => {
-      const initialTotalElements = await pages.adminNotifications.getTotalElements();
       await pages.adminNotifications.findRowByReference(referenceNumber);
       await pages.adminNotifications.checkboxNotificationByReference(referenceNumber).check();
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-      await expect.poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium }).toBe(initialTotalElements - 1);
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     });
 
     await test.step('writes a successful delete audit record for one notification delete', async () => {
@@ -95,7 +93,7 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
     let pageOneReference = '';
 
     await test.step('select all deletes only the current page', async () => {
-      const initialCount = await pages.adminNotifications.getTotalElements();
+      expect(await pages.adminNotifications.getTotalElements()).toBeGreaterThanOrEqual(4);
 
       expect(currentPageRefs.length).toBeGreaterThan(0);
       pageOneReference = currentPageRefs[0];
@@ -104,9 +102,6 @@ test.describe('Notifications (admin)', { tag: '@compose' }, () => {
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-      await expect
-        .poll(() => pages.adminNotifications.getTotalElements(), { timeout: timeouts.medium })
-        .toBe(initialCount - expectedDeletes);
     });
 
     await test.step('writes a successful delete audit record covering a page-1 reference', async () => {

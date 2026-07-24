@@ -1,5 +1,4 @@
 import { expect, test } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
 
 test.describe('Notification amend', () => {
   test.afterEach(async ({ journeyContext, notificationActions }) => {
@@ -18,12 +17,9 @@ test.describe('Notification amend', () => {
       await expect(pages.notificationView.btnAmend).toBeVisible();
     });
 
-    // TODO: use the dashboard search feature (in progress) to locate the notification by
-    // reference instead of sorting + relying on it landing on the first page — the sort-based
-    // lookup can miss the target under parallel test execution.
-    test('shows the Amend action on the dashboard for the SUBMITTED notification', { tag: '@flaky' }, async ({ pages, journeyContext }) => {
+    test('shows the Amend action on the dashboard for the SUBMITTED notification', async ({ pages, journeyContext }) => {
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+      await pages.notificationDashboard.searchForReference(journeyContext.referenceNumber);
       await expect(pages.notificationDashboard.btnAmend(journeyContext.referenceNumber)).toBeVisible();
     });
   });
@@ -47,32 +43,22 @@ test.describe('Notification amend', () => {
     await expect(pages.notificationView.btnDelete).toBeVisible();
   });
 
-  // TODO: use the dashboard search feature (in progress) to locate the notification by
-  // reference instead of sorting + relying on it landing on the first page — the sort-based
-  // lookup can miss the target under parallel test execution.
-  test(
-    'amends from the dashboard and lands on the view page in AMEND state',
-    { tag: '@flaky' },
-    async ({ pages, apiJourney, journeyContext }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const ref = created.referenceNumber ?? journeyContext.referenceNumber;
+  test('amends from the dashboard and lands on the view page in AMEND state', async ({ pages, apiJourney, journeyContext }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const ref = created.referenceNumber ?? journeyContext.referenceNumber;
 
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
-      await pages.notificationDashboard.btnAmend(ref).click();
+    await pages.notificationDashboard.open();
+    await pages.notificationDashboard.searchForReference(ref);
+    await pages.notificationDashboard.btnAmend(ref).click();
 
-      // Lands on /notification-view/{ref} with AMEND state
-      await expect(pages.notificationView.heading).toBeVisible();
-      await expect(pages.notificationView.amendStatusTag).toBeVisible();
-    },
-  );
+    // Lands on /notification-view/{ref} with AMEND state
+    await expect(pages.notificationView.heading).toBeVisible();
+    await expect(pages.notificationView.amendStatusTag).toBeVisible();
+  });
 
-  // TODO: use the dashboard search feature (in progress) to locate the notification by
-  // reference instead of sorting + relying on it landing on the first page — the sort-based
-  // lookup can miss the target under parallel test execution.
   test(
     'walks the full amend lifecycle: SUBMITTED → AMEND → SUBMITTED',
-    { tag: ['@smoke', '@flaky'] },
+    { tag: '@smoke' },
     async ({ pages, apiJourney, journeyContext, notificationActions }) => {
       // 1. Start from a freshly submitted notification.
       const created = await apiJourney.createSubmittedNotification();
@@ -105,7 +91,7 @@ test.describe('Notification amend', () => {
       // And the dashboard exposes the SUBMITTED-state Amend action against
       // the same reference, confirming the round-trip.
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+      await pages.notificationDashboard.searchForReference(ref);
       await expect(pages.notificationDashboard.btnAmend(ref)).toBeVisible();
     },
   );
