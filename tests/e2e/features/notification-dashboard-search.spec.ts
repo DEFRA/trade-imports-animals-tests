@@ -27,6 +27,21 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Results');
   });
 
+  test('opens notification view when clicking View after searching by reference number', async ({ pages, apiJourney, journey }) => {
+    const created = await apiJourney.createSubmittedNotification();
+    const referenceNumber = created.referenceNumber;
+    await journey.toNotificationDashboard();
+
+    await pages.notificationDashboard.searchForReference(referenceNumber);
+    await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
+
+    await pages.notificationDashboard.viewLink(referenceNumber).click();
+
+    await expect(pages.page).toHaveURL(new RegExp(pages.notificationView.expectedUrl(referenceNumber)));
+    await expect(pages.notificationView.heading).toBeVisible();
+    await expect(pages.notificationView.referenceNumberCaption).toContainText(referenceNumber);
+  });
+
   test('shows no notifications found when search has no matches', async ({ pages }) => {
     await pages.notificationDashboard.searchForReference(NO_MATCH_REFERENCE_NUMBER);
 
