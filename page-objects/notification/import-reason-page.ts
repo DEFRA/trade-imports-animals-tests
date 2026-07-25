@@ -1,30 +1,20 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-export class ImportReasonPage extends BasePage {
-  readonly expectedUrl = '/import-reason';
-
-  get referenceNumber(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
-  }
-
-  get linkBack(): Locator {
-    return this.page.getByRole('link', { name: 'Back' });
+export class ImportReasonPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'import-reason');
   }
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'What is the main reason for importing the animals?' });
   }
 
-  get radioInternalMarket(): Locator {
-    return this.page.getByRole('radio', { name: 'Internal market' });
+  reason(name: string): Locator {
+    return this.page.getByRole('radio', { name, exact: true });
   }
 
-  get radioReEntry(): Locator {
-    return this.page.getByRole('radio', { name: 'Re-entry' });
-  }
-
-  get btnSaveAndContinue(): Locator {
+  get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }

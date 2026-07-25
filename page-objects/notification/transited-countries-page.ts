@@ -1,15 +1,9 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-export class TransitedCountriesPage extends BasePage {
-  readonly expectedUrl = '/transited-countries';
-
-  get referenceNumber(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
-  }
-
-  get linkBack(): Locator {
-    return this.page.getByRole('link', { name: 'Back' });
+export class TransitedCountriesPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'transit-countries');
   }
 
   get heading(): Locator {
@@ -19,53 +13,21 @@ export class TransitedCountriesPage extends BasePage {
     });
   }
 
-  get inputCountrySearch(): Locator {
-    return this.page.getByRole('searchbox', { name: 'Search for a country' });
+  country(row: number = 0): Locator {
+    const id = row === 0 ? 'transitedCountries' : `transitedCountries-${row + 1}`;
+    return this.page.locator(`input#${id}`);
   }
 
-  get btnSearch(): Locator {
-    return this.page.getByRole('button', { name: 'Search', exact: true });
+  async selectCountry(name: string, row: number = 0): Promise<void> {
+    await this.country(row).fill(name);
+    await this.page.getByRole('option', { name, exact: true }).click();
   }
 
-  get selectedCountriesList(): Locator {
-    return this.page.locator('#selected-countries-list');
+  get addAnotherCountry(): Locator {
+    return this.page.getByRole('button', { name: 'Add another country' });
   }
 
-  checkboxForCountry(countryName: string): Locator {
-    return this.page.getByRole('checkbox', { name: countryName });
-  }
-
-  get btnAddSelectedCountries(): Locator {
-    return this.page.getByRole('button', { name: 'Add selected countries' });
-  }
-
-  get btnSaveAndContinue(): Locator {
+  get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
-  removeButtonForCountry(countryName: string): Locator {
-    return this.selectedCountriesList.getByRole('button', {
-      name: `Remove ${countryName}`,
-    });
-  }
-
-  selectedCountry(countryName: string): Locator {
-    return this.selectedCountriesList.locator('.app-selected-countries__item', {
-      hasText: countryName,
-    });
-  }
-
-  /**
-   * Server-side search via GET ?q= (works with JS disabled; CI-safe).
-   */
-  async searchForCountry(query: string): Promise<void> {
-    await this.inputCountrySearch.fill(query);
-    await Promise.all([
-      this.page.waitForURL((url) => {
-        const q = url.searchParams.get('q') ?? '';
-        return q === query;
-      }),
-      this.btnSearch.click(),
-    ]);
   }
 }

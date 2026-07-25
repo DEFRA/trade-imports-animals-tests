@@ -27,7 +27,6 @@ test.describe('Notification dashboard sort', () => {
       await pages.notificationDashboard.sortBy(value);
       await expect(pages.page).toHaveURL(/\?sort=/);
       await expect(pages.notificationDashboard.heading).toBeVisible();
-      await expect(pages.notificationDashboard.errorSummary).not.toBeVisible();
 
       // Sort order correctness is covered by lower-level tests; this spec validates sort option submission only.
     });

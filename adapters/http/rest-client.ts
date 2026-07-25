@@ -19,21 +19,26 @@ export class RestClient {
     private readonly apiKey?: string,
   ) {}
 
-  async get<T>(path: string): Promise<T> {
-    return this.send<T>('GET', path);
+  async get<T>(path: string, headers?: Record<string, string>): Promise<T> {
+    return this.send<T>('GET', path, undefined, headers);
   }
 
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.send<T>('POST', path, body);
+  async post<T>(path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
+    return this.send<T>('POST', path, body, headers);
   }
 
-  private async send<T>(method: string, path: string, body?: unknown): Promise<T> {
+  async put<T>(path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
+    return this.send<T>('PUT', path, body, headers);
+  }
+
+  private async send<T>(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const response = await this.request.fetch(url, {
       method,
       headers: {
         'content-type': 'application/json',
         ...(this.apiKey ? { 'x-api-key': this.apiKey } : {}),
+        ...headers,
       },
       data: body,
     });

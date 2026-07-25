@@ -1,17 +1,17 @@
 import { type Locator, type Page } from '@playwright/test';
 import { NotificationPage } from '@page-objects/base/base-page';
 
-export class CphNumberPage extends NotificationPage {
+export class ImportPurposePage extends NotificationPage {
   constructor(page: Page) {
-    super(page, 'cph-number');
+    super(page, 'import-purpose');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'County Parish Holding (CPH)' });
+    return this.page.getByRole('heading', { level: 1, name: 'Purpose in the internal market' });
   }
 
-  get cphNumber(): Locator {
-    return this.page.getByLabel('County Parish Holding (CPH)');
+  purpose(name: string): Locator {
+    return this.page.getByRole('radio', { name, exact: true });
   }
 
   get saveAndContinue(): Locator {
