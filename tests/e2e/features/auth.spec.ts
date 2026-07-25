@@ -41,10 +41,6 @@ test.describe('Authentication', { tag: '@auth' }, () => {
   });
 
   test('switching organisation changes the owner-scoped dashboard', async ({ pages }) => {
-    test.fail(
-      true,
-      'Workspace stack defect: the promoted frontend is running without LIVE_ANIMALS_MODE=real, so its stub record store is not organisation-scoped.',
-    );
     await pages.signIn.signIn({ userId: '2100010102' });
     await expect(pages.page.getByRole('heading', { name: 'Choose your organisation' })).toBeVisible();
     await pages.page.getByRole('radio', { name: /Farms Ltd/ }).check();
@@ -63,10 +59,6 @@ test.describe('Authentication', { tag: '@auth' }, () => {
   });
 
   test('lands on the sign in page when reopening the notification dashboard after sign out', async ({ pages }) => {
-    test.fail(
-      true,
-      'Promoted frontend bug: /auth/sign-out redirects to the Defra ID signed-out page without clearing the frontend session cookie/cache.',
-    );
     await pages.signIn.signIn();
     await pages.notificationDashboard.linkSignOut.click();
     await pages.signOut.heading.waitFor();

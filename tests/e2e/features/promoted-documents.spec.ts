@@ -7,7 +7,7 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
   test('uploads, scans, downloads and removes a document through the real uploader', async ({ journey, pages }) => {
     test.slow();
     await journey.toAccompanyingDocuments();
-    const reference = `PW-${Date.now()}`;
+    const reference = `PW${Date.now()}`;
 
     await pages.accompanyingDocuments.fillDocument(reference, { day: '3', month: '1', year: '2026' }, fileUploadPaths.safeFile1kbPdf);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
@@ -33,10 +33,6 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
     await expect(row).toHaveCount(0);
     await expect(pages.page.getByText('You have not added any documents yet.')).toBeVisible();
 
-    test.fail(
-      downloaded.includes('Placeholder file - the service does not store uploaded bytes.'),
-      'Workspace stack defect: LIVE_ANIMALS_MODE is not real, so the promoted frontend uses its canned document adapter instead of CDP uploader.',
-    );
     expect(downloaded).toEqual(uploaded);
   });
 
