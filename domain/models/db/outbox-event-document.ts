@@ -1,3 +1,18 @@
+export type OutboxActor = {
+  id: string;
+  source: string;
+  userType: string;
+  displayName: string;
+  organisationId: string;
+  onBehalfOfOrganisationId?: string;
+};
+
+export type OutboxStatusChange = {
+  status: string;
+  dateChanged: Date;
+  actor: OutboxActor | null;
+};
+
 export type OutboxEventDocument = {
   _id: string;
   aggregateId: string;
@@ -12,6 +27,8 @@ export type OutboxEventDocument = {
     schemaVersion: string;
     schemaUrl?: string;
   };
+  actor?: OutboxActor;
+  statusChanges?: OutboxStatusChange[];
   _class?: string;
 };
 

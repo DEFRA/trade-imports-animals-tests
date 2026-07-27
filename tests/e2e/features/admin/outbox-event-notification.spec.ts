@@ -65,6 +65,12 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaults.countryCode.value);
         expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(defaults.pointOfEntry.value);
         expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
+        // Submitted via API (no actor body) — actor is absent, statusChanges carries one entry
+        expect(doc.actor).toBeUndefined();
+        const submitChanges = doc.statusChanges ?? [];
+        expect(submitChanges).toHaveLength(1);
+        expect(submitChanges[0].status).toBe('SUBMITTED');
+        expect(submitChanges[0].actor).toBeNull();
       });
 
       await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
@@ -86,6 +92,17 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         expect(amendDocs[1].eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE);
         expect(amendDocs[0].data.exchangedDocument.identifier).toBe(referenceNumber);
         expect(amendDocs[1].data.exchangedDocument.identifier).toBe(referenceNumber);
+        // Amend triggered via UI — actor is present (from frontend session credentials)
+        // statusChanges on the amend event is cumulative: [SUBMITTED(no actor), AMEND(actor)]
+        const amendEvent = amendDocs[1];
+        expect(amendEvent.actor).toBeDefined();
+        expect(amendEvent.actor?.source).toBe('dynamics-contact');
+        const amendChanges = amendEvent.statusChanges ?? [];
+        expect(amendChanges).toHaveLength(2);
+        expect(amendChanges[0].status).toBe('SUBMITTED');
+        expect(amendChanges[1].status).toBe('AMEND');
+        expect(amendChanges[1].actor).not.toBeNull();
+        expect(amendChanges[1].actor?.source).toBe('dynamics-contact');
       });
     } finally {
       await client.close();
