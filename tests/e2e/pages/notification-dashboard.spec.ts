@@ -21,9 +21,28 @@ test.describe('Import notification service', () => {
       await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
       await expect(pages.originOfImport.heading).toBeVisible();
     });
+
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
+    test('displays details on the first notification card', async ({ pages }) => {
+      await expect(pages.notificationDashboard.notificationCards.first()).toBeVisible();
+      const firstCard = pages.notificationDashboard.notificationCard(0);
+
+      await expect(firstCard.details.heading).toBeVisible();
+      await expect(firstCard.details.heading).toContainText(/GBN-AG-\d{2}-[A-Z0-9]+/);
+      await expect(firstCard.details.commodity).toBeVisible();
+      await expect(firstCard.details.origin).toBeVisible();
+      await expect(firstCard.details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
+      await expect(firstCard.details.status).toBeVisible();
+      await expect(firstCard.details.status).toContainText(/Draft|Submitted|Amend/);
+      await expect(firstCard.details.dateCreated).toBeVisible();
+      await expect(firstCard.details.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
+    });
   });
 
   test.describe('notification card actions by status', () => {
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows view and copy as new for a draft notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createFullNotification();
       const referenceNumber = created.referenceNumber;
@@ -38,6 +57,8 @@ test.describe('Import notification service', () => {
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).not.toBeVisible();
     });
 
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows view, copy as new and amend for a submitted notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createSubmittedNotification();
       const referenceNumber = created.referenceNumber;
@@ -52,6 +73,8 @@ test.describe('Import notification service', () => {
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).toBeVisible();
     });
 
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows only view for an amend notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createAmendNotification();
       const referenceNumber = created.referenceNumber;
