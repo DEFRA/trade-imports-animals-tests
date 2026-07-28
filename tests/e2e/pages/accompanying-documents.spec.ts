@@ -34,6 +34,9 @@ test.describe('Accompanying documents', () => {
     });
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js:117) — it
+  // checks page text and Continue-without-documents are present, not each
+  // individual field or Save-and-continue's absence. Remove once closed.
   test('shows required form fields', async ({ pages }) => {
     await expect(pages.accompanyingDocuments.heading).toBeVisible();
     await expect.soft(pages.accompanyingDocuments.dropdownDocumentType).toBeVisible();
@@ -155,6 +158,9 @@ test.describe('Accompanying documents', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
+    // TODO: only Partial coverage elsewhere (controller.test.js:787-811) —
+    // it tests an empty-documentType combo, not this exact 3-way
+    // type+reference+file combination. Remove once closed.
     test('shows multiple errors when required fields are missing or invalid', async ({ pages }) => {
       await pages.accompanyingDocuments.inputDocumentReference.fill('REF@#$!');
       await pages.accompanyingDocuments.btnAddAttachment.click();

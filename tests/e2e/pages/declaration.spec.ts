@@ -29,6 +29,9 @@ test.describe('Declaration', () => {
     await expect(pages.declaration.btnSubmitNotification).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it confirms
+  // submissionDate is passed to the view (expect.any(String)), not the
+  // specific relative-date value or checkbox default. Remove once closed.
   test('shows default values on first load', async ({ pages }) => {
     const expectedDeclarationDate = toDisplayDate(getRelativeDate());
     await expect(pages.declaration.checkboxDeclaration).not.toBeChecked();

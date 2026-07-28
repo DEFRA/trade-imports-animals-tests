@@ -35,6 +35,9 @@ test.describe('Select species of commodity', () => {
     await expect(pages.speciesSelection.dropdownCommodityType).toHaveValue('');
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — the GET
+  // test asserts checked-flags only for a session with one species
+  // pre-selected, not the fully-unselected default. Remove once closed.
   test('shows expected species (for selected type*) with each species option unchecked by default', async ({ pages }) => {
     // Species are not currently filtered by commodity type.
     await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison)).toBeVisible();

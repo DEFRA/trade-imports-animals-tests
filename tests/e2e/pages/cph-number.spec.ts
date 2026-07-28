@@ -18,6 +18,11 @@ test.describe('County parish holding (cph) number', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it covers
+  // the blank value, but the `type`/`maxlength` input attributes (static,
+  // hardcoded in cph-number/index.njk) aren't asserted by any JS test.
+  // Remove once closed, or accept the low risk of a hardcoded template
+  // attribute and drop this instead.
   test('shows empty cph number input on first load', async ({ pages }) => {
     await expect(pages.cphNumber.inputCphNumber).toHaveValue('');
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('type', 'text');
@@ -40,6 +45,10 @@ test.describe('County parish holding (cph) number', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
+    // TODO: only Partial coverage elsewhere (cph-number-schema.test.js /
+    // controller.test.js) — the length and pattern messages are asserted
+    // separately; no test submits a payload that fails both simultaneously.
+    // Remove once closed.
     test('shows both errors when cph number is not a number and not 9 digits', async ({ pages }) => {
       await pages.cphNumber.inputCphNumber.fill('1234567!');
       await pages.cphNumber.btnSaveAndContinue.click();

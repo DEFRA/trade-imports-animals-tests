@@ -20,6 +20,10 @@ test.describe('Contact address for consignment', () => {
     await expect(pages.transporter.cellsTransporter.nth(0)).toContainText(TRANSPORTER_NAME);
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — the GET
+  // test checks heading/legend text and address names, not the paragraph
+  // description, "add a new branch address" link, or button. Remove once
+  // closed.
   test('shows expected page content', async ({ pages }) => {
     await expect(pages.contactAddress.heading).toBeVisible();
     await expect(pages.contactAddress.paragraphDescription).toBeVisible();

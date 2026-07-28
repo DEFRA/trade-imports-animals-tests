@@ -21,13 +21,6 @@ test.describe('Import notification service', () => {
       await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
       await expect(pages.originOfImport.heading).toBeVisible();
     });
-
-    test('displays the notification list on the home page', async ({ pages }) => {
-      await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-      await expect(pages.notificationDashboard.heading).toBeVisible();
-      await expect(pages.notificationDashboard.totalResults).toBeVisible();
-      await expect(pages.notificationDashboard.totalResults).toHaveText(/\d+ Results/);
-    });
   });
 
   test.describe('notification card actions by status', () => {

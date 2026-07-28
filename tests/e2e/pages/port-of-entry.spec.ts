@@ -20,6 +20,9 @@ test.describe('Arrival details', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (port-of-entry-schema.test.js) —
+  // it validates the allowed enum values, but no test asserts the full
+  // displayed option list/order in index.njk. Remove once closed.
   test('shows expected means of transport options', async ({ pages }) => {
     const options = await pages.entryPoint.dropdownMeansOfTransportOptions.allTextContents();
     expect(options[0]).toBe('Select one');
@@ -38,6 +41,10 @@ test.describe('Arrival details', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
+    // TODO: only Partial coverage elsewhere (port-of-entry-schema.test.js /
+    // controller.test.js) — day/month/year messages are asserted separately;
+    // no test submits a payload invalid on all three simultaneously. Remove
+    // once closed.
     test('shows all errors when all arrival date fields are out of range', async ({ pages }) => {
       await pages.entryPoint.dropdownMeansOfTransport.selectOption(meansOfTransport.vessel.value);
       await pages.entryPoint.fillArrivalDate({ day: '0', month: '13', year: '20266' });

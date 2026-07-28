@@ -52,6 +52,9 @@ test.describe('Origin of the import', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
+    // TODO: only Partial coverage elsewhere (origin-schema.test.js) — it
+    // tests each rule separately (default abortEarly); no test combines
+    // both errors via abortEarly:false. Remove once closed.
     test('shows both errors when internal reference is too long and non-alphanumeric', async ({ pages }) => {
       const invalidValue = 'A'.repeat(58) + '-$';
       await pages.originOfImport.inputInternalReferenceNumber.fill(invalidValue);
