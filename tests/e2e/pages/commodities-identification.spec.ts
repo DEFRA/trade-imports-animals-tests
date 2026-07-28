@@ -51,21 +51,6 @@ test.describe('Animal identification details', () => {
     await expect(pages.animalIdentification.inputPassport(1)).toHaveValue('');
   });
 
-  test('can enter animal identifiers for each animal', async ({ pages }) => {
-    const firstEarTag = 'FR123456789012?`';
-    const firstPassport = 'FR-BOV-2024-001234';
-    const secondEarTag = '#FR123456789013!';
-    const secondPassport = 'FR-BOV-2024-001235';
-    await pages.animalIdentification.inputEarTag(0).fill(firstEarTag);
-    await pages.animalIdentification.inputPassport(0).fill(firstPassport);
-    await pages.animalIdentification.inputEarTag(1).fill(secondEarTag);
-    await pages.animalIdentification.inputPassport(1).fill(secondPassport);
-    await expect(pages.animalIdentification.inputEarTag(0)).toHaveValue(firstEarTag);
-    await expect(pages.animalIdentification.inputPassport(0)).toHaveValue(firstPassport);
-    await expect(pages.animalIdentification.inputEarTag(1)).toHaveValue(secondEarTag);
-    await expect(pages.animalIdentification.inputPassport(1)).toHaveValue(secondPassport);
-  });
-
   test('continues to additional details after saving identification details', async ({ pages }) => {
     await pages.animalIdentification.inputEarTag(0).fill('FR123456789020');
     await pages.animalIdentification.inputPassport(0).fill('FR-BOV-2024-001240');

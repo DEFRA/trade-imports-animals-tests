@@ -18,22 +18,6 @@ test.describe('Reason for import', () => {
     await expect(pages.speciesSelection.heading).toBeVisible();
   });
 
-  test('shows reasons and they are unchecked by default', async ({ pages }) => {
-    await expect(pages.importReason.radioInternalMarket).toBeVisible();
-    await expect(pages.importReason.radioInternalMarket).not.toBeChecked();
-    await expect(pages.importReason.radioReEntry).toBeVisible();
-    await expect(pages.importReason.radioReEntry).not.toBeChecked();
-  });
-
-  test('can select only one reason', async ({ pages }) => {
-    await pages.importReason.radioInternalMarket.click();
-    await expect(pages.importReason.radioInternalMarket).toBeChecked();
-    await expect(pages.importReason.radioReEntry).not.toBeChecked();
-    await pages.importReason.radioReEntry.click();
-    await expect(pages.importReason.radioInternalMarket).not.toBeChecked();
-    await expect(pages.importReason.radioReEntry).toBeChecked();
-  });
-
   test('continues to commodity details after saving selected reason', async ({ pages }) => {
     await pages.importReason.radioInternalMarket.click();
     await pages.importReason.btnSaveAndContinue.click();

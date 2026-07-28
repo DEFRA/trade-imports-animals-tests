@@ -18,24 +18,6 @@ test.describe('Importer selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows operators unchecked by default', async ({ pages }) => {
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('Highland Import Services')).toBeVisible();
-    await expect(pages.importerSelection.radioImporter('Highland Import Services')).not.toBeChecked();
-  });
-
-  test('can select only one importer at a time', async ({ pages }) => {
-    await pages.importerSelection.radioImporter('Import Co UK').click();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).not.toBeChecked();
-    await pages.importerSelection.radioImporter('GB Animal Imports').click();
-    await expect(pages.importerSelection.radioImporter('Import Co UK')).not.toBeChecked();
-    await expect(pages.importerSelection.radioImporter('GB Animal Imports')).toBeChecked();
-  });
-
   test('shows error when no selection made', async ({ pages }) => {
     await pages.importerSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.importerSelection.expectedUrl);

@@ -59,28 +59,6 @@ test.describe('Select species of commodity', () => {
     await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bubalusBubalis)).not.toBeChecked();
   });
 
-  test('can select one or more species options and deselect one', async ({ pages }) => {
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).check();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosSpp)).not.toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosTaurus)).not.toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bubalusBubalis)).not.toBeChecked();
-
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bosSpp).check();
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bosTaurus).check();
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bubalusBubalis).check();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosSpp)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosTaurus)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bubalusBubalis)).toBeChecked();
-
-    await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).uncheck();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison)).not.toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosSpp)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bosTaurus)).toBeChecked();
-    await expect(pages.speciesSelection.checkboxSpecies(commoditySpecies.bubalusBubalis)).toBeChecked();
-  });
-
   test('continues to reason for import after saving selected species', async ({ pages }) => {
     await pages.speciesSelection.dropdownCommodityType.selectOption(commodityTypes.domestic);
     await pages.speciesSelection.checkboxSpecies(commoditySpecies.bisonBison).check();

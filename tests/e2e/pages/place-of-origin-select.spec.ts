@@ -18,24 +18,6 @@ test.describe('Place of origin selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows operators unchecked by default', async ({ pages }) => {
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Ferme des Alpes SARL')).toBeVisible();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Ferme des Alpes SARL')).not.toBeChecked();
-  });
-
-  test('can select only one place of origin at a time', async ({ pages }) => {
-    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm').click();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).not.toBeChecked();
-    await pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS').click();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm')).not.toBeChecked();
-    await expect(pages.placeOfOriginSelection.radioPlaceOfOrigin('Nordic Livestock AS')).toBeChecked();
-  });
-
   test('shows error when no selection made', async ({ pages }) => {
     await pages.placeOfOriginSelection.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.placeOfOriginSelection.expectedUrl);

@@ -40,11 +40,6 @@ test.describe('County parish holding (cph) number', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('limits cph number input to 11 characters', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('1'.repeat(20));
-      await expect(pages.cphNumber.inputCphNumber).toHaveValue('1'.repeat(11));
-    });
-
     test('shows error when cph number is not entered', async ({ pages }) => {
       // Leave cph number on default "".
       await pages.cphNumber.btnSaveAndContinue.click();

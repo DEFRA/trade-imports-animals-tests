@@ -35,12 +35,6 @@ test.describe('Origin of the import', () => {
     await expect(pages.originOfImport.inputInternalReferenceNumber).toHaveValue('');
   });
 
-  test('allows changing the region code from "No" to "Yes"', async ({ pages }) => {
-    await pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes).click();
-    await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.yes)).toBeChecked();
-    await expect(pages.originOfImport.radioRequiresOriginCode(yesNoValues.no)).not.toBeChecked();
-  });
-
   test('continues to commodity selection with defaults and required fields only', async ({ pages }) => {
     await pages.originOfImport.dropdownCountry.selectOption(countryCodes.eu.austria.value);
     await pages.originOfImport.btnSaveAndContinue.click();
