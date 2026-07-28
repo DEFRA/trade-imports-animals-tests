@@ -23,6 +23,18 @@ test.describe('Accompanying documents - view file', () => {
     const viewLink = pages.accompanyingDocuments.getViewFileLink(fileUploadNames.safeFile250bPng);
     await expect(viewLink).toBeVisible();
 
+    // EUDPA-106 regression guard: the callback URL that the backend gives to
+    // cdp-uploader has a static "pending" placeholder segment (see
+    // DocumentService.buildCallbackUrl). cdp-uploader does not substitute
+    // anything into it, so any code that reads the callback URL path arg as
+    // if it were cdp-uploader's real uploadId ends up storing the literal
+    // string "pending" on document.uploadId — which then leaks into this
+    // link's href. Guard the invariant here so the failure mode is
+    // "unexpected placeholder in href" rather than a 30 s download-event
+    // timeout.
+    const href = await viewLink.getAttribute('href');
+    expect(href).not.toContain('/accompanying-documents/pending/');
+
     const [download] = await Promise.all([pages.page.waitForEvent('download'), viewLink.click()]);
 
     expect(download.suggestedFilename()).toBe(fileUploadNames.safeFile250bPng);
