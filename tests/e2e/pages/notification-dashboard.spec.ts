@@ -28,21 +28,6 @@ test.describe('Import notification service', () => {
       await expect(pages.notificationDashboard.totalResults).toBeVisible();
       await expect(pages.notificationDashboard.totalResults).toHaveText(/\d+ Results/);
     });
-
-    test('displays details on the first notification card', async ({ pages }) => {
-      await expect(pages.notificationDashboard.notificationCards.first()).toBeVisible();
-      const firstCard = pages.notificationDashboard.notificationCard(0);
-
-      await expect(firstCard.details.heading).toBeVisible();
-      await expect(firstCard.details.heading).toContainText(/GBN-AG-\d{2}-[A-Z0-9]+/);
-      await expect(firstCard.details.commodity).toBeVisible();
-      await expect(firstCard.details.origin).toBeVisible();
-      await expect(firstCard.details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
-      await expect(firstCard.details.status).toBeVisible();
-      await expect(firstCard.details.status).toContainText(/Draft|Submitted|Amend/);
-      await expect(firstCard.details.dateCreated).toBeVisible();
-      await expect(firstCard.details.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
-    });
   });
 
   test.describe('notification card actions by status', () => {

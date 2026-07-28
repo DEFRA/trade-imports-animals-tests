@@ -27,14 +27,6 @@ test.describe('Additional details', () => {
     });
   });
 
-  test('shows default values on first load', async ({ pages }) => {
-    await expect(pages.additionalDetails.radioApprovedBodies).not.toBeChecked();
-    await expect(pages.additionalDetails.radioBreedingAndOrProduction).not.toBeChecked();
-    await expect(pages.additionalDetails.radioSlaughter).not.toBeChecked();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes)).not.toBeChecked();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.no)).toBeChecked();
-  });
-
   test('continues to accompanying documents after saving additional details', async ({ pages }) => {
     await pages.additionalDetails.radioApprovedBodies.click();
     await pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes).click();

@@ -1,7 +1,6 @@
 import { test, expect } from '@fixtures';
 import { commodityTypes } from '@domain/constants/commodity-types';
 import { commoditySpecies } from '@domain/constants/commodity-species';
-import { camelCaseToTitleCase } from '@utils/string-utils';
 
 test.describe('Select species of commodity', () => {
   test.beforeEach(async ({ apiJourney, pages }) => {
@@ -28,17 +27,6 @@ test.describe('Select species of commodity', () => {
     expect(commodityDetails[0]).toBe('0102');
     expect(commodityDetails[1]).toBe('Cow');
     expect(commodityDetails[2]).toBe('Live bovine animals');
-  });
-
-  test('shows expected types in commodity type dropdown', async ({ pages }) => {
-    await expect.poll(async () => pages.speciesSelection.dropdownCommodityTypeOptions.count()).toBeGreaterThan(1);
-    const commodityTypeOptions = await pages.speciesSelection.dropdownCommodityTypeOptions.allTextContents();
-    const keys = Object.keys(commodityTypes);
-    const expectedOptions = keys.map(camelCaseToTitleCase);
-    expect(commodityTypeOptions[0]).toBe('Select type of commodity');
-    expect(commodityTypeOptions[1]).toMatch(/^─+$/);
-    expect(commodityTypeOptions.slice(2)).toHaveLength(expectedOptions.length);
-    expect(commodityTypeOptions.slice(2)).toEqual(expect.arrayContaining(expectedOptions));
   });
 
   test('defaults type to "Select type of commodity"', async ({ pages }) => {

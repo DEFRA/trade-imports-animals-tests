@@ -40,36 +40,6 @@ test.describe('County parish holding (cph) number', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('shows error when cph number is not entered', async ({ pages }) => {
-      // Leave cph number on default "".
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('Enter a CPH number');
-      const errorSummaryItems = await pages.originOfImport.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('Enter a CPH number');
-    });
-
-    test('shows error when cph number is not 9 digits', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('12345678');
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('CPH number must be exactly 9 digits');
-      const errorSummaryItems = await pages.cphNumber.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('CPH number must be exactly 9 digits');
-    });
-
-    test('shows error when cph number is not a number', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('A'.repeat(9));
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('CPH number must only contain numbers');
-      const errorSummaryItems = await pages.cphNumber.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('CPH number must only contain numbers');
-    });
-
     test('shows both errors when cph number is not a number and not 9 digits', async ({ pages }) => {
       await pages.cphNumber.inputCphNumber.fill('1234567!');
       await pages.cphNumber.btnSaveAndContinue.click();

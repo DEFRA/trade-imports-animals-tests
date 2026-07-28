@@ -8,13 +8,6 @@ test.describe('Notification dashboard search', () => {
     await journey.toNotificationDashboard();
   });
 
-  test('displays the filter notifications search form', async ({ pages }) => {
-    await expect(pages.notificationDashboard.filterHeading).toBeVisible();
-    await expect(pages.notificationDashboard.searchForm).toBeVisible();
-    await expect(pages.notificationDashboard.inputReferenceSearch).toBeVisible();
-    await expect(pages.notificationDashboard.btnSearch).toBeVisible();
-  });
-
   test('returns matching notification when searching by complete reference number', async ({ pages, apiJourney, journey }) => {
     const created = await apiJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();

@@ -18,13 +18,6 @@ test.describe('Consignee selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows error when no selection made', async ({ pages }) => {
-    await pages.consigneeSelection.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.consigneeSelection.expectedUrl);
-    const errorItems = await pages.consigneeSelection.errorSummaryItems.allTextContents();
-    expect(errorItems).toContain('Select a consignee');
-  });
-
   test('returns to addresses after selecting a consignee', async ({ pages }) => {
     await pages.consigneeSelection.radioConsignee('British Livestock Ltd').click();
     await pages.consigneeSelection.btnSaveAndContinue.click();

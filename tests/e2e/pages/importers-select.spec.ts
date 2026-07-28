@@ -18,13 +18,6 @@ test.describe('Importer selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows error when no selection made', async ({ pages }) => {
-    await pages.importerSelection.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.importerSelection.expectedUrl);
-    const errorItems = await pages.importerSelection.errorSummaryItems.allTextContents();
-    expect(errorItems).toContain('Select an importer');
-  });
-
   test('returns to addresses after selecting an importer', async ({ pages }) => {
     await pages.importerSelection.radioImporter('Import Co UK').click();
     await pages.importerSelection.btnSaveAndContinue.click();

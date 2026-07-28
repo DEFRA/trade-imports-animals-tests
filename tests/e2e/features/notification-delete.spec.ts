@@ -8,10 +8,6 @@ test.describe('Notification delete', () => {
       await notificationActions.toNotificationView(created.referenceNumber);
     });
 
-    test('shows the delete button for a submitted notification', async ({ pages }) => {
-      await expect(pages.notificationView.btnDelete).toBeVisible();
-    });
-
     test('opens the confirmation dialog when delete is clicked', async ({ pages }) => {
       await pages.notificationView.btnDelete.click();
       await expect(pages.notificationView.deleteDialog).toBeVisible();

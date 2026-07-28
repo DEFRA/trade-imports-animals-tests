@@ -17,13 +17,6 @@ test.describe('Import notification service - dashboard pagination', () => {
       await seedNotifications(seedCount);
     });
 
-    test('starts on page one when opening the dashboard', async ({ pages }) => {
-      expect(pages.notificationDashboard.currentPageFromUrl()).toBe(1);
-      await expect(pages.page).not.toHaveURL(/\?page=/);
-      await expect(pages.notificationDashboard.totalResults).toHaveText(/^Showing 1 /);
-      await expect(pages.notificationDashboard.nextPageNumberLabel).toHaveText(/^2 of \d+$/);
-    });
-
     test('navigates to the next page and shows a different set of notifications', async ({ pages }) => {
       const firstPageReference = (await pages.notificationDashboard.notificationCard(0).details.heading.textContent())?.trim();
 

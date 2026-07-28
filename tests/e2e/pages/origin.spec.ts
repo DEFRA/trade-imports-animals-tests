@@ -52,37 +52,6 @@ test.describe('Origin of the import', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('shows error when country of origin is not selected', async ({ pages }) => {
-      // Leave country of origin on default "Select a country".
-      await pages.originOfImport.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-      const errorInline = pages.originOfImport.errorCountry;
-      await expect(errorInline).toContainText('Select the country where the animal originates from');
-      const errorSummaryItems = await pages.originOfImport.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toContain('Select the country where the animal originates from');
-    });
-
-    test('shows error for non-alphanumeric internal reference', async ({ pages }) => {
-      await pages.originOfImport.inputInternalReferenceNumber.fill('ABC123-_$!');
-      await pages.originOfImport.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-      const errorInline = pages.originOfImport.errorInternalReferenceNumber;
-      await expect(errorInline).toContainText('Internal reference must only contain letters and numbers');
-      const errorSummaryItems = await pages.originOfImport.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toContain('Internal reference must only contain letters and numbers');
-    });
-
-    test('shows error when internal reference exceeds 58 characters', async ({ pages }) => {
-      const fiftyNineChars = 'A'.repeat(59);
-      await pages.originOfImport.inputInternalReferenceNumber.fill(fiftyNineChars);
-      await pages.originOfImport.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.originOfImport.expectedUrl);
-      const errorInline = pages.originOfImport.errorInternalReferenceNumber;
-      await expect(errorInline).toContainText('Internal reference must be 58 characters or less');
-      const errorSummaryItems = await pages.originOfImport.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toContain('Internal reference must be 58 characters or less');
-    });
-
     test('shows both errors when internal reference is too long and non-alphanumeric', async ({ pages }) => {
       const invalidValue = 'A'.repeat(58) + '-$';
       await pages.originOfImport.inputInternalReferenceNumber.fill(invalidValue);

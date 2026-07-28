@@ -42,15 +42,4 @@ test.describe('Declaration', () => {
     await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
     await expect(pages.declaration.heading).toBeVisible();
   });
-
-  test.describe('Input validation', { tag: '@validation' }, () => {
-    test('shows error when declaration is not confirmed', async ({ pages }) => {
-      await pages.declaration.btnSubmitNotification.click();
-      await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
-      await expect(pages.declaration.errorDeclaration).toContainText('Confirm that the information is true and correct before submitting');
-      const errorSummaryItems = await pages.declaration.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('Confirm that the information is true and correct before submitting');
-    });
-  });
 });

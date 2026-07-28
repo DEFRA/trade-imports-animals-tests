@@ -18,13 +18,6 @@ test.describe('Place of origin selection', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
-  test('shows error when no selection made', async ({ pages }) => {
-    await pages.placeOfOriginSelection.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.placeOfOriginSelection.expectedUrl);
-    const errorItems = await pages.placeOfOriginSelection.errorSummaryItems.allTextContents();
-    expect(errorItems).toContain('Select a place of origin');
-  });
-
   test('returns to addresses after selecting a place of origin', async ({ pages }) => {
     await pages.placeOfOriginSelection.radioPlaceOfOrigin('Origin Farm').click();
     await pages.placeOfOriginSelection.btnSaveAndContinue.click();

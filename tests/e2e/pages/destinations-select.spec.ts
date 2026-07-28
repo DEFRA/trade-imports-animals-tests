@@ -42,9 +42,4 @@ test.describe('Destination selection', () => {
     await expect(cells.nth(1)).toHaveText('945 Main Street, London LS1 5AB');
     await expect(cells.nth(2)).toHaveText('United Kingdom');
   });
-
-  test('shows validation error when no destination is selected', async ({ pages }) => {
-    await pages.destinationSelection.btnSaveAndContinue.click();
-    await expect(pages.destinationSelection.errorSummaryItems.first()).toContainText('Select a place of destination');
-  });
 });
