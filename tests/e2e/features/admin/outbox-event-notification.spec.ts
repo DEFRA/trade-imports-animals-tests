@@ -70,7 +70,7 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         const submitChanges = doc.statusChanges ?? [];
         expect(submitChanges).toHaveLength(1);
         expect(submitChanges[0].status).toBe('SUBMITTED');
-        expect(submitChanges[0].actor).toBeNull();
+        expect(submitChanges[0].actor).toBeUndefined();
       });
 
       await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
