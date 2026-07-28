@@ -22,13 +22,8 @@ test.describe('Import notification service', () => {
       await expect(pages.originOfImport.heading).toBeVisible();
     });
 
-    test('displays the notification list on the home page', async ({ pages }) => {
-      await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
-      await expect(pages.notificationDashboard.heading).toBeVisible();
-      await expect(pages.notificationDashboard.totalResults).toBeVisible();
-      await expect(pages.notificationDashboard.totalResults).toHaveText(/\d+ Results/);
-    });
-
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('displays details on the first notification card', async ({ pages }) => {
       await expect(pages.notificationDashboard.notificationCards.first()).toBeVisible();
       const firstCard = pages.notificationDashboard.notificationCard(0);
@@ -46,6 +41,8 @@ test.describe('Import notification service', () => {
   });
 
   test.describe('notification card actions by status', () => {
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows view and copy as new for a draft notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createFullNotification();
       const referenceNumber = created.referenceNumber;
@@ -60,6 +57,8 @@ test.describe('Import notification service', () => {
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).not.toBeVisible();
     });
 
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows view, copy as new and amend for a submitted notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createSubmittedNotification();
       const referenceNumber = created.referenceNumber;
@@ -74,6 +73,8 @@ test.describe('Import notification service', () => {
       await expect(pages.notificationDashboard.btnAmend(referenceNumber)).toBeVisible();
     });
 
+    // Deliberate duplicate: proves the real backend renders this status
+    // correctly in a live browser, not just the mocked controller test.
     test('shows only view for an amend notification', async ({ pages, journey, apiJourney }) => {
       const created = await apiJourney.createAmendNotification();
       const referenceNumber = created.referenceNumber;

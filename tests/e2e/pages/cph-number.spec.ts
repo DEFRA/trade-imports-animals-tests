@@ -18,6 +18,11 @@ test.describe('County parish holding (cph) number', () => {
     await expect(pages.addresses.heading).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it covers
+  // the blank value, but the `type`/`maxlength` input attributes (static,
+  // hardcoded in cph-number/index.njk) aren't asserted by any JS test.
+  // Remove once closed, or accept the low risk of a hardcoded template
+  // attribute and drop this instead.
   test('shows empty cph number input on first load', async ({ pages }) => {
     await expect(pages.cphNumber.inputCphNumber).toHaveValue('');
     await expect(pages.cphNumber.inputCphNumber).toHaveAttribute('type', 'text');
@@ -40,41 +45,10 @@ test.describe('County parish holding (cph) number', () => {
   });
 
   test.describe('Input validation', { tag: '@validation' }, () => {
-    test('limits cph number input to 11 characters', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('1'.repeat(20));
-      await expect(pages.cphNumber.inputCphNumber).toHaveValue('1'.repeat(11));
-    });
-
-    test('shows error when cph number is not entered', async ({ pages }) => {
-      // Leave cph number on default "".
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('Enter a CPH number');
-      const errorSummaryItems = await pages.originOfImport.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('Enter a CPH number');
-    });
-
-    test('shows error when cph number is not 9 digits', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('12345678');
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('CPH number must be exactly 9 digits');
-      const errorSummaryItems = await pages.cphNumber.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('CPH number must be exactly 9 digits');
-    });
-
-    test('shows error when cph number is not a number', async ({ pages }) => {
-      await pages.cphNumber.inputCphNumber.fill('A'.repeat(9));
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await expect(pages.page).toHaveURL(pages.cphNumber.expectedUrl);
-      await expect(pages.cphNumber.errorCphNumber).toContainText('CPH number must only contain numbers');
-      const errorSummaryItems = await pages.cphNumber.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('CPH number must only contain numbers');
-    });
-
+    // TODO: only Partial coverage elsewhere (cph-number-schema.test.js /
+    // controller.test.js) — the length and pattern messages are asserted
+    // separately; no test submits a payload that fails both simultaneously.
+    // Remove once closed.
     test('shows both errors when cph number is not a number and not 9 digits', async ({ pages }) => {
       await pages.cphNumber.inputCphNumber.fill('1234567!');
       await pages.cphNumber.btnSaveAndContinue.click();

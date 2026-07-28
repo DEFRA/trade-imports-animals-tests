@@ -27,35 +27,6 @@ test.describe('Additional details', () => {
     });
   });
 
-  test('shows default values on first load', async ({ pages }) => {
-    await expect(pages.additionalDetails.radioApprovedBodies).not.toBeChecked();
-    await expect(pages.additionalDetails.radioBreedingAndOrProduction).not.toBeChecked();
-    await expect(pages.additionalDetails.radioSlaughter).not.toBeChecked();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes)).not.toBeChecked();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.no)).toBeChecked();
-  });
-
-  test('can select only one animals certified for option', async ({ pages }) => {
-    await pages.additionalDetails.radioApprovedBodies.click();
-    await expect(pages.additionalDetails.radioApprovedBodies).toBeChecked();
-    await expect(pages.additionalDetails.radioBreedingAndOrProduction).not.toBeChecked();
-    await expect(pages.additionalDetails.radioSlaughter).not.toBeChecked();
-    await pages.additionalDetails.radioBreedingAndOrProduction.click();
-    await expect(pages.additionalDetails.radioApprovedBodies).not.toBeChecked();
-    await expect(pages.additionalDetails.radioBreedingAndOrProduction).toBeChecked();
-    await expect(pages.additionalDetails.radioSlaughter).not.toBeChecked();
-    await pages.additionalDetails.radioSlaughter.click();
-    await expect(pages.additionalDetails.radioApprovedBodies).not.toBeChecked();
-    await expect(pages.additionalDetails.radioBreedingAndOrProduction).not.toBeChecked();
-    await expect(pages.additionalDetails.radioSlaughter).toBeChecked();
-  });
-
-  test('allows changing contains unweaned animals from "No" to "Yes"', async ({ pages }) => {
-    await pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes).click();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes)).toBeChecked();
-    await expect(pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.no)).not.toBeChecked();
-  });
-
   test('continues to accompanying documents after saving additional details', async ({ pages }) => {
     await pages.additionalDetails.radioApprovedBodies.click();
     await pages.additionalDetails.radioContainsUnweanedAnimals(yesNoValues.yes).click();

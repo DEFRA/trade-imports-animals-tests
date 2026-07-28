@@ -14,6 +14,9 @@ test.describe('Commodities', () => {
     expect(journeyContext.referenceNumber).toBe(referenceNumber);
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it checks
+  // option count (6) and 4 named items, not full parity with the dynamic
+  // commodity-codes list. Remove once closed.
   test('shows expected commodities in commodity dropdown', async ({ pages }) => {
     const commodityOptions = await pages.commoditySelection.dropdownCommodityOptions.allTextContents();
     const keys = Object.keys(commodityCodes);
@@ -25,6 +28,9 @@ test.describe('Commodities', () => {
     expect(commodityOptions.slice(2)).toEqual(expect.arrayContaining(expectedOptions));
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it asserts
+  // the text is present, not that it's the selected/empty-value default
+  // option. Remove once closed.
   test('defaults commodity to "Select a commodity"', async ({ pages }) => {
     // Default "Select a commodity" option has an empty value.
     await expect(pages.commoditySelection.dropdownCommodity.locator('option:checked')).toHaveText('Select a commodity');

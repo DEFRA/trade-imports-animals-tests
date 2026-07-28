@@ -6,11 +6,16 @@ test.describe('Notification dashboard sort', () => {
     await journey.toNotificationDashboard();
   });
 
+  // TODO: only Partial coverage elsewhere (notification-helper.test.js) — it
+  // unit-tests parseNotificationSort()'s defaulting logic but no controller
+  // test asserts the rendered `selected` option. Remove once closed.
   test('default sort option is "Arrival (newest to oldest)"', async ({ pages }) => {
     const selectedOption = pages.notificationDashboard.dropdownSort.locator('option:checked');
     await expect(selectedOption).toHaveText(sortByValues.arrivalNewestToOldest);
   });
 
+  // TODO: no coverage elsewhere — NOTIFICATION_SORT_OPTIONS' rendered option
+  // count/text isn't tested by any controller test. Remove once closed.
   test('sort dropdown contains all four expected options', async ({ pages }) => {
     const options = pages.notificationDashboard.dropdownSort.locator('option');
     await expect(options).toHaveCount(4);

@@ -40,6 +40,9 @@ test.describe('Animal identification details', () => {
     expect(secondCommodityDetails[3]).toBe(String((defaults.noOfAnimals as number[])[1]));
   });
 
+  // TODO: no coverage elsewhere — controller.test.js GET tests assert data
+  // passed to h.view, not the rendered empty input values. Remove once
+  // closed.
   test('shows empty animal identifiers for each animal by default', async ({ pages }) => {
     // Currently limited to one animal identifier per species; species name and type are carried over.
     await expect(pages.animalIdentification.rowsIdentifiers).toHaveCount(2);
@@ -49,21 +52,6 @@ test.describe('Animal identification details', () => {
     await expect(pages.animalIdentification.cellIdentifiers(1, BOS_DOMESTIC)).toBeVisible();
     await expect(pages.animalIdentification.inputEarTag(1)).toHaveValue('');
     await expect(pages.animalIdentification.inputPassport(1)).toHaveValue('');
-  });
-
-  test('can enter animal identifiers for each animal', async ({ pages }) => {
-    const firstEarTag = 'FR123456789012?`';
-    const firstPassport = 'FR-BOV-2024-001234';
-    const secondEarTag = '#FR123456789013!';
-    const secondPassport = 'FR-BOV-2024-001235';
-    await pages.animalIdentification.inputEarTag(0).fill(firstEarTag);
-    await pages.animalIdentification.inputPassport(0).fill(firstPassport);
-    await pages.animalIdentification.inputEarTag(1).fill(secondEarTag);
-    await pages.animalIdentification.inputPassport(1).fill(secondPassport);
-    await expect(pages.animalIdentification.inputEarTag(0)).toHaveValue(firstEarTag);
-    await expect(pages.animalIdentification.inputPassport(0)).toHaveValue(firstPassport);
-    await expect(pages.animalIdentification.inputEarTag(1)).toHaveValue(secondEarTag);
-    await expect(pages.animalIdentification.inputPassport(1)).toHaveValue(secondPassport);
   });
 
   test('continues to additional details after saving identification details', async ({ pages }) => {

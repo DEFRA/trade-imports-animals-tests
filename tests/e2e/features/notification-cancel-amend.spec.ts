@@ -11,11 +11,6 @@ test.describe('Notification cancel amend', () => {
       await notificationActions.toNotificationView(created.referenceNumber);
     });
 
-    test('shows the Cancel amendment option when notification is in Amend status', async ({ pages }) => {
-      await expect(pages.notificationView.amendStatusTag).toBeVisible();
-      await expect(pages.notificationView.btnCancelAmend).toBeVisible();
-    });
-
     test('shows the confirmation page when Cancel amendment is selected', async ({ pages, journeyContext }) => {
       await pages.notificationView.btnCancelAmend.click();
 
@@ -36,20 +31,6 @@ test.describe('Notification cancel amend', () => {
       await expect(pages.notificationView.btnCancelAmend).toBeVisible();
       await expect(pages.notificationView.changeLink('County Parish Holding number (CPH)')).toBeVisible();
     });
-  });
-
-  test('does not show the Cancel amendment option when notification is Submitted', async ({
-    pages,
-    apiJourney,
-    notificationActions,
-    journeyContext,
-  }) => {
-    const created = await apiJourney.createSubmittedNotification();
-    const submittedReference = created.referenceNumber ?? journeyContext.referenceNumber;
-    await notificationActions.toNotificationView(submittedReference);
-
-    await expect(pages.notificationView.btnCancelAmend).not.toBeVisible();
-    await expect(pages.notificationView.btnAmend).toBeVisible();
   });
 
   test(

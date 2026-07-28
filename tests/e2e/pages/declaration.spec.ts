@@ -21,6 +21,9 @@ test.describe('Declaration', () => {
     await expect(pages.notificationView.heading).toBeVisible();
   });
 
+  // TODO: no coverage elsewhere — heading/checkbox/date/submit-button
+  // presence isn't tested by any controller or template test. Remove once
+  // closed.
   test('shows expected page content', async ({ pages }) => {
     await expect(pages.declaration.heading).toBeVisible();
     await expect(pages.declaration.responsibilityConfirmation).toBeVisible();
@@ -29,6 +32,9 @@ test.describe('Declaration', () => {
     await expect(pages.declaration.btnSubmitNotification).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it confirms
+  // submissionDate is passed to the view (expect.any(String)), not the
+  // specific relative-date value or checkbox default. Remove once closed.
   test('shows default values on first load', async ({ pages }) => {
     const expectedDeclarationDate = toDisplayDate(getRelativeDate());
     await expect(pages.declaration.checkboxDeclaration).not.toBeChecked();
@@ -41,16 +47,5 @@ test.describe('Declaration', () => {
     // TODO: pending submission confirmation page implementation, temporarily stays on declaration page.
     await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
     await expect(pages.declaration.heading).toBeVisible();
-  });
-
-  test.describe('Input validation', { tag: '@validation' }, () => {
-    test('shows error when declaration is not confirmed', async ({ pages }) => {
-      await pages.declaration.btnSubmitNotification.click();
-      await expect(pages.page).toHaveURL(pages.declaration.expectedUrl);
-      await expect(pages.declaration.errorDeclaration).toContainText('Confirm that the information is true and correct before submitting');
-      const errorSummaryItems = await pages.declaration.errorSummaryItems.allTextContents();
-      expect(errorSummaryItems).toHaveLength(1);
-      expect(errorSummaryItems).toContain('Confirm that the information is true and correct before submitting');
-    });
   });
 });

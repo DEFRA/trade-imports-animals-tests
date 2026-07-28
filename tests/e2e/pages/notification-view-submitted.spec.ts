@@ -44,17 +44,6 @@ test.describe('Notification view (SUBMITTED)', () => {
     await expect(pages.notificationView.btnConfirmAndSubmit).not.toBeVisible();
   });
 
-  test('displays all section headings', async ({ pages }) => {
-    await expect(pages.notificationView.sectionHeading('Where is this consignment coming from?')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Your commodities')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Additional information details')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Reason for importing the animals')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Addresses')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('County Parish Holding number (CPH)')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Transport details')).toBeVisible();
-    await expect(pages.notificationView.sectionHeading('Accompanying documents')).toBeVisible();
-  });
-
   test('shows origin details', async ({ pages }) => {
     await expect(pages.notificationView.summaryValue('Country of origin')).toHaveText(defaults.countryCode.display);
   });
@@ -96,6 +85,9 @@ test.describe('Notification view (SUBMITTED)', () => {
     await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.value);
   });
 
+  // TODO: no coverage elsewhere — the "Not yet added" empty-state text
+  // (index.njk:339) isn't asserted by any controller test. Remove once
+  // closed.
   test('shows no accompanying documents', async ({ pages }) => {
     // TODO: Pending automation of accompanying documents page (upload doc).
     await expect(pages.notificationView.noDocumentsText).toBeVisible();

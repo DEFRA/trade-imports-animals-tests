@@ -17,6 +17,8 @@ test.describe('Import notification service - dashboard pagination', () => {
       await seedNotifications(seedCount);
     });
 
+    // Deliberate duplicate: proves the real backend renders this label
+    // correctly in a live browser, not just the mocked controller test.
     test('starts on page one when opening the dashboard', async ({ pages }) => {
       expect(pages.notificationDashboard.currentPageFromUrl()).toBe(1);
       await expect(pages.page).not.toHaveURL(/\?page=/);

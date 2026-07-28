@@ -42,9 +42,4 @@ test.describe('Consignor selection', () => {
     await expect(cells.nth(1)).toHaveText('12 Rue de la Gare, 59000 Lille');
     await expect(cells.nth(2)).toHaveText('	France');
   });
-
-  test('shows validation error when no consignor is selected', async ({ pages }) => {
-    await pages.consignorSelection.btnSaveAndContinue.click();
-    await expect(pages.consignorSelection.errorSummaryItems.first()).toContainText('Select a consignor or exporter');
-  });
 });

@@ -20,30 +20,16 @@ test.describe('Contact address for consignment', () => {
     await expect(pages.transporter.cellsTransporter.nth(0)).toContainText(TRANSPORTER_NAME);
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — the GET
+  // test checks heading/legend text and address names, not the paragraph
+  // description, "add a new branch address" link, or button. Remove once
+  // closed.
   test('shows expected page content', async ({ pages }) => {
     await expect(pages.contactAddress.heading).toBeVisible();
     await expect(pages.contactAddress.paragraphDescription).toBeVisible();
     await expect(pages.contactAddress.groupSelectAddress).toBeVisible();
     await expect(pages.contactAddress.linkAddNewBranchAddress).toBeVisible();
     await expect(pages.contactAddress.btnSaveAndContinue).toBeVisible();
-  });
-
-  test('shows addresses unchecked by default', async ({ pages }) => {
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('Laiterie du Nord SARL')).toBeVisible();
-    await expect(pages.contactAddress.radioAddress('Laiterie du Nord SARL')).not.toBeChecked();
-  });
-
-  test('can select only one address at a time', async ({ pages }) => {
-    await pages.contactAddress.radioAddress('Animal and Plant Health Agency').click();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).not.toBeChecked();
-    await pages.contactAddress.radioAddress('EuroStore Services').click();
-    await expect(pages.contactAddress.radioAddress('Animal and Plant Health Agency')).not.toBeChecked();
-    await expect(pages.contactAddress.radioAddress('EuroStore Services')).toBeChecked();
   });
 
   test('continues to review after selecting a contact address', async ({ pages, journeyContext }) => {

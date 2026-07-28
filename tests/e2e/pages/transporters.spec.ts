@@ -18,6 +18,9 @@ test.describe('Transporter', () => {
     await expect(pages.entryPoint.heading).toBeVisible();
   });
 
+  // TODO: only Partial coverage elsewhere (controller.test.js) — it checks
+  // 'Transporter'/'Add a transporter' strings are present, not the guidance
+  // link, its target attribute, or button visibility. Remove once closed.
   test('shows expected page content', async ({ pages }) => {
     await expect(pages.transporter.heading).toBeVisible();
     await expect(pages.transporter.caption).toBeVisible();
