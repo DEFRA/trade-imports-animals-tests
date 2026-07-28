@@ -21,6 +21,9 @@ test.describe('Declaration', () => {
     await expect(pages.notificationView.heading).toBeVisible();
   });
 
+  // TODO: no coverage elsewhere — heading/checkbox/date/submit-button
+  // presence isn't tested by any controller or template test. Remove once
+  // closed.
   test('shows expected page content', async ({ pages }) => {
     await expect(pages.declaration.heading).toBeVisible();
     await expect(pages.declaration.responsibilityConfirmation).toBeVisible();

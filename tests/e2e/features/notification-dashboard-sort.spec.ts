@@ -14,6 +14,8 @@ test.describe('Notification dashboard sort', () => {
     await expect(selectedOption).toHaveText(sortByValues.arrivalNewestToOldest);
   });
 
+  // TODO: no coverage elsewhere — NOTIFICATION_SORT_OPTIONS' rendered option
+  // count/text isn't tested by any controller test. Remove once closed.
   test('sort dropdown contains all four expected options', async ({ pages }) => {
     const options = pages.notificationDashboard.dropdownSort.locator('option');
     await expect(options).toHaveCount(4);

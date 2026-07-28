@@ -40,6 +40,9 @@ test.describe('Animal identification details', () => {
     expect(secondCommodityDetails[3]).toBe(String((defaults.noOfAnimals as number[])[1]));
   });
 
+  // TODO: no coverage elsewhere — controller.test.js GET tests assert data
+  // passed to h.view, not the rendered empty input values. Remove once
+  // closed.
   test('shows empty animal identifiers for each animal by default', async ({ pages }) => {
     // Currently limited to one animal identifier per species; species name and type are carried over.
     await expect(pages.animalIdentification.rowsIdentifiers).toHaveCount(2);

@@ -23,6 +23,9 @@ test.describe('Commodity details', () => {
     await expect(pages.importReason.heading).toBeVisible();
   });
 
+  // TODO: no coverage elsewhere — no GET test in controller.test.js and no
+  // template test asserting these hardcoded table cells. Remove once
+  // closed.
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
     // Commodity details are currently hardcoded in the view.
     await expect(pages.commodityDetails.rowsCommodities).toHaveCount(1);
@@ -31,6 +34,9 @@ test.describe('Commodity details', () => {
     expect(commodityDetails[1]).toBe('Live bovine animals');
   });
 
+  // TODO: no coverage elsewhere — no GET test in controller.test.js and no
+  // template test asserting these hardcoded table cells. Remove once
+  // closed.
   test('shows species and type in table (for selected commodity*)', async ({ pages }) => {
     // Species and type are currently hardcoded in the view.
     await expect(pages.commodityDetails.rowsQuantities).toHaveCount(3);
@@ -40,6 +46,8 @@ test.describe('Commodity details', () => {
     expect(speciesAndType[2]).toContain('Subtotal');
   });
 
+  // TODO: no coverage elsewhere — controller.test.js only tests the POST
+  // handler; no GET/default test exists. Remove once closed.
   test('shows empty quantity inputs and zero subtotals by default', async ({ pages }) => {
     await expect(pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC)).toHaveAttribute('type', 'number');
     await expect(pages.commodityDetails.inputNoOfAnimals(BISON_DOMESTIC)).toHaveText('');

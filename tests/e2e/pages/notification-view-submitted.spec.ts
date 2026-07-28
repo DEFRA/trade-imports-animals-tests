@@ -85,6 +85,9 @@ test.describe('Notification view (SUBMITTED)', () => {
     await expect(pages.notificationView.summaryValue('Port of entry')).toContainText(defaults.pointOfEntry.value);
   });
 
+  // TODO: no coverage elsewhere — the "Not yet added" empty-state text
+  // (index.njk:339) isn't asserted by any controller test. Remove once
+  // closed.
   test('shows no accompanying documents', async ({ pages }) => {
     // TODO: Pending automation of accompanying documents page (upload doc).
     await expect(pages.notificationView.noDocumentsText).toBeVisible();

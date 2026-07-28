@@ -25,6 +25,9 @@ test.describe('Origin of the import', () => {
     }
   });
 
+  // TODO: no coverage elsewhere — the empty-session default
+  // dropdown/radio/input state isn't tested by any controller test. Remove
+  // once closed.
   test('shows default values on first load', async ({ pages }) => {
     // Default "Select a country" option has an empty value.
     await expect(pages.originOfImport.dropdownCountry.locator('option:checked')).toHaveText('Select a country');

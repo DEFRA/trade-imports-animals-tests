@@ -20,6 +20,9 @@ test.describe('Select species of commodity', () => {
     await expect(pages.commoditySelection.heading).toBeVisible();
   });
 
+  // TODO: no coverage elsewhere — the hardcoded commodity-details table
+  // content (select/index.njk) isn't asserted by any controller test.
+  // Remove once closed.
   test('shows commodity details in table (for selected commodity*)', async ({ pages }) => {
     await expect(pages.speciesSelection.rowsCommodities).toHaveCount(1);
     const commodityDetails = await pages.speciesSelection.cellsCommodities(0).allTextContents();
@@ -29,6 +32,9 @@ test.describe('Select species of commodity', () => {
     expect(commodityDetails[2]).toBe('Live bovine animals');
   });
 
+  // TODO: no coverage elsewhere — the GET controller test only covers a
+  // session with typeOfCommodity already set; no empty-session default
+  // test exists. Remove once closed.
   test('defaults type to "Select type of commodity"', async ({ pages }) => {
     // Default "Select type of commodity" option has an empty value.
     await expect(pages.speciesSelection.dropdownCommodityType.locator('option:checked')).toHaveText('Select type of commodity');
