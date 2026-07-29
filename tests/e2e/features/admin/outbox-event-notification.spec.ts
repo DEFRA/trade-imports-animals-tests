@@ -92,17 +92,22 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         expect(amendDocs[1].eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE);
         expect(amendDocs[0].data.exchangedDocument.identifier).toBe(referenceNumber);
         expect(amendDocs[1].data.exchangedDocument.identifier).toBe(referenceNumber);
-        // Amend triggered via UI — actor is present (from frontend session credentials)
-        // statusChanges on the amend event is cumulative: [SUBMITTED(no actor), AMEND(actor)]
+        // Amend triggered via UI — actor is present (from frontend session credentials).
+        // Default E2E user: Andrew Farmer, CRN 2100010101, org 5900001 (Gatwick Airport).
         const amendEvent = amendDocs[1];
-        expect(amendEvent.actor).toBeDefined();
         expect(amendEvent.actor?.source).toBe('dynamics-contact');
+        expect(amendEvent.actor?.userType).toBe('B2C');
+        expect(amendEvent.actor?.displayName).toBe('Andrew Farmer');
+        expect(amendEvent.actor?.organisationId).toBe('5900001');
+        // statusChanges on the amend event is cumulative: [SUBMITTED(no actor), AMEND(actor)]
         const amendChanges = amendEvent.statusChanges ?? [];
         expect(amendChanges).toHaveLength(2);
         expect(amendChanges[0].status).toBe('SUBMITTED');
         expect(amendChanges[1].status).toBe('AMEND');
-        expect(amendChanges[1].actor).not.toBeNull();
         expect(amendChanges[1].actor?.source).toBe('dynamics-contact');
+        expect(amendChanges[1].actor?.userType).toBe('B2C');
+        expect(amendChanges[1].actor?.displayName).toBe('Andrew Farmer');
+        expect(amendChanges[1].actor?.organisationId).toBe('5900001');
       });
     } finally {
       await client.close();
