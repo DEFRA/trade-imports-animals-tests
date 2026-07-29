@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Authentication', { tag: '@auth' }, () => {
+test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
   test.beforeEach(async ({ journey, pages }) => {
     await journey.toSignIn((attemptSignIn) => pages.notificationDashboard.open(attemptSignIn));
   });

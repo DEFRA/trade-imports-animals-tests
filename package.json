@@ -22,7 +22,7 @@
     "_reset_and_clean_and_test_docker_compose": "npm run database:reseed && npm run _clean && npm run _test_docker_compose --",
     "_test_integration": "playwright test --config=playwright.integration.config.ts",
     "_reset_and_clean_and_test_integration": "npm run database:reseed && npm run _clean && npm run _test_integration --",
-    "test": "npm run _clean_and_test -- --grep-invert '@agent|@compose|@a11y'",
+    "test": "npm run _clean_and_test -- --grep-invert '@agent|@compose|@a11y|@integration'",
     "test:integration": "npm run _reset_and_clean_and_test_integration -- --grep '@integration'",
     "test:local": "npm run test:integration",
     "test:a11y": "npm run _clean_and_test -- --grep '@a11y'",
