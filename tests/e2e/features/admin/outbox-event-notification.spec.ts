@@ -95,6 +95,7 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         // Amend triggered via UI — actor is present (from frontend session credentials).
         // Default E2E user: Andrew Farmer, CRN 2100010101, org 5900001 (Gatwick Airport).
         const amendEvent = amendDocs[1];
+        expect(amendEvent.actor?.id).toBe('2100010101');
         expect(amendEvent.actor?.source).toBe('dynamics-contact');
         expect(amendEvent.actor?.userType).toBe('B2C');
         expect(amendEvent.actor?.displayName).toBe('Andrew Farmer');
@@ -104,6 +105,7 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
         expect(amendChanges).toHaveLength(2);
         expect(amendChanges[0].status).toBe('SUBMITTED');
         expect(amendChanges[1].status).toBe('AMEND');
+        expect(amendChanges[1].actor?.id).toBe('2100010101');
         expect(amendChanges[1].actor?.source).toBe('dynamics-contact');
         expect(amendChanges[1].actor?.userType).toBe('B2C');
         expect(amendChanges[1].actor?.displayName).toBe('Andrew Farmer');
