@@ -25,6 +25,10 @@ const viewport = { width: 1280, height: 1000 };
 const parityConfig = withServiceBaseUrls(
   {
     ...sharedConfig,
+    // Both parity suites share one workspace stack; unbounded local workers
+    // overwhelm the defra-id auth stub and tip the heaviest reaches into
+    // 30s timeouts. Four workers is the empirically clean ceiling.
+    workers: process.env.CI ? '50%' : 4,
     projects: [
       {
         name: 'reworked',
