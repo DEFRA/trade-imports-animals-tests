@@ -113,7 +113,7 @@ export class Journey {
     await this.pages.accompanyingDocuments.heading.waitFor();
   }
 
-  async answerAddresses(): Promise<void> {
+  async fillAddressesToCph(): Promise<void> {
     await this.pages.overview.task('Roles and addresses').click();
     const parties = [
       ['Consignor or exporter', 'Astra Rosales'],
@@ -130,19 +130,27 @@ export class Journey {
     }
     await this.pages.addresses.continueButton.click();
     await this.pages.cphNumber.heading.waitFor();
+  }
+
+  async answerAddresses(): Promise<void> {
+    await this.fillAddressesToCph();
     await this.pages.cphNumber.cphNumber.fill('12/345/6789');
     await this.pages.cphNumber.saveAndContinue.click();
     await this.pages.overview.heading.waitFor();
   }
 
-  async answerTransport(): Promise<void> {
-    await this.pages.overview.task('Arrival details').click();
+  async fillArrivalDetails(): Promise<void> {
     await this.pages.arrivalDetails.fillArrivalDate({ day: '12', month: '12', year: '2026' });
     await this.pages.arrivalDetails.portOfEntry.fill('Aberdeen');
     await this.pages.page.getByRole('option', { name: PORT, exact: true }).click();
     await this.pages.page.getByRole('radio', { name: 'Road Vehicle', exact: true }).check();
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
     await this.pages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
+  }
+
+  async answerTransport(): Promise<void> {
+    await this.pages.overview.task('Arrival details').click();
+    await this.fillArrivalDetails();
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
     await this.pages.transitedCountries.selectCountry('France');
@@ -173,6 +181,94 @@ export class Journey {
     await this.answerAddresses();
     await this.answerTransport();
     await this.answerContact();
+  }
+
+  // Reach helpers — land on a page UNFILLED so a per-page spec can drive it.
+  // API-seeded notifications cannot be saved through the UI, so specs that submit
+  // must reach the page through the real journey flow. The commodity section (and
+  // everything downstream) is gated behind origin, so any reach past origin runs
+  // unlockSections first.
+  async toCommoditySelection(): Promise<void> {
+    await this.startNotification();
+    await this.answerOrigin();
+    await this.pages.overview.task('What are you importing?').click();
+    await this.pages.commoditySelection.heading.waitFor();
+  }
+
+  async toConsignmentDetails(): Promise<void> {
+    await this.toCommoditySelection();
+    await this.pages.commoditySelection.searchAndSelect('Cow', ['Bos taurus']);
+    await this.pages.commoditySelection.saveAndContinue.click();
+    await this.pages.consignmentDetails.heading.waitFor();
+  }
+
+  async toAnimalIdentification(): Promise<void> {
+    await this.startNotification();
+    await this.unlockSections();
+    await this.pages.overview.task('Animal identification details').click();
+    await this.pages.animalIdentification.heading.waitFor();
+  }
+
+  async toImportReason(): Promise<void> {
+    await this.startNotification();
+    await this.unlockSections();
+    await this.pages.overview.task('Main reason for importing').click();
+    await this.pages.importReason.heading.waitFor();
+  }
+
+  async toImportPurpose(): Promise<void> {
+    await this.toImportReason();
+    await this.pages.importReason.reason('Internal market').check();
+    await this.pages.importReason.saveAndContinue.click();
+    await this.pages.importPurpose.heading.waitFor();
+  }
+
+  async toAdditionalDetails(): Promise<void> {
+    await this.toImportPurpose();
+    await this.pages.importPurpose.purpose('Breeding').check();
+    await this.pages.importPurpose.saveAndContinue.click();
+    await this.pages.additionalDetails.heading.waitFor();
+  }
+
+  async toCphNumber(): Promise<void> {
+    await this.startNotification();
+    await this.unlockSections();
+    await this.fillAddressesToCph();
+  }
+
+  async toArrivalDetails(): Promise<void> {
+    await this.startNotification();
+    await this.unlockSections();
+    await this.pages.overview.task('Arrival details').click();
+    await this.pages.arrivalDetails.heading.waitFor();
+  }
+
+  async toTransitedCountries(): Promise<void> {
+    await this.toArrivalDetails();
+    await this.fillArrivalDetails();
+    await this.pages.arrivalDetails.saveAndContinue.click();
+    await this.pages.transitedCountries.heading.waitFor();
+  }
+
+  async toTransporter(): Promise<void> {
+    await this.toTransitedCountries();
+    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.saveAndContinue.click();
+    await this.pages.transporter.heading.waitFor();
+  }
+
+  async toTransporterSelection(): Promise<void> {
+    await this.toTransporter();
+    await this.pages.transporter.transporterType('Commercial').check();
+    await this.pages.transporter.saveAndContinue.click();
+    await this.pages.transporterSelection.heading.waitFor();
+  }
+
+  async toContactAddress(): Promise<void> {
+    await this.startNotification();
+    await this.unlockSections();
+    await this.pages.overview.task('Contact address').click();
+    await this.pages.contactAddress.heading.waitFor();
   }
 
   async toReview(): Promise<void> {

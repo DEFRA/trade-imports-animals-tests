@@ -1,27 +1,28 @@
 import { test, expect } from '@fixtures';
 
 test.describe('CPH number page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('shows an error summary when submitted empty', async ({ journey, pages }) => {
-    await journey.startNotification();
-    await journey.unlockSections();
-    await pages.overview.task('Roles and addresses').click();
+  test.beforeEach(async ({ journey }) => {
+    await journey.toCphNumber();
+  });
 
-    const parties = [
-      ['Consignor or exporter', 'Astra Rosales'],
-      ['Place of destination', 'Tech Imports Ltd'],
-      ['Place of origin', 'Origin Farm'],
-      ['Consignee', 'British Livestock Ltd'],
-      ['Importer', 'Import Co UK'],
-    ] as const;
-    for (const [role, name] of parties) {
-      await pages.addresses.addParty(role).click();
-      await pages.page.getByRole('radio', { name }).check();
-      await pages.page.getByRole('button', { name: 'Save and continue' }).click();
-      await pages.addresses.heading.waitFor();
-    }
-    await pages.addresses.continueButton.click();
-    await pages.cphNumber.heading.waitFor();
+  test('renders the page controls', async ({ pages }) => {
+    await expect(pages.cphNumber.heading).toBeVisible();
+    await expect(pages.cphNumber.cphNumber).toBeVisible();
+    await expect(pages.cphNumber.saveAndContinue).toBeVisible();
+  });
 
+  test('leaves the CPH number empty on load', async ({ pages }) => {
+    await expect(pages.cphNumber.cphNumber).toHaveValue('');
+  });
+
+  test('accepts a valid CPH number', async ({ pages }) => {
+    await pages.cphNumber.cphNumber.fill('12/345/6789');
+    await pages.cphNumber.saveAndContinue.click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+  });
+
+  test('shows an error summary when submitted empty', async ({ pages }) => {
     await pages.cphNumber.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
