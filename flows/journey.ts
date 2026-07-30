@@ -139,13 +139,28 @@ export class Journey {
     await this.pages.overview.heading.waitFor();
   }
 
-  async fillArrivalDetails(): Promise<void> {
+  async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
     await this.pages.arrivalDetails.fillArrivalDate({ day: '12', month: '12', year: '2026' });
     await this.pages.arrivalDetails.portOfEntry.fill('Aberdeen');
     await this.pages.page.getByRole('option', { name: PORT, exact: true }).click();
-    await this.pages.page.getByRole('radio', { name: 'Road Vehicle', exact: true }).check();
+    await this.pages.page.getByRole('radio', { name: means, exact: true }).check();
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
     await this.pages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
+  }
+
+  // Re-navigate from the hub to the transporter-type page within an already
+  // unlocked journey. Arrival details is enforced-at-continue, so it must be
+  // filled to save through; a road vehicle keeps transited countries in scope,
+  // which is answered on the way.
+  async reachTransporterFromHub(): Promise<void> {
+    await this.pages.overview.task('Arrival details').click();
+    await this.pages.arrivalDetails.heading.waitFor();
+    await this.fillArrivalDetails();
+    await this.pages.arrivalDetails.saveAndContinue.click();
+    await this.pages.transitedCountries.heading.waitFor();
+    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.saveAndContinue.click();
+    await this.pages.transporter.heading.waitFor();
   }
 
   async answerTransport(): Promise<void> {
