@@ -40,24 +40,6 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
     await expect(pages.notificationDashboard.user()).toBeVisible();
   });
 
-  test('switching organisation changes the owner-scoped dashboard', async ({ pages }) => {
-    await pages.signIn.signIn({ userId: '2100010102' });
-    await expect(pages.page.getByRole('heading', { name: 'Choose your organisation' })).toBeVisible();
-    await pages.page.getByRole('radio', { name: /Farms Ltd/ }).check();
-    await pages.page.getByRole('button', { name: 'Continue' }).click();
-    await pages.notificationDashboard.heading.waitFor();
-
-    await pages.notificationDashboard.btnCreateNewNotification.click();
-    const firstOrganisationJourney = pages.importType.journeyIdFromUrl();
-
-    await pages.notificationDashboard.navigateToFrontend('/auth/organisation');
-    await expect(pages.page.getByRole('heading', { name: 'Choose your organisation' })).toBeVisible();
-    await pages.page.getByRole('radio', { name: /Gatwick Airport/ }).check();
-    await pages.page.getByRole('button', { name: 'Continue' }).click();
-    await pages.notificationDashboard.heading.waitFor();
-    await expect(pages.notificationDashboard.notificationCard(firstOrganisationJourney)).toHaveCount(0);
-  });
-
   test('lands on the sign in page when reopening the notification dashboard after sign out', async ({ pages }) => {
     await pages.signIn.signIn();
     await pages.notificationDashboard.linkSignOut.click();

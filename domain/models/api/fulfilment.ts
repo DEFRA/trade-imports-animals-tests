@@ -22,13 +22,3 @@ export type Fulfilment = {
   createdAt: string;
   submittedAt?: string | null;
 };
-
-export type Owner = {
-  id: string;
-  organisation: string;
-};
-
-export const defaultOwner: Owner = {
-  id: '5add6531-c8c8-4e78-b57b-071002f21887',
-  organisation: '5900001',
-};
