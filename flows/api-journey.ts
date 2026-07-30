@@ -1,5 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
+import { RestClientError } from '@adapters/http/rest-client';
 import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/models/api/fulfilment';
 import type { PageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
@@ -91,7 +92,21 @@ export class ApiJourney {
 
   async createAmendNotification(): Promise<Fulfilment> {
     const submitted = await this.createSubmittedNotification();
-    return this.remember(await this.api.amendNotification(submitted.id));
+    return this.remember(await this.amendWhenOutboxFree(submitted.id));
+  }
+
+  // Submit's outbox write holds a short per-aggregate lock; an API amend fired
+  // straight after can land inside it and 500 (no user can click that fast).
+  private async amendWhenOutboxFree(id: string, attempts = 3): Promise<Fulfilment> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await this.api.amendNotification(id);
+      } catch (error) {
+        const transientLock = error instanceof RestClientError && error.status === 500;
+        if (!transientLock || attempt >= attempts) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+      }
+    }
   }
 
   async resumeInUi<T extends { open(journeyId: string): Promise<void>; heading: Locator }>(journeyId: string, targetPage: T): Promise<T> {
