@@ -1,15 +1,31 @@
 #!/bin/sh
-# Regenerate the frozen main-suite visual baseline in a Linux container.
+# Regenerate a visual baseline in a Linux container.
 # Bind-mounts the repo so the updated snapshot is written to the host.
+#
+# Usage: ./bin/update-visual-baselines-linux.sh [main|reworked] [Playwright arguments]
+# Defaults to the frozen main-suite lane.
 #
 # Prerequisites: workspace stack running (./scripts/stack/run-stack.sh).
 # Reseeds the database on the host before the container run.
 #
-# Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, MONGODB_URI, TRADE_IMPORTS_ANIMALS_BACKEND_URL, MAIN_FRONTEND_URL, or CONTAINER_USER to customise the container run.
+# Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, MONGODB_URI, TRADE_IMPORTS_ANIMALS_BACKEND_URL, MAIN_FRONTEND_URL, REWORKED_FRONTEND_URL, or CONTAINER_USER to customise the container run.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+LANE="${1:-main}"
+
+case "$LANE" in
+  main | reworked)
+    if [ "$#" -gt 0 ]; then
+      shift
+    fi
+    ;;
+  *)
+    echo "Usage: $0 [main|reworked] [Playwright arguments]" >&2
+    exit 2
+    ;;
+esac
 
 PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.61.1-jammy}"
 # Run as the invoking user's UID:GID so bind-mounted reports and snapshots are host-owned, not root.
@@ -18,6 +34,7 @@ NODE_MODULES_VOLUME="${NODE_MODULES_VOLUME:-trade-imports-animals-tests-containe
 MONGODB_URI="${MONGODB_URI:-mongodb://host.docker.internal:27017/?tls=false&directConnection=true}"
 TRADE_IMPORTS_ANIMALS_BACKEND_URL="${TRADE_IMPORTS_ANIMALS_BACKEND_URL:-http://host.docker.internal:8085}"
 MAIN_FRONTEND_URL="${MAIN_FRONTEND_URL:-http://localhost:3200}"
+REWORKED_FRONTEND_URL="${REWORKED_FRONTEND_URL:-http://localhost:3100}"
 
 cd "$REPO_ROOT"
 npm run database:reseed
@@ -55,7 +72,7 @@ docker run --rm \
   -e MONGODB_URI="$MONGODB_URI" \
   -e TRADE_IMPORTS_ANIMALS_BACKEND_URL="$TRADE_IMPORTS_ANIMALS_BACKEND_URL" \
   -e MAIN_FRONTEND_URL="$MAIN_FRONTEND_URL" \
-  -e TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL="$MAIN_FRONTEND_URL" \
+  -e REWORKED_FRONTEND_URL="$REWORKED_FRONTEND_URL" \
   --entrypoint npm \
   "$PLAYWRIGHT_IMAGE" \
-  run _test_parity_main -- --grep @visual --update-snapshots "$@"
+  run "_test_parity_$LANE" -- --grep @visual --update-snapshots --workers=1 "$@"
