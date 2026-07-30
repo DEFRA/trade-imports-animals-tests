@@ -21,10 +21,18 @@ const mainUrl = process.env.MAIN_FRONTEND_URL ?? 'http://localhost:3200';
 const adminUrl = process.env.ADMIN_FRONTEND_URL ?? 'http://localhost:3001';
 
 const viewport = { width: 1280, height: 1000 };
+const artifactLane = process.env.PARITY_ARTIFACT_LANE ?? 'run';
 
 const parityConfig = withServiceBaseUrls(
   {
     ...sharedConfig,
+    outputDir: `test-results/parity-${artifactLane}`,
+    reporter: [
+      ['list'],
+      ['html', { open: 'never', outputFolder: `playwright-report/parity-${artifactLane}` }],
+      ['allure-playwright'],
+      ['./utils/playwright/failed-suite-reporter.ts'],
+    ],
     // Both parity suites share one workspace stack; unbounded local workers
     // overwhelm the defra-id auth stub and tip the heaviest reaches into
     // 30s timeouts. Four workers is the empirically clean ceiling.

@@ -172,26 +172,7 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
-### Updating macOS baselines
-
-```bash
-npm run test:docker-compose:visual -- --update-snapshots
-npm run test:docker-compose:visual -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
-```
-
-Produces `*-darwin.png` on local macOS. Host Playwright runs against the workspace
-stack; updated snapshots are written to your working tree for commit.
-
-### Updating Linux baselines
-
-```bash
-npm run test:docker-compose:visual:container -- --update-snapshots
-npm run test:docker-compose:visual:container -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
-```
-
-Produces `*-linux.png` files that match CI rendering. Playwright runs in a Linux
-container against the workspace stack; updated snapshots are written into your
-working tree for commit.
+Regenerate the frozen main-suite baseline against the :3200 frontend with `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image used by CI; both commands reseed the workspace database, run the main parity project's `@visual` spec, and write the updated snapshot into the working tree for commit.
 
 ## Running Tests on GitHub
 
