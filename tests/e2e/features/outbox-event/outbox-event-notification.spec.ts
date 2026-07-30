@@ -1,11 +1,28 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
+import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+const EXPECTED_ACTOR: OutboxEventActor = {
+  id: '2100010101',
+  source: 'dynamics-contact',
+  userType: 'B2C',
+  displayName: 'Andrew Farmer',
+  organisationId: '5900001',
+  onBehalfOfOrganisationId: null,
+};
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
+
+const actorWithNullableFields = (actor: OutboxEventActor | null): OutboxEventActor => ({
+  id: actor?.id ?? null,
+  source: actor?.source ?? null,
+  userType: actor?.userType ?? null,
+  displayName: actor?.displayName ?? null,
+  organisationId: actor?.organisationId ?? null,
+  onBehalfOfOrganisationId: actor?.onBehalfOfOrganisationId ?? null,
+});
 
 /**
  * Integration seam: a real UI submission emits the transactional outbox event the gateway forwards.
@@ -54,6 +71,11 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
       expect(doc.data.$type).toBe('gbn-ag');
       expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
       expect(doc.data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+      expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
+      expect(doc.statusChanges).toHaveLength(1);
+      expect(doc.statusChanges[0].status).toBe('SUBMITTED');
+      expect(doc.statusChanges[0].dateChanged).toEqual(expect.any(Date));
+      expect(actorWithNullableFields(doc.statusChanges[0].actor)).toEqual(EXPECTED_ACTOR);
     } finally {
       await client.close();
     }
