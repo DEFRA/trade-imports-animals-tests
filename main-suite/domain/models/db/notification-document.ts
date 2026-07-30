@@ -1,0 +1,110 @@
+import type { ObjectId } from 'mongodb';
+
+export type NotificationDocument = {
+  _id: ObjectId;
+  referenceNumber: string | null;
+  origin: {
+    countryCode: string;
+    requiresRegionCode: string;
+    internalReference?: string;
+  };
+  commodity: {
+    name: string;
+    commodityComplement: Array<{
+      typeOfCommodity: string;
+      species: Array<{
+        value: string;
+        text: string;
+        noOfAnimals: number;
+        noOfPackages: number;
+        earTag: string;
+        passport: string;
+      }>;
+      totalNoOfAnimals: number;
+      totalNoOfPackages: number;
+    }>;
+  };
+  reasonForImport: string;
+  additionalDetails: {
+    certifiedFor?: string;
+    unweanedAnimals: string;
+  };
+  placeOfOrigin?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  consignor?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  consignee?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  importer?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  destination?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  cphNumber?: string;
+  transport: {
+    portOfEntry?: string;
+    arrivalDate?: Date;
+    meansOfTransport: string;
+    transportIdentification?: string;
+    transportDocumentReference?: string;
+    transitedCountries?: string[];
+    transporter?: {
+      name: string;
+      address: {
+        addressLine1: string;
+        addressLine2: string;
+        addressLine3?: string;
+        country: string;
+      };
+      approvalNumber: string;
+      type: string;
+    };
+  };
+  consignment?: {
+    name: string;
+    address: {
+      addressLine1: string;
+      addressLine2?: string;
+      addressLine3?: string;
+      country: string;
+    };
+  };
+  status: string;
+  created: Date;
+  updated: Date;
+  _class: string;
+};
