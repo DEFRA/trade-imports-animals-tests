@@ -15,7 +15,7 @@ export class PartyPickerPage extends NotificationPage {
   }
 
   party(name: string): Locator {
-    return this.page.getByRole('radio', { name, exact: true });
+    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
   get search(): Locator {
