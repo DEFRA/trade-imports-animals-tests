@@ -30,6 +30,20 @@ export class NotificationApiClient {
     return this.rest.put<Fulfilment>(`/fulfilments/${id}`, { id, fulfilment }, this.ownerHeaders(owner));
   }
 
+  /**
+   * Seed the "current" notification projection (Mapper A). Every UI save writes this alongside the
+   * fulfilment; an API seed must create it too, or the UI's GET /notifications/{id} 404s and the save
+   * fails. Only referenceNumber is required — the first UI save overwrites the rest.
+   */
+  async replaceNotification(id: string, body: Record<string, unknown> = {}, owner: Owner = this.owner): Promise<void> {
+    await this.rest.put<unknown>(`/notifications/${id}`, { referenceNumber: id, ...body }, this.ownerHeaders(owner));
+  }
+
+  /** Seed the "proposed"/new notification projection (Mapper B). See replaceNotification. */
+  async replaceProposedNotification(id: string, body: Record<string, unknown> = {}, owner: Owner = this.owner): Promise<void> {
+    await this.rest.put<unknown>(`/proposed-notifications/${id}`, { referenceNumber: id, ...body }, this.ownerHeaders(owner));
+  }
+
   async getFulfilment(id: string, owner: Owner = this.owner): Promise<Fulfilment> {
     return this.rest.get<Fulfilment>(`/fulfilments/${id}`, this.ownerHeaders(owner));
   }
