@@ -7,15 +7,6 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
     await apiJourney.createAmendNotification();
   });
 
-  test.afterEach(async ({ pages, journeyContext }) => {
-    if (journeyContext.referenceNumber) {
-      await pages.page.goto(`/notifications/${journeyContext.referenceNumber}/delete`);
-      await pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
-      await pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
-      await pages.page.getByText('The notification has been deleted.').waitFor();
-    }
-  });
-
   test('replays outbox events and shows success banner', async ({ adminNavigation, pages, journeyContext }) => {
     await adminNavigation.toOutboxEvents(journeyContext.referenceNumber);
 

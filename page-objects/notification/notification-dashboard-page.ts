@@ -28,7 +28,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get filterHeading(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'Filter notifications' });
+    return this.page.getByRole('heading', { level: 3, name: 'Filter notifications' });
   }
 
   get searchForm(): Locator {
@@ -44,7 +44,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get resultsLabel(): Locator {
-    return this.page.getByTestId('notification-results-label');
+    return this.page.locator('.notification-list__results');
   }
 
   get errorSummary(): Locator {
@@ -52,7 +52,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get notificationCards(): Locator {
-    return this.page.locator('.notification-list__main .govuk-summary-card');
+    return this.page.locator('.govuk-summary-card');
   }
 
   notificationCard(reference: string): Locator {
@@ -70,19 +70,21 @@ export class NotificationDashboardPage extends BasePage {
   notificationCardDetails(index: number) {
     const card = this.notificationCardAt(index);
     return {
-      heading: card.getByRole('heading', { level: 2 }),
+      heading: card.getByRole('heading', { level: 3 }),
       commodity: this.cardField(card, 'Commodity'),
       origin: this.cardField(card, 'Origin'),
       arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
       consignee: this.cardField(card, 'Consignee'),
       consignor: this.cardField(card, 'Consignor'),
       status: this.cardField(card, 'Status'),
-      dateCreated: card.getByText(/Date created:/),
+      dateCreated: this.cardField(card, 'Date created'),
     };
   }
 
   async searchFor(reference: string): Promise<void> {
-    await this.searchForReference(reference);
+    await this.page.getByLabel('Keyword or reference').fill(reference);
+    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
+    await this.page.getByLabel('Keyword or reference').waitFor();
   }
 
   /** Server-side dashboard search via GET ?referenceNumber=. */
@@ -95,7 +97,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get totalResults(): Locator {
-    return this.page.getByText(/^(?:No Results|Showing .* Results)$/);
+    return this.page.getByText(/^Showing (?:1 Result|\d+(?: to \d+)? of \d+ Results)$/);
   }
 
   async getResultsRange(): Promise<ResultsRange | null> {
@@ -110,7 +112,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   formatResultsRangeLabel({ start, end, total }: ResultsRange): string {
-    if (total === 1) return 'Showing 1 Results';
+    if (total === 1) return 'Showing 1 Result';
     if (start === end) return `Showing ${start} of ${total} Results`;
     return `Showing ${start} to ${end} of ${total} Results`;
   }
@@ -120,22 +122,20 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: /^Next(?: page)?$/ });
+    return this.pagination.getByRole('link', { name: 'Next', exact: true });
   }
 
   get linkPreviousPage(): Locator {
-    return this.pagination.getByRole('link', { name: /^Previous(?: page)?$/ });
-  }
-
-  get nextPageNumberLabel(): Locator {
-    return this.linkNextPage.locator('.notifications-pagination__page');
+    return this.pagination.getByRole('link', { name: 'Previous', exact: true });
   }
 
   async getPaginationTotalPages(): Promise<number> {
-    const text = (await this.nextPageNumberLabel.textContent())?.trim() ?? '';
-    const match = text.match(/^\d+ of (\d+)$/);
-    if (!match) throw new Error(`Could not parse pagination total from next link label: "${text}"`);
-    return Number(match[1]);
+    const range = await this.getResultsRange();
+    if (!range) throw new Error('Could not parse the dashboard results range');
+
+    const currentPage = this.currentPageFromUrl();
+    const pageSize = currentPage === 1 ? range.end : Math.floor((range.start - 1) / (currentPage - 1));
+    return Math.ceil(range.total / pageSize);
   }
 
   async openDashboardPage(pageNumber: number): Promise<void> {

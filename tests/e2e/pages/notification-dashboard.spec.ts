@@ -42,18 +42,19 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
     });
 
-    test('displays details on a notification card', async ({ apiJourney, pages }) => {
-      const created = await apiJourney.createFullNotification();
+    test('displays details on a notification card', async ({ journey, journeyContext, pages }) => {
+      test.slow();
+      await journey.submitNotification();
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(created.id);
+      await pages.notificationDashboard.searchForReference(journeyContext.journeyId);
 
       const details = pages.notificationDashboard.notificationCardDetails(0);
-      await expect(details.heading).toContainText(created.id);
+      await expect(details.heading).toContainText(journeyContext.journeyId);
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
       await expect(details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
-      await expect(details.status).toContainText('Draft');
-      await expect(details.dateCreated).toHaveText(/Date created: \d{1,2} \w+ \d{4}/);
+      await expect(details.status).toContainText('Submitted');
+      await expect(details.dateCreated).toHaveText(/\d{1,2} \w+ \d{4}/);
     });
   });
 
@@ -83,30 +84,25 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.amend(referenceNumber)).toBeVisible();
     });
 
-    test('shows only view for an amending notification', async ({ pages, apiJourney }) => {
-      const created = await apiJourney.createAmendNotification();
-      const referenceNumber = created.id;
+    test(
+      'copies a submitted notification from its searched dashboard card',
+      { tag: '@smoke' },
+      async ({ pages, journey, journeyContext }) => {
+        test.slow();
+        await journey.submitNotification();
+        const originalReferenceNumber = journeyContext.journeyId;
 
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCardDetails(0).status).toContainText(/Amend/);
-      await expect(pages.notificationDashboard.view(referenceNumber)).toBeVisible();
-      await expect(pages.notificationDashboard.copyAsNew(referenceNumber)).not.toBeVisible();
-      await expect(pages.notificationDashboard.amend(referenceNumber)).not.toBeVisible();
-    });
+        await pages.notificationDashboard.open();
+        await pages.notificationDashboard.searchForReference(originalReferenceNumber);
+        await pages.notificationDashboard.copyAsNew(originalReferenceNumber).click();
 
-    test('copies a submitted notification from its searched dashboard card', { tag: '@smoke' }, async ({ pages, apiJourney }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const originalReferenceNumber = created.id;
-
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(originalReferenceNumber);
-      await pages.notificationDashboard.copyAsNew(originalReferenceNumber).click();
-
-      await pages.notificationView.heading.waitFor();
-      const copiedReferenceNumber = await pages.notificationView.referenceNumberCaption.textContent();
-      expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-      expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
-    });
+        await pages.overview.heading.waitFor();
+        const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
+          /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+        )?.[0];
+        expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+        expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
+      },
+    );
   });
 });

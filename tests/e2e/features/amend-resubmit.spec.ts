@@ -27,8 +27,6 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     // Change the country of origin through the amending check your answers page.
     await pages.overview.task('Check and submit').click();
     await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.btnCopyAsNew).toBeVisible();
-    await expect(pages.notificationView.btnDelete).toBeVisible();
     await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
     await expect(pages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);

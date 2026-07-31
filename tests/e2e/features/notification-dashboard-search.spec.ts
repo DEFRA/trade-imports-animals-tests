@@ -24,7 +24,7 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${created.id.replace(/-/g, '\\-')}(?:&|$)`));
     await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
     await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(created.id);
-    await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Results');
+    await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Result');
   });
 
   test('opens notification view when clicking View after searching by reference number', async ({ pages, apiJourney, journey }) => {

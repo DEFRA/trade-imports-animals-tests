@@ -18,10 +18,6 @@ export class NotificationViewPage extends NotificationPage {
     return this.journeyStrip;
   }
 
-  get btnAmend(): Locator {
-    return this.page.getByRole('button', { name: 'Amend' });
-  }
-
   get btnCopyAsNew(): Locator {
     return this.page.getByRole('button', { name: 'Copy as new' });
   }

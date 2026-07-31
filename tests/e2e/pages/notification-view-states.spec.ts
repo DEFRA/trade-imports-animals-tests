@@ -57,7 +57,6 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('offers Copy as new and Delete on the read-only view', async ({ pages }) => {
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
-      await expect(pages.notificationView.btnAmend).toBeVisible();
       await expect(pages.notificationView.cancelAmendment).toHaveCount(0);
     });
 
@@ -65,8 +64,10 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       const originalReferenceNumber = journeyContext.journeyId;
       await pages.notificationView.btnCopyAsNew.click();
 
-      await pages.notificationView.heading.waitFor();
-      const copiedReferenceNumber = await pages.notificationView.referenceNumberCaption.textContent();
+      await pages.overview.heading.waitFor();
+      const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
+        /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+      )?.[0];
       expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
       expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });

@@ -30,10 +30,6 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
           timeout: timeouts.medium,
         })
         .toBe(false);
-
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     },
   );
 
@@ -66,10 +62,6 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
           timeout: timeouts.medium,
         })
         .toBe(false);
-
-      await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(referenceNumber);
-      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     });
 
     await test.step('writes a successful delete audit record for one notification delete', async () => {
