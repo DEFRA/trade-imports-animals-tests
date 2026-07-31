@@ -15,6 +15,7 @@ export class NotificationActions {
 
   async deleteNotification(journeyId: string): Promise<void> {
     await this.pages.notificationDashboard.open();
+    await this.pages.notificationDashboard.searchFor(journeyId);
     await this.pages.notificationDashboard.delete(journeyId).click();
     await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
     await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();

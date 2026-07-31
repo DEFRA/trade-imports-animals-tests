@@ -11,7 +11,11 @@ export class ArrivalDetailsPage extends NotificationPage {
   }
 
   get portOfEntry(): Locator {
-    return this.page.locator('input#portOfEntry');
+    return this.page.locator('select#portOfEntry');
+  }
+
+  async selectPort(name: string): Promise<void> {
+    await this.portOfEntry.selectOption({ label: name });
   }
 
   get meansOfTransport(): Locator {

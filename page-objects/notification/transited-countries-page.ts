@@ -13,18 +13,16 @@ export class TransitedCountriesPage extends NotificationPage {
     });
   }
 
-  country(row: number = 0): Locator {
-    const id = row === 0 ? 'transitedCountries' : `transitedCountries-${row + 1}`;
-    return this.page.locator(`input#${id}`);
+  country(name: string): Locator {
+    return this.page.getByRole('checkbox', { name, exact: true });
   }
 
-  async selectCountry(name: string, row: number = 0): Promise<void> {
-    await this.country(row).fill(name);
-    await this.page.getByRole('option', { name, exact: true }).click();
+  async selectCountry(name: string): Promise<void> {
+    await this.country(name).check();
   }
 
-  get addAnotherCountry(): Locator {
-    return this.page.getByRole('button', { name: 'Add another country' });
+  get countries(): Locator {
+    return this.page.locator('input[name="transitedCountries"]');
   }
 
   get saveAndContinue(): Locator {

@@ -15,10 +15,10 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // Add one commodity line for the given species, taking the fewest steps: the
     // counts are submit-enforced, so the details page saves blank straight back
     // to the hub.
-    const addCommodity = async (query: string, species: string): Promise<void> => {
+    const addCommodity = async (species: string): Promise<void> => {
       await pages.overview.open(journeyId);
       await pages.overview.task('What are you importing?').click();
-      await pages.commoditySelection.searchAndSelect(query, [species]);
+      await pages.commoditySelection.selectSpecies([species]);
       await pages.commoditySelection.saveAndContinue.click();
       await expect(pages.consignmentDetails.heading).toBeVisible();
       await pages.consignmentDetails.saveAndContinue.click();
@@ -34,7 +34,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // A non-triggering commodity (cats): CPH is out of scope, so the addresses
     // hub shows no CPH row and Continue returns straight to the hub — no CPH
     // page (the derived gate).
-    await addCommodity('Cat', 'Felis catus');
+    await addCommodity('Felis catus');
     await openAddresses();
     await expect(cphRow).toBeHidden();
     await pages.addresses.continueButton.click();
@@ -43,7 +43,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
 
     // Adding a triggering commodity (cattle) brings CPH into scope across the
     // commodity lines (frame:"anyItem") — the row appears in its empty state.
-    await addCommodity('Cow', 'Bos taurus');
+    await addCommodity('Bos taurus');
     await openAddresses();
     await expect(cphRow).toBeVisible();
     await expect(cphRow).toContainText('Not added yet');

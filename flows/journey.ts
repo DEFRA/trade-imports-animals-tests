@@ -71,7 +71,7 @@ export class Journey {
 
   async answerCommodity(): Promise<void> {
     await this.pages.overview.task('What are you importing?').click();
-    await this.pages.commoditySelection.searchAndSelect('Cow', ['Bos taurus']);
+    await this.pages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.pages.commoditySelection.saveAndContinue.click();
     await this.pages.consignmentDetails.heading.waitFor();
     await this.pages.consignmentDetails.numberOfAnimals.fill('1');
@@ -141,8 +141,7 @@ export class Journey {
 
   async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
     await this.pages.arrivalDetails.fillArrivalDate('12/12/2026');
-    await this.pages.arrivalDetails.portOfEntry.fill('Aberdeen');
-    await this.pages.page.getByRole('option', { name: PORT, exact: true }).click();
+    await this.pages.arrivalDetails.selectPort(PORT);
     await this.pages.page.getByRole('radio', { name: means, exact: true }).check();
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
     await this.pages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
@@ -169,8 +168,7 @@ export class Journey {
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
     await this.pages.transitedCountries.selectCountry('France');
-    await this.pages.transitedCountries.addAnotherCountry.click();
-    await this.pages.transitedCountries.selectCountry('Belgium', 1);
+    await this.pages.transitedCountries.selectCountry('Belgium');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
     await this.pages.transporter.transporterType('Commercial').check();
@@ -212,7 +210,7 @@ export class Journey {
 
   async toConsignmentDetails(): Promise<void> {
     await this.toCommoditySelection();
-    await this.pages.commoditySelection.searchAndSelect('Cow', ['Bos taurus']);
+    await this.pages.commoditySelection.selectSpecies(['Bos taurus']);
     await this.pages.commoditySelection.saveAndContinue.click();
     await this.pages.consignmentDetails.heading.waitFor();
   }

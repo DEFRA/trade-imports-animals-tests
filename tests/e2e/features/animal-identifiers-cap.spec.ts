@@ -11,7 +11,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
 
     // A cattle line with a declared count of 2 (M = 2).
     await pages.overview.task('What are you importing?').click();
-    await pages.commoditySelection.searchAndSelect('Cow', ['Bos taurus']);
+    await pages.commoditySelection.selectSpecies(['Bos taurus']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.consignmentDetails.heading).toBeVisible();
     await pages.consignmentDetails.numberOfAnimals.fill('2');

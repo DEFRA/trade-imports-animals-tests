@@ -12,12 +12,11 @@ export class OriginOfImportPage extends NotificationPage {
   }
 
   get countryOfOrigin(): Locator {
-    return this.page.locator('input#countryOfOrigin');
+    return this.page.locator('select#countryOfOrigin');
   }
 
   async selectCountry(name: string): Promise<void> {
-    await this.countryOfOrigin.fill(name);
-    await this.page.getByRole('option', { name, exact: true }).click();
+    await this.countryOfOrigin.selectOption({ label: name });
   }
 
   radioRequiresOriginCode(value: YesNoValue): Locator {

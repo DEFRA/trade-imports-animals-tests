@@ -14,10 +14,10 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
 
     // Each call ADDS a commodity line; counts are submit-enforced, so the
     // consignment page saves blank straight back to the hub.
-    const addCommodity = async (query: string, species: string): Promise<void> => {
+    const addCommodity = async (species: string): Promise<void> => {
       await pages.overview.open(journeyId);
       await pages.overview.task('What are you importing?').click();
-      await pages.commoditySelection.searchAndSelect(query, [species]);
+      await pages.commoditySelection.selectSpecies([species]);
       await pages.commoditySelection.saveAndContinue.click();
       await pages.consignmentDetails.heading.waitFor();
       await pages.consignmentDetails.saveAndContinue.click();
@@ -36,14 +36,14 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
 
     // A non-triggering commodity (cats): certified-for shows, but the
     // notification-level unweaned-animals question is out of scope.
-    await addCommodity('Cat', 'Felis catus');
+    await addCommodity('Felis catus');
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeHidden();
 
     // Adding a triggering commodity (cattle) brings the unweaned-animals question
     // into scope across the commodity lines (frame:"anyItem").
-    await addCommodity('Cow', 'Bos taurus');
+    await addCommodity('Bos taurus');
     await openAdditionalDetails();
     await expect(certifiedFor).toBeVisible();
     await expect(unweaned).toBeVisible();

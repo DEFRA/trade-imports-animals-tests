@@ -35,6 +35,12 @@ export class NotificationDashboardPage extends BasePage {
     return this.notificationCards.filter({ hasText: reference });
   }
 
+  async searchFor(reference: string): Promise<void> {
+    await this.page.getByLabel('Keyword or reference').fill(reference);
+    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
+    await this.page.getByLabel('Keyword or reference').waitFor();
+  }
+
   get totalResults(): Locator {
     return this.page.getByText(/^Showing (?:1 Result|\d+(?: to \d+)? of \d+ Results)$/);
   }

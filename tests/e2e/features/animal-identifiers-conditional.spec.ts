@@ -11,7 +11,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     // Batch-create a Cats commodity line — the counts are submit-enforced, so
     // the consignment details page can be left blank.
     await pages.overview.task('What are you importing?').click();
-    await pages.commoditySelection.searchAndSelect('Cat', ['Felis catus']);
+    await pages.commoditySelection.selectSpecies(['Felis catus']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.consignmentDetails.heading).toBeVisible();
 
@@ -66,7 +66,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     // Fish is in no typed-identifier list, so the notInUnionOf gate turns the
     // free-text fallbacks ON and every typed input OFF.
     await pages.overview.task('What are you importing?').click();
-    await pages.commoditySelection.searchAndSelect('Fish', ['Salmo salar']);
+    await pages.commoditySelection.selectSpecies(['Salmo salar']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.consignmentDetails.heading).toBeVisible();
 

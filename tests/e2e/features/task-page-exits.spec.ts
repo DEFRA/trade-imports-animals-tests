@@ -16,11 +16,8 @@ test.describe('Task-page exits', { tag: ['@integration', '@duplicated-in-fronten
     await expect(originRow).toContainText('Not yet started');
 
     await pages.overview.task('Where is this consignment coming from?').click();
-    // Unselected state: the enhancement seeds the visible input from the
-    // selected option's text — the placeholder — while the hidden select
-    // (the data truth) stays empty: nothing was committed.
-    await expect(pages.page.locator('input#countryOfOrigin')).toHaveValue('Select a country');
-    await expect(pages.page.locator('#countryOfOrigin-select')).toHaveValue('');
+    // Nothing was committed, so the server-rendered select is still empty.
+    await expect(pages.originOfImport.countryOfOrigin).toHaveValue('');
 
     // Save-and-return leg: the named secondary submit commits the page and
     // redirects to the hub instead of the next flow target.
@@ -29,10 +26,8 @@ test.describe('Task-page exits', { tag: ['@integration', '@duplicated-in-fronten
     await expect(pages.overview.heading).toBeVisible();
     await expect(originRow).toContainText('In progress');
 
-    // The committed value is there on re-entry: the autocomplete input shows
-    // the country name, the underlying select holds the stored code.
+    // The committed country code is there on re-entry.
     await pages.overview.task('Where is this consignment coming from?').click();
-    await expect(pages.page.locator('input#countryOfOrigin')).toHaveValue('France');
-    await expect(pages.page.locator('#countryOfOrigin-select')).toHaveValue('FR');
+    await expect(pages.originOfImport.countryOfOrigin).toHaveValue('FR');
   });
 });

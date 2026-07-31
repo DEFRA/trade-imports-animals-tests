@@ -46,7 +46,7 @@ test.describe('Reference strip', { tag: ['@integration', '@duplicated-in-fronten
     // Every post-origin task page inherits the strip from the shared layout.
     await pages.overview.open(journeyId);
     await pages.overview.task('What are you importing?').click();
-    await expect(pages.commoditySelection.searchInput).toBeVisible();
+    await expect(pages.commoditySelection.species('Bos taurus')).toBeVisible();
     await expect(strip).toBeVisible();
     await expect(strip.locator('.govuk-tag')).toHaveText('Draft');
     await expect(strip).toContainText(GBN_REFERENCE);

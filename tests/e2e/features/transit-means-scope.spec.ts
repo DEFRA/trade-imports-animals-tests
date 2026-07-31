@@ -37,8 +37,7 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     await saveArrivalWithMeans('Road Vehicle');
     await expect(pages.transitedCountries.heading).toBeVisible();
     await pages.transitedCountries.selectCountry('France');
-    await pages.transitedCountries.addAnotherCountry.click();
-    await pages.transitedCountries.selectCountry('Belgium', 1);
+    await pages.transitedCountries.selectCountry('Belgium');
     await pages.transitedCountries.saveAndContinue.click();
     await saveThroughTransporters();
     await expect(transitRow).toContainText('Completed');
@@ -50,10 +49,10 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     await expect(transitRow).toHaveCount(0);
 
     // Back to a road vehicle: leaving scope wiped the saved countries — the page
-    // returns with an empty first row and no second row.
+    // returns with every checkbox cleared.
     await saveArrivalWithMeans('Road Vehicle');
     await expect(pages.transitedCountries.heading).toBeVisible();
-    await expect(pages.transitedCountries.country(0)).toHaveValue('Select a country');
-    await expect(pages.transitedCountries.country(1)).toHaveCount(0);
+    await expect(pages.transitedCountries.country('France')).not.toBeChecked();
+    await expect(pages.transitedCountries.country('Belgium')).not.toBeChecked();
   });
 });
