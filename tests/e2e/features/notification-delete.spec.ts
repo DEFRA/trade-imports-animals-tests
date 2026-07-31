@@ -16,4 +16,17 @@ test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-fro
     await pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
     await expect(pages.page.getByText('The notification has been deleted.')).toBeVisible();
   });
+  test(
+    'deletes the notification and removes it from the dashboard',
+    { tag: '@smoke' },
+    async ({ pages, apiJourney, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const referenceNumber = created.id;
+
+      await notificationActions.deleteNotification(referenceNumber);
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
+    },
+  );
 });

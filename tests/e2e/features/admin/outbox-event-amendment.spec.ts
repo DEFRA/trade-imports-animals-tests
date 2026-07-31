@@ -15,7 +15,7 @@ const EXPECTED_ACTOR: OutboxEventActor = {
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
-const actorWithNullableFields = (actor: OutboxEventActor | null): OutboxEventActor => ({
+const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventActor => ({
   id: actor?.id ?? null,
   source: actor?.source ?? null,
   userType: actor?.userType ?? null,
@@ -44,15 +44,16 @@ test.describe('Notification amendment outbox event', { tag: ['@integration', '@m
 
       const events = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
       const amended = events[1];
+      const statusChanges = amended.statusChanges ?? [];
 
       expect(amended.aggregateVersion).toBe(2);
       expect(amended.eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED);
       expect(amended.data.exchangedDocument.notificationStatusCode).toBe('AMEND');
       expect(actorWithNullableFields(amended.actor)).toEqual(EXPECTED_ACTOR);
-      expect(amended.statusChanges).toHaveLength(2);
-      expect(amended.statusChanges.map(({ status }) => status)).toEqual(['SUBMITTED', 'AMEND']);
-      expect(amended.statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date)]);
-      expect(amended.statusChanges.map(({ actor }) => actorWithNullableFields(actor))).toEqual([EXPECTED_ACTOR, EXPECTED_ACTOR]);
+      expect(statusChanges).toHaveLength(2);
+      expect(statusChanges.map(({ status }) => status)).toEqual(['SUBMITTED', 'AMEND']);
+      expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date)]);
+      expect(statusChanges.map(({ actor }) => actorWithNullableFields(actor))).toEqual([EXPECTED_ACTOR, EXPECTED_ACTOR]);
     } finally {
       await client.close();
     }

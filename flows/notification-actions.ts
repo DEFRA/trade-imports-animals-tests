@@ -9,6 +9,7 @@ export class NotificationActions {
 
   async amendNotification(journeyId: string): Promise<void> {
     await this.pages.notificationDashboard.open();
+    await this.pages.notificationDashboard.searchForReference(journeyId);
     await this.pages.notificationDashboard.amend(journeyId).click();
     await this.pages.overview.heading.waitFor();
   }

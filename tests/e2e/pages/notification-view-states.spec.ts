@@ -57,7 +57,18 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('offers Copy as new and Delete on the read-only view', async ({ pages }) => {
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toBeVisible();
+      await expect(pages.notificationView.btnAmend).toBeVisible();
       await expect(pages.notificationView.cancelAmendment).toHaveCount(0);
+    });
+
+    test('copies the submitted notification to a new draft', async ({ pages, journeyContext }) => {
+      const originalReferenceNumber = journeyContext.journeyId;
+      await pages.notificationView.btnCopyAsNew.click();
+
+      await pages.notificationView.heading.waitFor();
+      const copiedReferenceNumber = await pages.notificationView.referenceNumberCaption.textContent();
+      expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+      expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });
 
     test('still renders the recorded answers after submission', async ({ pages }) => {

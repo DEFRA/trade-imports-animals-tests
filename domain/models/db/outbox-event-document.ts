@@ -7,8 +7,8 @@ export type OutboxEventDocument = {
   eventType: string;
   timestamp: Date;
   data: GbnAgEventData;
-  actor: OutboxEventActor | null;
-  statusChanges: OutboxEventStatusChange[];
+  actor?: OutboxEventActor | null;
+  statusChanges?: OutboxEventStatusChange[];
   metadata: {
     correlationId: string;
     schemaVersion: string;
@@ -29,7 +29,7 @@ export type OutboxEventActor = {
 export type OutboxEventStatusChange = {
   status: string;
   dateChanged: Date;
-  actor: OutboxEventActor | null;
+  actor?: OutboxEventActor | null;
 };
 
 // The outbox event `data` is the GBN-AG payload produced by the backend GbnAgMapper

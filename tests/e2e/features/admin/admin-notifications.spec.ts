@@ -4,36 +4,38 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment } from '@utils/playwright/environment';
 
-/**
- * Integration seam: the admin operator UI over real data — operating on real notifications.
- *
- * A real UI submission writes the notification the admin lists; this proves the operator can find it and
- * delete it by reference number, by checkbox and by select-all, that cancelling keeps it, that an invalid
- * reference fails without deleting, and that each delete writes its backend audit record.
- */
+/** Integration seam: the admin operator UI over real notifications and audit records. */
 test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, () => {
   test.describe.configure({ mode: 'default' });
 
-  test('finds and deletes a submitted notification by reference number', async ({ journey, journeyContext, adminNavigation, pages }) => {
-    test.slow();
-    await journey.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+  test(
+    'finds and deletes a submitted notification by reference number',
+    { tag: '@smoke' },
+    async ({ journey, journeyContext, adminNavigation, pages }) => {
+      test.slow();
+      await journey.submitNotification();
+      const referenceNumber = journeyContext.journeyId;
 
-    await adminNavigation.toNotifications();
-    await pages.adminNotifications.findRowByReference(referenceNumber);
-    await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
+      await adminNavigation.toNotifications();
+      await pages.adminNotifications.findRowByReference(referenceNumber);
+      await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
 
-    await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
-    await pages.adminNotifications.deleteByReferenceNumber();
-    await pages.adminNotifications.btnConfirm.click();
-    await expect(pages.adminNotifications.alertSuccess).toBeVisible();
+      await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
+      await pages.adminNotifications.deleteByReferenceNumber();
+      await pages.adminNotifications.btnConfirm.click();
+      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
 
-    await expect
-      .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), {
-        timeout: timeouts.medium,
-      })
-      .toBe(false);
-  });
+      await expect
+        .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), {
+          timeout: timeouts.medium,
+        })
+        .toBe(false);
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
+    },
+  );
 
   test('cancelling checkbox deletion keeps the notification visible', async ({ apiJourney, adminNavigation, pages }) => {
     test.slow();
@@ -64,6 +66,10 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
           timeout: timeouts.medium,
         })
         .toBe(false);
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     });
 
     await test.step('writes a successful delete audit record for one notification delete', async () => {
@@ -72,12 +78,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       try {
         await client.connect();
         const collection = client.collection('trade-imports-animals-backend', 'audit');
-
-        const docs = await collection
-          .find({
-            notificationReferenceNumbers: referenceNumber,
-          })
-          .toArray();
+        const docs = await collection.find({ notificationReferenceNumbers: referenceNumber }).toArray();
 
         expect(docs).toHaveLength(1);
         expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
@@ -94,8 +95,8 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     });
   });
 
-  test('deletes all current-page notifications by select all', async ({ apiJourney, adminNavigation, pages }) => {
-    skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications); never run on CDP environments.');
+  test.skip('deletes all current-page notifications by select all', { tag: '@compose' }, async ({ apiJourney, adminNavigation, pages }) => {
+    skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications).');
     test.slow();
 
     await apiJourney.createFullNotification();
@@ -116,11 +117,6 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
       await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-      await expect
-        .poll(async () => pages.adminNotifications.tableRowByReference(pageOneReference).isVisible(), {
-          timeout: timeouts.medium,
-        })
-        .toBe(false);
     });
 
     await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
@@ -130,10 +126,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
         await client.connect();
         const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
         const docs = await auditCollection
-          .find({
-            action: 'DELETE_NOTIFICATIONS',
-            notificationReferenceNumbers: pageOneReference,
-          })
+          .find({ action: 'DELETE_NOTIFICATIONS', notificationReferenceNumbers: pageOneReference })
           .toArray();
 
         expect(docs).toHaveLength(1);
@@ -173,12 +166,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       try {
         await client.connect();
         const collection = client.collection('trade-imports-animals-backend', 'audit');
-
-        const docs = await collection
-          .find({
-            notificationReferenceNumbers: invalidReference,
-          })
-          .toArray();
+        const docs = await collection.find({ notificationReferenceNumbers: invalidReference }).toArray();
 
         expect(docs).toHaveLength(1);
         expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);

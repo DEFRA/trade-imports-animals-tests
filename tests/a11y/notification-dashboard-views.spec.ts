@@ -18,6 +18,24 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
   });
 
+  test('the notification dashboard has no accessibility violations when searched', async ({ pages, runA11yScan, apiJourney, journey }) => {
+    const noMatchReferenceNumber = 'GBN-AG-26-ZZZZZZ';
+
+    await test.step('Notification dashboard (search match)', async () => {
+      const created = await apiJourney.createSubmittedNotification();
+      await journey.toNotificationDashboard();
+      await pages.notificationDashboard.searchForReference(created.id);
+      await pages.notificationDashboard.heading.waitFor();
+      await runA11yScan();
+    });
+
+    await test.step('Notification dashboard (search no-match)', async () => {
+      await pages.notificationDashboard.searchForReference(noMatchReferenceNumber);
+      await pages.notificationDashboard.resultsLabel.waitFor();
+      await runA11yScan();
+    });
+  });
+
   test.describe('pagination', () => {
     test.beforeEach(async ({ pages }) => {
       const hasPagination = await pages.notificationDashboard.pagination.isVisible();

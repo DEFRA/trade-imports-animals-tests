@@ -45,10 +45,10 @@ async function expectSeededRowListed(pages: PageObjects, eventId: string): Promi
       await pages.page.reload();
     }
     await expect(pages.adminDlqEvents.rowById(eventId)).toBeVisible({ timeout: timeouts.short });
-  }).toPass({ timeout: timeouts.long });
+  }).toPass({ timeout: timeouts.medium });
 }
 
-test.describe('DLQ operator actions', { tag: ['@compose', '@integration'] }, () => {
+test.describe('DLQ operator actions', { tag: '@compose' }, () => {
   // Serial: both tests act on the whole DLQ (replay-all / delete-all), so they must not run
   // concurrently against the one shared queue.
   test.describe.configure({ mode: 'serial' });

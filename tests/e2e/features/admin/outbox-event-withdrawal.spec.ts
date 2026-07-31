@@ -15,7 +15,7 @@ const EXPECTED_ACTOR: OutboxEventActor = {
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 
-const actorWithNullableFields = (actor: OutboxEventActor | null): OutboxEventActor => ({
+const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventActor => ({
   id: actor?.id ?? null,
   source: actor?.source ?? null,
   userType: actor?.userType ?? null,
@@ -43,15 +43,16 @@ test.describe('Notification withdrawal outbox event', { tag: ['@integration', '@
       await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBe(2);
 
       const withdrawn = await collection.findOne({ aggregateId, eventType: NOTIFICATION_WITHDRAWN });
+      const statusChanges = withdrawn?.statusChanges ?? [];
 
       expect(withdrawn).not.toBeNull();
       expect(withdrawn?.aggregateVersion).toBe(2);
       expect(withdrawn?.eventType).toBe(NOTIFICATION_WITHDRAWN);
       expect(actorWithNullableFields(withdrawn?.actor ?? null)).toEqual(EXPECTED_ACTOR);
-      expect(withdrawn?.statusChanges).toHaveLength(2);
-      expect(withdrawn?.statusChanges.map(({ status }) => status)).toEqual(['SUBMITTED', 'DELETED']);
-      expect(withdrawn?.statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date)]);
-      expect(withdrawn?.statusChanges.map(({ actor }) => actorWithNullableFields(actor))).toEqual([EXPECTED_ACTOR, EXPECTED_ACTOR]);
+      expect(statusChanges).toHaveLength(2);
+      expect(statusChanges.map(({ status }) => status)).toEqual(['SUBMITTED', 'DELETED']);
+      expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date)]);
+      expect(statusChanges.map(({ actor }) => actorWithNullableFields(actor))).toEqual([EXPECTED_ACTOR, EXPECTED_ACTOR]);
     } finally {
       await client.close();
     }

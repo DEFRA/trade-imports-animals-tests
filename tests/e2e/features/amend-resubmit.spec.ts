@@ -1,5 +1,4 @@
 import { test, expect } from '@fixtures';
-import { sortByValues } from '@domain/constants/sort-by-values';
 
 /**
  * Amend resubmission through the UI. A submitted notification is amended from
@@ -28,6 +27,11 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     // Change the country of origin through the amending check your answers page.
     await pages.overview.task('Check and submit').click();
     await expect(pages.notificationView.heading).toBeVisible();
+    await expect(pages.notificationView.btnCopyAsNew).toBeVisible();
+    await expect(pages.notificationView.btnDelete).toBeVisible();
+    await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
+    await expect(pages.notificationView.changeLink('Change commodity 1')).toBeVisible();
+    expect(await pages.page.getByRole('link', { name: /^Change/ }).count()).toBeGreaterThanOrEqual(4);
     const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
     await expect(countryRow).toContainText('France');
     await pages.notificationView.changeLink('Change country of origin').click();
@@ -53,7 +57,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
 
     // And the dashboard offers Amend again for the resubmitted notification.
     await pages.notificationDashboard.open();
-    await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
+    await pages.notificationDashboard.searchForReference(journeyContext.journeyId);
     await expect(pages.notificationDashboard.amend(journeyContext.journeyId)).toBeVisible();
   });
 });

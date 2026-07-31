@@ -9,32 +9,36 @@ import { timeouts } from '@config/timeouts';
  * submit, so the search is re-issued until the row appears.
  */
 test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, () => {
-  test('shows the outbox event for a submitted notification', async ({ journey, journeyContext, adminNavigation, pages }) => {
-    test.slow();
-    await journey.submitNotification();
-    const referenceNumber = journeyContext.journeyId;
+  test(
+    'shows the outbox event for a submitted notification',
+    { tag: '@smoke' },
+    async ({ journey, journeyContext, adminNavigation, pages }) => {
+      test.slow();
+      await journey.submitNotification();
+      const referenceNumber = journeyContext.journeyId;
 
-    await adminNavigation.toOutboxEvents(referenceNumber);
-    await expect
-      .poll(
-        async () => {
-          await pages.adminOutboxEvents.inputReferenceNumber.fill(referenceNumber);
-          await pages.adminOutboxEvents.btnSearch.click();
-          return pages.adminOutboxEvents.tableRows.count();
-        },
-        { timeout: timeouts.long },
-      )
-      .toBe(1);
+      await adminNavigation.toOutboxEvents(referenceNumber);
+      await expect
+        .poll(
+          async () => {
+            await pages.adminOutboxEvents.inputReferenceNumber.fill(referenceNumber);
+            await pages.adminOutboxEvents.btnSearch.click();
+            return pages.adminOutboxEvents.tableRows.count();
+          },
+          { timeout: timeouts.long },
+        )
+        .toBe(1);
 
-    await expect(pages.adminOutboxEvents.cellVersion(0)).toHaveText('1');
-    await expect(pages.adminOutboxEvents.cellEventType(0)).toContainText('NotificationSubmitted');
-    await expect(pages.adminOutboxEvents.cellTimestamp(0)).not.toBeEmpty();
+      await expect(pages.adminOutboxEvents.cellVersion(0)).toHaveText('1');
+      await expect(pages.adminOutboxEvents.cellEventType(0)).toContainText('NotificationSubmitted');
+      await expect(pages.adminOutboxEvents.cellTimestamp(0)).not.toBeEmpty();
 
-    await pages.adminOutboxEvents.linkViewJson(0).click();
-    const json = await pages.adminOutboxEvents.cellDataPre(0).textContent();
-    expect(json).toContain(referenceNumber);
-    expect(json).toContain('SUBMITTED');
-  });
+      await pages.adminOutboxEvents.linkViewJson(0).click();
+      const json = await pages.adminOutboxEvents.cellDataPre(0).textContent();
+      expect(json).toContain(referenceNumber);
+      expect(json).toContain('SUBMITTED');
+    },
+  );
 
   test('shows the empty state for an unknown reference number', async ({ adminNavigation, pages }) => {
     const unknownRef = 'GBN-AG-00-000000';

@@ -10,7 +10,7 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
     await expect(pages.signIn.heading).toBeVisible();
   });
 
-  test('allows signing into the notification dashboard', async ({ pages }) => {
+  test('allows signing into the notification dashboard', { tag: '@smoke' }, async ({ pages }) => {
     await pages.signIn.signIn();
     await expect(pages.page).toHaveURL(pages.notificationDashboard.expectedUrl);
     await expect(pages.notificationDashboard.heading).toBeVisible();

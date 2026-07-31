@@ -14,6 +14,22 @@ export class NotificationViewPage extends NotificationPage {
     return this.page.locator('.app-journey-strip');
   }
 
+  get referenceNumberCaption(): Locator {
+    return this.journeyStrip;
+  }
+
+  get btnAmend(): Locator {
+    return this.page.getByRole('button', { name: 'Amend' });
+  }
+
+  get btnCopyAsNew(): Locator {
+    return this.page.getByRole('button', { name: 'Copy as new' });
+  }
+
+  get btnDelete(): Locator {
+    return this.page.getByRole('button', { name: 'Delete' });
+  }
+
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }

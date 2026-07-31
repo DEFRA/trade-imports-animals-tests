@@ -2,14 +2,6 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 
-/**
- * Integration seam: an operator re-publishes a notification's outbox events from the admin UI.
- *
- * The seed is a submitted-then-amended notification, so two outbox events exist (NotificationSubmitted +
- * the amend event — outbox-event-notification.spec.ts pins emission and envelope). Replay re-publishes
- * every event to the SNS topic without consuming them, and the backend writes one REPLAY_EVENTS audit
- * record covering the whole batch.
- */
 test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () => {
   test.beforeEach(async ({ apiJourney }) => {
     await apiJourney.createAmendNotification();

@@ -27,22 +27,75 @@ export class NotificationDashboardPage extends BasePage {
     return this.page.getByRole('button', { name: 'Update sort' });
   }
 
+  get filterHeading(): Locator {
+    return this.page.getByRole('heading', { level: 2, name: 'Filter notifications' });
+  }
+
+  get searchForm(): Locator {
+    return this.page.getByTestId('notification-search-form');
+  }
+
+  get inputReferenceSearch(): Locator {
+    return this.searchForm.getByLabel('Keyword or reference');
+  }
+
+  get btnSearch(): Locator {
+    return this.searchForm.getByRole('button', { name: 'Search' });
+  }
+
+  get resultsLabel(): Locator {
+    return this.page.getByTestId('notification-results-label');
+  }
+
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
   get notificationCards(): Locator {
-    return this.page.locator('.govuk-summary-card');
+    return this.page.locator('.notification-list__main .govuk-summary-card');
   }
 
   notificationCard(reference: string): Locator {
     return this.notificationCards.filter({ hasText: reference });
   }
 
+  notificationCardAt(index: number): Locator {
+    return this.notificationCards.nth(index);
+  }
+
+  private cardField(card: Locator, term: string): Locator {
+    return card.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
+  }
+
+  notificationCardDetails(index: number) {
+    const card = this.notificationCardAt(index);
+    return {
+      heading: card.getByRole('heading', { level: 2 }),
+      commodity: this.cardField(card, 'Commodity'),
+      origin: this.cardField(card, 'Origin'),
+      arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
+      consignee: this.cardField(card, 'Consignee'),
+      consignor: this.cardField(card, 'Consignor'),
+      status: this.cardField(card, 'Status'),
+      dateCreated: card.getByText(/Date created:/),
+    };
+  }
+
   async searchFor(reference: string): Promise<void> {
-    await this.page.getByLabel('Keyword or reference').fill(reference);
-    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
-    await this.page.getByLabel('Keyword or reference').waitFor();
+    await this.searchForReference(reference);
+  }
+
+  /** Server-side dashboard search via GET ?referenceNumber=. */
+  async searchForReference(referenceNumber: string): Promise<void> {
+    await this.inputReferenceSearch.fill(referenceNumber);
+    await Promise.all([
+      this.page.waitForURL((url) => (url.searchParams.get('referenceNumber') ?? '') === referenceNumber),
+      this.btnSearch.click(),
+    ]);
   }
 
   get totalResults(): Locator {
-    return this.page.getByText(/^Showing (?:1 Result|\d+(?: to \d+)? of \d+ Results)$/);
+    return this.page.getByText(/^(?:No Results|Showing .* Results)$/);
   }
 
   async getResultsRange(): Promise<ResultsRange | null> {
@@ -56,16 +109,55 @@ export class NotificationDashboardPage extends BasePage {
     };
   }
 
+  formatResultsRangeLabel({ start, end, total }: ResultsRange): string {
+    if (total === 1) return 'Showing 1 Results';
+    if (start === end) return `Showing ${start} of ${total} Results`;
+    return `Showing ${start} to ${end} of ${total} Results`;
+  }
+
   get pagination(): Locator {
     return this.page.locator('.govuk-pagination');
   }
 
   get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Next', exact: true });
+    return this.pagination.getByRole('link', { name: /^Next(?: page)?$/ });
   }
 
   get linkPreviousPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Previous', exact: true });
+    return this.pagination.getByRole('link', { name: /^Previous(?: page)?$/ });
+  }
+
+  get nextPageNumberLabel(): Locator {
+    return this.linkNextPage.locator('.notifications-pagination__page');
+  }
+
+  async getPaginationTotalPages(): Promise<number> {
+    const text = (await this.nextPageNumberLabel.textContent())?.trim() ?? '';
+    const match = text.match(/^\d+ of (\d+)$/);
+    if (!match) throw new Error(`Could not parse pagination total from next link label: "${text}"`);
+    return Number(match[1]);
+  }
+
+  async openDashboardPage(pageNumber: number): Promise<void> {
+    await this.navigateToFrontend(pageNumber <= 1 ? '/' : `/?page=${pageNumber}`);
+    await this.heading.waitFor({ state: 'visible' });
+    await this.waitForNotificationList();
+  }
+
+  async goToLastPage(): Promise<number> {
+    const totalPages = await this.getPaginationTotalPages();
+    await this.openDashboardPage(totalPages);
+    return totalPages;
+  }
+
+  currentPageFromUrl(): number {
+    const pageParam = new URL(this.page.url()).searchParams.get('page');
+    const page = Number.parseInt(pageParam ?? '1', 10);
+    return Number.isNaN(page) ? 1 : page;
+  }
+
+  async waitForNotificationList(): Promise<void> {
+    await this.resultsLabel.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async sortBy(sortByValue: SortByValue): Promise<void> {
@@ -79,16 +171,28 @@ export class NotificationDashboardPage extends BasePage {
     });
   }
 
+  btnCopyAsNew(reference: string): Locator {
+    return this.copyAsNew(reference);
+  }
+
   amend(reference: string): Locator {
     return this.notificationCard(reference).getByRole('button', {
       name: `Amend notification ${reference}`,
     });
   }
 
+  btnAmend(reference: string): Locator {
+    return this.amend(reference);
+  }
+
   view(reference: string): Locator {
     return this.notificationCard(reference).getByRole('link', {
       name: `View notification ${reference}`,
     });
+  }
+
+  viewLink(reference: string): Locator {
+    return this.view(reference);
   }
 
   resume(reference: string): Locator {
@@ -106,5 +210,18 @@ export class NotificationDashboardPage extends BasePage {
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.navigateToFrontend('/');
     await this.signInWhenRequested(attemptSignIn);
+
+    if (attemptSignIn) {
+      try {
+        await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+        await this.waitForNotificationList();
+      } catch {
+        console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
+        await this.navigateToFrontend('/');
+        await this.signInWhenRequested(true);
+        await this.heading.waitFor({ state: 'visible', timeout: 5000 });
+        await this.waitForNotificationList();
+      }
+    }
   }
 }

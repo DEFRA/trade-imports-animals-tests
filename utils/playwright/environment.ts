@@ -33,9 +33,17 @@ export function skipIfCdpEnvironment(reason: string): void {
 }
 
 /**
+ * True when running against the Docker Compose stack (local or GitHub) — the only environment
+ * with direct Mongo access, so persistence assertions gate on this rather than a tag.
+ */
+export function isComposeEnvironment(): boolean {
+  const baseUrl = String(test.info().project.use.baseURL ?? '').toLowerCase();
+  return baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') || baseUrl.includes('cdp-docker.test');
+}
+
+/**
  * Skip a test when running against the Docker Compose stack (local or GitHub).
  */
 export function skipIfComposeEnvironment(reason: string): void {
-  const baseUrl = String(test.info().project.use.baseURL ?? '').toLowerCase();
-  test.skip(baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') || baseUrl.includes('cdp-docker.test'), reason);
+  test.skip(isComposeEnvironment(), reason);
 }
