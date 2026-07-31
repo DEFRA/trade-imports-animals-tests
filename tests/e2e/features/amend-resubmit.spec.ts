@@ -2,9 +2,8 @@ import { test, expect } from '@fixtures';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
 /**
- * Amend resubmission through the reworked UI (parity with main-suite's
- * notification-amend.spec.ts full-lifecycle walk). A submitted notification
- * is amended from the dashboard, one answer is changed through the UI, and
+ * Amend resubmission through the UI. A submitted notification is amended from
+ * the dashboard, one answer is changed through the UI, and
  * the amendment is resubmitted through check your answers + declaration —
  * returning the notification to Submitted with the edited value kept.
  *

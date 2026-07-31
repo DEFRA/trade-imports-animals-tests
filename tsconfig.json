@@ -19,17 +19,7 @@
       "@fixtures": ["fixtures"],
       "@fixtures/*": ["fixtures/*"],
       "@resources/*": ["resources/*"],
-      "@utils/*": ["utils/*"],
-      "@main-adapters/*": ["main-suite/adapters/*"],
-      "@main-config/*": ["main-suite/config/*"],
-      "@main-domain/*": ["main-suite/domain/*"],
-      "@main-page-objects": ["main-suite/page-objects"],
-      "@main-page-objects/*": ["main-suite/page-objects/*"],
-      "@main-flows/*": ["main-suite/flows/*"],
-      "@main-fixtures": ["main-suite/fixtures"],
-      "@main-fixtures/*": ["main-suite/fixtures/*"],
-      "@main-resources/*": ["main-suite/resources/*"],
-      "@main-utils/*": ["main-suite/utils/*"]
+      "@utils/*": ["utils/*"]
     }
   }
 }

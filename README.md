@@ -70,14 +70,14 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                            | Test scope                                                                                                              | Target               | Config                                | Generates Report |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                         | Dual-frontend parity: reworked suite vs :3100, frozen `main-suite/` vs :3200 (workspace stack, `--profile test-target`) | workspace stack      | `playwright.parity.config.ts`         | ✓                |
-| `npm run test:cdp`                 | e2e test suite (pre-parity default)                                                                                     | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                | Accessibility (`@a11y`) test suite                                                                                      | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`      | e2e + e2e integration (`@compose`) test suites                                                                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite                                                                                      | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`   | e2e (CI shards)                                                                                                         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                            | Test scope                                               | Target               | Config                                | Generates Report |
+| ---------------------------------- | -------------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                         | E2E suite against :3100 plus admin (test-target profile) | workspace stack      | `playwright.e2e.config.ts`            | ✓                |
+| `npm run test:cdp`                 | E2E test suite                                           | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                | Accessibility (`@a11y`) test suite                       | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites           | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite                       | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`   | E2E (CI shards)                                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -102,13 +102,14 @@ After tests run, Playwright results and report are generated automatically, and 
 ### Test Configuration
 
 Shared settings (projects, reporters, `retries: 1`, `trace: on-first-retry`)
-live in `utils/playwright/shared-config.ts`. Two configs extend it, one per
-target host:
+live in `utils/playwright/shared-config.ts`. The target-specific configs extend
+those settings:
 
-| File                                  | Target               |
-| ------------------------------------- | -------------------- |
-| `playwright.config.ts`                | CDP services         |
-| `playwright.docker-compose.config.ts` | docker-compose stack |
+| File                                  | Target                |
+| ------------------------------------- | --------------------- |
+| `playwright.config.ts`                | CDP services          |
+| `playwright.docker-compose.config.ts` | docker-compose stack  |
+| `playwright.e2e.config.ts`            | workspace test target |
 
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
@@ -119,20 +120,34 @@ against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
-Tests are split across two Playwright projects targeting different services:
+The workspace E2E config splits tests across two Playwright projects:
 
-| Project             | Test scope                      |
-| ------------------- | ------------------------------- |
-| `frontend-chromium` | All tests excluding admin pages |
-| `admin-chromium`    | Admin pages only                |
+| Project | Test scope                      |
+| ------- | ------------------------------- |
+| `e2e`   | All tests excluding admin pages |
+| `admin` | Admin pages only                |
+
+The CDP and docker-compose configs use equivalent projects named
+`frontend-chromium` and `admin-chromium`.
 
 ## Local Testing
 
 ### Local workspace stack
 
-1. Start the workspace stack: `./scripts/stack/run-stack.sh` from the
-   [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace).
-2. Run tests with `npm run test:docker-compose`.
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace),
+   start the locally built stack and the frontend test target:
+
+   ```bash
+   ./scripts/stack/run-stack.sh -d --profile test-target
+   ```
+
+2. Run the E2E and admin projects with `npm test`.
+
+`npm test` checks that the frontend, backend, admin, and MongoDB services are
+available, cleans previous reports, reseeds MongoDB, and then runs the suite.
+
+To target the base stack frontend on :3000 instead, use
+`npm run test:docker-compose`.
 
 To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
 
@@ -146,13 +161,14 @@ into Mongo).
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                             | Purpose                                                |
-| ----------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
-| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-mongo.sh`   | Recreate MongoDB and rerun the init + seed scripts     |
-| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
+| Command                                                 | Purpose                                                |
+| ------------------------------------------------------- | ------------------------------------------------------ |
+| `./scripts/stack/run-stack.sh`                          | Start the full stack from published images             |
+| `./scripts/stack/run-stack.sh -d`                       | Start the stack built from local source under `repos/` |
+| `./scripts/stack/run-stack.sh -d --profile test-target` | Start the local stack plus the E2E frontend on :3100   |
+| `./scripts/stack/stop-stack.sh`                         | Stop the stack and wipe volumes                        |
+| `./scripts/stack/bounce-mongo.sh`                       | Recreate MongoDB and rerun the init + seed scripts     |
+| `./scripts/stack/bounce-backend.sh`                     | Recreate the backend container (picks up Java changes) |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
@@ -161,7 +177,7 @@ See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 To run tests against a CDP environment from your local machine:
 
 1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
-2. Run tests with `npm run test`.
+2. Run tests with `npm run test:cdp`.
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
@@ -172,7 +188,11 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
-Regenerate the frozen main-suite baseline against the :3200 frontend with `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image used by CI; both commands reseed the workspace database, run the main parity project's `@visual` spec, and write the updated snapshot into the working tree for commit.
+Regenerate the E2E baseline against the :3100 frontend with
+`npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
+`npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
+used by CI. Both commands reseed the workspace database, run the `e2e` project's
+`@visual` spec, and write the updated snapshot into the working tree for commit.
 
 ## Running Tests on GitHub
 

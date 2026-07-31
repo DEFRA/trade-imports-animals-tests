@@ -1,9 +1,8 @@
 import { test, expect } from '@fixtures';
 
 /**
- * Cancel-amendment through the reworked UI (parity with main-suite's
- * notification-cancel-amend.spec.ts). An amending notification offers a
- * Cancel amendment link on the notification view; the confirmation page's
+ * Cancel-amendment through the UI. An amending notification offers a Cancel
+ * amendment link on the notification view; the confirmation page's
  * No keeps the amendment, Yes discards the amend edits and restores the
  * submitted version.
  */

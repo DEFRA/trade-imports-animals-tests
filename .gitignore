@@ -59,8 +59,6 @@ FAILED
 # Generated assets
 *.png
 !tests/e2e/visual/**
-!main-suite/resources/file-upload/**
-!main-suite/tests/e2e/visual/**
 
 # Test reports
 allure-report/
