@@ -1,6 +1,5 @@
 import { type Locator } from '@playwright/test';
 import { NotificationPage } from '@page-objects/base/base-page';
-import type { DateInput } from '@domain/types/date-time-input';
 
 export class ArrivalDetailsPage extends NotificationPage {
   constructor(page: ConstructorParameters<typeof NotificationPage>[0]) {
@@ -27,10 +26,8 @@ export class ArrivalDetailsPage extends NotificationPage {
     return this.page.getByLabel('Transport document reference');
   }
 
-  async fillArrivalDate(date: DateInput): Promise<void> {
-    await this.page.getByLabel('Day').fill(date.day);
-    await this.page.getByLabel('Month').fill(date.month);
-    await this.page.getByLabel('Year').fill(date.year);
+  async fillArrivalDate(date: string): Promise<void> {
+    await this.page.locator('input[name="arrivalDateAtPort"]').fill(date);
   }
 
   get saveAndContinue(): Locator {

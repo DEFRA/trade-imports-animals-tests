@@ -4,7 +4,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-const issueDate = { day: '3', month: '1', year: '2026' } as const;
+const issueDate = '03/01/2026';
 
 test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ journey }) => {

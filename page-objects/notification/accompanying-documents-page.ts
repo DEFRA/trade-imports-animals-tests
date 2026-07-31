@@ -1,5 +1,4 @@
 import { type Locator, type Page } from '@playwright/test';
-import type { DateInput } from '@domain/types/date-time-input';
 import { NotificationPage } from '@page-objects/base/base-page';
 
 export class AccompanyingDocumentsPage extends NotificationPage {
@@ -43,11 +42,9 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: /Refresh/ });
   }
 
-  async fillDocument(reference: string, issueDate: DateInput, filePath: string): Promise<void> {
+  async fillDocument(reference: string, issueDate: string, filePath: string): Promise<void> {
     await this.documentReference.fill(reference);
-    await this.page.getByLabel('Day').fill(issueDate.day);
-    await this.page.getByLabel('Month').fill(issueDate.month);
-    await this.page.getByLabel('Year').fill(issueDate.year);
+    await this.page.locator('input[name="accompanyingDocumentDateOfIssue"]').fill(issueDate);
     await this.fileUpload.setInputFiles(filePath);
   }
 }

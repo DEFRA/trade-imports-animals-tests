@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { writeSyntheticFile } from '@utils/synthetic-file-writer';
 import { ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-upload/constants';
 
-const issueDate = { day: '3', month: '1', year: '2026' } as const;
+const issueDate = '03/01/2026';
 
 test.describe('Documents reject flows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('refuses an oversize file pick without adding a document', async ({ journey, pages }, testInfo) => {

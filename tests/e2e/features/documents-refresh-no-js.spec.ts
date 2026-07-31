@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 
-const issueDate = { day: '3', month: '1', year: '2026' } as const;
+const issueDate = '03/01/2026';
 
 test.describe('Documents scan refresh without JavaScript', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.use({ javaScriptEnabled: false });

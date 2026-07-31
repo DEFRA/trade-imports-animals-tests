@@ -5,7 +5,7 @@ import { fileUploadPaths } from '@resources/file-upload/paths';
 import { TEN_MB_BYTES } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
-const issueDate = { day: '3', month: '1', year: '2026' } as const;
+const issueDate = '03/01/2026';
 const maximumDocuments = 10;
 const maximumDocumentsMessage = `You can add a maximum of ${maximumDocuments} documents`;
 

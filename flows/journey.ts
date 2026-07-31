@@ -140,7 +140,7 @@ export class Journey {
   }
 
   async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
-    await this.pages.arrivalDetails.fillArrivalDate({ day: '12', month: '12', year: '2026' });
+    await this.pages.arrivalDetails.fillArrivalDate('12/12/2026');
     await this.pages.arrivalDetails.portOfEntry.fill('Aberdeen');
     await this.pages.page.getByRole('option', { name: PORT, exact: true }).click();
     await this.pages.page.getByRole('radio', { name: means, exact: true }).check();

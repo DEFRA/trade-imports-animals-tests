@@ -9,7 +9,7 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
     await journey.toAccompanyingDocuments();
     const reference = `PW${Date.now()}`;
 
-    await pages.accompanyingDocuments.fillDocument(reference, { day: '3', month: '1', year: '2026' }, fileUploadPaths.safeFile1kbPdf);
+    await pages.accompanyingDocuments.fillDocument(reference, '03/01/2026', fileUploadPaths.safeFile1kbPdf);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = pages.accompanyingDocuments.documentRow(reference);
@@ -38,11 +38,7 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
 
   test('rejects an unsupported file type without adding a document', async ({ journey, pages }) => {
     await journey.toAccompanyingDocuments();
-    await pages.accompanyingDocuments.fillDocument(
-      `PW-TXT-${Date.now()}`,
-      { day: '3', month: '1', year: '2026' },
-      fileUploadPaths.restrictedFile10bTxt,
-    );
+    await pages.accompanyingDocuments.fillDocument(`PW-TXT-${Date.now()}`, '03/01/2026', fileUploadPaths.restrictedFile10bTxt);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();

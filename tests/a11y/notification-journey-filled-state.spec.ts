@@ -70,11 +70,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Upload documents', async () => {
       await pages.overview.task('Uploaded documents').click();
       await pages.accompanyingDocuments.heading.waitFor();
-      await pages.accompanyingDocuments.fillDocument(
-        'InternalReference123',
-        { day: '3', month: '1', year: '2026' },
-        fileUploadPaths.safeFile1kbPdf,
-      );
+      await pages.accompanyingDocuments.fillDocument('InternalReference123', '03/01/2026', fileUploadPaths.safeFile1kbPdf);
       await runA11yScan();
       await pages.overview.open(pages.accompanyingDocuments.journeyIdFromUrl());
       await pages.overview.heading.waitFor();

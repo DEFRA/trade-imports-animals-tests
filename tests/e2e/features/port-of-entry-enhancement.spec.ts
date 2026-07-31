@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
 const PORT_CODE = 'GB ABD';
-const ARRIVAL_DATE = { day: '12', month: '12', year: '2026' };
+const ARRIVAL_DATE = '12/12/2026';
 
 test.describe('Port of entry accessible-autocomplete enhancement', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('name and code search both suggest, and selection persists the code', async ({ journey, pages }) => {

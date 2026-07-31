@@ -20,7 +20,8 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
     await journey.toAccompanyingDocuments();
     const referenceNumber = journeyContext.journeyId;
     const documentReference = `PW${Date.now()}`;
-    const issueDate = { day: '3', month: '1', year: '2026' };
+    const issueDate = '03/01/2026';
+    const persistedIssueDate = { day: '3', month: '1', year: '2026' };
 
     await pages.accompanyingDocuments.fillDocument(documentReference, issueDate, fileUploadPaths.safeFile1kbPdf);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
@@ -46,7 +47,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
       expect(doc.notificationReferenceNumber).toBe(referenceNumber);
       expect(doc.documentReference).toBe(documentReference);
       expect(doc.uploadId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-      expect(doc.dateOfIssue.getTime()).toBe(toUtcDate(issueDate).getTime());
+      expect(doc.dateOfIssue.getTime()).toBe(toUtcDate(persistedIssueDate).getTime());
       await expect.poll(() => collection.findOne({ uploadId: doc.uploadId }).then((d) => d?.scanStatus)).toBe('COMPLETE');
       expect(doc.documentType).toBe('OTHER');
 
