@@ -32,3 +32,14 @@ test(
     await expect(pages.page.getByText(created.referenceNumber, { exact: true })).toBeVisible();
   },
 );
+
+test(
+  'the dashboard lists the seeded draft but never lists the DELETED notification',
+  { tag: '@integration' },
+  async ({ plantProductsJourney: journey, plantProductsPages: pages }) => {
+    await journey.toNotificationDashboard();
+
+    await expect(pages.plantNotificationDashboard.row(seededDraftReference)).toBeVisible();
+    await expect(pages.plantNotificationDashboard.row(seededDeletedReference)).toHaveCount(0);
+  },
+);

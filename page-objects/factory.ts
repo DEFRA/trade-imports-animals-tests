@@ -5,6 +5,12 @@ import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { AboutTheConsignmentPage } from './plant-products/about-the-consignment-page';
+import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
+import { PlantHubPage } from './plant-products/hub-page';
+import { PlantImportTypePage } from './plant-products/import-type-page';
+import { PlantOriginOfImportPage } from './plant-products/origin-of-import-page';
+import { PlantNotificationDashboardPage } from './plant-products/plant-notification-dashboard-page';
 import { AccompanyingDocumentsPage } from './live-animals/accompanying-documents-page';
 import { AdditionalDetailsPage } from './live-animals/additional-details-page';
 import { AddressesPage } from './live-animals/addresses-page';
@@ -79,7 +85,15 @@ export function createLiveAnimalsPageObjects(page: Page) {
 }
 
 export function createPlantProductsPageObjects(page: Page) {
-  return createSharedPageObjects(page);
+  return {
+    ...createSharedPageObjects(page),
+    plantNotificationDashboard: new PlantNotificationDashboardPage(page),
+    importType: new PlantImportTypePage(page),
+    hub: new PlantHubPage(page),
+    countryOfOrigin: new CountryOfOriginPage(page),
+    originOfImport: new PlantOriginOfImportPage(page),
+    aboutTheConsignment: new AboutTheConsignmentPage(page),
+  };
 }
 
 export type SharedPageObjects = ReturnType<typeof createSharedPageObjects>;
