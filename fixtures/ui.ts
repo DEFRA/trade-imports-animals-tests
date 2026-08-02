@@ -12,6 +12,8 @@ import { AdminNavigation } from '@flows/admin-navigation';
 import { NotificationActions } from '@flows/live-animals/notification-actions';
 import { ApiJourney } from '@flows/live-animals/api-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
+import { PlantProductsApiClient } from '@adapters/http/plant-products-api-client';
+import { PlantProductsApiJourney } from '@flows/plant-products/api-journey';
 
 export interface PageFixtures {
   liveAnimalsPages: LiveAnimalsPageObjects;
@@ -23,6 +25,8 @@ export interface PageFixtures {
   notificationActions: NotificationActions;
   notificationApi: NotificationApiClient;
   liveAnimalsApiJourney: ApiJourney;
+  plantProductsApi: PlantProductsApiClient;
+  plantProductsApiJourney: PlantProductsApiJourney;
 }
 
 export const test = base.extend<PageFixtures>({
@@ -53,6 +57,12 @@ export const test = base.extend<PageFixtures>({
   },
   liveAnimalsApiJourney: async ({ liveAnimalsPages, notificationApi, journeyContext }, use) => {
     await use(new ApiJourney(liveAnimalsPages, notificationApi, journeyContext));
+  },
+  plantProductsApi: async ({ request }, use) => {
+    await use(new PlantProductsApiClient(request));
+  },
+  plantProductsApiJourney: async ({ plantProductsPages, plantProductsApi, journeyContext }, use) => {
+    await use(new PlantProductsApiJourney(plantProductsPages, plantProductsApi, journeyContext));
   },
 });
 

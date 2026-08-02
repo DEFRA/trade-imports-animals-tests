@@ -1,0 +1,36 @@
+export const bcps = {
+  abcLegal1: { value: 'UK6N3IVF', display: 'ABC Legal' },
+  abcLegal2: { value: 'UKVTZOI8', display: 'ABC Legal' },
+  abcLegal3: { value: 'UK9M301K', display: 'ABC Legal' },
+  abcLegal4: { value: 'UK0ICKBR', display: 'ABC Legal' },
+  abcLegal5: { value: 'UKU6G5N1', display: 'ABC Legal' },
+  abcLegal6: { value: 'UKXZDFMB', display: 'ABC Legal' },
+  abcLegal7: { value: 'UKK4X46Z', display: 'ABC Legal' },
+  abcLegal8: { value: 'UKPAK5PR', display: 'ABC Legal' },
+  abcLegal9: { value: 'UKARBQVP', display: 'ABC Legal' },
+  abcLegal10: { value: 'UKVO3L92', display: 'ABC Legal' },
+  abcd1: { value: 'WQ9z7', display: 'ABCD' },
+  abcd2: { value: 'NiKTZ', display: 'ABCD' },
+  aberdeenHarbourBoard: { value: 'GBAHB4PP', display: 'Aberdeen Harbour Board' },
+  associatedBritishPortsAyr: { value: 'GBABP4PP', display: 'Associated British Ports - Ayr' },
+  associatedBritishPortsHull: { value: 'GBHLL4PP', display: 'Associated British Ports - Hull' },
+  associatedBritishPortsPlymouth: { value: 'GBPLP4PP', display: 'Associated British Ports - Plymouth' },
+  associatedBritishPortsSilloth: { value: 'GBPOS4PP', display: 'Associated British Ports - Silloth' },
+  automation9Testing: { value: 'TEST123', display: 'Automation9 Testing' },
+  belfastPharmaceuticals: { value: 'CHEDPP1', display: 'Belfast Pharmaceuticals' },
+  birminghamInternationalAirport: { value: 'GBBXH4PP', display: 'Birmingham International Airport' },
+  controlPoint: {
+    value: 'CONPNT',
+    display: 'Control Point',
+    controlPoints: [
+      { value: 'INSPBAR1', display: 'Barfoots of Botley (Chichester)' },
+      { value: 'INSPBER1', display: 'Berryplants Ltd' },
+    ],
+  },
+  heathrowAirport: { value: 'GBLHR4PP', display: 'Heathrow Airport' },
+  portOfDoverWestern: { value: 'GBDOV1PP', display: 'Port of Dover (Western)' },
+  portOfFelixstowe: { value: 'GBFXT1PP', display: 'Port of Felixstowe' },
+  folkestone: { value: 'GBFOL4PP', display: 'Folkestone' },
+} as const;
+
+export type BorderControlPost = (typeof bcps)[keyof typeof bcps];
