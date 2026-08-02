@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/base/sets';
 
 /**
  * Cancel-amendment through the UI. An amending notification offers a Cancel
@@ -21,7 +22,9 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
     test('opens the confirmation page when Cancel amendment is selected', async ({ pages, journeyContext }) => {
       await pages.notificationView.cancelAmendment.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationCancelAmend.expectedUrl(journeyContext.referenceNumber)}$`));
+      await expect(pages.page).toHaveURL(
+        (url) => url.pathname === pages.notificationCancelAmend.expectedUrl(journeyContext.referenceNumber),
+      );
       await expect(pages.notificationCancelAmend.heading).toBeVisible();
       await expect(
         pages.page.getByText('Your changes since you started amending will be discarded and the submitted version restored.'),
@@ -34,7 +37,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await pages.notificationView.cancelAmendment.click();
       await pages.notificationCancelAmend.reject.click();
 
-      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
+      await expect(pages.page).toHaveURL((url) => url.pathname === pages.notificationView.expectedUrl(journeyContext.referenceNumber));
       await expect(pages.notificationView.journeyStrip).toContainText('Amending');
       await expect(pages.notificationView.cancelAmendment).toBeVisible();
       await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
@@ -61,7 +64,9 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await pages.notificationView.cancelAmendment.click();
       await pages.notificationCancelAmend.confirm.click();
 
-      await expect(pages.page).toHaveURL(/\/notification-view\?cancelled=1$/);
+      await expect(pages.page).toHaveURL((url) =>
+        new RegExp(`^${SET_BASES.liveAnimals}/notifications/[^/]+/notification-view\\?cancelled=1$`).test(`${url.pathname}${url.search}`),
+      );
       await expect(pages.page.getByRole('alert')).toContainText('The amendment has been cancelled and the submitted version restored.');
       await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
       await expect(pages.notificationView.cancelAmendment).not.toBeVisible();

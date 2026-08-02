@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.describe('DRAFT', () => {
@@ -37,7 +38,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
     test('Continue moves on to the declaration', async ({ pages }) => {
       await pages.notificationView.continueButton.click();
-      await expect(pages.page).toHaveURL(/\/declaration$/);
+      await expect(pages.page).toHaveURL((url) =>
+        new RegExp(`^${SET_BASES.liveAnimals}/notifications/[^/]+/declaration$`).test(url.pathname),
+      );
       await expect(pages.declaration.heading).toBeVisible();
     });
   });
@@ -49,7 +52,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('lands on the view page with the Submitted strip and reference', async ({ pages, journeyContext }) => {
-      await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(journeyContext.journeyId)}$`));
+      await expect(pages.page).toHaveURL((url) => url.pathname === pages.notificationView.expectedUrl(journeyContext.journeyId));
       await expect(pages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
       await expect(pages.notificationView.journeyStrip).toContainText(journeyContext.journeyId);
     });

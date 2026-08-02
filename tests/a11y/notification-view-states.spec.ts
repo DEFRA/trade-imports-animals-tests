@@ -1,4 +1,5 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('the check your answers page has no accessibility violations in its DRAFT and SUBMITTED states, including the submission confirmation', async ({
@@ -23,7 +24,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import notification submitted (confirmation)', async () => {
-      await pages.notificationView.navigateToFrontend(`/notifications/${submitted.id}/confirmation`);
+      await pages.notificationView.navigateToFrontend(`${SET_BASES.liveAnimals}/notifications/${submitted.id}/confirmation`);
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
       await runA11yScan();
     });

@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe('Dashboard pagination', { tag: '@integration' }, () => {
   test('uses GOV.UK pagination and reports the result range', async ({ journey, pages }) => {
@@ -14,7 +15,7 @@ test.describe('Dashboard pagination', { tag: '@integration' }, () => {
 
     const firstPageReference = await pages.notificationDashboard.notificationCards.first().getByRole('heading').textContent();
     await pages.notificationDashboard.linkNextPage.click();
-    await expect(pages.page).toHaveURL(/[?&]page=2(?:&|$)/);
+    await expect(pages.page).toHaveURL((url) => url.pathname === SET_BASES.liveAnimals && url.searchParams.get('page') === '2');
     await expect(pages.notificationDashboard.linkPreviousPage).toBeVisible();
     await expect(pages.notificationDashboard.totalResults).toHaveText(/^Showing 21(?: to \d+)? of \d+ Results$/);
 

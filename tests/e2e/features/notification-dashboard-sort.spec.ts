@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { sortByValues } from '@domain/constants/sort-by-values';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe('Notification dashboard sort', () => {
   test.beforeEach(async ({ journey }) => {
@@ -25,7 +26,7 @@ test.describe('Notification dashboard sort', () => {
   for (const value of Object.values(sortByValues)) {
     test(`selecting "${value}" submits and reloads without error`, async ({ pages }) => {
       await pages.notificationDashboard.sortBy(value);
-      await expect(pages.page).toHaveURL(/\?sort=/);
+      await expect(pages.page).toHaveURL((url) => url.pathname === SET_BASES.liveAnimals && url.searchParams.has('sort'));
       await expect(pages.notificationDashboard.heading).toBeVisible();
 
       // Sort order correctness is covered by lower-level tests; this spec validates sort option submission only.

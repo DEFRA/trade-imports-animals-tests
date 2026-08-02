@@ -1,4 +1,14 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/base/sets';
+
+test('signing in without a stored redirect lands on the default set', { tag: ['@auth', '@integration'] }, async ({ pages }) => {
+  await pages.notificationDashboard.navigateToFrontend('/auth/sign-in');
+  await pages.signIn.heading.waitFor();
+  await pages.signIn.signIn();
+
+  await expect(pages.page).toHaveURL(SET_BASES.liveAnimals);
+  await expect(pages.notificationDashboard.heading).toBeVisible();
+});
 
 test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
   test.beforeEach(async ({ journey, pages }) => {
@@ -74,7 +84,9 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
 
     test('allows signing into a page further in the journey', async ({ pages }) => {
       await pages.signIn.signIn();
-      await expect(pages.page).toHaveURL(new RegExp(`/notifications/${journeyId}/origin$`));
+      await expect(pages.page).toHaveURL((url) =>
+        new RegExp(`^${SET_BASES.liveAnimals}/notifications/${journeyId}/origin$`).test(url.pathname),
+      );
       await expect(pages.originOfImport.heading).toBeVisible();
     });
   });

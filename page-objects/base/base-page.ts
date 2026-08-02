@@ -1,5 +1,6 @@
 import { Page, Locator, errors } from '@playwright/test';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
+import { SET_BASES } from '@page-objects/base/sets';
 
 const SIGN_IN_FORM_PROBE_MS = 5_000;
 
@@ -72,17 +73,18 @@ export class NotificationPage extends BasePage {
   constructor(
     page: Page,
     readonly slug: string,
+    readonly setBase: string = SET_BASES.liveAnimals,
   ) {
     super(page);
   }
 
   expectedUrl(journeyId: string): string {
     const suffix = this.slug ? `/${this.slug}` : '';
-    return `/notifications/${journeyId}${suffix}`;
+    return `${this.setBase}/notifications/${journeyId}${suffix}`;
   }
 
   journeyIdFromUrl(): string {
-    const match = new URL(this.page.url()).pathname.match(/^\/notifications\/([^/]+)/);
+    const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
       throw new Error(`No journey id in notification URL: ${this.page.url()}`);
     }
@@ -91,7 +93,7 @@ export class NotificationPage extends BasePage {
 
   currentJourneyUrl(slug: string = this.slug): string {
     const suffix = slug ? `/${slug}` : '';
-    return `/notifications/${this.journeyIdFromUrl()}${suffix}`;
+    return `${this.setBase}/notifications/${this.journeyIdFromUrl()}${suffix}`;
   }
 
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {

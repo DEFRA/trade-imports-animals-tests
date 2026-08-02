@@ -1,10 +1,11 @@
 import { test, expect } from '@fixtures';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
   test('starts a journey at the promoted import-type filter and lists the draft', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
 
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${journeyId}$`));
+    await expect(pages.page).toHaveURL((url) => new RegExp(`^${SET_BASES.liveAnimals}/notifications/${journeyId}$`).test(url.pathname));
     await expect(pages.overview.heading).toBeVisible();
 
     const card = pages.notificationDashboard.notificationCard(journeyId);
