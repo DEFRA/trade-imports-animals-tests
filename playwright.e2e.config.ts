@@ -24,9 +24,15 @@ const e2eConfig = withServiceBaseUrls(
     workers: process.env.CI ? '50%' : 4,
     projects: [
       {
-        name: 'e2e',
+        name: 'e2e-live-animals',
         testDir: './tests/e2e',
-        testIgnore: ['**/admin/**'],
+        testMatch: ['**/live-animals/**/*.spec.ts', '**/tests/e2e/features/*.spec.ts'],
+        use: { ...devices['Desktop Chrome'], viewport, baseURL: frontendUrl },
+      },
+      {
+        name: 'e2e-plant-products',
+        testDir: './tests/e2e',
+        testMatch: ['**/plant-products/**/*.spec.ts'],
         use: { ...devices['Desktop Chrome'], viewport, baseURL: frontendUrl },
       },
       {

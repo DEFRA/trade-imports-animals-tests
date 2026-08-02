@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@fixtures';
-import type { PageObjects } from '@page-objects';
+import type { AdminPageObjects } from '@page-objects';
 import { SqsClient } from '@adapters/queue/sqs-client';
 import { getDlqUrl } from '@config/service-base-urls';
 import { outboxEventPaths } from '@resources/outbox-events/paths';
@@ -39,7 +39,7 @@ async function seedDlqMessage(sqs: SqsClient): Promise<string> {
  * Confirm the seeded message is listed on the DLQ page. The list is fetched on page load, so if the
  * just-seeded message hasn't propagated yet, reload and re-check rather than waiting on stale content.
  */
-async function expectSeededRowListed(pages: PageObjects, eventId: string): Promise<void> {
+async function expectSeededRowListed(pages: AdminPageObjects, eventId: string): Promise<void> {
   await expect(async () => {
     if (!(await pages.adminDlqEvents.rowById(eventId).isVisible())) {
       await pages.page.reload();
@@ -63,7 +63,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     sqs.destroy();
   });
 
-  test('replays all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
+  test('replays all DLQ messages via the admin UI', async ({ adminNavigation, adminPages: pages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await adminNavigation.toDlqEvents();
@@ -76,7 +76,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await expect(pages.adminDlqEvents.bannerSuccess).toContainText('Replay-all started');
   });
 
-  test('deletes all DLQ messages via the admin UI', async ({ adminNavigation, pages }) => {
+  test('deletes all DLQ messages via the admin UI', async ({ adminNavigation, adminPages: pages }) => {
     const eventId = await seedDlqMessage(sqs);
 
     await adminNavigation.toDlqEvents();

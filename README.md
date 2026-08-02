@@ -81,14 +81,14 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
-| Playwright Parameters            | Action                                     |
-| -------------------------------- | ------------------------------------------ |
-| `-- --headed`                    | Run tests in headed mode (see the browser) |
-| `-- tests/example.spec.ts`       | Run a specific test file                   |
-| `-- --grep "@smoke"`             | Run tests with a specific tag              |
-| `-- --debug`                     | Run tests in debug mode                    |
-| `-- --ui`                        | Run tests with UI mode                     |
-| `-- --project=frontend-chromium` | Run tests in a specific project            |
+| Playwright Parameters                         | Action                                     |
+| --------------------------------------------- | ------------------------------------------ |
+| `-- --headed`                                 | Run tests in headed mode (see the browser) |
+| `-- tests/example.spec.ts`                    | Run a specific test file                   |
+| `-- --grep "@smoke"`                          | Run tests with a specific tag              |
+| `-- --debug`                                  | Run tests in debug mode                    |
+| `-- --ui`                                     | Run tests with UI mode                     |
+| `-- --project=frontend-live-animals-chromium` | Run tests in a specific project            |
 
 ### Test Reports
 
@@ -120,15 +120,17 @@ against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
-The workspace E2E config splits tests across two Playwright projects:
+The workspace E2E config splits tests across three Playwright projects:
 
-| Project | Test scope                      |
-| ------- | ------------------------------- |
-| `e2e`   | All tests excluding admin pages |
-| `admin` | Admin pages only                |
+| Project              | Test scope           |
+| -------------------- | -------------------- |
+| `e2e-live-animals`   | Live-animals tests   |
+| `e2e-plant-products` | Plant-products tests |
+| `admin`              | Admin pages only     |
 
 The CDP and docker-compose configs use equivalent projects named
-`frontend-chromium` and `admin-chromium`.
+`frontend-live-animals-chromium`, `frontend-plant-products-chromium`, and
+`admin-chromium`.
 
 ## Local Testing
 

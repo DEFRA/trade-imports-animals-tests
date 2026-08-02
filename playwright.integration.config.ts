@@ -5,7 +5,8 @@ import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 
 const projectBaseUrls: Record<string, string> = {
-  'frontend-chromium': 'http://localhost:3100',
+  'frontend-live-animals-chromium': 'http://localhost:3100',
+  'frontend-plant-products-chromium': 'http://localhost:3100',
   'admin-chromium': 'http://localhost:3001',
 };
 

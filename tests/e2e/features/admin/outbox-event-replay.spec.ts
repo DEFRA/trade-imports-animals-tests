@@ -3,11 +3,11 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () => {
-  test.beforeEach(async ({ apiJourney }) => {
+  test.beforeEach(async ({ liveAnimalsApiJourney: apiJourney }) => {
     await apiJourney.createAmendNotification();
   });
 
-  test('replays outbox events and shows success banner', async ({ adminNavigation, pages, journeyContext }) => {
+  test('replays outbox events and shows success banner', async ({ adminNavigation, adminPages: pages, journeyContext }) => {
     await adminNavigation.toOutboxEvents(journeyContext.referenceNumber);
 
     await test.step('shows two outbox events before replay', async () => {
@@ -28,7 +28,7 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
   test(
     'writes a REPLAY_EVENTS audit record covering both outbox events',
     { tag: '@mongodb' },
-    async ({ adminNavigation, pages, journeyContext }) => {
+    async ({ adminNavigation, adminPages: pages, journeyContext }) => {
       const referenceNumber = journeyContext.referenceNumber;
 
       await adminNavigation.toOutboxEvents(referenceNumber);

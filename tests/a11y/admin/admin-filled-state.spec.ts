@@ -2,10 +2,10 @@ import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('each admin page has no accessibility violations after user input', async ({
-    apiJourney,
+    liveAnimalsApiJourney: apiJourney,
     journeyContext,
     adminNavigation,
-    pages,
+    adminPages: pages,
     runA11yScan,
   }) => {
     await apiJourney.createSubmittedNotification();

@@ -2,6 +2,8 @@
 
 This folder contains flow helpers that support tests by interacting with multiple pages.
 
-## Notes
+## Per-set flows
 
-- This directory may start empty; Git won’t track empty folders, so the presence of this README is intentional until the first helper is added.
+Live-animals journey helpers live under `live-animals/`. Plant-products helpers
+will live under `plant-products/` as that suite is added. Admin navigation stays
+at this level because it targets the separate admin service.

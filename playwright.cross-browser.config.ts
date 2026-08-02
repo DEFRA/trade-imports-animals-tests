@@ -16,6 +16,7 @@ process.env.TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL = FRONTEND_BASE_URL;
  */
 const crossBrowserConfig = {
   ...sharedConfig,
+  // This lane remains set-neutral and flat; its stable project names avoid needless snapshot churn.
   projects: [
     {
       name: 'frontend-chromium',

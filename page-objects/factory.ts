@@ -1,36 +1,54 @@
 import { type Page } from '@playwright/test';
-import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
-import { AdditionalDetailsPage } from './notification/additional-details-page';
-import { AddressesPage } from './notification/addresses-page';
-import { AnimalIdentificationPage } from './notification/animal-identification-page';
-import { ArrivalDetailsPage } from './notification/arrival-details-page';
-import { CommoditySelectionPage } from './notification/commodity-selection-page';
-import { ConsignmentDetailsPage } from './notification/consignment-details-page';
-import { ContactAddressPage } from './notification/contact-address-page';
-import { CphNumberPage } from './notification/cph-number-page';
-import { DeclarationPage } from './notification/declaration-page';
-import { ImportPurposePage } from './notification/import-purpose-page';
-import { ImportReasonPage } from './notification/import-reason-page';
-import { ImportTypePage } from './notification/import-type-page';
-import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
-import { NotificationDashboardPage } from './notification/notification-dashboard-page';
-import { NotificationViewPage } from './notification/notification-view-page';
-import { OriginOfImportPage } from './notification/origin-of-import-page';
-import { OverviewPage } from './notification/overview-page';
-import { PartyPickerPage } from './notification/party-picker-page';
-import { TransitedCountriesPage } from './notification/transited-countries-page';
-import { TransporterPage } from './notification/transporter-page';
-import { TransporterSelectionPage } from './notification/transporter-selection-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminDlqEventsPage } from './admin/admin-dlq-events-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { AccompanyingDocumentsPage } from './live-animals/accompanying-documents-page';
+import { AdditionalDetailsPage } from './live-animals/additional-details-page';
+import { AddressesPage } from './live-animals/addresses-page';
+import { AnimalIdentificationPage } from './live-animals/animal-identification-page';
+import { ArrivalDetailsPage } from './live-animals/arrival-details-page';
+import { CommoditySelectionPage } from './live-animals/commodity-selection-page';
+import { ConsignmentDetailsPage } from './live-animals/consignment-details-page';
+import { ContactAddressPage } from './live-animals/contact-address-page';
+import { CphNumberPage } from './live-animals/cph-number-page';
+import { DeclarationPage } from './live-animals/declaration-page';
+import { ImportPurposePage } from './live-animals/import-purpose-page';
+import { ImportReasonPage } from './live-animals/import-reason-page';
+import { ImportTypePage } from './live-animals/import-type-page';
+import { NotificationCancelAmendPage } from './live-animals/notification-cancel-amend-page';
+import { NotificationDashboardPage } from './live-animals/notification-dashboard-page';
+import { NotificationViewPage } from './live-animals/notification-view-page';
+import { OriginOfImportPage } from './live-animals/origin-of-import-page';
+import { OverviewPage } from './live-animals/overview-page';
+import { PartyPickerPage } from './live-animals/party-picker-page';
+import { TransitedCountriesPage } from './live-animals/transited-countries-page';
+import { TransporterPage } from './live-animals/transporter-page';
+import { TransporterSelectionPage } from './live-animals/transporter-selection-page';
 
-export function createPageObjects(page: Page) {
+export function createSharedPageObjects(page: Page) {
   return {
     page,
+    signIn: new SignInPage(page),
+    signOut: new SignOutPage(page),
+  };
+}
+
+export function createAdminPageObjects(page: Page) {
+  return {
+    ...createSharedPageObjects(page),
+    adminDashboard: new AdminDashboardPage(page),
+    adminDlqEvents: new AdminDlqEventsPage(page),
+    adminNotifications: new AdminNotificationsPage(page),
+    adminOutboxEvents: new AdminOutboxEventsPage(page),
+  };
+}
+
+export function createLiveAnimalsPageObjects(page: Page) {
+  return {
+    ...createSharedPageObjects(page),
     notificationDashboard: new NotificationDashboardPage(page),
     importType: new ImportTypePage(page),
     overview: new OverviewPage(page),
@@ -57,13 +75,14 @@ export function createPageObjects(page: Page) {
     notificationView: new NotificationViewPage(page),
     declaration: new DeclarationPage(page),
     notificationCancelAmend: new NotificationCancelAmendPage(page),
-    signIn: new SignInPage(page),
-    signOut: new SignOutPage(page),
-    adminDashboard: new AdminDashboardPage(page),
-    adminDlqEvents: new AdminDlqEventsPage(page),
-    adminNotifications: new AdminNotificationsPage(page),
-    adminOutboxEvents: new AdminOutboxEventsPage(page),
   };
 }
 
-export type PageObjects = ReturnType<typeof createPageObjects>;
+export function createPlantProductsPageObjects(page: Page) {
+  return createSharedPageObjects(page);
+}
+
+export type SharedPageObjects = ReturnType<typeof createSharedPageObjects>;
+export type AdminPageObjects = ReturnType<typeof createAdminPageObjects>;
+export type LiveAnimalsPageObjects = ReturnType<typeof createLiveAnimalsPageObjects>;
+export type PlantProductsPageObjects = ReturnType<typeof createPlantProductsPageObjects>;

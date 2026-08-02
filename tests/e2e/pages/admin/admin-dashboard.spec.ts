@@ -5,12 +5,12 @@ test.describe('Admin service', () => {
     await adminNavigation.toAdminDashboard();
   });
 
-  test('lands on the admin dashboard', { tag: '@smoke' }, async ({ pages }) => {
+  test('lands on the admin dashboard', { tag: '@smoke' }, async ({ adminPages: pages }) => {
     await expect(pages.page).toHaveURL(pages.adminDashboard.expectedUrl);
     await expect(pages.adminDashboard.heading).toBeVisible();
   });
 
-  test('allows navigating to notifications area', async ({ pages }) => {
+  test('allows navigating to notifications area', async ({ adminPages: pages }) => {
     await pages.adminDashboard.btnNotifications.click();
     await expect(pages.page).toHaveURL(pages.adminNotifications.expectedUrl);
     await expect(pages.adminNotifications.heading).toBeVisible();

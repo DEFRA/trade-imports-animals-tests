@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/models/api/fulfilment';
+import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/live-animals/models/api/fulfilment';
 
 export class NotificationApiClient {
   private readonly rest: RestClient;

@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
+import { type OutboxEventActor, type OutboxEventDocument } from '@domain/live-animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 
 const NOTIFICATION_SUBMISSION_AMENDED = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
@@ -26,7 +26,7 @@ const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventAc
 
 test.describe('Notification amendment outbox event', { tag: ['@integration', '@mongodb'] }, () => {
   test('records the authenticated actor and cumulative status changes on amendment', async ({
-    journey,
+    liveAnimalsJourney: journey,
     journeyContext,
     notificationActions,
   }) => {
