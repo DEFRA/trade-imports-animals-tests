@@ -1,4 +1,6 @@
 import type { PlantProductsPageObjects } from '@page-objects';
+import type { CommodityBulkDetails } from '@page-objects/plant-products/commodity-bulk-details-page';
+import type { VarietyTarget } from '@page-objects/plant-products/variety-of-genus-and-species-page';
 
 export type PlantProductsJourneyContext = {
   journeyId?: string;
@@ -13,6 +15,35 @@ export type PlantOriginOptions = {
 
 export type PlantPurposeOptions = {
   reason?: string;
+};
+
+export type PlantVarietyOptions = {
+  variety: string;
+  varietyClass: 'CLASS_I' | 'CLASS_II' | 'EXTRA_CLASS';
+};
+
+export type PlantSpeciesOptions = {
+  eppoCode: string;
+  genusAndSpecies: string;
+  varieties?: PlantVarietyOptions[];
+};
+
+export type PlantCommodityLineOptions = {
+  commodityCode: string;
+  commodityDescription: string;
+  species: PlantSpeciesOptions[];
+  details?: CommodityBulkDetails;
+};
+
+export type PlantCommoditiesOptions = {
+  lines: PlantCommodityLineOptions[];
+  returnAtSummary?: boolean;
+};
+
+export type PlantAdditionalDetailsOptions = {
+  totalGrossWeight: string;
+  grossVolume?: string;
+  grossVolumeUnit?: 'LITRES' | 'METRES_CUBED';
 };
 
 const DEFAULT_ORIGIN: Required<PlantOriginOptions> = {
@@ -95,6 +126,107 @@ export class PlantProductsJourney {
     await this.pages.aboutTheConsignment.heading.waitFor();
     await this.fillPurpose(options);
     await this.savePurpose();
+    await this.pages.hub.heading.waitFor();
+  }
+
+  private varietyTarget(lineIndex: number, speciesIndex: number, species: PlantSpeciesOptions): VarietyTarget {
+    return {
+      lineIndex,
+      speciesIndex,
+      eppoCode: species.eppoCode,
+      genusAndSpecies: species.genusAndSpecies,
+    };
+  }
+
+  private async addVarieties(lineIndex: number, line: PlantCommodityLineOptions): Promise<void> {
+    const varieties = line.species.flatMap((species, speciesIndex) =>
+      (species.varieties ?? []).map((variety) => ({
+        target: this.varietyTarget(lineIndex, speciesIndex, species),
+        variety,
+      })),
+    );
+    if (varieties.length === 0) return;
+
+    await this.pages.varietyOfGenusAndSpecies.heading.waitFor();
+    for (const { target, variety } of varieties) {
+      await this.pages.varietyOfGenusAndSpecies.variety(target).selectOption(variety.variety);
+      await this.pages.varietyOfGenusAndSpecies.varietyClass(target).selectOption(variety.varietyClass);
+      await this.pages.varietyOfGenusAndSpecies.addAnother(target).click();
+    }
+    await this.pages.varietyOfGenusAndSpecies.saveAndContinue.click();
+  }
+
+  private async addCommodityLine(lineIndex: number, line: PlantCommodityLineOptions): Promise<void> {
+    if (lineIndex > 0) {
+      await this.pages.commoditySummary.addAnotherCommodity.click();
+    }
+    await this.pages.commoditySearch.heading.waitFor();
+    await this.pages.commoditySearch.search(line.commodityCode);
+    await this.pages.commodityBasicDescription.heading.waitFor();
+    for (const species of line.species) {
+      await this.pages.commodityBasicDescription.addSpecies(line.commodityCode, species.genusAndSpecies).click();
+    }
+    await this.pages.commodityBasicDescription.saveAndContinue.click();
+    await this.addVarieties(lineIndex, line);
+    await this.pages.commoditySummary.heading.waitFor();
+  }
+
+  async answerCommodities(options: PlantCommoditiesOptions): Promise<void> {
+    if (options.lines.length === 0) throw new Error('answerCommodities requires at least one commodity line');
+
+    await this.pages.hub.task('Commodity').click();
+    await this.pages.commodityInputMethod.heading.waitFor();
+    await this.pages.commodityInputMethod.method('Manual entry').check();
+    await this.pages.commodityInputMethod.saveAndContinue.click();
+
+    for (const [lineIndex, line] of options.lines.entries()) {
+      await this.addCommodityLine(lineIndex, line);
+    }
+    if (options.returnAtSummary) return;
+
+    await this.pages.commoditySummary.saveAndContinue.click();
+    await this.pages.commodityBulkDetails.heading.waitFor();
+    for (const line of options.lines) {
+      if (!line.details) throw new Error(`Commodity ${line.commodityCode} is missing bulk details`);
+      await this.pages.commodityBulkDetails.fill(line.commodityCode, line.commodityDescription, line.details);
+    }
+    await this.pages.commodityBulkDetails.saveAndContinue.click();
+    await this.pages.hub.heading.waitFor();
+  }
+
+  async removeSpecies(lineIndex: number, speciesIndex: number, genusAndSpecies: string, commodityCode: string): Promise<void> {
+    await this.pages.commoditySummary.removeSpecies(lineIndex, speciesIndex, genusAndSpecies, commodityCode).click();
+    await this.pages.commoditySummary.heading.waitFor();
+  }
+
+  async removeVariety(
+    lineIndex: number,
+    speciesIndex: number,
+    species: PlantSpeciesOptions,
+    varietyLabel: string,
+    classLabel: string,
+  ): Promise<void> {
+    await this.pages.commoditySummary.addSpeciesTo(lineIndex).click();
+    await this.pages.commodityBasicDescription.heading.waitFor();
+    await this.pages.commodityBasicDescription.saveAndContinue.click();
+    const target = this.varietyTarget(lineIndex, speciesIndex, species);
+    await this.pages.varietyOfGenusAndSpecies.heading.waitFor();
+    await this.pages.varietyOfGenusAndSpecies.remove(target, varietyLabel, classLabel).click();
+    await this.pages.varietyOfGenusAndSpecies.saveAndContinue.click();
+    await this.pages.commoditySummary.heading.waitFor();
+  }
+
+  async answerAdditionalDetails(options: PlantAdditionalDetailsOptions): Promise<void> {
+    await this.pages.hub.task('Additional details').click();
+    await this.pages.commodityAdditionalDetails.heading.waitFor();
+    await this.pages.commodityAdditionalDetails.totalGrossWeight.fill(options.totalGrossWeight);
+    if (options.grossVolume !== undefined) {
+      await this.pages.commodityAdditionalDetails.grossVolume.fill(options.grossVolume);
+    }
+    if (options.grossVolumeUnit !== undefined) {
+      await this.pages.commodityAdditionalDetails.grossVolumeUnit.selectOption(options.grossVolumeUnit);
+    }
+    await this.pages.commodityAdditionalDetails.saveAndContinue.click();
     await this.pages.hub.heading.waitFor();
   }
 }

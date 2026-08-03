@@ -7,10 +7,17 @@ import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
 import { AboutTheConsignmentPage } from './plant-products/about-the-consignment-page';
 import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
+import { CommodityAdditionalDetailsPage } from './plant-products/commodity-additional-details-page';
+import { CommodityBasicDescriptionPage } from './plant-products/commodity-basic-description-page';
+import { CommodityBulkDetailsPage } from './plant-products/commodity-bulk-details-page';
+import { CommodityInputMethodPage } from './plant-products/commodity-input-method-page';
+import { CommoditySearchPage } from './plant-products/commodity-search-page';
+import { CommoditySummaryPage } from './plant-products/commodity-summary-page';
 import { PlantHubPage } from './plant-products/hub-page';
 import { PlantImportTypePage } from './plant-products/import-type-page';
 import { PlantOriginOfImportPage } from './plant-products/origin-of-import-page';
 import { PlantNotificationDashboardPage } from './plant-products/plant-notification-dashboard-page';
+import { VarietyOfGenusAndSpeciesPage } from './plant-products/variety-of-genus-and-species-page';
 import { AccompanyingDocumentsPage } from './live-animals/accompanying-documents-page';
 import { AdditionalDetailsPage } from './live-animals/additional-details-page';
 import { AddressesPage } from './live-animals/addresses-page';
@@ -93,6 +100,13 @@ export function createPlantProductsPageObjects(page: Page) {
     countryOfOrigin: new CountryOfOriginPage(page),
     originOfImport: new PlantOriginOfImportPage(page),
     aboutTheConsignment: new AboutTheConsignmentPage(page),
+    commodityInputMethod: new CommodityInputMethodPage(page),
+    commoditySearch: new CommoditySearchPage(page),
+    commodityBasicDescription: new CommodityBasicDescriptionPage(page),
+    varietyOfGenusAndSpecies: new VarietyOfGenusAndSpeciesPage(page),
+    commoditySummary: new CommoditySummaryPage(page),
+    commodityBulkDetails: new CommodityBulkDetailsPage(page),
+    commodityAdditionalDetails: new CommodityAdditionalDetailsPage(page),
   };
 }
 
