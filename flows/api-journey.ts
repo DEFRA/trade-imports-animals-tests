@@ -60,13 +60,12 @@ export class ApiJourney {
     return fulfilment;
   }
 
-  // A UI save-and-continue persists three shapes (fulfilment + current-notification + proposed-
-  // notification projections). POST /fulfilments creates only the fulfilment, so an API seed must
-  // create the two projections too — otherwise the UI's GET /notifications/{id} 404s and the first
-  // save fails, and submit skips the notification cascade so admin never sees it.
+  // A UI save-and-continue persists two shapes (fulfilment + notification projection).
+  // POST /fulfilments creates only the fulfilment, so an API seed must create the projection
+  // too — otherwise the UI's GET /notifications/{id} 404s and the first save fails, and
+  // submit skips the notification cascade so admin never sees it.
   private async seedProjections(fulfilment: Fulfilment): Promise<Fulfilment> {
     await this.api.replaceNotification(fulfilment.id);
-    await this.api.replaceProposedNotification(fulfilment.id);
     return fulfilment;
   }
 

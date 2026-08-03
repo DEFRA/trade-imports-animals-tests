@@ -19,17 +19,12 @@ export class NotificationApiClient {
   }
 
   /**
-   * Seed the "current" notification projection (Mapper A). Every UI save writes this alongside the
+   * Seed the notification projection. Every UI save writes this alongside the
    * fulfilment; an API seed must create it too, or the UI's GET /notifications/{id} 404s and the save
    * fails. Only referenceNumber is required — the first UI save overwrites the rest.
    */
   async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<void> {
     await this.rest.put<unknown>(`/notifications/${id}`, { referenceNumber: id, ...body });
-  }
-
-  /** Seed the "proposed"/new notification projection (Mapper B). See replaceNotification. */
-  async replaceProposedNotification(id: string, body: Record<string, unknown> = {}): Promise<void> {
-    await this.rest.put<unknown>(`/proposed-notifications/${id}`, { referenceNumber: id, ...body });
   }
 
   async getFulfilment(id: string): Promise<Fulfilment> {
