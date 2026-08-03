@@ -38,6 +38,7 @@ test(
   { tag: '@integration' },
   async ({ plantProductsJourney: journey, plantProductsPages: pages }) => {
     await journey.toNotificationDashboard();
+    await pages.page.goto('/plant-products?sort=createdAt%2Casc');
 
     await expect(pages.plantNotificationDashboard.row(seededDraftReference)).toBeVisible();
     await expect(pages.plantNotificationDashboard.row(seededDeletedReference)).toHaveCount(0);
