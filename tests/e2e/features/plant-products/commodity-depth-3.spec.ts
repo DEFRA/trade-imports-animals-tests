@@ -10,11 +10,11 @@ const plantUrl = (reference: string, slug: string) => new RegExp(`^/plant-produc
 
 const foliage = commodityCodes.otherFoliage;
 const [crataegomespilus, lens] = eppoSpecies[foliage.value];
-const citrus = commodityCodes.otherCitrus;
-const cidac = eppoSpecies[citrus.value][0];
-const cidacVarieties = varietyClasses.CIDAC.map(({ value }) => ({
-  variety: varieties.CIDAC[0].value,
-  varietyClass: value,
+const apples = commodityCodes.otherApples;
+const mabsd = eppoSpecies[apples.value][0];
+const mabsdVarieties = varieties[apples.value].MABSD.map(({ value }, index) => ({
+  variety: value,
+  varietyClass: varietyClasses[apples.value][index].value,
 }));
 
 const lines: PlantCommodityLineOptions[] = [
@@ -24,9 +24,9 @@ const lines: PlantCommodityLineOptions[] = [
     species: [crataegomespilus, lens],
   },
   {
-    commodityCode: citrus.value,
-    commodityDescription: citrus.display,
-    species: [{ ...cidac, varieties: cidacVarieties }],
+    commodityCode: apples.value,
+    commodityDescription: apples.display,
+    species: [{ ...mabsd, varieties: mabsdVarieties }],
   },
 ];
 
@@ -74,10 +74,10 @@ const expectInitialDomTree = async (page: Page): Promise<void> => {
   ]);
   await expect(speciesRows(page, 1)).toHaveCount(1);
   expect(await normalisedCells(speciesRows(page, 1))).toEqual([
-    citrus.value,
-    cidac.genusAndSpecies,
-    cidac.eppoCode,
-    'None None None',
+    apples.value,
+    mabsd.genusAndSpecies,
+    mabsd.eppoCode,
+    'McIntosh Red Spartan Royal Gala',
     'Class I Class II Extra Class',
     '',
   ]);
@@ -95,9 +95,9 @@ const expectedInitialTree = (ids: Array<string | null | undefined>) => [
   },
   {
     uniqueComplementId: ids[1],
-    commodityCode: citrus.value,
-    commodityDescription: citrus.display,
-    species: [{ ...cidac, varieties: cidacVarieties }],
+    commodityCode: apples.value,
+    commodityDescription: apples.display,
+    species: [{ ...mabsd, varieties: mabsdVarieties }],
   },
 ];
 
@@ -120,8 +120,8 @@ test(
     expect(ids).toEqual([null, null]);
     expect(persistedTree(initial)).toEqual(expectedInitialTree(ids));
 
-    // CIDAC has one real variety ID and three real classes, so index 1 is a genuine middle removal.
-    await journey.removeVariety(1, 0, lines[1].species[0], 'None', 'Class II');
+    // MABSD has three real varieties and three real classes, so Spartan is a genuine middle removal.
+    await journey.removeVariety(1, 0, lines[1].species[0], 'Spartan', 'Class II');
     await expect(summaryTables(page)).toHaveCount(2);
     await expect(speciesRows(page, 0)).toHaveCount(2);
     expect(await normalisedCells(speciesRows(page, 0).nth(0))).toEqual([
@@ -141,10 +141,10 @@ test(
       'Remove',
     ]);
     expect(await normalisedCells(speciesRows(page, 1))).toEqual([
-      citrus.value,
-      cidac.genusAndSpecies,
-      cidac.eppoCode,
-      'None None',
+      apples.value,
+      mabsd.genusAndSpecies,
+      mabsd.eppoCode,
+      'McIntosh Red Royal Gala',
       'Class I Extra Class',
       '',
     ]);
@@ -155,8 +155,8 @@ test(
         ...expectedInitialTree(ids)[1],
         species: [
           {
-            ...cidac,
-            varieties: [cidacVarieties[0], cidacVarieties[2]],
+            ...mabsd,
+            varieties: [mabsdVarieties[0], mabsdVarieties[2]],
           },
         ],
       },
@@ -169,10 +169,10 @@ test(
     await expect(speciesRows(page, 0)).toHaveCount(1);
     expect(await normalisedCells(speciesRows(page, 0))).toEqual([foliage.value, lens.genusAndSpecies, lens.eppoCode, '', '', '']);
     expect(await normalisedCells(speciesRows(page, 1))).toEqual([
-      citrus.value,
-      cidac.genusAndSpecies,
-      cidac.eppoCode,
-      'None None',
+      apples.value,
+      mabsd.genusAndSpecies,
+      mabsd.eppoCode,
+      'McIntosh Red Royal Gala',
       'Class I Extra Class',
       '',
     ]);
@@ -185,7 +185,7 @@ test(
       },
       {
         ...expectedInitialTree(ids)[1],
-        species: [{ ...cidac, varieties: [cidacVarieties[0], cidacVarieties[2]] }],
+        species: [{ ...mabsd, varieties: [mabsdVarieties[0], mabsdVarieties[2]] }],
       },
     ]);
     expect(afterSpeciesRemoval.commodity?.commodityComplement?.map(({ uniqueComplementId }) => uniqueComplementId)).toEqual(ids);

@@ -6,12 +6,12 @@ import type { VarietyTarget } from '@page-objects/plant-products/variety-of-genu
 
 const plantUrl = (reference: string, slug: string) => new RegExp(`^/plant-products/notifications/${reference}/${slug}(?:\\?.*)?$`);
 
-const citrus = commodityCodes.otherCitrus;
-const cidac = eppoSpecies[citrus.value][0];
-const cidacTarget: VarietyTarget = {
+const apples = commodityCodes.otherApples;
+const mabsd = eppoSpecies[apples.value][0];
+const mabsdTarget: VarietyTarget = {
   lineIndex: 0,
   speciesIndex: 0,
-  ...cidac,
+  ...mabsd,
 };
 
 test.describe('Plant-products variety and class page', { tag: '@integration' }, () => {
@@ -20,23 +20,23 @@ test.describe('Plant-products variety and class page', { tag: '@integration' }, 
     await pages.hub.task('Commodity').click();
     await pages.commodityInputMethod.method('Manual entry').check();
     await pages.commodityInputMethod.saveAndContinue.click();
-    await pages.commoditySearch.search(citrus.value);
-    await pages.commodityBasicDescription.addSpecies(citrus.value, cidac.genusAndSpecies).click();
+    await pages.commoditySearch.search(apples.value);
+    await pages.commodityBasicDescription.addSpecies(apples.value, mabsd.genusAndSpecies).click();
     await pages.commodityBasicDescription.saveAndContinue.click();
     await pages.varietyOfGenusAndSpecies.heading.waitFor();
   });
 
-  test('renders only the shipped CIDAC variety and class options and validates an empty first entry', async ({
+  test('renders only the shipped MABSD variety and class options and validates an empty first entry', async ({
     plantProductsPages: pages,
   }) => {
-    await expect(pages.varietyOfGenusAndSpecies.variety(cidacTarget).locator('option')).toHaveText([
+    await expect(pages.varietyOfGenusAndSpecies.variety(mabsdTarget).locator('option')).toHaveText([
       'Select a variety',
-      varieties.CIDAC[0].display,
+      ...varieties[apples.value].MABSD.map(({ display }) => display),
       'Other',
     ]);
-    await expect(pages.varietyOfGenusAndSpecies.varietyClass(cidacTarget).locator('option')).toHaveText([
+    await expect(pages.varietyOfGenusAndSpecies.varietyClass(mabsdTarget).locator('option')).toHaveText([
       'Select a class',
-      ...varietyClasses.CIDAC.map(({ display }) => display),
+      ...varietyClasses[apples.value].map(({ display }) => display),
     ]);
 
     await pages.varietyOfGenusAndSpecies.saveAndContinue.click();
@@ -48,28 +48,28 @@ test.describe('Plant-products variety and class page', { tag: '@integration' }, 
     plantProductsPages: pages,
   }) => {
     const reference = pages.varietyOfGenusAndSpecies.journeyIdFromUrl();
-    await pages.varietyOfGenusAndSpecies.variety(cidacTarget).selectOption(varieties.CIDAC[0].value);
-    await pages.varietyOfGenusAndSpecies.varietyClass(cidacTarget).selectOption(varietyClasses.CIDAC[0].value);
-    await pages.varietyOfGenusAndSpecies.addAnother(cidacTarget).click();
+    await pages.varietyOfGenusAndSpecies.variety(mabsdTarget).selectOption(varieties[apples.value].MABSD[2].value);
+    await pages.varietyOfGenusAndSpecies.varietyClass(mabsdTarget).selectOption(varietyClasses[apples.value][2].value);
+    await pages.varietyOfGenusAndSpecies.addAnother(mabsdTarget).click();
     await pages.varietyOfGenusAndSpecies.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL((url) => plantUrl(reference, 'commodity-summary').test(`${url.pathname}${url.search}`));
     const persisted = (await plantProductsApi.load(reference)).commodity?.commodityComplement?.[0]?.species?.[0]?.varieties?.[0];
     expect(persisted).toEqual({
-      variety: varieties.CIDAC[0].value,
-      varietyClass: varietyClasses.CIDAC[0].value,
+      variety: varieties[apples.value].MABSD[2].value,
+      varietyClass: varietyClasses[apples.value][2].value,
     });
-    expect(persisted?.variety).not.toBe(varieties.CIDAC[0].display);
+    expect(persisted?.variety).not.toBe(varieties[apples.value].MABSD[2].display);
 
     await pages.commoditySummary.addSpeciesTo(0).click();
     await pages.commodityBasicDescription.saveAndContinue.click();
-    const savedRow = pages.varietyOfGenusAndSpecies.rows(cidacTarget);
+    const savedRow = pages.varietyOfGenusAndSpecies.rows(mabsdTarget);
     await expect(savedRow).toHaveCount(1);
-    await expect(savedRow.getByRole('cell').nth(0)).toHaveText(varieties.CIDAC[0].display);
-    await expect(savedRow.getByRole('cell').nth(1)).toHaveText(varietyClasses.CIDAC[0].display);
+    await expect(savedRow.getByRole('cell').nth(0)).toHaveText(varieties[apples.value].MABSD[2].display);
+    await expect(savedRow.getByRole('cell').nth(1)).toHaveText(varietyClasses[apples.value][2].display);
     await expect(
       savedRow.getByRole('button', {
-        name: 'Remove None, Class I from commodity line 1, species 1: CIDAC - Citrus australasica',
+        name: 'Remove Royal Gala, Extra Class from commodity line 1, species 1: MABSD - Malus domestica',
       }),
     ).toBeVisible();
     await pages.varietyOfGenusAndSpecies.backLink.click();
@@ -78,24 +78,34 @@ test.describe('Plant-products variety and class page', { tag: '@integration' }, 
 });
 
 test(
-  'MABSD has real varieties but no classes, so the UI correctly creates no variety entry instead of fabricating a class',
+  'CIDAC persists its real variety without rendering or fabricating a class',
   {
     tag: '@integration',
   },
   async ({ plantProductsApi, plantProductsJourney: journey, plantProductsPages: pages }) => {
-    const apples = commodityCodes.ciderApples;
-    const mabsd = eppoSpecies[apples.value][0];
+    const citrus = commodityCodes.otherCitrus;
+    const cidac = eppoSpecies[citrus.value][0];
+    const cidacTarget: VarietyTarget = { lineIndex: 0, speciesIndex: 0, ...cidac };
     const reference = await journey.startNotification();
     await pages.hub.task('Commodity').click();
     await pages.commodityInputMethod.method('Manual entry').check();
     await pages.commodityInputMethod.saveAndContinue.click();
-    await pages.commoditySearch.search(apples.value);
-    await pages.commodityBasicDescription.addSpecies(apples.value, mabsd.genusAndSpecies).click();
+    await pages.commoditySearch.search(citrus.value);
+    await pages.commodityBasicDescription.addSpecies(citrus.value, cidac.genusAndSpecies).click();
     await pages.commodityBasicDescription.saveAndContinue.click();
+    await expect(pages.varietyOfGenusAndSpecies.heading).toBeVisible();
+    await expect(pages.varietyOfGenusAndSpecies.varietyClass(cidacTarget)).toHaveCount(0);
+
+    await pages.varietyOfGenusAndSpecies.variety(cidacTarget).selectOption(varieties[citrus.value].CIDAC[0].value);
+    await pages.varietyOfGenusAndSpecies.addAnother(cidacTarget).click();
+    await pages.varietyOfGenusAndSpecies.saveAndContinue.click();
 
     await expect(pages.page).toHaveURL((url) => plantUrl(reference, 'commodity-summary').test(`${url.pathname}${url.search}`));
-    const persisted = (await plantProductsApi.load(reference)).commodity?.commodityComplement?.[0]?.species?.[0];
-    expect(persisted).toMatchObject(mabsd);
-    expect(persisted?.varieties).toEqual([]);
+    await expect(pages.commoditySummary.classesOf(0, 0)).toHaveText('');
+    const persisted = (await plantProductsApi.load(reference)).commodity?.commodityComplement?.[0]?.species?.[0]?.varieties?.[0];
+    expect(persisted).toEqual({
+      variety: varieties[citrus.value].CIDAC[0].value,
+      varietyClass: null,
+    });
   },
 );

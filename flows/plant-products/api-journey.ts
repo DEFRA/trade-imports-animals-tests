@@ -9,7 +9,7 @@ import { importPurposes } from '@domain/plant-products/constants/import-purposes
 import { meansOfTransport } from '@domain/plant-products/constants/means-of-transport';
 import { packageTypes } from '@domain/plant-products/constants/package-types';
 import { quantityTypes } from '@domain/plant-products/constants/quantity-types';
-import { varieties, varietyClasses } from '@domain/plant-products/constants/varieties';
+import { varieties } from '@domain/plant-products/constants/varieties';
 import type {
   PlantProductsNotification,
   PlantProductsNotificationDto,
@@ -75,8 +75,7 @@ const fullNotification = (referenceNumber: string): PlantProductsNotificationDto
               ...species,
               varieties: [
                 {
-                  variety: varieties.CIDAC[0].value,
-                  varietyClass: varietyClasses.CIDAC[0].value,
+                  variety: varieties[commodity.value].CIDAC[0].value,
                 },
               ],
             },
