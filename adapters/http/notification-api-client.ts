@@ -2,13 +2,24 @@ import type { APIRequestContext } from '@playwright/test';
 import { RestClient } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
 import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/models/api/fulfilment';
+import type { Notification } from '@domain/models/api/notification';
 
+/**
+ * HTTP client for the spike's dual persistence surface. Every write path that
+ * needs to reflect in admin (which reads notifications) requires both a
+ * fulfilment-side call and a notification-side call.
+ *
+ * Methods suffixed *Fulfilment hit /fulfilments/{id}/…; methods suffixed
+ * *Notification hit /notifications/{id}/…
+ */
 export class NotificationApiClient {
   private readonly rest: RestClient;
 
   constructor(request: APIRequestContext, baseUrl: string = getBackendBaseUrl(), apiKey: string | undefined = getDeveloperApiKey()) {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
+
+  // --- Fulfilment aggregate (spike-only, POST /fulfilments…) ---
 
   async createFulfilment(): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>('/fulfilments');
@@ -18,38 +29,69 @@ export class NotificationApiClient {
     return this.rest.put<Fulfilment>(`/fulfilments/${id}`, { id, fulfilment });
   }
 
-  /**
-   * Seed the notification projection. Every UI save writes this alongside the
-   * fulfilment; an API seed must create it too, or the UI's GET /notifications/{id} 404s and the save
-   * fails. Only referenceNumber is required — the first UI save overwrites the rest.
-   */
-  async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<void> {
-    await this.rest.put<unknown>(`/notifications/${id}`, { referenceNumber: id, ...body });
-  }
-
   async getFulfilment(id: string): Promise<Fulfilment> {
     return this.rest.get<Fulfilment>(`/fulfilments/${id}`);
   }
 
-  async submitNotification(id: string): Promise<Fulfilment> {
+  async submitFulfilment(id: string): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>(`/fulfilments/${id}/submit`);
   }
 
-  async amendNotification(id: string): Promise<Fulfilment> {
+  async amendFulfilment(id: string): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>(`/fulfilments/${id}/amend`);
   }
 
-  async cancelAmend(id: string): Promise<Fulfilment> {
+  async cancelAmendFulfilment(id: string): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>(`/fulfilments/${id}/cancel-amend`);
   }
 
-  async copyNotification(id: string, idempotencyKey: string): Promise<Fulfilment> {
+  async copyFulfilment(id: string, idempotencyKey: string): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>(`/fulfilments/${id}/copy`, undefined, {
       'Idempotency-Key': idempotencyKey,
     });
   }
 
-  async softDeleteNotification(id: string): Promise<Fulfilment> {
+  async softDeleteFulfilment(id: string): Promise<Fulfilment> {
     return this.rest.post<Fulfilment>(`/fulfilments/${id}/soft-delete`);
+  }
+
+  // --- Notification aggregate (matches main, POST /notifications…) ---
+
+  /**
+   * Mint a new notification. Empty body → server mints the reference number via
+   * ReferenceNumberGenerator and returns it in the response body.
+   */
+  async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
+    return this.rest.post<Notification>('/notifications', body);
+  }
+
+  /**
+   * Whole-record update of an existing notification. `referenceNumber` in the
+   * body is required — main's `saveOriginOfImport` delegates to
+   * `updateNotification` (find-by-ref, replace), and 404s if the record does
+   * not exist.
+   */
+  async saveNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
+    return this.rest.post<Notification>('/notifications', { referenceNumber: id, ...body });
+  }
+
+  async submitNotification(id: string): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/submit`);
+  }
+
+  async amendNotification(id: string): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/amend`);
+  }
+
+  async cancelAmendNotification(id: string): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
+  }
+
+  async copyNotification(id: string): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/copy`);
+  }
+
+  async softDeleteNotification(id: string): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
   }
 }

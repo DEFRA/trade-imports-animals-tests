@@ -34,7 +34,7 @@ const record = (obligationId: string, fulfilmentId: string, value: unknown): Per
 
 // Captured verbatim from a real UI unlock (startNotification + answerOrigin + answerCommodity), not
 // invented — Mapper A projects the commodity code to a string, so an invented array value makes the
-// first UI save's PUT /notifications fail deserialization. Keep in step with journey.ts's unlock.
+// first UI save's POST /notifications fail deserialization. Keep in step with journey.ts's unlock.
 const UNLOCKED_FULFILMENT: PersistedFulfilmentEntry[] = [
   scalar('a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', 'FR'),
   scalar('b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'no'),
@@ -60,24 +60,20 @@ export class ApiJourney {
     return fulfilment;
   }
 
-  // A UI save-and-continue persists two shapes (fulfilment + notification projection).
-  // POST /fulfilments creates only the fulfilment, so an API seed must create the projection
-  // too — otherwise the UI's GET /notifications/{id} 404s and the first save fails, and
-  // submit skips the notification cascade so admin never sees it.
-  private async seedProjections(fulfilment: Fulfilment): Promise<Fulfilment> {
-    await this.api.replaceNotification(fulfilment.id);
-    return fulfilment;
+  // Notification mints the reference number (main's saveOriginOfImport with blank ref),
+  // and the fulfilment is bootstrapped at that same ref. Matches the frontend's own
+  // create flow post-cascade-removal.
+  private async mintNotificationAndBootstrapFulfilment(fulfilmentContent: PersistedFulfilmentEntry[] = []): Promise<Fulfilment> {
+    const notification = await this.api.createNotification();
+    return this.api.replaceFulfilment(notification.referenceNumber, fulfilmentContent);
   }
 
   async createEmptyNotification(): Promise<Fulfilment> {
-    const created = await this.api.createFulfilment();
-    return this.remember(await this.seedProjections(created));
+    return this.remember(await this.mintNotificationAndBootstrapFulfilment());
   }
 
   async createFullNotification(): Promise<Fulfilment> {
-    const created = await this.api.createFulfilment();
-    const replaced = await this.api.replaceFulfilment(created.id, UNLOCKED_FULFILMENT);
-    return this.remember(await this.seedProjections(replaced));
+    return this.remember(await this.mintNotificationAndBootstrapFulfilment(UNLOCKED_FULFILMENT));
   }
 
   async createUpToPage(): Promise<Fulfilment> {
@@ -86,20 +82,27 @@ export class ApiJourney {
 
   async createSubmittedNotification(): Promise<Fulfilment> {
     const draft = await this.createFullNotification();
-    return this.remember(await this.api.submitNotification(draft.id));
+    await this.api.submitFulfilment(draft.id);
+    await this.api.submitNotification(draft.id);
+    return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
   async createAmendNotification(): Promise<Fulfilment> {
     const submitted = await this.createSubmittedNotification();
-    return this.remember(await this.amendWhenOutboxFree(submitted.id));
+    await this.api.amendFulfilment(submitted.id);
+    await this.amendNotificationWhenOutboxFree(submitted.id);
+    return this.remember({ ...submitted, status: 'AMEND' });
   }
 
-  // Submit's outbox write holds a short per-aggregate lock; an API amend fired
-  // straight after can land inside it and 500 (no user can click that fast).
-  private async amendWhenOutboxFree(id: string, attempts = 3): Promise<Fulfilment> {
+  // Submit's outbox write holds a short per-aggregate lock on the notification
+  // side; an API amend fired straight after can land inside it and 500 (no user
+  // can click that fast). Fulfilment amend has no outbox lock — the retry only
+  // wraps the notification amend.
+  private async amendNotificationWhenOutboxFree(id: string, attempts = 3): Promise<void> {
     for (let attempt = 1; ; attempt += 1) {
       try {
-        return await this.api.amendNotification(id);
+        await this.api.amendNotification(id);
+        return;
       } catch (error) {
         const transientLock = error instanceof RestClientError && error.status === 500;
         if (!transientLock || attempt >= attempts) throw error;
