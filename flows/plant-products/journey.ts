@@ -494,10 +494,14 @@ export class PlantProductsJourney {
     await this.pages.consignorCreate.saveAndContinue.click();
     await this.pages.consignorConfirmation.heading.waitFor();
     await this.pages.consignorConfirmation.addToNotification.click();
+    await this.pages.consignorPicker.heading.waitFor();
+    await this.pages.consignorPicker.saveAndContinue.click();
   }
 
   async fillTraders(options: PlantTradersOptions): Promise<void> {
     await this.pages.tradersAddresses.addConsignor.click();
+    await this.pages.consignorPicker.heading.waitFor();
+    await this.pages.consignorPicker.addConsignor.click();
     await this.pages.consignorCreate.heading.waitFor();
     await this.fillConsignor(options.consignor);
     await this.saveConsignor();

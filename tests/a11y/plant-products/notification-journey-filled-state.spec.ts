@@ -225,6 +225,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.tradersAddresses.heading.waitFor();
       await pages.tradersAddresses.addConsignor.click();
 
+      await pages.consignorPicker.heading.waitFor();
+      await pages.consignorPicker.addConsignor.click();
+
       await pages.consignorCreate.heading.waitFor();
       await journey.fillConsignor({
         name: 'Consignor plant operator',
@@ -243,6 +246,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.consignorConfirmation.heading.waitFor();
       await runA11yScan();
       await pages.consignorConfirmation.addToNotification.click();
+
+      await pages.consignorPicker.heading.waitFor();
+      await runA11yScan();
+      await pages.consignorPicker.saveAndContinue.click();
 
       await pages.tradersAddresses.heading.waitFor();
       await pages.tradersAddresses.destinationSameAsConsignee(true).check();

@@ -11,6 +11,7 @@ import { PlantAccompanyingDocumentsPage } from './plant-products/accompanying-do
 import { PlantConfirmationPage } from './plant-products/confirmation-page';
 import { ConsignorConfirmationPage } from './plant-products/consignor-confirmation-page';
 import { ConsignorCreatePage } from './plant-products/consignor-create-page';
+import { ConsignorPickerPage } from './plant-products/consignor-picker-page';
 import { ContactDetailsPage } from './plant-products/contact-details-page';
 import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
 import { PlantDeleteConfirmationPage } from './plant-products/delete-confirmation-page';
@@ -127,6 +128,7 @@ export function createPlantProductsPageObjects(page: Page) {
     nominatedContact: new NominatedContactPage(page),
     accompanyingDocuments: new PlantAccompanyingDocumentsPage(page),
     tradersAddresses: new TradersAddressesPage(page),
+    consignorPicker: new ConsignorPickerPage(page),
     consignorCreate: new ConsignorCreatePage(page),
     consignorConfirmation: new ConsignorConfirmationPage(page),
     reviewNotification: new ReviewNotificationPage(page),
