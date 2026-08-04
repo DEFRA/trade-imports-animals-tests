@@ -49,11 +49,11 @@ test.describe('Plant-products goods movement page', { tag: '@integration' }, () 
     await plantProductsApi.replace(created.referenceNumber, { ...notification, goodsMovementServices: null });
     await pages.goodsMovementServices.open(created.referenceNumber);
     await pages.goodsMovementServices.saveAndContinue.click();
-    expect(
-      await pages.goodsMovementServices.errorSummary
-        .getByRole('link')
-        .evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['#commonTransitConvention', '#usingGvms']);
+    await expect
+      .poll(() =>
+        pages.goodsMovementServices.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual(['#commonTransitConvention', '#usingGvms']);
     await pages.goodsMovementServices.backLink.click();
     await expect(pages.page).toHaveURL((url) => plantUrl(created.referenceNumber).test(url.pathname));
   });

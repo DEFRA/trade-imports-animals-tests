@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
 
+// The seeded-draft test below asserts the sign-in form on a deep link, so it has to start
+// from a signed-out browser rather than the worker's restored session.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 const seededDraftReference = 'GBN-PP-26-SEED01';
 const seededDeletedReference = 'GBN-PP-26-SEED04';
 

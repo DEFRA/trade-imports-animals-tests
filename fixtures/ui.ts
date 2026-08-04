@@ -16,6 +16,12 @@ import { PlantProductsApiClient } from '@adapters/http/plant-products-api-client
 import { PlantProductsApiJourney } from '@flows/plant-products/api-journey';
 import { PlantProductsJourney } from '@flows/plant-products/journey';
 import { PlantProductsNotificationActions } from '@flows/plant-products/notification-actions';
+import { createWorkerAuthState, supportsSessionReuse } from '@fixtures/auth-state';
+
+export interface AuthWorkerFixtures {
+  /** Path to this worker's saved signed-in state, or undefined when the lane signs in per test. */
+  workerAuthState: string | undefined;
+}
 
 export interface PageFixtures {
   liveAnimalsPages: LiveAnimalsPageObjects;
@@ -33,7 +39,24 @@ export interface PageFixtures {
   plantProductsApiJourney: PlantProductsApiJourney;
 }
 
-export const test = base.extend<PageFixtures>({
+export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
+  // One sign-in per worker rather than one per test. The state is minted in the worker's
+  // own browser, so browser-specific sign-in regressions are still exercised, and a spec
+  // that must start cold overrides storageState with an explicit empty state.
+  workerAuthState: [
+    async ({ browser }, use, workerInfo) => {
+      const baseURL = workerInfo.project.use.baseURL;
+      if (!supportsSessionReuse(baseURL)) {
+        await use(undefined);
+        return;
+      }
+      await use(await createWorkerAuthState(browser, baseURL, workerInfo.workerIndex));
+    },
+    { scope: 'worker' },
+  ],
+  storageState: async ({ workerAuthState }, use) => {
+    await use(workerAuthState);
+  },
   liveAnimalsPages: async ({ page }, use) => {
     await use(createLiveAnimalsPageObjects(page));
   },

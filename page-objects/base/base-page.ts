@@ -1,8 +1,17 @@
-import { Page, Locator, errors } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { SET_BASES } from '@page-objects/base/sets';
 
 const SIGN_IN_FORM_PROBE_MS = 5_000;
+const SIGN_IN_CALLBACK_PATH = '/auth/sign-in-oidc';
+
+function pathnameOf(url: string): string {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return '';
+  }
+}
 
 function requireBaseUrl(envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL'): string {
   const baseUrl = process.env[envVar];
@@ -44,28 +53,39 @@ export class BasePage {
   protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
-    // Under concurrent load the auth stub can be slow; the caller may retry
-    // after a goto that landed directly on a post-auth page. Only sign in if
-    // the sign-in form is actually present.
-    try {
-      await signInPage.inputUserId.waitFor({
-        state: 'visible',
-        timeout: SIGN_IN_FORM_PROBE_MS,
-      });
-    } catch (error) {
-      if (error instanceof errors.TimeoutError) return;
-      throw error;
+    const settledUrl = this.page.url();
+
+    // Settling on the OIDC callback means the round trip came back but the app rendered
+    // its sign-in failure page instead of the requested one — typically a session the
+    // frontend has evicted while the identity provider still recognises the browser, so
+    // no form is ever shown. Retry from the failure page rather than returning.
+    if (pathnameOf(settledUrl) === SIGN_IN_CALLBACK_PATH) {
+      await this.retryAfterSignInFailure(signInPage);
+      return;
     }
+
+    // The identity provider is a separate origin, so the settled URL after a goto is a
+    // free and exact test for "a sign-in is actually needed". Probing for the form
+    // instead costs SIGN_IN_FORM_PROBE_MS on every open() that is already signed in.
+    if (!signInPage.expectedUrl.test(settledUrl)) return;
+
+    await signInPage.inputUserId.waitFor({
+      state: 'visible',
+      timeout: SIGN_IN_FORM_PROBE_MS,
+    });
     await signInPage.signIn();
+    await this.retryAfterSignInFailure(signInPage);
+  }
+
+  private async retryAfterSignInFailure(signInPage: SignInPage): Promise<void> {
     const transientError = this.page.getByRole('heading', {
       level: 1,
       name: 'Sorry, we are unable to sign you in.',
     });
-    if (await transientError.isVisible()) {
-      await this.page.getByRole('link', { name: 'try again' }).click();
-      await signInPage.inputUserId.waitFor();
-      await signInPage.signIn();
-    }
+    if (!(await transientError.isVisible())) return;
+    await this.page.getByRole('link', { name: 'try again' }).click();
+    await signInPage.inputUserId.waitFor();
+    await signInPage.signIn();
   }
 }
 

@@ -17,11 +17,11 @@ test.describe('Plant-products accompanying documents page', { tag: '@integration
       ...Object.values(documentTypes).map(({ display }) => display),
     ]);
     await pages.accompanyingDocuments.addDocument.click();
-    expect(
-      await pages.accompanyingDocuments.errorSummary
-        .getByRole('link')
-        .evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['#documentType', '#documentReference', '#issueDate']);
+    await expect
+      .poll(() =>
+        pages.accompanyingDocuments.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual(['#documentType', '#documentReference', '#issueDate']);
 
     await pages.accompanyingDocuments.documentType.selectOption(documentTypes.phytosanitaryCertificate.value);
     await pages.accompanyingDocuments.documentReference.fill('PHYTO-001');

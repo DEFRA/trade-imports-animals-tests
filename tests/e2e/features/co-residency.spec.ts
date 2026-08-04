@@ -1,6 +1,10 @@
 import { test, expect } from '@fixtures';
 import { SET_BASES } from '@page-objects/base/sets';
 
+// The GET /signout below drops the server-side session for whichever sessionId the context
+// holds. On a restored session that is the worker's session, so this spec runs cold.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test(
   'keeps both deployed sets and their drafts isolated with one shared session and server-wide routes',
   { tag: ['@compose', '@integration'] },

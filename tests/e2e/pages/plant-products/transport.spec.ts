@@ -78,17 +78,19 @@ test.describe('Plant-products transport page', { tag: '@integration' }, () => {
     await pages.transportBeforeBip.open(created.referenceNumber);
     await pages.transportBeforeBip.saveAndContinue.click();
 
-    expect(
-      await pages.transportBeforeBip.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual([
-      '#borderControlPost',
-      '#meansOfTransport',
-      '#transportIdentification',
-      '#transportDocumentReference',
-      '#usesContainers',
-      '#arrivalDate-day',
-      '#arrivalTime-hour',
-    ]);
+    await expect
+      .poll(() =>
+        pages.transportBeforeBip.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual([
+        '#borderControlPost',
+        '#meansOfTransport',
+        '#transportIdentification',
+        '#transportDocumentReference',
+        '#usesContainers',
+        '#arrivalDate-day',
+        '#arrivalTime-hour',
+      ]);
     await pages.transportBeforeBip.backLink.click();
     await expect(pages.page).toHaveURL((url) => plantUrl(created.referenceNumber).test(url.pathname));
   });

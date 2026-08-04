@@ -17,9 +17,11 @@ test.describe('Plant-products nominated contacts page', { tag: '@integration' },
     await expect(pages.nominatedContact.heading).toBeVisible();
     await expect(pages.nominatedContact.summaryRows).toHaveCount(0);
     await pages.nominatedContact.addAnother.click();
-    expect(
-      await pages.nominatedContact.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['#contactName', '#contactEmail']);
+    await expect
+      .poll(() =>
+        pages.nominatedContact.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual(['#contactName', '#contactEmail']);
 
     await journey.fillNominatedContacts([
       { name: 'Nominated Agent', email: 'agent@example.com', isAgent: true },

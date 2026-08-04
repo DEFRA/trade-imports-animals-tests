@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
 
+// Signs in, signs out and enters unauthenticated by design. A restored session would skip
+// the form entirely — the identity provider auto-completes for a browser it already knows.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   test.beforeEach(async ({ liveAnimalsJourney: journey, adminPages: pages }) => {
     await journey.toSignIn((attemptSignIn) => pages.adminDashboard.open(attemptSignIn));

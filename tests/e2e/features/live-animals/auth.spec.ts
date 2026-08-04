@@ -1,6 +1,10 @@
 import { test, expect } from '@fixtures';
 import { SET_BASES } from '@page-objects/base/sets';
 
+// Signs in, signs out and enters unauthenticated by design. A restored session would skip
+// the form entirely — the identity provider auto-completes for a browser it already knows.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test(
   'signing in without a stored redirect lands on the default set',
   { tag: ['@auth', '@integration'] },

@@ -2,6 +2,11 @@ import { test, expect } from '@fixtures';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { SET_BASES } from '@page-objects/base/sets';
 
+// Both deep links must be genuinely cold, and the hand-built contexts below do not give
+// that for free: Playwright copies the resolved context options into any browser.newContext()
+// call that does not name them, so a restored session reaches them too.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test(
   'cold deep links are isolated by set and each reaches only its own import-type filter',
   { tag: '@integration' },

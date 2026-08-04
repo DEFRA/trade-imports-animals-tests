@@ -18,9 +18,11 @@ test.describe('Plant-products contact details page', { tag: '@integration' }, ()
     await expect(pages.contactDetails.responsiblePersonEmail).toHaveValue('');
     await expect(pages.contactDetails.responsiblePersonTelephone).toHaveValue('');
     await pages.contactDetails.saveAndContinue.click();
-    expect(
-      await pages.contactDetails.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual(['#responsiblePersonName', '#responsiblePersonEmail']);
+    await expect
+      .poll(() =>
+        pages.contactDetails.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual(['#responsiblePersonName', '#responsiblePersonEmail']);
 
     await pages.contactDetails.responsiblePersonName.fill('Responsible Person');
     await pages.contactDetails.responsiblePersonEmail.fill('responsible.person@example.com');

@@ -29,16 +29,18 @@ test.describe('Plant-products consignor create and confirmation pages', { tag: '
     }
     await pages.consignorCreate.consignorCountry.selectOption('');
     await pages.consignorCreate.saveAndContinue.click();
-    expect(
-      await pages.consignorCreate.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
-    ).toEqual([
-      '#consignorName',
-      '#consignorAddressLine1',
-      '#consignorCity',
-      '#consignorTelephone',
-      '#consignorCountry',
-      '#consignorEmail',
-    ]);
+    await expect
+      .poll(() =>
+        pages.consignorCreate.errorSummary.getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href'))),
+      )
+      .toEqual([
+        '#consignorName',
+        '#consignorAddressLine1',
+        '#consignorCity',
+        '#consignorTelephone',
+        '#consignorCountry',
+        '#consignorEmail',
+      ]);
 
     await journey.fillConsignor({
       name: 'Consignor plant operator',

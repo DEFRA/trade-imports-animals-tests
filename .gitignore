@@ -53,6 +53,8 @@ FAILED
 /test-results/
 /playwright-report/
 /playwright/.cache/
+# Saved signed-in browser state — live session cookies, never commit.
+/playwright/.auth/
 /blob-report/
 /.playwright-cli/
 
