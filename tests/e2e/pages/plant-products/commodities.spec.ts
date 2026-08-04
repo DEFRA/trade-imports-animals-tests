@@ -17,9 +17,9 @@ test.describe('Plant-products commodity pages', { tag: '@integration' }, () => {
     await pages.commodityInputMethod.heading.waitFor();
   });
 
-  test('input method renders both branches and validates an empty submission', async ({ plantProductsPages: pages }) => {
+  test('input method renders only manual entry and validates an empty submission', async ({ plantProductsPages: pages }) => {
     await expect(pages.commodityInputMethod.method('Manual entry')).toBeVisible();
-    await expect(pages.commodityInputMethod.method('Upload from a CSV file')).toBeVisible();
+    await expect(pages.commodityInputMethod.method('Upload from a CSV file')).toHaveCount(0);
 
     await pages.commodityInputMethod.saveAndContinue.click();
     await expect(pages.commodityInputMethod.errorSummary).toContainText('Select how you want to add your commodity details');
@@ -42,18 +42,6 @@ test.describe('Plant-products commodity pages', { tag: '@integration' }, () => {
     await expect(pages.page).toHaveURL((url) => plantUrl(reference).test(`${url.pathname}${url.search}`));
     await pages.hub.task('Commodity').click();
     await expect(pages.commodityInputMethod.method('Manual entry')).toBeChecked();
-  });
-
-  test('CSV currently persists and continues to commodity search until the m5 upload branch exists', async ({
-    plantProductsApi,
-    plantProductsPages: pages,
-  }) => {
-    const reference = pages.commodityInputMethod.journeyIdFromUrl();
-    await pages.commodityInputMethod.method('Upload from a CSV file').check();
-    await pages.commodityInputMethod.saveAndContinue.click();
-
-    await expect(pages.page).toHaveURL((url) => plantUrl(reference, 'commodity-search').test(`${url.pathname}${url.search}`));
-    expect((await plantProductsApi.load(reference)).commodity?.inputMethod).toBe('CSV');
   });
 
   test('search shows no results without inventing a code, then persists the selected code and derived description', async ({
