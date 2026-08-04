@@ -110,6 +110,17 @@ export type PlantTradersOptions = {
   consignor: PlantConsignorOptions;
 };
 
+export type PlantMandatorySpokesOptions = {
+  purpose?: PlantPurposeOptions;
+  commodities?: PlantCommoditiesOptions;
+  additionalDetails?: PlantAdditionalDetailsOptions;
+  transport?: PlantTransportOptions;
+  goodsMovement?: PlantGoodsMovementOptions;
+  contact?: PlantContactOptions;
+  documents?: PlantDocumentOptions[];
+  traders?: PlantTradersOptions;
+};
+
 const DEFAULT_ORIGIN: Required<PlantOriginOptions> = {
   countryOfOrigin: 'France',
   countryOfConsignment: 'France',
@@ -506,33 +517,35 @@ export class PlantProductsJourney {
     await this.pages.hub.heading.waitFor();
   }
 
-  async completeMandatorySpokes(): Promise<void> {
-    await this.answerPurpose();
-    await this.answerCommodities({
-      lines: [
-        {
-          commodityCode: DEFAULT_COMMODITY.value,
-          commodityDescription: DEFAULT_COMMODITY.display,
-          species: [DEFAULT_SPECIES],
-          details: {
-            numberOfPackages: '4',
-            packageType: packageTypes.box.value,
-            quantity: '120',
-            quantityType: quantityTypes.pieces.value,
-            netWeight: '80',
-            controlledAtmosphereContainer: false,
-            intendedForFinalUsers: true,
-            testAndTrial: false,
+  async completeMandatorySpokes(options: PlantMandatorySpokesOptions = {}): Promise<void> {
+    await this.answerPurpose(options.purpose);
+    await this.answerCommodities(
+      options.commodities ?? {
+        lines: [
+          {
+            commodityCode: DEFAULT_COMMODITY.value,
+            commodityDescription: DEFAULT_COMMODITY.display,
+            species: [DEFAULT_SPECIES],
+            details: {
+              numberOfPackages: '4',
+              packageType: packageTypes.box.value,
+              quantity: '120',
+              quantityType: quantityTypes.pieces.value,
+              netWeight: '80',
+              controlledAtmosphereContainer: false,
+              intendedForFinalUsers: true,
+              testAndTrial: false,
+            },
           },
-        },
-      ],
-    });
-    await this.answerAdditionalDetails({ totalGrossWeight: '100' });
-    await this.answerTransport();
-    await this.answerGoodsMovement();
-    await this.answerContact();
-    await this.answerDocuments();
-    await this.answerTraders();
+        ],
+      },
+    );
+    await this.answerAdditionalDetails(options.additionalDetails ?? { totalGrossWeight: '100' });
+    await this.answerTransport(options.transport);
+    await this.answerGoodsMovement(options.goodsMovement);
+    await this.answerContact(options.contact);
+    await this.answerDocuments(options.documents);
+    await this.answerTraders(options.traders);
   }
 
   async reviewAndSubmit(): Promise<void> {

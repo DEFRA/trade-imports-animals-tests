@@ -12,4 +12,11 @@ test.describe('Cross-browser journey smoke', { tag: '@cross-browser' }, () => {
     expect(journeyId).toBeTruthy();
     await expect(pages.overview.heading).toBeVisible();
   });
+
+  test('signs in and starts a plant-products notification', async ({ plantProductsJourney: journey, plantProductsPages: pages }) => {
+    test.slow();
+    const journeyId = await journey.startNotification();
+    expect(journeyId).toBeTruthy();
+    await expect(pages.hub.heading).toBeVisible();
+  });
 });
