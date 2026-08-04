@@ -27,9 +27,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     const submitted = await apiJourney.createSubmittedNotification();
 
     await test.step('Review notification (submitted)', async () => {
-      // The current plant dashboard has no View action for SUBMITTED and this
-      // direct route still renders the editable review template. This scans the
-      // shipped status rendering, but is not a substitute for a read-only view.
+      // The current plant dashboard has no View action for SUBMITTED, so this
+      // direct route is how the read-only view is reached. It renders with no
+      // change links, no commodity Action column and no resubmission form, so
+      // this step scans the read-only surface rather than the editable one.
       await pages.reviewNotification.open(submitted.referenceNumber, false);
       await pages.reviewNotification.heading.waitFor();
       await expect(statusTag).toBeVisible();
