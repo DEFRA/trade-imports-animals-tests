@@ -6,12 +6,14 @@ import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
 import { AboutTheConsignmentPage } from './plant-products/about-the-consignment-page';
+import { PlantCancelAmendPage } from './plant-products/cancel-amend-page';
 import { PlantAccompanyingDocumentsPage } from './plant-products/accompanying-documents-page';
 import { PlantConfirmationPage } from './plant-products/confirmation-page';
 import { ConsignorConfirmationPage } from './plant-products/consignor-confirmation-page';
 import { ConsignorCreatePage } from './plant-products/consignor-create-page';
 import { ContactDetailsPage } from './plant-products/contact-details-page';
 import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
+import { PlantDeleteConfirmationPage } from './plant-products/delete-confirmation-page';
 import { CommodityAdditionalDetailsPage } from './plant-products/commodity-additional-details-page';
 import { CommodityBasicDescriptionPage } from './plant-products/commodity-basic-description-page';
 import { CommodityBulkDetailsPage } from './plant-products/commodity-bulk-details-page';
@@ -25,6 +27,7 @@ import { PlantImportTypePage } from './plant-products/import-type-page';
 import { PlantOriginOfImportPage } from './plant-products/origin-of-import-page';
 import { PlantNotificationDashboardPage } from './plant-products/plant-notification-dashboard-page';
 import { NominatedContactPage } from './plant-products/nominated-contact-page';
+import { PlantNotificationViewPage } from './plant-products/notification-view-page';
 import { ReviewNotificationPage } from './plant-products/review-notification-page';
 import { TradersAddressesPage } from './plant-products/traders-addresses-page';
 import { TransportBeforeBipPage } from './plant-products/transport-before-bip-page';
@@ -127,6 +130,9 @@ export function createPlantProductsPageObjects(page: Page) {
     consignorCreate: new ConsignorCreatePage(page),
     consignorConfirmation: new ConsignorConfirmationPage(page),
     reviewNotification: new ReviewNotificationPage(page),
+    notificationView: new PlantNotificationViewPage(page),
+    cancelAmend: new PlantCancelAmendPage(page),
+    deleteConfirmation: new PlantDeleteConfirmationPage(page),
     declaration: new PlantDeclarationPage(page),
     confirmation: new PlantConfirmationPage(page),
   };

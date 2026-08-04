@@ -15,6 +15,7 @@ import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { PlantProductsApiClient } from '@adapters/http/plant-products-api-client';
 import { PlantProductsApiJourney } from '@flows/plant-products/api-journey';
 import { PlantProductsJourney } from '@flows/plant-products/journey';
+import { PlantProductsNotificationActions } from '@flows/plant-products/notification-actions';
 
 export interface PageFixtures {
   liveAnimalsPages: LiveAnimalsPageObjects;
@@ -23,6 +24,7 @@ export interface PageFixtures {
   journeyContext: JourneyContext;
   liveAnimalsJourney: Journey;
   plantProductsJourney: PlantProductsJourney;
+  plantProductsNotificationActions: PlantProductsNotificationActions;
   adminNavigation: AdminNavigation;
   notificationActions: NotificationActions;
   notificationApi: NotificationApiClient;
@@ -50,6 +52,9 @@ export const test = base.extend<PageFixtures>({
   },
   plantProductsJourney: async ({ plantProductsPages, journeyContext }, use) => {
     await use(new PlantProductsJourney(plantProductsPages, journeyContext));
+  },
+  plantProductsNotificationActions: async ({ plantProductsPages }, use) => {
+    await use(new PlantProductsNotificationActions(plantProductsPages));
   },
   adminNavigation: async ({ adminPages }, use) => {
     await use(new AdminNavigation(adminPages));

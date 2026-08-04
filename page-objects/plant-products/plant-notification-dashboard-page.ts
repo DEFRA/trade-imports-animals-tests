@@ -74,6 +74,46 @@ export class PlantNotificationDashboardPage extends BasePage {
     return this.resultRows.filter({ has: this.page.getByRole('rowheader', { name: reference, exact: true }) });
   }
 
+  continue(reference: string): Locator {
+    return this.row(reference).getByRole('link', { name: `Continue notification ${reference}`, exact: true });
+  }
+
+  view(reference: string): Locator {
+    return this.row(reference).getByRole('link', { name: `View notification ${reference}`, exact: true });
+  }
+
+  amend(reference: string): Locator {
+    return this.row(reference).getByRole('button', { name: `Amend notification ${reference}`, exact: true });
+  }
+
+  resume(reference: string): Locator {
+    return this.row(reference).getByRole('link', { name: `Resume notification ${reference}`, exact: true });
+  }
+
+  copy(reference: string): Locator {
+    return this.row(reference).getByRole('button', { name: `Copy as new notification ${reference}`, exact: true });
+  }
+
+  cancelAmend(reference: string): Locator {
+    return this.row(reference).getByRole('link', { name: `Cancel amendment notification ${reference}`, exact: true });
+  }
+
+  delete(reference: string): Locator {
+    return this.row(reference).getByRole('link', { name: `Delete notification ${reference}`, exact: true });
+  }
+
+  actionForm(action: Locator): Locator {
+    return action.locator('..');
+  }
+
+  idempotencyKey(reference: string): Locator {
+    return this.actionForm(this.copy(reference)).locator('input[name="idempotencyKey"]');
+  }
+
+  copyOrigin(reference: string): Locator {
+    return this.actionForm(this.copy(reference)).locator('input[name="copyOrigin"]');
+  }
+
   get noNotificationsFound(): Locator {
     return this.page.getByText('No notifications found', { exact: true });
   }
