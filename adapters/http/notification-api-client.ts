@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/models/api/fulfilment';
+import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
 import type { Notification } from '@domain/models/api/notification';
 
 // Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
@@ -14,10 +14,10 @@ const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 /**
  * HTTP client for the spike's dual persistence surface. Every write path that
  * needs to reflect in admin (which reads notifications) requires both a
- * fulfilment-side call and a notification-side call.
+ * notification-fulfilments call and a notification call.
  *
- * Methods suffixed *Fulfilment hit /fulfilments/{id}/…; methods suffixed
- * *Notification hit /notifications/{id}/…
+ * Methods suffixed *NotificationFulfilments hit /notification-fulfilments/{id}/…;
+ * methods suffixed *Notification hit /notifications/{id}/…
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
@@ -26,40 +26,40 @@ export class NotificationApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  // --- Fulfilment aggregate (spike-only, POST /fulfilments…) ---
+  // --- NotificationFulfilments aggregate (spike-only, POST /notification-fulfilments…) ---
 
-  async createFulfilment(): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>('/fulfilments');
+  async createNotificationFulfilments(): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>('/notification-fulfilments');
   }
 
-  async replaceFulfilment(id: string, fulfilment: PersistedFulfilmentEntry[]): Promise<Fulfilment> {
-    return this.rest.put<Fulfilment>(`/fulfilments/${id}`, { id, fulfilment });
+  async replaceNotificationFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
+    return this.rest.put<NotificationFulfilments>(`/notification-fulfilments/${id}`, { id, fulfilments });
   }
 
-  async getFulfilment(id: string): Promise<Fulfilment> {
-    return this.rest.get<Fulfilment>(`/fulfilments/${id}`);
+  async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
+    return this.rest.get<NotificationFulfilments>(`/notification-fulfilments/${id}`);
   }
 
-  async submitFulfilment(id: string): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>(`/fulfilments/${id}/submit`);
+  async submitNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/submit`);
   }
 
-  async amendFulfilment(id: string): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>(`/fulfilments/${id}/amend`);
+  async amendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/amend`);
   }
 
-  async cancelAmendFulfilment(id: string): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>(`/fulfilments/${id}/cancel-amend`);
+  async cancelAmendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/cancel-amend`);
   }
 
-  async copyFulfilment(id: string, idempotencyKey: string): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>(`/fulfilments/${id}/copy`, undefined, {
+  async copyNotificationFulfilments(id: string, idempotencyKey: string): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/copy`, undefined, {
       'Idempotency-Key': idempotencyKey,
     });
   }
 
-  async softDeleteFulfilment(id: string): Promise<Fulfilment> {
-    return this.rest.post<Fulfilment>(`/fulfilments/${id}/soft-delete`);
+  async softDeleteNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
+    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/soft-delete`);
   }
 
   // --- Notification aggregate (matches main, POST /notifications…) ---

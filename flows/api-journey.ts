@@ -1,6 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
-import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/models/api/fulfilment';
+import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
 import type { PageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
 
@@ -34,7 +34,7 @@ const record = (obligationId: string, fulfilmentId: string, value: unknown): Per
 // Captured verbatim from a real UI unlock (startNotification + answerOrigin + answerCommodity), not
 // invented — Mapper A projects the commodity code to a string, so an invented array value makes the
 // first UI save's POST /notifications fail deserialization. Keep in step with journey.ts's unlock.
-const UNLOCKED_FULFILMENT: PersistedFulfilmentEntry[] = [
+const UNLOCKED_FULFILMENTS: PersistedFulfilmentEntry[] = [
   scalar('a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', 'FR'),
   scalar('b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'no'),
   scalar('c23d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f', ''),
@@ -53,42 +53,42 @@ export class ApiJourney {
     private readonly context: JourneyContext,
   ) {}
 
-  private remember(fulfilment: Fulfilment): Fulfilment {
-    this.context.journeyId = fulfilment.id;
-    this.context.referenceNumber = fulfilment.id;
-    return fulfilment;
+  private remember(aggregate: NotificationFulfilments): NotificationFulfilments {
+    this.context.journeyId = aggregate.id;
+    this.context.referenceNumber = aggregate.id;
+    return aggregate;
   }
 
   // Notification mints the reference number (main's saveOriginOfImport with blank ref),
-  // and the fulfilment is bootstrapped at that same ref. Matches the frontend's own
-  // create flow post-cascade-removal.
-  private async mintNotificationAndBootstrapFulfilment(fulfilmentContent: PersistedFulfilmentEntry[] = []): Promise<Fulfilment> {
+  // and the notification-fulfilments aggregate is bootstrapped at that same ref.
+  // Matches the frontend's own create flow post-cascade-removal.
+  private async mintNotificationAndBootstrapFulfilments(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
     const notification = await this.api.createNotification();
-    return this.api.replaceFulfilment(notification.referenceNumber, fulfilmentContent);
+    return this.api.replaceNotificationFulfilments(notification.referenceNumber, contents);
   }
 
-  async createEmptyNotification(): Promise<Fulfilment> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilment());
+  async createEmptyNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments());
   }
 
-  async createFullNotification(): Promise<Fulfilment> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilment(UNLOCKED_FULFILMENT));
+  async createFullNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments(UNLOCKED_FULFILMENTS));
   }
 
-  async createUpToPage(): Promise<Fulfilment> {
+  async createUpToPage(): Promise<NotificationFulfilments> {
     return this.createFullNotification();
   }
 
-  async createSubmittedNotification(): Promise<Fulfilment> {
+  async createSubmittedNotification(): Promise<NotificationFulfilments> {
     const draft = await this.createFullNotification();
-    await this.api.submitFulfilment(draft.id);
+    await this.api.submitNotificationFulfilments(draft.id);
     await this.api.submitNotification(draft.id);
     return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
-  async createAmendNotification(): Promise<Fulfilment> {
+  async createAmendNotification(): Promise<NotificationFulfilments> {
     const submitted = await this.createSubmittedNotification();
-    await this.api.amendFulfilment(submitted.id);
+    await this.api.amendNotificationFulfilments(submitted.id);
     await this.api.amendNotification(submitted.id);
     return this.remember({ ...submitted, status: 'AMEND' });
   }

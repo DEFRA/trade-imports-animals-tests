@@ -1,58 +1,58 @@
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
-import { fulfilmentStatuses } from '@domain/models/api/fulfilment';
+import { notificationFulfilmentsStatuses } from '@domain/models/api/notification-fulfilments';
 import { notificationStatuses } from '@domain/models/api/notification';
 
 test.describe('Promoted lifecycle across both aggregates', { tag: ['@compose', '@integration'] }, () => {
-  test('dual-writes create/submit/amend/cancel/soft-delete to both /notifications and /fulfilments, and fulfilment copy stays idempotent', async ({
+  test('dual-writes create/submit/amend/cancel/soft-delete to both /notifications and /notification-fulfilments, and notification-fulfilments copy stays idempotent', async ({
     notificationApi,
   }) => {
-    // Notification mints the ref; fulfilment is bootstrapped at that same ref.
+    // Notification mints the ref; notification-fulfilments is bootstrapped at that same ref.
     const notification = await notificationApi.createNotification();
     const id = notification.referenceNumber;
     expect(notification.status).toBe(notificationStatuses.draft);
 
-    const draft = await notificationApi.replaceFulfilment(id, []);
+    const draft = await notificationApi.replaceNotificationFulfilments(id, []);
     expect(draft.id).toBe(id);
-    expect(draft.status).toBe(fulfilmentStatuses.draft);
+    expect(draft.status).toBe(notificationFulfilmentsStatuses.draft);
 
     // Submit both sides.
-    const submittedFulfilment = await notificationApi.submitFulfilment(id);
+    const submittedNotificationFulfilments = await notificationApi.submitNotificationFulfilments(id);
     const submittedNotification = await notificationApi.submitNotification(id);
-    expect(submittedFulfilment.status).toBe(fulfilmentStatuses.submitted);
+    expect(submittedNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
     expect(submittedNotification.status).toBe(notificationStatuses.submitted);
 
     // Amend both sides.
-    const amendedFulfilment = await notificationApi.amendFulfilment(id);
+    const amendedNotificationFulfilments = await notificationApi.amendNotificationFulfilments(id);
     const amendedNotification = await notificationApi.amendNotification(id);
-    expect(amendedFulfilment.status).toBe(fulfilmentStatuses.amend);
-    expect(amendedFulfilment.submittedFulfilment).toEqual([]);
+    expect(amendedNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.amend);
+    expect(amendedNotificationFulfilments.submittedFulfilments).toEqual([]);
     expect(amendedNotification.status).toBe(notificationStatuses.amend);
 
     // Cancel-amend both sides.
-    const cancelledFulfilment = await notificationApi.cancelAmendFulfilment(id);
+    const cancelledNotificationFulfilments = await notificationApi.cancelAmendNotificationFulfilments(id);
     const cancelledNotification = await notificationApi.cancelAmendNotification(id);
-    expect(cancelledFulfilment.status).toBe(fulfilmentStatuses.submitted);
+    expect(cancelledNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
     expect(cancelledNotification.status).toBe(notificationStatuses.submitted);
 
-    // Fulfilment copy carries an idempotency key; the notification copy on main
-    // has no equivalent (POST /notifications/{id}/copy takes no key), so this
-    // spec only exercises the fulfilment side of copy.
+    // NotificationFulfilments copy carries an idempotency key; the notification
+    // copy on main has no equivalent (POST /notifications/{id}/copy takes no key),
+    // so this spec only exercises the notification-fulfilments side of copy.
     const key = randomUUID();
-    const copiedFulfilment = await notificationApi.copyFulfilment(id, key);
-    const repeatedCopy = await notificationApi.copyFulfilment(id, key);
-    expect(copiedFulfilment.id).not.toBe(id);
-    expect(repeatedCopy.id).toBe(copiedFulfilment.id);
-    expect(copiedFulfilment.status).toBe(fulfilmentStatuses.draft);
+    const copiedNotificationFulfilments = await notificationApi.copyNotificationFulfilments(id, key);
+    const repeatedCopy = await notificationApi.copyNotificationFulfilments(id, key);
+    expect(copiedNotificationFulfilments.id).not.toBe(id);
+    expect(repeatedCopy.id).toBe(copiedNotificationFulfilments.id);
+    expect(copiedNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.draft);
 
     // Soft-delete both sides; both are idempotent.
-    const deletedFulfilment = await notificationApi.softDeleteFulfilment(id);
+    const deletedNotificationFulfilments = await notificationApi.softDeleteNotificationFulfilments(id);
     const deletedNotification = await notificationApi.softDeleteNotification(id);
-    expect(deletedFulfilment.status).toBe(fulfilmentStatuses.deleted);
+    expect(deletedNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.deleted);
     expect(deletedNotification.status).toBe(notificationStatuses.deleted);
 
-    const repeatFulfilmentDelete = await notificationApi.softDeleteFulfilment(id);
-    expect(repeatFulfilmentDelete.status).toBe(fulfilmentStatuses.deleted);
+    const repeatDelete = await notificationApi.softDeleteNotificationFulfilments(id);
+    expect(repeatDelete.status).toBe(notificationFulfilmentsStatuses.deleted);
   });
 
   test('renders a submitted notification read-only and re-enters an amendment at Overview', async ({
