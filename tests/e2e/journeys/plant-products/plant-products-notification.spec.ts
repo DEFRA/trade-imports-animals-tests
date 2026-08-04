@@ -24,18 +24,18 @@ const expectedAppleVarieties = [
   { variety: spartan.value, varietyClass: 'CLASS_II' },
   { variety: royalGala.value, varietyClass: 'EXTRA_CLASS' },
 ];
-const stubOrganisation = {
+const placeholderOrganisation = {
   operatorId: null,
-  name: 'Stubbed organisation',
+  name: 'KING CHARLES III',
   telephone: null,
   email: null,
   address: {
-    addressLine1: 'KAINOS SOFTWARE LTD',
+    addressLine1: 'BUCKINGHAM PALACE',
     addressLine2: null,
     addressLine3: null,
-    city: 'BELFAST',
-    postcode: 'BT7 1NT',
-    country: 'GB-NIR',
+    city: null,
+    postcode: null,
+    country: 'GB-ENG',
   },
 };
 const commodity = {
@@ -142,8 +142,8 @@ test(
         },
       },
       consignee: null,
-      importer: stubOrganisation,
-      destination: stubOrganisation,
+      importer: placeholderOrganisation,
+      destination: placeholderOrganisation,
       responsiblePerson: {
         name: 'Responsible Person',
         email: 'responsible.person@example.com',

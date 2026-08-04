@@ -20,7 +20,7 @@ const seededPlantNotifications = [
   status,
   ownership: {
     assignedOrganisationId: 'stub-org',
-    assignedOrganisationName: 'Stubbed organisation',
+    assignedOrganisationName: 'KING CHARLES III',
   },
   origin: {
     countryCode: 'FR',
