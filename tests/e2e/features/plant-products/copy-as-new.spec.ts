@@ -2,8 +2,8 @@ import type { APIResponse, Locator, Page } from '@playwright/test';
 import type { PlantProductsNotificationResponse } from '@domain/plant-products/models/api/notification';
 import { test, expect } from '@fixtures';
 
-// From the frontend's plant-products flow/fixtures/happy-path.json.
-const differentSourceInternalReference = 'IMPORT-041';
+const firstSourceInternalReference = 'COPY-FIRST-SOURCE';
+const differentSourceInternalReference = 'COPY-SECOND-SOURCE';
 
 type CopyForm = {
   action: string;
@@ -126,14 +126,17 @@ test.describe('Plant-products copy as new', { tag: '@integration' }, () => {
     });
   });
 
-  test('the current global key returns the first source copy when reused against a different source', async ({
+  test('a global key reused against a different source is rejected without creating a copy', async ({
     plantProductsApiJourney: apiJourney,
     plantProductsApi,
     plantProductsPages: pages,
   }) => {
-    const firstSource = await apiJourney.createSubmittedNotification();
-    const firstSourceInternalReference = firstSource.origin?.internalReference;
-    if (!firstSourceInternalReference) throw new Error('First submitted notification has no internal reference');
+    const firstDraft = await apiJourney.createFullNotification();
+    await plantProductsApi.replace(firstDraft.referenceNumber, {
+      ...firstDraft,
+      origin: { ...firstDraft.origin, internalReference: firstSourceInternalReference },
+    });
+    const firstSource = await plantProductsApi.setStatus(firstDraft.referenceNumber, { status: 'SUBMITTED' });
     const secondDraft = await apiJourney.createFullNotification();
     await plantProductsApi.replace(secondDraft.referenceNumber, {
       ...secondDraft,
@@ -155,12 +158,23 @@ test.describe('Plant-products copy as new', { tag: '@integration' }, () => {
     const secondForm = await readCopyForm(
       pages.plantNotificationDashboard.actionForm(pages.plantNotificationDashboard.copy(secondSource.referenceNumber)),
     );
-    const secondLocation = copyLocation(await postCopyForm(pages.page, secondForm, firstForm.idempotencyKey));
+    const rejectedResponse = await postCopyForm(pages.page, secondForm, firstForm.idempotencyKey);
 
-    // pp-098 will scope idempotency to the source; until it lands the key is global and returns the first source's copy.
-    expect(secondLocation).toBe(firstLocation);
-    const reusedCopy = await plantProductsApi.load(referenceFromLocation(secondLocation));
-    expect(reusedCopy.origin?.internalReference).toBe(firstSourceInternalReference);
-    expect(reusedCopy.origin?.internalReference).not.toBe(differentSourceInternalReference);
+    // A key identifies one exact copy operation globally; reusing it for another source fails loudly.
+    expect(rejectedResponse.status()).toBe(422);
+    expect(rejectedResponse.headers().location).toBeUndefined();
+    expect(await rejectedResponse.text()).toContain('Try copying it again. A new copy request will be used.');
+    const copiesForEitherSource = (await plantProductsApi.list()).content.filter(
+      ({ origin, status }) =>
+        status === 'DRAFT' && [firstSourceInternalReference, differentSourceInternalReference].includes(origin?.internalReference ?? ''),
+    );
+    expect(copiesForEitherSource).toHaveLength(1);
+    const onlyDraft = copiesForEitherSource[0];
+    if (!onlyDraft) throw new Error('Expected the first-source copy to remain');
+    expect(onlyDraft).toMatchObject({
+      referenceNumber: referenceFromLocation(firstLocation),
+      origin: { internalReference: firstSourceInternalReference },
+    });
+    expect(onlyDraft.origin?.internalReference).not.toBe(differentSourceInternalReference);
   });
 });
