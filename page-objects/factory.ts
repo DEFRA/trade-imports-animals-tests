@@ -6,6 +6,11 @@ import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
 import { AboutTheConsignmentPage } from './plant-products/about-the-consignment-page';
+import { PlantAccompanyingDocumentsPage } from './plant-products/accompanying-documents-page';
+import { PlantConfirmationPage } from './plant-products/confirmation-page';
+import { ConsignorConfirmationPage } from './plant-products/consignor-confirmation-page';
+import { ConsignorCreatePage } from './plant-products/consignor-create-page';
+import { ContactDetailsPage } from './plant-products/contact-details-page';
 import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
 import { CommodityAdditionalDetailsPage } from './plant-products/commodity-additional-details-page';
 import { CommodityBasicDescriptionPage } from './plant-products/commodity-basic-description-page';
@@ -13,10 +18,16 @@ import { CommodityBulkDetailsPage } from './plant-products/commodity-bulk-detail
 import { CommodityInputMethodPage } from './plant-products/commodity-input-method-page';
 import { CommoditySearchPage } from './plant-products/commodity-search-page';
 import { CommoditySummaryPage } from './plant-products/commodity-summary-page';
+import { PlantDeclarationPage } from './plant-products/declaration-page';
+import { GoodsMovementServicesPage } from './plant-products/goods-movement-services-page';
 import { PlantHubPage } from './plant-products/hub-page';
 import { PlantImportTypePage } from './plant-products/import-type-page';
 import { PlantOriginOfImportPage } from './plant-products/origin-of-import-page';
 import { PlantNotificationDashboardPage } from './plant-products/plant-notification-dashboard-page';
+import { NominatedContactPage } from './plant-products/nominated-contact-page';
+import { ReviewNotificationPage } from './plant-products/review-notification-page';
+import { TradersAddressesPage } from './plant-products/traders-addresses-page';
+import { TransportBeforeBipPage } from './plant-products/transport-before-bip-page';
 import { VarietyOfGenusAndSpeciesPage } from './plant-products/variety-of-genus-and-species-page';
 import { AccompanyingDocumentsPage } from './live-animals/accompanying-documents-page';
 import { AdditionalDetailsPage } from './live-animals/additional-details-page';
@@ -107,6 +118,17 @@ export function createPlantProductsPageObjects(page: Page) {
     commoditySummary: new CommoditySummaryPage(page),
     commodityBulkDetails: new CommodityBulkDetailsPage(page),
     commodityAdditionalDetails: new CommodityAdditionalDetailsPage(page),
+    transportBeforeBip: new TransportBeforeBipPage(page),
+    goodsMovementServices: new GoodsMovementServicesPage(page),
+    contactDetails: new ContactDetailsPage(page),
+    nominatedContact: new NominatedContactPage(page),
+    accompanyingDocuments: new PlantAccompanyingDocumentsPage(page),
+    tradersAddresses: new TradersAddressesPage(page),
+    consignorCreate: new ConsignorCreatePage(page),
+    consignorConfirmation: new ConsignorConfirmationPage(page),
+    reviewNotification: new ReviewNotificationPage(page),
+    declaration: new PlantDeclarationPage(page),
+    confirmation: new PlantConfirmationPage(page),
   };
 }
 

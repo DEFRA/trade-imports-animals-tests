@@ -24,6 +24,6 @@ export class PlantHubPage extends NotificationPage {
   }
 
   get groupHeadings(): Locator {
-    return this.page.getByRole('heading', { level: 2 });
+    return this.page.locator('main').getByRole('heading', { level: 2 });
   }
 }
