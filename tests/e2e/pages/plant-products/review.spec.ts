@@ -24,6 +24,8 @@ test.describe('Plant-products review page', { tag: '@integration' }, () => {
       'Traders',
     ]);
     await expect(pages.reviewNotification.value('Transport to the Border Control Post', 'Means of transport')).toHaveText('Vessel');
+    await expect(pages.reviewNotification.value('Additional details', 'Total gross weight')).toHaveText('100.00');
+    await expect(pages.reviewNotification.value('Additional details', 'Gross volume')).toHaveText('250.00');
     await pages.reviewNotification.changeLink('Transport to the Border Control Post', 'Means of transport').click();
     await expect(pages.page).toHaveURL((url) =>
       plantUrl(created.referenceNumber, 'transport-before-bip').test(`${url.pathname}${url.search}`),

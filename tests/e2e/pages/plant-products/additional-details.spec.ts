@@ -75,7 +75,7 @@ test.describe('Plant-products additional details page', { tag: '@integration' },
     plantProductsPages: pages,
   }) => {
     const reference = pages.commodityAdditionalDetails.journeyIdFromUrl();
-    await pages.commodityAdditionalDetails.totalGrossWeight.fill('20.5');
+    await pages.commodityAdditionalDetails.totalGrossWeight.fill('20.50');
     await pages.commodityAdditionalDetails.grossVolume.fill('5.25');
     await pages.commodityAdditionalDetails.grossVolumeUnit.selectOption(grossVolumeUnits.litres.value);
     await pages.commodityAdditionalDetails.saveAndContinue.click();
@@ -88,7 +88,7 @@ test.describe('Plant-products additional details page', { tag: '@integration' },
     });
 
     await pages.hub.task('Additional details').click();
-    await expect(pages.commodityAdditionalDetails.totalGrossWeight).toHaveValue('20.5');
+    await expect(pages.commodityAdditionalDetails.totalGrossWeight).toHaveValue('20.50');
     await expect(pages.commodityAdditionalDetails.grossVolume).toHaveValue('5.25');
     await expect(pages.commodityAdditionalDetails.grossVolumeUnit).toHaveValue(grossVolumeUnits.litres.value);
     await pages.commodityAdditionalDetails.grossVolume.fill('');
