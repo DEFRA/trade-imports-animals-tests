@@ -8,7 +8,7 @@ import { NotificationDashboardPage } from '@page-objects/live-animals/notificati
 
 const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
-// Cookies are not port-scoped, so on a local stack the frontend (:3000/:3100) and
+// Cookies are not port-scoped, so on a local stack the frontend (:3000) and
 // admin (:3001) share the `localhost` cookie domain while keeping separate Redis key
 // prefixes — a session minted against one is a cache miss against the other. Keying
 // saved state by role and base URL is what stops the lanes overwriting each other.

@@ -3,7 +3,7 @@ import { SET_BASES } from '@page-objects/base/sets';
 
 /**
  * Belt-and-braces duplicate of the frontend canned suite's delete lifecycle (tagged @duplicated-in-frontend
- * — the seam to remove once the frontend net is trusted). Runs against the real-mode :3100 target. Navigates
+ * — the seam to remove once the frontend net is trusted). Runs against the real-mode :3000 frontend. Navigates
  * to the notification's own delete URL rather than hunting the (paginated) dashboard.
  */
 test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {

@@ -18,7 +18,7 @@ CONTAINER_USER="${CONTAINER_USER:-$(id -u):$(id -g)}"
 NODE_MODULES_VOLUME="${NODE_MODULES_VOLUME:-trade-imports-animals-tests-container-nm}"
 MONGODB_URI="${MONGODB_URI:-mongodb://host.docker.internal:27017/?tls=false&directConnection=true}"
 TRADE_IMPORTS_ANIMALS_BACKEND_URL="${TRADE_IMPORTS_ANIMALS_BACKEND_URL:-http://host.docker.internal:8085}"
-REWORKED_FRONTEND_URL="${REWORKED_FRONTEND_URL:-http://localhost:3100}"
+REWORKED_FRONTEND_URL="${REWORKED_FRONTEND_URL:-http://localhost:3000}"
 
 cd "$REPO_ROOT"
 npm run database:reseed

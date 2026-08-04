@@ -3,8 +3,8 @@ import sharedConfig from './utils/playwright/shared-config';
 import { withContainerHostResolver } from './utils/playwright/with-container-host-resolver';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 
-/** Workspace E2E configuration for the frontend test target and admin service. */
-const frontendUrl = process.env.REWORKED_FRONTEND_URL ?? 'http://localhost:3100';
+/** Workspace E2E configuration for the frontend and admin services. */
+const frontendUrl = process.env.REWORKED_FRONTEND_URL ?? 'http://localhost:3000';
 const adminUrl = process.env.ADMIN_FRONTEND_URL ?? 'http://localhost:3001';
 
 const viewport = { width: 1280, height: 1000 };

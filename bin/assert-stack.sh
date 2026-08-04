@@ -5,8 +5,8 @@ set -eu
 
 fail() {
   echo "error: $1 is not responding at $2" >&2
-  echo "  npm test needs the workspace stack with the test-target profile:" >&2
-  echo "    ./scripts/stack/run-stack.sh -d --profile test-target  # from the workspace root" >&2
+  echo "  npm test needs the workspace stack:" >&2
+  echo "    ./scripts/stack/run-stack.sh -d  # from the workspace root" >&2
   exit 1
 }
 
@@ -14,7 +14,7 @@ check() {
   curl -sf -o /dev/null --max-time 5 "$2/health" || fail "$1" "$2"
 }
 
-check "frontend" "${REWORKED_FRONTEND_URL:-http://localhost:3100}"
+check "frontend" "${REWORKED_FRONTEND_URL:-http://localhost:3000}"
 check "backend" "${TRADE_IMPORTS_ANIMALS_BACKEND_URL:-http://localhost:8085}"
 check "admin" "${ADMIN_FRONTEND_URL:-http://localhost:3001}"
 

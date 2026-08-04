@@ -70,14 +70,14 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                            | Test scope                                               | Target               | Config                                | Generates Report |
-| ---------------------------------- | -------------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                         | E2E suite against :3100 plus admin (test-target profile) | workspace stack      | `playwright.e2e.config.ts`            | ✓                |
-| `npm run test:cdp`                 | E2E test suite                                           | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                | Accessibility (`@a11y`) test suite                       | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites           | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite                       | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`   | E2E (CI shards)                                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                            | Test scope                                     | Target               | Config                                | Generates Report |
+| ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                         | E2E suite against :3000 plus admin             | workspace stack      | `playwright.e2e.config.ts`            | ✓                |
+| `npm run test:cdp`                 | E2E test suite                                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`   | E2E (CI shards)                                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -137,19 +137,16 @@ The CDP and docker-compose configs use equivalent projects named
 ### Local workspace stack
 
 1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace),
-   start the locally built stack and the frontend test target:
+   start the locally built stack:
 
    ```bash
-   ./scripts/stack/run-stack.sh -d --profile test-target
+   ./scripts/stack/run-stack.sh -d
    ```
 
 2. Run the E2E and admin projects with `npm test`.
 
 `npm test` checks that the frontend, backend, admin, and MongoDB services are
 available, cleans previous reports, reseeds MongoDB, and then runs the suite.
-
-To target the base stack frontend on :3000 instead, use
-`npm run test:docker-compose`.
 
 To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
 
@@ -163,14 +160,13 @@ into Mongo).
 
 #### Workspace stack commands (run from the workspace root)
 
-| Command                                                 | Purpose                                                |
-| ------------------------------------------------------- | ------------------------------------------------------ |
-| `./scripts/stack/run-stack.sh`                          | Start the full stack from published images             |
-| `./scripts/stack/run-stack.sh -d`                       | Start the stack built from local source under `repos/` |
-| `./scripts/stack/run-stack.sh -d --profile test-target` | Start the local stack plus the E2E frontend on :3100   |
-| `./scripts/stack/stop-stack.sh`                         | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-mongo.sh`                       | Recreate MongoDB and rerun the init + seed scripts     |
-| `./scripts/stack/bounce-backend.sh`                     | Recreate the backend container (picks up Java changes) |
+| Command                             | Purpose                                                |
+| ----------------------------------- | ------------------------------------------------------ |
+| `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
+| `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
+| `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
+| `./scripts/stack/bounce-mongo.sh`   | Recreate MongoDB and rerun the init + seed scripts     |
+| `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 
@@ -190,7 +186,7 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
-Regenerate the E2E baseline against the :3100 frontend with
+Regenerate the E2E baseline against the :3000 frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
 used by CI. Both commands reseed the workspace database, run the `e2e` project's

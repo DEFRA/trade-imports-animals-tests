@@ -5,8 +5,8 @@ import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 
 const projectBaseUrls: Record<string, string> = {
-  'frontend-live-animals-chromium': 'http://localhost:3100',
-  'frontend-plant-products-chromium': 'http://localhost:3100',
+  'frontend-live-animals-chromium': 'http://localhost:3000',
+  'frontend-plant-products-chromium': 'http://localhost:3000',
   'admin-chromium': 'http://localhost:3001',
 };
 
@@ -20,8 +20,7 @@ const integrationConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, 
 });
 
 /**
- * Integration lane — @integration seams against the dedicated real-mode frontend test-target on :3100
- * (docker/stack test-target profile, LIVE_ANIMALS_MODE=real). Same service base URLs as the docker-compose
- * lane; only the frontend project base URL moves to 3100 so the seams never contend with dev-mode's 3000.
+ * Integration lane — @integration seams against the workspace stack's frontend on :3000
+ * (LIVE_ANIMALS_MODE=real). Same service base URLs as the docker-compose lane.
  */
 export default defineConfig(process.env.PLAYWRIGHT_IN_CONTAINER === '1' ? withContainerHostResolver(integrationConfig) : integrationConfig);
