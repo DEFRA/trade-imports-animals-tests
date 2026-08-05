@@ -2,6 +2,11 @@ import { test, expect } from '@fixtures';
 
 test.describe('Additional details scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the unweaned-animals question shows only when a triggering commodity line exists', async ({ journey, pages }) => {
+    // Proving scope needs three commodity shapes, and each one walks the hub,
+    // selection and consignment pages — roughly 25 loads against a CI runner
+    // hosting the whole stack, which does not fit the default budget.
+    test.slow();
+
     const journeyId = await journey.startNotification();
     // Commodities is gated on origin; answering it unlocks the section each added
     // line then opens.
