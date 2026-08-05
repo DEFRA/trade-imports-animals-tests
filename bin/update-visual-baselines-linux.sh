@@ -7,7 +7,7 @@
 # Prerequisites: workspace stack running (./scripts/stack/run-stack.sh).
 # Reseeds the database on the host before the container run.
 #
-# Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, MONGODB_URI, TRADE_IMPORTS_ANIMALS_BACKEND_URL, REWORKED_FRONTEND_URL, or CONTAINER_USER to customise the container run.
+# Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, MONGODB_URI, TRADE_IMPORTS_ANIMALS_BACKEND_URL, or CONTAINER_USER to customise the container run.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -18,7 +18,6 @@ CONTAINER_USER="${CONTAINER_USER:-$(id -u):$(id -g)}"
 NODE_MODULES_VOLUME="${NODE_MODULES_VOLUME:-trade-imports-animals-tests-container-nm}"
 MONGODB_URI="${MONGODB_URI:-mongodb://host.docker.internal:27017/?tls=false&directConnection=true}"
 TRADE_IMPORTS_ANIMALS_BACKEND_URL="${TRADE_IMPORTS_ANIMALS_BACKEND_URL:-http://host.docker.internal:8085}"
-REWORKED_FRONTEND_URL="${REWORKED_FRONTEND_URL:-http://localhost:3100}"
 
 cd "$REPO_ROOT"
 npm run database:reseed
@@ -55,7 +54,6 @@ docker run --rm \
   -e PLAYWRIGHT_IN_CONTAINER=1 \
   -e MONGODB_URI="$MONGODB_URI" \
   -e TRADE_IMPORTS_ANIMALS_BACKEND_URL="$TRADE_IMPORTS_ANIMALS_BACKEND_URL" \
-  -e REWORKED_FRONTEND_URL="$REWORKED_FRONTEND_URL" \
   --entrypoint npm \
   "$PLAYWRIGHT_IMAGE" \
-  run _test_e2e -- --grep @visual --update-snapshots --workers=1 "$@"
+  run _test_docker_compose -- --grep @visual --update-snapshots --workers=1 "$@"
