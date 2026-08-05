@@ -54,7 +54,7 @@ export default defineConfig({
       },
     },
     {
-      name: 'admin',
+      name: 'admin-chromium',
       testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],

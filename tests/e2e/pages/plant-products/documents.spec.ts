@@ -35,10 +35,12 @@ test.describe('Plant-products accompanying documents page', { tag: '@integration
     ]);
 
     await pages.accompanyingDocuments.open(created.referenceNumber, false);
+    // This document is added by metadata alone, so the file column reads "No file".
     await expect(pages.accompanyingDocuments.summaryRows.nth(1).getByRole('cell')).toHaveText([
       documentTypes.phytosanitaryCertificate.display,
       'PHYTO-001',
       '4/12/2025',
+      'No file',
       `Remove ${documentTypes.phytosanitaryCertificate.display} PHYTO-001`,
     ]);
     await pages.accompanyingDocuments.backLink.click();
