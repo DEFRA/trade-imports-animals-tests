@@ -1,11 +1,16 @@
-import { test, WCAG_STANDARD } from '@fixtures/a11y';
+import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
+
+// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
+// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
+// disagreement, not a service defect. Exclude just that input from origin scans.
+const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
 // Only pages with server-side validation are scanned in the error state; the
-// invalid inputs mirror the @validation tests in tests/e2e/pages/. The other
-// pages are walked through with valid input to reach the next validation page.
+// invalid submits mirror the error-summary tests in tests/e2e/pages/. The
+// other sections are answered with valid input to unlock the next one.
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+    await journey.startNotification();
   });
 
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({
@@ -13,92 +18,73 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     pages,
     runA11yScan,
   }) => {
+    const errorSummaryHeading = pages.page.getByRole('heading', { name: 'There is a problem' });
+
     await test.step('Origin of import with validation errors', async () => {
-      await journey.toOriginOfImport();
-      await pages.originOfImport.inputInternalReferenceNumber.fill('!');
-      await pages.originOfImport.btnSaveAndContinue.click();
-      await pages.originOfImport.errorSummaryItems.first().waitFor();
-      await runA11yScan();
-      await journey.fillOriginOfImport({ internalReference: 'InternalReference123' });
+      await pages.overview.task('Where is this consignment coming from?').click();
+      await pages.originOfImport.heading.waitFor();
+      await pages.originOfImport.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan({ exclude: conditionalRadioInput });
+      await journey.fillOriginOfImport();
       await journey.saveOriginOfImport();
-    });
-
-    await test.step('Continue to accompanying documents', async () => {
-      await journey.fillCommoditySelection();
-      await journey.saveCommoditySelection();
-      await journey.fillSpeciesSelection();
-      await journey.saveSpeciesSelection();
-      await journey.fillImportReason();
-      await journey.saveImportReason();
-      await journey.fillCommodityDetails();
-      await journey.saveCommodityDetails();
-      await journey.fillAnimalIdentification();
-      await journey.saveAnimalIdentification();
-      await journey.fillAdditionalDetails();
-      await journey.saveAdditionalDetails();
-    });
-
-    await test.step('Accompanying documents with validation errors', async () => {
-      await pages.accompanyingDocuments.btnAddAttachment.click();
-      await pages.accompanyingDocuments.errorSummaryItems.first().waitFor();
-      await runA11yScan();
-      await journey.saveAccompanyingDocuments();
+      await pages.overview.heading.waitFor();
     });
 
     await test.step('Continue to CPH number', async () => {
-      await journey.openPlaceOfOrigin();
-      await journey.fillPlaceOfOrigin();
-      await journey.savePlaceOfOrigin();
-      await journey.openConsignor();
-      await journey.fillConsignor();
-      await journey.saveConsignor();
-      await journey.openConsignee();
-      await journey.fillConsignee();
-      await journey.saveConsignee();
-      await journey.openImporter();
-      await journey.fillImporter();
-      await journey.saveImporter();
-      await journey.openPlaceOfDestination();
-      await journey.fillPlaceOfDestination();
-      await journey.savePlaceOfDestination();
-      await journey.openCphNumber();
+      await journey.answerCommodity();
+      await journey.fillAddressesToCph();
     });
 
     await test.step('CPH number with validation errors', async () => {
-      await pages.cphNumber.inputCphNumber.fill('12345678');
-      await pages.cphNumber.btnSaveAndContinue.click();
-      await pages.cphNumber.errorSummaryItems.first().waitFor();
+      await pages.cphNumber.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await journey.fillCphNumber();
-      await journey.saveCphNumber();
+      await pages.cphNumber.cphNumber.fill('12/345/6789');
+      await pages.cphNumber.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
-    await test.step('Entry point with validation errors', async () => {
-      await journey.saveAddresses();
-      await journey.fillEntryPoint();
-      await pages.entryPoint.fillArrivalDate({ day: '32', month: '1', year: '2026' });
-      await pages.entryPoint.btnSaveAndContinue.click();
-      await pages.entryPoint.errorSummaryItems.first().waitFor();
+    await test.step('Arrival details with validation errors', async () => {
+      await pages.overview.task('Arrival details').click();
+      await pages.arrivalDetails.heading.waitFor();
+      await pages.arrivalDetails.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await journey.fillEntryPoint();
-      await journey.saveEntryPoint();
+      await journey.fillArrivalDetails();
+      await pages.arrivalDetails.saveAndContinue.click();
+    });
+
+    await test.step('Transited countries with validation errors', async () => {
+      await pages.transitedCountries.heading.waitFor();
+      await pages.transitedCountries.saveAndContinue.click();
+      await expect(errorSummaryHeading).toBeVisible();
+      await runA11yScan();
+      await pages.transitedCountries.selectCountry('France');
+      await pages.transitedCountries.saveAndContinue.click();
     });
 
     await test.step('Continue to declaration', async () => {
-      await journey.openTransporterSelection();
-      await journey.selectTransporter();
-      await journey.saveTransporter();
-      await journey.fillContactAddress();
-      await journey.saveContactAddress();
-      await journey.confirmReview();
+      await pages.transporter.heading.waitFor();
+      await pages.transporter.transporterType('Commercial').check();
+      await pages.transporter.saveAndContinue.click();
+      await pages.transporterSelection.heading.waitFor();
+      await pages.transporterSelection.transporter('García Livestock Transport SL').check();
+      await pages.transporterSelection.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
+      await journey.answerAnimalIdentification();
+      await journey.answerReasonAndAdditionalDetails();
+      await journey.answerContact();
+      await pages.overview.task('Check and submit').click();
+      await pages.notificationView.heading.waitFor();
+      await pages.notificationView.continueButton.click();
+      await pages.declaration.heading.waitFor();
     });
 
     await test.step('Declaration with validation errors', async () => {
-      await pages.declaration.btnSubmitNotification.click();
-      await pages.declaration.errorSummaryItems.first().waitFor();
+      await pages.declaration.continueButton.click();
+      await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await journey.fillDeclaration();
-      await journey.submitDeclaration();
     });
   });
 });

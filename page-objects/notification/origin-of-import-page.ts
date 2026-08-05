@@ -1,55 +1,37 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 import type { YesNoValue } from '@domain/constants/yes-no-values';
 
-export class OriginOfImportPage extends BasePage {
-  readonly expectedUrl = '/origin';
+export class OriginOfImportPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'origin');
+  }
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Origin of the import' });
   }
 
-  get dropdownCountry(): Locator {
-    return this.page.getByRole('combobox', { name: 'Origin of the Import' });
+  get countryOfOrigin(): Locator {
+    return this.page.locator('select#countryOfOrigin');
   }
 
-  get groupRequiresOriginCode(): Locator {
-    return this.page.getByRole('group', { name: 'Does the consignment require a region of origin code?' });
+  async selectCountry(name: string): Promise<void> {
+    await this.countryOfOrigin.selectOption({ label: name });
   }
 
   radioRequiresOriginCode(value: YesNoValue): Locator {
-    return this.groupRequiresOriginCode.getByRole('radio', { name: value });
+    return this.page.getByRole('radio', { name: value, exact: true });
   }
 
-  get dropdownCountryOptions(): Locator {
-    return this.dropdownCountry.locator('option');
+  get regionCode(): Locator {
+    return this.page.getByLabel('Region of origin code', { exact: true });
   }
 
-  get inputInternalReferenceNumber(): Locator {
-    return this.page.getByRole('textbox', { name: 'Your internal reference number' });
+  get internalReference(): Locator {
+    return this.page.getByLabel('Your internal reference for this consignment (optional)');
   }
 
-  get btnSaveAndContinue(): Locator {
+  get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
-  get errorSummaryItems(): Locator {
-    return this.page
-      .getByRole('alert')
-      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
-      .getByRole('link');
-  }
-
-  get errorCountry(): Locator {
-    return this.page.locator('#countryCode-error');
-  }
-
-  get errorInternalReferenceNumber(): Locator {
-    return this.page.locator('#internalReference-error');
-  }
-
-  async open(attemptSignIn: boolean = true): Promise<void> {
-    await this.page.goto(this.expectedUrl);
-    await this.signInWhenRequested(attemptSignIn);
   }
 }

@@ -1,8 +1,8 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const PROJECT_ENV_VARS: Record<string, string> = {
-  'frontend-chromium': 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
-  'admin-chromium': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+  e2e: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
+  admin: 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
 };
 
 /**

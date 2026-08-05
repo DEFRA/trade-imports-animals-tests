@@ -1,121 +1,19 @@
-import { request, type Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
-import { RestClientError } from '@adapters/http/rest-client';
-import type { Notification, Operator, SpeciesEntry, Transporter } from '@domain/models/api/notification';
+import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
 import type { PageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
-import type { DateInput } from '@domain/types/date-time-input';
-import { commoditySpecies, type CommoditySpecies } from '@domain/constants/commodity-species';
-import { requiresTransitedCountries } from '@domain/constants/means-of-transport';
-import type { YesNoValue } from '@domain/constants/yes-no-values';
-import {
-  CONSIGNEE_NAME,
-  CONSIGNOR_NAME,
-  CONTACT_ADDRESS_NAME,
-  CPH_NUMBER,
-  DESTINATION_NAME,
-  EAR_TAG_PREFIX,
-  IMPORTER_NAME,
-  PASSPORT_PREFIX,
-  PLACE_OF_ORIGIN_NAME,
-  TRANSPORTER_NAME,
-  defaultJourneyOptions,
-  type JourneyOptions,
-} from '@domain/constants/journey-options';
-
-/**
- * The exact records the UI journey selects by name
- * (`domain/constants/journey-options.ts`'s CONSIGNOR_NAME etc.), copied from
- * the frontend's canned address lists. Kept here as the one place API-seeded
- * notifications need full address data — `journey-options.ts` only needs the
- * name, since the UI looks the rest up itself.
- */
-const CANNED_OPERATORS: Record<'placeOfOrigin' | 'consignor' | 'consignee' | 'importer' | 'destination' | 'contact', Operator> = {
-  placeOfOrigin: {
-    name: PLACE_OF_ORIGIN_NAME,
-    address: { addressLine1: '1 Farm Lane', addressLine2: 'County Clare', country: 'Ireland' },
-  },
-  consignor: {
-    name: CONSIGNOR_NAME,
-    address: {
-      addressLine1: '43 East Hague Extension',
-      addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
-      addressLine3: 'Quasoccaecat ut ear, 30055',
-      country: 'Switzerland',
-    },
-  },
-  consignee: {
-    name: CONSIGNEE_NAME,
-    address: { addressLine1: '10 Market Street', addressLine2: 'Leeds LS1 6HB', country: 'United Kingdom' },
-  },
-  importer: {
-    name: IMPORTER_NAME,
-    address: { addressLine1: '20 Trade Road', addressLine2: 'London EC1A 1BB', country: 'United Kingdom' },
-  },
-  destination: {
-    name: DESTINATION_NAME,
-    address: { addressLine1: '643 Main Street', addressLine2: 'Birmingham G1 3AZ', country: 'United Kingdom' },
-  },
-  contact: {
-    name: CONTACT_ADDRESS_NAME,
-    address: {
-      addressLine1: 'Woodham Lane',
-      addressLine2: 'New Haw',
-      addressLine3: 'Addlestone, KT15 3NB',
-      country: 'United Kingdom',
-    },
-  },
-};
-
-const CANNED_TRANSPORTER: Transporter = {
-  name: TRANSPORTER_NAME,
-  address: {
-    addressLine1: '43 East Hague Extension',
-    addressLine2: 'Delectus sitodio p. Laborum Odio tempor',
-    addressLine3: 'Quasoccaecat ut ear, 30055',
-    country: 'Switzerland',
-  },
-  approvalNumber: 'ES-T2-45001294',
-  type: 'Commercial',
-};
-
-/** The frontend's mock-species.json `value` id for each `commoditySpecies` text. */
-const SPECIES_VALUE_IDS: Record<CommoditySpecies, string> = {
-  [commoditySpecies.bisonBison]: '716661',
-  [commoditySpecies.bosSpp]: '1388624',
-  [commoditySpecies.bosTaurus]: '1148346',
-  [commoditySpecies.bubalusBubalis]: '749313',
-};
-
-function toArray<T>(value: T | T[]): T[] {
-  return Array.isArray(value) ? value : [value];
-}
-
-/** The frontend lowercases Yes/No before saving. */
-function toWireYesNo(value: YesNoValue | undefined): string | undefined {
-  return value === undefined ? undefined : value.toLowerCase();
-}
-
-function toIsoDate(date: DateInput): string {
-  return `${date.year}-${date.month.padStart(2, '0')}-${date.day.padStart(2, '0')}`;
-}
 
 export const journeyPages = [
   'originOfImport',
   'commoditySelection',
-  'speciesSelection',
-  'importReason',
-  'commodityDetails',
+  'consignmentDetails',
   'animalIdentification',
+  'importReason',
   'additionalDetails',
   'accompanyingDocuments',
-  'placeOfOriginSelection',
-  'consignorSelection',
-  'consigneeSelection',
-  'importerSelection',
-  'destinationSelection',
-  'cphNumber',
-  'entryPoint',
+  'addresses',
+  'arrivalDetails',
   'transitedCountries',
   'transporter',
   'contactAddress',
@@ -123,287 +21,81 @@ export const journeyPages = [
 
 export type JourneyPage = (typeof journeyPages)[number];
 
-type Options = Required<JourneyOptions>;
-type PageContribution = (draft: Notification, options: Options) => void;
+const scalar = (obligationId: string, value: unknown): PersistedFulfilmentEntry => ({
+  obligationId,
+  value,
+});
 
-/**
- * One function per UI page, applied cumulatively in journey order so a draft
- * built through page N carries exactly the fields a user would have saved by
- * page N. Defaults come from `domain/constants/journey-options.ts`'s
- * `defaultJourneyOptions` and named constants — the same module `Journey`
- * itself draws from — so there is one source of truth for what a "default"
- * test notification looks like.
- */
-const pageContributions: Record<JourneyPage, PageContribution> = {
-  originOfImport(draft, options) {
-    draft.origin = {
-      countryCode: options.countryCode.value,
-      requiresRegionCode: toWireYesNo(options.requiresRegionCode),
-      internalReference: options.internalReference,
-    };
-  },
+const record = (obligationId: string, fulfilmentId: string, value: unknown): PersistedFulfilmentEntry => ({
+  obligationId,
+  records: [{ fulfilmentId, value }],
+});
 
-  commoditySelection(draft, options) {
-    draft.commodity = { name: options.commodityCode };
-  },
+// Captured verbatim from a real UI unlock (startNotification + answerOrigin + answerCommodity), not
+// invented — Mapper A projects the commodity code to a string, so an invented array value makes the
+// first UI save's POST /notifications fail deserialization. Keep in step with journey.ts's unlock.
+const UNLOCKED_FULFILMENTS: PersistedFulfilmentEntry[] = [
+  scalar('a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', 'FR'),
+  scalar('b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'no'),
+  scalar('c23d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f', ''),
+  scalar('10e5f607-1829-4a3b-84c5-06d7e8f9a0b1', ''),
+  record('21f60718-192a-4d4e-8bcd-17e8f9a0b1c3', 'line0', 'Cow'),
+  record('22071829-2a3b-4e5f-8cde-28f9a0b1c2d4', 'line0', '16'),
+  record('2318293a-3b4c-4f60-8def-39a0b1c2d3e5', 'line0', '1148346'),
+  record('24192a3b-4c5d-4a71-8ef0-4ab1c2d3e4f6', 'line0', 1),
+  record('252a3b4c-5d6e-4b82-8f01-5bc2d3e4f507', 'line0', '5'),
+];
 
-  speciesSelection(draft, options) {
-    const species: SpeciesEntry[] = toArray(options.species).map((entry) => ({
-      value: SPECIES_VALUE_IDS[entry],
-      text: entry,
-    }));
-    draft.commodity = {
-      name: draft.commodity?.name ?? options.commodityCode,
-      commodityComplement: [{ typeOfCommodity: options.commodityType, species }],
-    };
-  },
-
-  importReason(draft, options) {
-    draft.reasonForImport = options.importReason;
-  },
-
-  commodityDetails(draft, options) {
-    const complement = draft.commodity?.commodityComplement?.[0];
-    if (!complement) {
-      throw new Error('commodityDetails requires speciesSelection to have run first');
-    }
-    const animals = toArray(options.noOfAnimals);
-    const packages = toArray(options.noOfPackages);
-    const speciesCount = complement.species.length;
-    if (animals.length !== speciesCount || packages.length !== speciesCount) {
-      throw new Error(`Mismatched quantities: species=${speciesCount}, noOfAnimals=${animals.length}, noOfPackages=${packages.length}`);
-    }
-    complement.species = complement.species.map((entry, index) => ({
-      ...entry,
-      noOfAnimals: animals[index],
-      noOfPackages: packages[index],
-    }));
-    complement.totalNoOfAnimals = animals.reduce((total, count) => total + count, 0);
-    complement.totalNoOfPackages = packages.reduce((total, count) => total + count, 0);
-  },
-
-  animalIdentification(draft) {
-    const complement = draft.commodity?.commodityComplement?.[0];
-    if (!complement) {
-      throw new Error('animalIdentification requires speciesSelection to have run first');
-    }
-    complement.species = complement.species.map((entry, index) => {
-      const digits = String(index + 1).padStart(12, '0');
-      return { ...entry, earTag: `${EAR_TAG_PREFIX}${digits}`, passport: `${PASSPORT_PREFIX}${digits.slice(-6)}` };
-    });
-  },
-
-  additionalDetails(draft, options) {
-    draft.additionalDetails = {
-      certifiedFor: options.certificationPurpose,
-      unweanedAnimals: toWireYesNo(options.unweanedAnimals),
-    };
-  },
-
-  // Accompanying documents go to the separate document service and
-  // contribute nothing to the notification payload itself.
-  accompanyingDocuments() {},
-
-  placeOfOriginSelection(draft) {
-    draft.placeOfOrigin = CANNED_OPERATORS.placeOfOrigin;
-  },
-
-  consignorSelection(draft) {
-    draft.consignor = CANNED_OPERATORS.consignor;
-  },
-
-  consigneeSelection(draft) {
-    draft.consignee = CANNED_OPERATORS.consignee;
-  },
-
-  importerSelection(draft) {
-    draft.importer = CANNED_OPERATORS.importer;
-  },
-
-  destinationSelection(draft) {
-    draft.destination = CANNED_OPERATORS.destination;
-  },
-
-  cphNumber(draft) {
-    draft.cphNumber = CPH_NUMBER;
-  },
-
-  entryPoint(draft, options) {
-    draft.transport = {
-      ...draft.transport,
-      portOfEntry: options.pointOfEntry.value,
-      arrivalDate: toIsoDate(options.arrivalDate),
-      meansOfTransport: options.meansOfTransport.value,
-      transportIdentification: options.transportIdentification,
-      transportDocumentReference: options.transportDocumentReference,
-    };
-  },
-
-  transitedCountries(draft, options) {
-    if (!requiresTransitedCountries(options.meansOfTransport) || options.transitedCountries === undefined) {
-      return;
-    }
-    draft.transport = {
-      ...draft.transport,
-      transitedCountries: toArray(options.transitedCountries).map((country) => country.value),
-    };
-  },
-
-  transporter(draft) {
-    draft.transport = { ...draft.transport, transporter: CANNED_TRANSPORTER };
-  },
-
-  contactAddress(draft) {
-    draft.consignment = CANNED_OPERATORS.contact;
-  },
-};
-
-export type DeepPartial<T> = T extends (infer U)[] ? DeepPartial<U>[] : T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
-export type NotificationOverrides = DeepPartial<Notification>;
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/** Objects merge recursively; arrays and primitives replace wholesale. */
-function deepMerge<T>(target: T, overrides: DeepPartial<T>): T {
-  const result: Record<string, unknown> = { ...(target as Record<string, unknown>) };
-  for (const [key, value] of Object.entries(overrides as Record<string, unknown>)) {
-    const current = result[key];
-    result[key] = isPlainObject(current) && isPlainObject(value) ? deepMerge(current, value) : value;
-  }
-  return result as T;
-}
-
-/**
- * Builds a draft with every prior page's contribution applied, stopping
- * before `stopBeforePage` — i.e. every field a user would have saved
- * arriving fresh at that page, but not the page's own answer. Omit
- * `stopBeforePage` to apply every page's contribution (a complete draft).
- */
-function buildNotificationBeforePage(
-  stopBeforePage: JourneyPage | undefined,
-  options: JourneyOptions,
-  overrides?: NotificationOverrides,
-): Notification {
-  const merged: Options = { ...defaultJourneyOptions, ...options };
-  const draft: Notification = {};
-  for (const page of journeyPages) {
-    if (page === stopBeforePage) break;
-    pageContributions[page](draft, merged);
-  }
-  return overrides ? deepMerge(draft, overrides) : draft;
-}
-
-const TRANSITION_RETRY_ATTEMPTS = 3;
-const TRANSITION_RETRY_DELAY_MS = 500;
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Submit/amend write an outbox event inside a Mongo transaction under a
- * ShedLock, so concurrent transitions can 500 transiently ("please try
- * again"); retry the way a UI user would.
- */
-async function retryTransientTransitionErrors<T>(action: () => Promise<T>): Promise<T> {
-  for (let attempt = 1; attempt < TRANSITION_RETRY_ATTEMPTS; attempt += 1) {
-    try {
-      return await action();
-    } catch (error) {
-      if (!(error instanceof RestClientError) || error.status !== 500) {
-        throw error;
-      }
-      await delay(TRANSITION_RETRY_DELAY_MS * attempt);
-    }
-  }
-  return action();
-}
-
-/**
- * Seeds notification state through the backend API instead of driving the UI
- * wizard page by page — `createUpToPage(page)` pairs with
- * `resumeInUi(ref, pages.<page>)` to land on that page unanswered.
- *
- * One instance creates at most one notification per test; `save()` enforces
- * this, and the reference is recorded on `journeyContext.referenceNumber` —
- * mirroring `Journey`, that's the default way to read it back, not the
- * returned `Notification`. For bulk/throwaway seeding, use
- * `seedNotifications` instead.
- */
 export class ApiJourney {
   constructor(
     private readonly pages: PageObjects,
     private readonly api: NotificationApiClient,
-    private readonly journeyContext: JourneyContext,
+    private readonly context: JourneyContext,
   ) {}
 
-  private async save(draft: Notification): Promise<Notification> {
-    if (this.journeyContext.referenceNumber !== undefined) {
-      throw new Error(
-        'ApiJourney already created a notification for this journeyContext (at most one create*() call per instance, ' +
-          'mirroring Journey). For bulk/throwaway seeding, use seedNotifications() instead.',
-      );
-    }
-    const notification = await this.api.saveNotification(draft);
-    this.journeyContext.referenceNumber = notification.referenceNumber;
-    return notification;
+  private remember(aggregate: NotificationFulfilments): NotificationFulfilments {
+    this.context.journeyId = aggregate.id;
+    this.context.referenceNumber = aggregate.id;
+    return aggregate;
   }
 
-  async createUpToPage(page: JourneyPage, options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    return this.save(buildNotificationBeforePage(page, options, overrides));
+  // Notification mints the reference number (main's saveOriginOfImport with blank ref),
+  // and the notification-fulfilments aggregate is bootstrapped at that same ref.
+  // Matches the frontend's own create flow post-cascade-removal.
+  private async mintNotificationAndBootstrapFulfilments(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
+    const notification = await this.api.createNotification();
+    return this.api.replaceNotificationFulfilments(notification.referenceNumber, contents);
   }
 
-  /** Complete DRAFT: every journey page's fields populated. */
-  async createFullNotification(options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    return this.save(buildNotificationBeforePage(undefined, options, overrides));
+  async createEmptyNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments());
   }
 
-  async createSubmittedNotification(options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    const draft = await this.createFullNotification(options, overrides);
-    return retryTransientTransitionErrors(() => this.api.submitNotification(draft.referenceNumber));
+  async createFullNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments(UNLOCKED_FULFILMENTS));
   }
 
-  async createAmendNotification(options: JourneyOptions = {}, overrides?: NotificationOverrides): Promise<Notification> {
-    const submitted = await this.createSubmittedNotification(options, overrides);
-    return retryTransientTransitionErrors(() => this.api.amendNotification(submitted.referenceNumber));
+  async createUpToPage(): Promise<NotificationFulfilments> {
+    return this.createFullNotification();
   }
 
-  /**
-   * Opens an API-seeded notification in the frontend and lands on any wizard
-   * page — not just the one after where seeding stopped. Viewing the
-   * notification hydrates the browser session from the full backend
-   * document (see the frontend's notification-client.js `get()`), so every
-   * wizard page's session-derived fields are populated regardless of how far
-   * the seed got.
-   */
-  async resumeInUi<T extends { expectedUrl: string; heading: Locator }>(referenceNumber: string, targetPage: T): Promise<T> {
-    await this.pages.notificationView.open(referenceNumber);
-    await this.pages.notificationView.navigateToFrontend(targetPage.expectedUrl);
+  async createSubmittedNotification(): Promise<NotificationFulfilments> {
+    const draft = await this.createFullNotification();
+    await this.api.submitNotificationFulfilments(draft.id);
+    await this.api.submitNotification(draft.id);
+    return this.remember({ ...draft, status: 'SUBMITTED' });
+  }
+
+  async createAmendNotification(): Promise<NotificationFulfilments> {
+    const submitted = await this.createSubmittedNotification();
+    await this.api.amendNotificationFulfilments(submitted.id);
+    await this.api.amendNotification(submitted.id);
+    return this.remember({ ...submitted, status: 'AMEND' });
+  }
+
+  async resumeInUi<T extends { open(journeyId: string): Promise<void>; heading: Locator }>(journeyId: string, targetPage: T): Promise<T> {
+    await targetPage.open(journeyId);
     await targetPage.heading.waitFor();
     return targetPage;
-  }
-}
-
-/**
- * Seeds `count` throwaway DRAFT notifications for list-population scenarios
- * with no single notification under test — bypasses `apiJourney`/
- * `journeyContext` and owns its own request context, so it also works from
- * `test.beforeAll`.
- */
-export async function seedNotifications(
-  count: number,
-  options: JourneyOptions = {},
-  overrides?: NotificationOverrides,
-): Promise<Notification[]> {
-  const requestContext = await request.newContext();
-  const api = new NotificationApiClient(requestContext);
-  try {
-    return await Promise.all(
-      Array.from({ length: count }, () => api.saveNotification(buildNotificationBeforePage(undefined, options, overrides))),
-    );
-  } finally {
-    await requestContext.dispose();
   }
 }

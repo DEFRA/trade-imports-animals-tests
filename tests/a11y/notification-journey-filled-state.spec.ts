@@ -1,151 +1,179 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
-import { countryCodes } from '@domain/constants/country-codes';
-import { documentTypes } from '@domain/constants/document-types';
-import { meansOfTransport } from '@domain/constants/means-of-transport';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+
+// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
+// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
+// disagreement, not a service defect. Exclude just that input from origin scans.
+const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ journey }) => {
-    await journey.toNotificationDashboard();
+    await journey.startNotification();
   });
 
-  test('each notification journey page has no accessibility violations after user input', async ({ journey, runA11yScan }) => {
+  test('each notification journey page has no accessibility violations after user input', async ({ journey, pages, runA11yScan }) => {
     await test.step('Origin of import', async () => {
-      await journey.toOriginOfImport();
-      await journey.fillOriginOfImport({ internalReference: 'InternalReference123' });
-      await runA11yScan();
+      await pages.overview.task('Where is this consignment coming from?').click();
+      await journey.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
+      await runA11yScan({ exclude: conditionalRadioInput });
       await journey.saveOriginOfImport();
+      await pages.overview.heading.waitFor();
     });
 
     await test.step('Commodity selection', async () => {
-      await journey.fillCommoditySelection();
+      await pages.overview.task('What are you importing?').click();
+      await pages.commoditySelection.selectSpecies(['Bos taurus']);
       await runA11yScan();
-      await journey.saveCommoditySelection();
+      await pages.commoditySelection.saveAndContinue.click();
     });
 
-    await test.step('Species selection', async () => {
-      await journey.fillSpeciesSelection();
+    await test.step('Consignment details', async () => {
+      await pages.consignmentDetails.heading.waitFor();
+      await pages.consignmentDetails.numberOfAnimals.fill('1');
+      await pages.consignmentDetails.numberOfPackages.fill('5');
       await runA11yScan();
-      await journey.saveSpeciesSelection();
-    });
-
-    await test.step('Import reason', async () => {
-      await journey.fillImportReason();
-      await runA11yScan();
-      await journey.saveImportReason();
-    });
-
-    await test.step('Commodity details', async () => {
-      await journey.fillCommodityDetails();
-      await runA11yScan();
-      await journey.saveCommodityDetails();
+      await pages.consignmentDetails.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
     await test.step('Animal identification', async () => {
-      await journey.fillAnimalIdentification();
+      await pages.overview.task('Animal identification details').click();
+      await pages.animalIdentification.earTag.fill('UK123456789012');
       await runA11yScan();
-      await journey.saveAnimalIdentification();
+      await pages.animalIdentification.saveAndFinish.click();
+      await pages.overview.heading.waitFor();
+    });
+
+    await test.step('Import reason', async () => {
+      await pages.overview.task('Main reason for importing').click();
+      await pages.importReason.reason('Internal market').check();
+      await runA11yScan();
+      await pages.importReason.saveAndContinue.click();
+    });
+
+    await test.step('Import purpose', async () => {
+      await pages.importPurpose.heading.waitFor();
+      await pages.importPurpose.purpose('Breeding').check();
+      await runA11yScan();
+      await pages.importPurpose.saveAndContinue.click();
     });
 
     await test.step('Additional details', async () => {
-      await journey.fillAdditionalDetails();
+      await pages.additionalDetails.heading.waitFor();
+      await pages.additionalDetails.certifiedFor('Slaughter').check();
+      await pages.additionalDetails.containsUnweanedAnimals('No').check();
       await runA11yScan();
-      await journey.saveAdditionalDetails();
+      await pages.additionalDetails.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
-    await test.step('Accompanying documents', async () => {
-      const accompanyingDocuments = {
-        filePath: fileUploadPaths.safeFile250bPng,
-        documentType: documentTypes.veterinaryHealthCertificate,
-        documentReference: 'InternalReference123',
-        issueDate: { day: '02', month: '12', year: '2025' },
-      };
-      await journey.fillAccompanyingDocuments({ accompanyingDocuments });
+    await test.step('Upload documents', async () => {
+      await pages.overview.task('Uploaded documents').click();
+      await pages.accompanyingDocuments.heading.waitFor();
+      await pages.accompanyingDocuments.fillDocument('InternalReference123', '03/01/2026', fileUploadPaths.safeFile1kbPdf);
       await runA11yScan();
-      await journey.saveAccompanyingDocuments({ accompanyingDocuments });
+      await pages.overview.open(pages.accompanyingDocuments.journeyIdFromUrl());
+      await pages.overview.heading.waitFor();
     });
 
-    await test.step('Place of origin selection', async () => {
-      await journey.openPlaceOfOrigin();
-      await journey.fillPlaceOfOrigin();
+    await test.step('Consignor or exporter selection', async () => {
+      await pages.overview.task('Roles and addresses').click();
+      await pages.addresses.heading.waitFor();
+      await pages.addresses.addParty('Consignor or exporter').click();
+      await pages.consignorSelection.party('Astra Rosales').check();
       await runA11yScan();
-      await journey.savePlaceOfOrigin();
+      await pages.consignorSelection.saveAndContinue.click();
+      await pages.addresses.heading.waitFor();
     });
 
-    await test.step('Consignor selection', async () => {
-      await journey.openConsignor();
-      await journey.fillConsignor();
-      await runA11yScan();
-      await journey.saveConsignor();
+    await test.step('Remaining addresses', async () => {
+      await pages.addresses.addParty('Place of destination').click();
+      await pages.destinationSelection.party('Tech Imports Ltd').check();
+      await pages.destinationSelection.saveAndContinue.click();
+      await pages.addresses.heading.waitFor();
+      await pages.addresses.addParty('Place of origin').click();
+      await pages.placeOfOriginSelection.party('Origin Farm').check();
+      await pages.placeOfOriginSelection.saveAndContinue.click();
+      await pages.addresses.heading.waitFor();
+      await pages.addresses.addParty('Consignee').click();
+      await pages.consigneeSelection.party('British Livestock Ltd').check();
+      await pages.consigneeSelection.saveAndContinue.click();
+      await pages.addresses.heading.waitFor();
+      await pages.addresses.addParty('Importer').click();
+      await pages.importerSelection.party('Import Co UK').check();
+      await pages.importerSelection.saveAndContinue.click();
+      await pages.addresses.heading.waitFor();
     });
 
-    await test.step('Consignee selection', async () => {
-      await journey.openConsignee();
-      await journey.fillConsignee();
+    await test.step('Consignment addresses with all parties added', async () => {
       await runA11yScan();
-      await journey.saveConsignee();
-    });
-
-    await test.step('Importer selection', async () => {
-      await journey.openImporter();
-      await journey.fillImporter();
-      await runA11yScan();
-      await journey.saveImporter();
-    });
-
-    await test.step('Place of destination selection', async () => {
-      await journey.openPlaceOfDestination();
-      await journey.fillPlaceOfDestination();
-      await runA11yScan();
-      await journey.savePlaceOfDestination();
+      await pages.addresses.continueButton.click();
     });
 
     await test.step('CPH number', async () => {
-      await journey.openCphNumber();
-      await journey.fillCphNumber();
+      await pages.cphNumber.heading.waitFor();
+      await pages.cphNumber.cphNumber.fill('12/345/6789');
       await runA11yScan();
-      await journey.saveCphNumber();
+      await pages.cphNumber.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
-    await test.step('Consignment addresses with all addresses added', async () => {
+    await test.step('Arrival details', async () => {
+      await pages.overview.task('Arrival details').click();
+      await pages.arrivalDetails.heading.waitFor();
+      await journey.fillArrivalDetails();
       await runA11yScan();
-      await journey.saveAddresses();
-    });
-
-    await test.step('Entry point', async () => {
-      await journey.fillEntryPoint({ meansOfTransport: meansOfTransport.roadVehicle });
-      await runA11yScan();
-      await journey.saveEntryPoint();
+      await pages.arrivalDetails.saveAndContinue.click();
     });
 
     await test.step('Transited countries with a country added', async () => {
-      await journey.addTransitedCountry(countryCodes.eu.germany.display);
+      await pages.transitedCountries.heading.waitFor();
+      await pages.transitedCountries.selectCountry('France');
       await runA11yScan();
-      await journey.saveTransitedCountries();
+      await pages.transitedCountries.saveAndContinue.click();
     });
 
-    await test.step('Transporter with transporter added', async () => {
-      await journey.openTransporterSelection();
-      await journey.selectTransporter();
+    await test.step('Transporter', async () => {
+      await pages.transporter.heading.waitFor();
+      await pages.transporter.transporterType('Commercial').check();
       await runA11yScan();
-      await journey.saveTransporter();
+      await pages.transporter.saveAndContinue.click();
+    });
+
+    await test.step('Transporter selection', async () => {
+      await pages.transporterSelection.heading.waitFor();
+      await pages.transporterSelection.transporter('García Livestock Transport SL').check();
+      await runA11yScan();
+      await pages.transporterSelection.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
     await test.step('Contact address', async () => {
-      await journey.fillContactAddress();
+      await pages.overview.task('Contact address').click();
+      await pages.contactAddress.heading.waitFor();
+      await pages.contactAddress.address('Animal and Plant Health Agency').check();
       await runA11yScan();
-      await journey.saveContactAddress();
+      await pages.contactAddress.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
     });
 
-    await test.step('Review notification', async () => {
+    await test.step('Check your answers', async () => {
+      await pages.overview.task('Check and submit').click();
+      await pages.notificationView.heading.waitFor();
       await runA11yScan();
-      await journey.confirmReview();
+      await pages.notificationView.continueButton.click();
     });
 
     await test.step('Declaration', async () => {
-      await journey.fillDeclaration();
+      await pages.declaration.heading.waitFor();
+      await pages.declaration.confirmation.check();
       await runA11yScan();
-      await journey.submitDeclaration();
+      await pages.declaration.continueButton.click();
+    });
+
+    await test.step('Notification submitted', async () => {
+      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
+      await runA11yScan();
     });
   });
 });

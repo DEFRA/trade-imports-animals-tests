@@ -1,4 +1,4 @@
-import { Locator } from '@playwright/test';
+import { type Locator } from '@playwright/test';
 import type { SortByValue } from '@domain/constants/sort-by-values';
 import { BasePage } from '@page-objects/base/base-page';
 
@@ -16,7 +16,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get btnCreateNewNotification(): Locator {
-    return this.page.getByRole('button', { name: 'Create an import notification' });
+    return this.page.getByRole('button', { name: 'Start a new notification' });
   }
 
   get dropdownSort(): Locator {
@@ -28,7 +28,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get filterHeading(): Locator {
-    return this.page.getByRole('heading', { level: 2, name: 'Filter notifications' });
+    return this.page.getByRole('heading', { level: 3, name: 'Filter notifications' });
   }
 
   get searchForm(): Locator {
@@ -44,86 +44,106 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   get resultsLabel(): Locator {
-    return this.page.getByTestId('notification-results-label');
+    return this.page.locator('.notification-list__results');
   }
 
   get errorSummary(): Locator {
     return this.page.locator('.govuk-error-summary');
   }
 
-  get totalResults(): Locator {
-    return this.page.getByText(/(No Results|Showing .* Results)/);
+  get notificationCards(): Locator {
+    return this.page.locator('.govuk-summary-card');
   }
 
-  /** Parses the dashboard results label (e.g. "Showing 1 to 25 of 1199 Results"). */
+  notificationCard(reference: string): Locator {
+    return this.notificationCards.filter({ hasText: reference });
+  }
+
+  notificationCardAt(index: number): Locator {
+    return this.notificationCards.nth(index);
+  }
+
+  private cardField(card: Locator, term: string): Locator {
+    return card.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
+  }
+
+  notificationCardDetails(index: number) {
+    const card = this.notificationCardAt(index);
+    return {
+      heading: card.getByRole('heading', { level: 3 }),
+      commodity: this.cardField(card, 'Commodity'),
+      origin: this.cardField(card, 'Origin'),
+      arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
+      consignee: this.cardField(card, 'Consignee'),
+      consignor: this.cardField(card, 'Consignor'),
+      status: this.cardField(card, 'Status'),
+      dateCreated: this.cardField(card, 'Date created'),
+    };
+  }
+
+  async searchFor(reference: string): Promise<void> {
+    await this.page.getByLabel('Keyword or reference').fill(reference);
+    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
+    await this.page.getByLabel('Keyword or reference').waitFor();
+  }
+
+  /** Server-side dashboard search via GET ?referenceNumber=. */
+  async searchForReference(referenceNumber: string): Promise<void> {
+    await this.inputReferenceSearch.fill(referenceNumber);
+    await Promise.all([
+      this.page.waitForURL((url) => (url.searchParams.get('referenceNumber') ?? '') === referenceNumber),
+      this.btnSearch.click(),
+    ]);
+  }
+
+  get totalResults(): Locator {
+    return this.page.getByText(/^Showing (?:1 Result|\d+(?: to \d+)? of \d+ Results)$/);
+  }
+
   async getResultsRange(): Promise<ResultsRange | null> {
     const text = (await this.totalResults.textContent())?.trim() ?? '';
-    const rangeMatch = text.match(/^Showing (\d+) to (\d+) of (\d+) Results$/);
-    if (rangeMatch) {
-      return {
-        start: Number(rangeMatch[1]),
-        end: Number(rangeMatch[2]),
-        total: Number(rangeMatch[3]),
-      };
-    }
-
-    const singleMatch = text.match(/^Showing (\d+) of (\d+) Results$/);
-    if (singleMatch) {
-      const value = Number(singleMatch[1]);
-      return { start: value, end: value, total: Number(singleMatch[2]) };
-    }
-
-    return null;
+    const match = text.match(/^Showing (\d+)(?: to (\d+))? of (\d+) Results$/);
+    if (!match) return null;
+    return {
+      start: Number(match[1]),
+      end: Number(match[2] ?? match[1]),
+      total: Number(match[3]),
+    };
   }
 
-  /** Builds the results label text using the same rules as the frontend helper. */
   formatResultsRangeLabel({ start, end, total }: ResultsRange): string {
-    if (total === 1) {
-      return 'Showing 1 Results';
-    }
-
-    if (start === end) {
-      return `Showing ${start} of ${total} Results`;
-    }
-
+    if (total === 1) return 'Showing 1 Result';
+    if (start === end) return `Showing ${start} of ${total} Results`;
     return `Showing ${start} to ${end} of ${total} Results`;
   }
 
   get pagination(): Locator {
-    return this.page.locator('nav.notifications-pagination');
+    return this.page.locator('.govuk-pagination');
   }
 
   get linkNextPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Next page' });
+    return this.pagination.getByRole('link', { name: 'Next', exact: true });
   }
 
   get linkPreviousPage(): Locator {
-    return this.pagination.getByRole('link', { name: 'Previous page' });
+    return this.pagination.getByRole('link', { name: 'Previous', exact: true });
   }
 
-  get nextPageNumberLabel(): Locator {
-    return this.linkNextPage.locator('.notifications-pagination__page');
-  }
-
-  /** Parses total pages from the next-link label on page one (e.g. "2 of 5" → 5). */
   async getPaginationTotalPages(): Promise<number> {
-    const text = (await this.nextPageNumberLabel.textContent())?.trim() ?? '';
-    const match = text.match(/^\d+ of (\d+)$/);
-    if (!match) {
-      throw new Error(`Could not parse pagination total from next link label: "${text}"`);
-    }
+    const range = await this.getResultsRange();
+    if (!range) throw new Error('Could not parse the dashboard results range');
 
-    return Number(match[1]);
+    const currentPage = this.currentPageFromUrl();
+    const pageSize = currentPage === 1 ? range.end : Math.floor((range.start - 1) / (currentPage - 1));
+    return Math.ceil(range.total / pageSize);
   }
 
   async openDashboardPage(pageNumber: number): Promise<void> {
-    const path = pageNumber <= 1 ? '/' : `/?page=${pageNumber}`;
-    await this.navigateToFrontend(path);
+    await this.navigateToFrontend(pageNumber <= 1 ? '/' : `/?page=${pageNumber}`);
     await this.heading.waitFor({ state: 'visible' });
     await this.waitForNotificationList();
   }
 
-  /** Opens the final page directly using the total shown on the next link (page one only). */
   async goToLastPage(): Promise<number> {
     const totalPages = await this.getPaginationTotalPages();
     await this.openDashboardPage(totalPages);
@@ -136,10 +156,6 @@ export class NotificationDashboardPage extends BasePage {
     return Number.isNaN(page) ? 1 : page;
   }
 
-  get notificationCards(): Locator {
-    return this.page.locator('.notification-list__main .govuk-summary-card');
-  }
-
   async waitForNotificationList(): Promise<void> {
     await this.resultsLabel.waitFor({ state: 'visible', timeout: 10000 });
   }
@@ -149,54 +165,46 @@ export class NotificationDashboardPage extends BasePage {
     await this.btnUpdateSort.click();
   }
 
-  /**
-   * Server-side dashboard search via GET ?referenceNumber= (works with JS disabled; CI-safe).
-   */
-  async searchForReference(referenceNumber: string): Promise<void> {
-    await this.inputReferenceSearch.fill(referenceNumber);
-    await Promise.all([
-      this.page.waitForURL((url) => {
-        const reference = url.searchParams.get('referenceNumber') ?? '';
-        return reference === referenceNumber;
-      }),
-      this.btnSearch.click(),
-    ]);
+  copyAsNew(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('button', {
+      name: `Copy as new notification ${reference}`,
+    });
   }
 
-  private cardField(card: Locator, term: string): Locator {
-    return card.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
+  btnCopyAsNew(reference: string): Locator {
+    return this.copyAsNew(reference);
   }
 
-  btnCopyAsNew(referenceNumber: string): Locator {
-    return this.page.getByRole('button', { name: `Copy as new ${referenceNumber}` });
+  amend(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('button', {
+      name: `Amend notification ${reference}`,
+    });
   }
 
-  btnAmend(referenceNumber: string): Locator {
-    return this.page.getByRole('button', { name: `Amend ${referenceNumber}` });
+  btnAmend(reference: string): Locator {
+    return this.amend(reference);
   }
 
-  viewLink(referenceNumber: string): Locator {
-    return this.page.getByRole('link', { name: `View ${referenceNumber}` });
+  view(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('link', {
+      name: `View notification ${reference}`,
+    });
   }
 
-  notificationCard(index: number) {
-    const card = this.notificationCards.nth(index);
-    return {
-      details: {
-        heading: card.getByRole('heading', { level: 2 }),
-        commodity: this.cardField(card, 'Commodity'),
-        origin: this.cardField(card, 'Origin'),
-        arrivalAtDestination: this.cardField(card, 'Arrival at destination'),
-        consignee: this.cardField(card, 'Consignee'),
-        consignor: this.cardField(card, 'Consignor'),
-        status: this.cardField(card, 'Status'),
-        dateCreated: card.getByText(/Date created:/),
-      },
-      actions: {
-        copyAsNew: card.getByRole('button', { name: /Copy as new/ }),
-        view: card.getByRole('link', { name: /View/ }),
-      },
-    };
+  viewLink(reference: string): Locator {
+    return this.view(reference);
+  }
+
+  resume(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('link', {
+      name: `Resume notification ${reference}`,
+    });
+  }
+
+  delete(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('link', {
+      name: `Delete notification ${reference}`,
+    });
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {
@@ -204,14 +212,12 @@ export class NotificationDashboardPage extends BasePage {
     await this.signInWhenRequested(attemptSignIn);
 
     if (attemptSignIn) {
-      // The auth stub can fail under concurrent load. If we don't land on the
-      // dashboard within a short grace period, retry the whole auth flow once.
       try {
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
         await this.waitForNotificationList();
       } catch {
         console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
-        await this.page.goto('/');
+        await this.navigateToFrontend('/');
         await this.signInWhenRequested(true);
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
         await this.waitForNotificationList();

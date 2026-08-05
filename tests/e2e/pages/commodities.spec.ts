@@ -1,40 +1,43 @@
 import { test, expect } from '@fixtures';
-import { commodityCodes } from '@domain/constants/commodity-codes';
-import { camelCaseToTitleCase } from '@utils/string-utils';
 
-test.describe('Commodities', () => {
-  test.beforeEach(async ({ apiJourney, pages }) => {
-    const created = await apiJourney.createUpToPage('commoditySelection');
-    await apiJourney.resumeInUi(created.referenceNumber, pages.commoditySelection);
+const expectedGroups = [
+  ['Cow (0102)', ['Bison bison', 'Bos spp.', 'Bos taurus', 'Bubalus bubalis']],
+  ['Horse (0101)', ['Equus caballus']],
+  ['Cat (01061900)', ['Felis catus']],
+  ['Dog (01061900)', ['Canis lupus familiaris']],
+  ['Fish (0301)', ['Salmo salar']],
+] as const;
+
+test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  test.beforeEach(async ({ journey }) => {
+    await journey.toCommoditySelection();
   });
 
-  test('shows system-generated reference number', async ({ journeyContext, pages }) => {
-    const referenceNumber = await pages.commoditySelection.referenceNumber.textContent();
-    expect(referenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
-    expect(journeyContext.referenceNumber).toBe(referenceNumber);
+  test('renders the full grouped checklist', async ({ pages }) => {
+    await expect(pages.commoditySelection.heading).toBeVisible();
+    for (const [legend, species] of expectedGroups) {
+      const group = pages.page.getByRole('group', { name: legend });
+      await expect(group).toBeVisible();
+      for (const name of species) {
+        await expect(group.getByRole('checkbox', { name })).toBeVisible();
+      }
+    }
+    await expect(pages.page.getByRole('checkbox')).toHaveCount(8);
+    await expect(pages.commoditySelection.saveAndContinue).toBeVisible();
   });
 
-  test('shows expected commodities in commodity dropdown', async ({ pages }) => {
-    const commodityOptions = await pages.commoditySelection.dropdownCommodityOptions.allTextContents();
-    const keys = Object.keys(commodityCodes);
-    const expectedOptions = keys.map(camelCaseToTitleCase);
-    expect(commodityOptions[0]).toBe('Select a commodity');
-    expect(commodityOptions[1]).toMatch(/^─+$/);
-    // Dropdown commodities must match the expected list (same items and count; order ignored).
-    expect(commodityOptions.slice(2)).toHaveLength(expectedOptions.length);
-    expect(commodityOptions.slice(2)).toEqual(expect.arrayContaining(expectedOptions));
+  test('accepts and persists multiple commodity-species pairs', async ({ pages }) => {
+    await pages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
+    await pages.commoditySelection.saveAndContinue.click();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+
+    await pages.page.getByRole('link', { name: 'Back' }).click();
+    await expect(pages.commoditySelection.species('Bos taurus')).toBeChecked();
+    await expect(pages.commoditySelection.species('Felis catus')).toBeChecked();
   });
 
-  test('defaults commodity to "Select a commodity"', async ({ pages }) => {
-    // Default "Select a commodity" option has an empty value.
-    await expect(pages.commoditySelection.dropdownCommodity.locator('option:checked')).toHaveText('Select a commodity');
-    await expect(pages.commoditySelection.dropdownCommodity).toHaveValue('');
-  });
-
-  test('continues to species selection after saving selected commodity', async ({ pages }) => {
-    await pages.commoditySelection.dropdownCommodity.selectOption(commodityCodes.dog);
-    await pages.commoditySelection.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.speciesSelection.expectedUrl);
-    await expect(pages.speciesSelection.heading).toBeVisible();
+  test('shows an error summary when submitted empty', async ({ pages }) => {
+    await pages.commoditySelection.saveAndContinue.click();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
   });
 });

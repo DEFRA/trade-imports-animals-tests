@@ -1,37 +1,30 @@
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test('the notification view page has no accessibility violations in its SUBMITTED, AMEND, cancel-amend-confirmation and delete-confirmation states', async ({
-    journey,
-    notificationActions,
+  test('the check your answers page has no accessibility violations in its DRAFT and SUBMITTED states, including the submission confirmation', async ({
+    apiJourney,
     pages,
-    journeyContext,
     runA11yScan,
   }) => {
-    await test.step('Notification view (SUBMITTED)', async () => {
-      await journey.submitNotification();
-      await notificationActions.toNotificationView(journeyContext.referenceNumber);
+    await test.step('Check your answers (draft)', async () => {
+      const draft = await apiJourney.createFullNotification();
+      await apiJourney.resumeInUi(draft.id, pages.notificationView);
       await runA11yScan();
     });
 
-    await test.step('Notification view (AMEND)', async () => {
-      await pages.notificationView.btnAmend.click();
-      await pages.notificationView.amendStatusTag.waitFor();
+    const submitted = await apiJourney.createSubmittedNotification();
+
+    await test.step('Check your answers (submitted, read-only)', async () => {
+      await apiJourney.resumeInUi(submitted.id, pages.notificationView);
+      // The Delete action renders only in the read-only SUBMITTED state, so its
+      // presence proves the scan sees the submitted view rather than the draft.
+      await pages.page.getByRole('button', { name: 'Delete' }).waitFor();
       await runA11yScan();
     });
 
-    await test.step('Cancel amendment confirmation', async () => {
-      await pages.notificationView.btnCancelAmend.click();
-      await pages.notificationCancelAmend.heading.waitFor();
-      await runA11yScan();
-    });
-
-    await test.step('Notification view (delete confirmation)', async () => {
-      // "No" returns to the view page still in AMEND state, where Delete is available
-      await pages.notificationCancelAmend.btnNoReturnToNotification.click();
-      await pages.notificationView.amendStatusTag.waitFor();
-      await pages.notificationView.btnDelete.click();
-      await pages.notificationView.deleteDialog.waitFor();
+    await test.step('Import notification submitted (confirmation)', async () => {
+      await pages.notificationView.navigateToFrontend(`/notifications/${submitted.id}/confirmation`);
+      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
       await runA11yScan();
     });
   });

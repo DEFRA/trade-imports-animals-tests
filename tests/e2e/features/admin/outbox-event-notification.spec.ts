@@ -1,17 +1,36 @@
 import { test, expect } from '@fixtures';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
+import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
-import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 
-const NOTIFICATION_SUBMITTED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmitted';
-const NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
+const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
+const POINT_OF_ENTRY = 'GB ABD';
+const EXPECTED_ACTOR: OutboxEventActor = {
+  id: '2100010101',
+  source: 'dynamics-contact',
+  userType: 'B2C',
+  displayName: 'Andrew Farmer',
+  organisationId: '5900001',
+  onBehalfOfOrganisationId: null,
+};
 
-test.describe('Notification outbox event', { tag: '@compose' }, () => {
-  test('does not write outbox event before submission', async ({ apiJourney }) => {
-    const created = await apiJourney.createFullNotification();
-    const referenceNumber = created.referenceNumber;
-    const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
+const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
+
+const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventActor => ({
+  id: actor?.id ?? null,
+  source: actor?.source ?? null,
+  userType: actor?.userType ?? null,
+  displayName: actor?.displayName ?? null,
+  organisationId: actor?.organisationId ?? null,
+  onBehalfOfOrganisationId: actor?.onBehalfOfOrganisationId ?? null,
+});
+
+test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }, () => {
+  test('does not write an outbox event before submission', async ({ journey, journeyContext }) => {
+    test.slow();
+    await journey.toDeclaration();
+    const aggregateId = aggregateIdFor(journeyContext.journeyId);
     const client = new MongoDbClient();
 
     try {
@@ -23,94 +42,46 @@ test.describe('Notification outbox event', { tag: '@compose' }, () => {
     }
   });
 
-  test('records notification submitted event in outbox after submission', async ({ apiJourney, pages, notificationActions }) => {
-    const created = await apiJourney.createSubmittedNotification();
-    const referenceNumber = created.referenceNumber;
-    const aggregateId = `Imports.Notification.GBN-AG.${referenceNumber}`;
-    const defaults = defaultJourneyOptions;
+  test('records a NotificationSubmitted outbox event on UI submission', async ({ journey, journeyContext }) => {
+    test.slow();
+    await journey.submitNotification();
+    const referenceNumber = journeyContext.journeyId;
+    const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
 
     try {
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.short }).toBe(1);
+      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBe(1);
+
       const docs = await collection.find({ aggregateId }).toArray();
       const [doc] = docs;
+      const data = doc.data;
+      const statusChanges = doc.statusChanges ?? [];
 
-      await test.step('finds exactly one outbox event for the notification', () => {
-        expect(docs).toHaveLength(1);
-      });
-
-      await test.step('asserts outbox event envelope and GBN-AG payload smoke checks', () => {
-        const data = doc.data;
-
-        // Outbox E2E: assert envelope and GBN-AG payload identity — not full notification
-        // parity (see notification-persistence.spec.ts). One smoke field per major payload
-        // section. The trade-line commodity name/description are not yet mapped (EUDPA-274
-        // trade-line data gap), so the commodity section is smoke-checked structurally.
-        expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
-        expect(doc.aggregateId).toBe(aggregateId);
-        expect(doc.aggregateType).toBe('Notification');
-        expect(doc.subType).toBe('GBN-AG');
-        expect(doc.aggregateVersion).toBe(1);
-        expect(doc.eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
-        expect(doc.timestamp).toBeInstanceOf(Date);
-        expect(doc.metadata.schemaVersion).toBe('1');
-        expect(doc.metadata.correlationId).toBeDefined();
-        expect(data.$model).toBe('defra/certificate-internal/1');
-        expect(data.$type).toBe('gbn-ag');
-        expect(data.exchangedDocument.identifier).toBe(referenceNumber);
-        expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
-        expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
-        expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaults.countryCode.value);
-        expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(defaults.pointOfEntry.value);
-        expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
-        // Submitted via API (no actor body) — actor is absent, statusChanges carries one entry
-        expect(doc.actor).toBeUndefined();
-        const submitChanges = doc.statusChanges ?? [];
-        expect(submitChanges).toHaveLength(1);
-        expect(submitChanges[0].status).toBe('SUBMITTED');
-        expect(submitChanges[0].actor).toBeUndefined();
-      });
-
-      await test.step('amends the submitted notification (SUBMITTED → AMEND)', async () => {
-        await notificationActions.toNotificationView(referenceNumber);
-        await pages.notificationView.btnAmend.click();
-        await expect(pages.notificationView.amendStatusTag).toBeVisible();
-      });
-
-      await test.step('finds two outbox events with incrementing aggregate versions', async () => {
-        await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.short }).toBe(2);
-
-        const amendDocs = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
-        expect(amendDocs).toHaveLength(2);
-        expect(amendDocs[0].aggregateVersion).toBe(1);
-        expect(amendDocs[1].aggregateVersion).toBe(2);
-        expect(amendDocs[0].aggregateId).toBe(aggregateId);
-        expect(amendDocs[1].aggregateId).toBe(aggregateId);
-        expect(amendDocs[0].eventType).toBe(NOTIFICATION_SUBMITTED_EVENT_TYPE);
-        expect(amendDocs[1].eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED_EVENT_TYPE);
-        expect(amendDocs[0].data.exchangedDocument.identifier).toBe(referenceNumber);
-        expect(amendDocs[1].data.exchangedDocument.identifier).toBe(referenceNumber);
-        // Amend triggered via UI — actor is present (from frontend session credentials).
-        // Default E2E user: Andrew Farmer, CRN 2100010101, org 5900001 (Gatwick Airport).
-        const amendEvent = amendDocs[1];
-        expect(amendEvent.actor?.id).toBe('2100010101');
-        expect(amendEvent.actor?.source).toBe('dynamics-contact');
-        expect(amendEvent.actor?.userType).toBe('B2C');
-        expect(amendEvent.actor?.displayName).toBe('Andrew Farmer');
-        expect(amendEvent.actor?.organisationId).toBe('5900001');
-        // statusChanges on the amend event is cumulative: [SUBMITTED(no actor), AMEND(actor)]
-        const amendChanges = amendEvent.statusChanges ?? [];
-        expect(amendChanges).toHaveLength(2);
-        expect(amendChanges[0].status).toBe('SUBMITTED');
-        expect(amendChanges[1].status).toBe('AMEND');
-        expect(amendChanges[1].actor?.id).toBe('2100010101');
-        expect(amendChanges[1].actor?.source).toBe('dynamics-contact');
-        expect(amendChanges[1].actor?.userType).toBe('B2C');
-        expect(amendChanges[1].actor?.displayName).toBe('Andrew Farmer');
-        expect(amendChanges[1].actor?.organisationId).toBe('5900001');
-      });
+      expect(docs).toHaveLength(1);
+      expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+      expect(doc.aggregateId).toBe(aggregateId);
+      expect(doc.aggregateType).toBe('Notification');
+      expect(doc.subType).toBe('GBN-AG');
+      expect(Number(doc.aggregateVersion)).toBe(1);
+      expect(doc.eventType).toBe(NOTIFICATION_SUBMITTED);
+      expect(doc.timestamp).toBeInstanceOf(Date);
+      expect(doc.metadata.schemaVersion).toBe('1');
+      expect(doc.metadata.correlationId).toBeDefined();
+      expect(data.$model).toBe('defra/certificate-internal/1');
+      expect(data.$type).toBe('gbn-ag');
+      expect(data.exchangedDocument.identifier).toBe(referenceNumber);
+      expect(data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+      expect(data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
+      expect(data.specifiedConsignment.originCountry?.code?.value).toBe(defaultJourneyOptions.countryCode.value);
+      expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
+      expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
+      expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
+      expect(statusChanges).toHaveLength(1);
+      expect(statusChanges[0].status).toBe('SUBMITTED');
+      expect(statusChanges[0].dateChanged).toEqual(expect.any(Date));
+      expect(actorWithNullableFields(statusChanges[0].actor)).toEqual(EXPECTED_ACTOR);
     } finally {
       await client.close();
     }

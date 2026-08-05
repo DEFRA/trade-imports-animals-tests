@@ -1,38 +1,20 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-// County Parish Holding number (CPH) page
-export class CphNumberPage extends BasePage {
-  readonly expectedUrl = '/cph-number';
-
-  get referenceNumber(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
-  }
-
-  get linkBack(): Locator {
-    return this.page.getByRole('link', { name: 'Back' });
+export class CphNumberPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'cph-number');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Add the County Parish Holding number (CPH)' });
+    return this.page.getByRole('heading', { level: 1, name: 'County Parish Holding (CPH)' });
   }
 
-  get inputCphNumber(): Locator {
-    return this.page.getByRole('textbox', { name: 'CPH number' });
+  get cphNumber(): Locator {
+    return this.page.getByLabel('County Parish Holding (CPH)');
   }
 
-  get btnSaveAndContinue(): Locator {
+  get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
-  }
-
-  get errorSummaryItems(): Locator {
-    return this.page
-      .getByRole('alert')
-      .filter({ has: this.page.getByRole('heading', { name: 'There is a problem' }) })
-      .getByRole('link');
-  }
-
-  get errorCphNumber(): Locator {
-    return this.page.locator('#cphNumber-error');
   }
 }

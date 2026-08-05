@@ -1,31 +1,20 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-export class NotificationCancelAmendPage extends BasePage {
-  expectedUrl(referenceNumber: string): string {
-    return `/notification-cancel-amend/${referenceNumber}`;
+export class NotificationCancelAmendPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'cancel-amend');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Cancel amendment' });
+    return this.page.getByRole('heading', { level: 1, name: 'Cancel this amendment?' });
   }
 
-  get confirmationQuestion(): Locator {
-    return this.page.getByText('Are you sure you want to cancel this amendment?');
-  }
-
-  get btnYesCancelAmendment(): Locator {
+  get confirm(): Locator {
     return this.page.getByRole('button', { name: 'Yes, cancel amendment' });
   }
 
-  get btnNoReturnToNotification(): Locator {
-    return this.page.getByRole('button', { name: 'No, return to notification' });
-  }
-
-  async open(referenceNumber: string): Promise<void> {
-    await this.navigateToFrontend(this.expectedUrl(referenceNumber));
-    await this.signInWhenRequested(true);
-    await this.heading.waitFor();
-    await this.page.waitForLoadState('load');
+  get reject(): Locator {
+    return this.page.getByRole('button', { name: /No/ });
   }
 }

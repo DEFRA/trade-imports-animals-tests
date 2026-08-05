@@ -56,5 +56,46 @@ export class BasePage {
       throw error;
     }
     await signInPage.signIn();
+    const transientError = this.page.getByRole('heading', {
+      level: 1,
+      name: 'Sorry, we are unable to sign you in.',
+    });
+    if (await transientError.isVisible()) {
+      await this.page.getByRole('link', { name: 'try again' }).click();
+      await signInPage.inputUserId.waitFor();
+      await signInPage.signIn();
+    }
+  }
+}
+
+export class NotificationPage extends BasePage {
+  constructor(
+    page: Page,
+    readonly slug: string,
+  ) {
+    super(page);
+  }
+
+  expectedUrl(journeyId: string): string {
+    const suffix = this.slug ? `/${this.slug}` : '';
+    return `/notifications/${journeyId}${suffix}`;
+  }
+
+  journeyIdFromUrl(): string {
+    const match = new URL(this.page.url()).pathname.match(/^\/notifications\/([^/]+)/);
+    if (!match) {
+      throw new Error(`No journey id in notification URL: ${this.page.url()}`);
+    }
+    return match[1];
+  }
+
+  currentJourneyUrl(slug: string = this.slug): string {
+    const suffix = slug ? `/${slug}` : '';
+    return `/notifications/${this.journeyIdFromUrl()}${suffix}`;
+  }
+
+  async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
+    await this.navigateToFrontend(this.expectedUrl(journeyId));
+    await this.signInWhenRequested(attemptSignIn);
   }
 }

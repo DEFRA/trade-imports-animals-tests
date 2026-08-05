@@ -1,58 +1,28 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-export class AnimalIdentificationPage extends BasePage {
-  readonly expectedUrl = '/commodities/identification';
-
-  get referenceNumber(): Locator {
-    return this.page.locator('.govuk-caption-xl', { hasText: 'GBN-AG' });
-  }
-
-  get linkBack(): Locator {
-    return this.page.getByRole('link', { name: 'Back' });
+export class AnimalIdentificationPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'commodities/identification');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Enter animal identification details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Animal identification details' });
   }
 
-  get tableCommodities(): Locator {
-    // No accessible name for the table, so use filter to get by the first column header.
-    return this.page.getByRole('table').filter({ has: this.page.locator('thead th', { hasText: /^Commodity code$/ }) });
+  get earTag(): Locator {
+    return this.page.getByLabel('Ear tag number');
   }
 
-  get rowsCommodities(): Locator {
-    return this.tableCommodities.locator('tbody').getByRole('row');
+  get passportNumber(): Locator {
+    return this.page.getByLabel('Passport number');
   }
 
-  cellsCommodities(rowIndex: number): Locator {
-    return this.rowsCommodities.nth(rowIndex).getByRole('cell');
+  get saveAndAddAnother(): Locator {
+    return this.page.getByRole('button', { name: 'Save and add another' });
   }
 
-  get tablesIdentifiers(): Locator {
-    // No accessible name for the table(s), so use filter to get by the first column header.
-    return this.page.getByRole('table').filter({ has: this.page.locator('thead th', { hasText: /^Animal$/ }) });
-  }
-
-  get rowsIdentifiers(): Locator {
-    return this.tablesIdentifiers.locator('tbody').getByRole('row');
-  }
-
-  cellIdentifiers(rowIndex: number, cellName: string): Locator {
-    return this.rowsIdentifiers.nth(rowIndex).getByRole('cell', { name: cellName });
-  }
-
-  inputEarTag(rowIndex: number): Locator {
-    // No accesible name for the input, so use locator directly.
-    return this.rowsIdentifiers.nth(rowIndex).locator('input[name*="earTag"]');
-  }
-
-  inputPassport(rowIndex: number): Locator {
-    // No accesible name for the input, so use locator directly.
-    return this.rowsIdentifiers.nth(rowIndex).locator('input[name*="passport"]');
-  }
-
-  get btnSaveAndContinue(): Locator {
-    return this.page.getByRole('button', { name: 'Save and continue' });
+  get saveAndFinish(): Locator {
+    return this.page.getByRole('button', { name: 'Save and finish' });
   }
 }

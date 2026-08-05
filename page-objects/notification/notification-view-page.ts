@@ -1,122 +1,49 @@
-import { Locator } from '@playwright/test';
-import { BasePage } from '@page-objects/base/base-page';
+import { type Locator, type Page } from '@playwright/test';
+import { NotificationPage } from '@page-objects/base/base-page';
 
-export class NotificationViewPage extends BasePage {
-  expectedUrl(referenceNumber: string): string {
-    return `/notification-view/${referenceNumber}`;
+export class NotificationViewPage extends NotificationPage {
+  constructor(page: Page) {
+    super(page, 'notification-view');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Notification details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Check your answers' });
+  }
+
+  get journeyStrip(): Locator {
+    return this.page.locator('.app-journey-strip');
   }
 
   get referenceNumberCaption(): Locator {
-    return this.page.locator('.govuk-caption-xl');
-  }
-
-  get dateCreated(): Locator {
-    return this.page.locator('p.govuk-body').filter({ hasText: 'Date created:' });
-  }
-
-  get backLink(): Locator {
-    return this.page.getByRole('link', { name: 'Back' });
-  }
-
-  sectionHeading(text: string): Locator {
-    return this.page.getByRole('heading', { level: 2, name: text });
-  }
-
-  summaryValue(term: string): Locator {
-    return this.page.locator('dt').filter({ hasText: term }).locator('xpath=following-sibling::dd[1]');
-  }
-
-  get commodityName(): Locator {
-    return this.page
-      .locator('.govuk-summary-card')
-      .filter({ has: this.page.getByRole('heading', { level: 2, name: 'Your commodities' }) })
-      .locator('p.govuk-body strong');
-  }
-
-  get speciesRows(): Locator {
-    return this.page
-      .locator('.govuk-summary-card')
-      .filter({ has: this.page.getByRole('heading', { level: 2, name: 'Your commodities' }) })
-      .locator('tbody tr');
-  }
-
-  speciesCell(rowIndex: number, colIndex: number): Locator {
-    return this.speciesRows.nth(rowIndex).locator('td').nth(colIndex);
-  }
-
-  get documentsRows(): Locator {
-    return this.page
-      .locator('.govuk-summary-card')
-      .filter({ has: this.page.getByRole('heading', { level: 2, name: 'Accompanying documents' }) })
-      .locator('tbody tr');
-  }
-
-  get noDocumentsText(): Locator {
-    return this.page
-      .locator('.govuk-summary-card')
-      .filter({ has: this.page.getByRole('heading', { level: 2, name: 'Accompanying documents' }) })
-      .locator('p.govuk-body', { hasText: 'Not yet added' });
-  }
-
-  async open(referenceNumber: string): Promise<void> {
-    await this.navigateToFrontend(this.expectedUrl(referenceNumber));
-    await this.signInWhenRequested(true);
-    await this.heading.waitFor();
-    await this.page.waitForLoadState('load');
-  }
-
-  get btnConfirmAndSubmit(): Locator {
-    return this.page.getByRole('button', { name: 'Confirm and submit' });
-  }
-
-  changeLink(sectionHeading: string): Locator {
-    return this.page
-      .locator('.govuk-summary-card')
-      .filter({ has: this.page.getByRole('heading', { level: 2, name: sectionHeading }) })
-      .getByRole('link', { name: /^Change/ });
+    return this.journeyStrip;
   }
 
   get btnCopyAsNew(): Locator {
     return this.page.getByRole('button', { name: 'Copy as new' });
   }
 
-  get btnAmend(): Locator {
-    return this.page.getByRole('button', { name: 'Amend this notification' });
-  }
-
-  get amendStatusTag(): Locator {
-    return this.page.locator('.govuk-tag', { hasText: 'Amend' });
-  }
-
-  get btnCancelAmend(): Locator {
-    return this.page.getByRole('button', { name: 'Cancel amendment' });
-  }
-
-  get amendCancelledBanner(): Locator {
-    return this.page.locator('#amend-cancelled-banner');
-  }
-
   get btnDelete(): Locator {
     return this.page.getByRole('button', { name: 'Delete' });
   }
 
-  get deleteDialog(): Locator {
-    return this.page.getByRole('dialog', { name: 'Delete this notification?' });
+  get continueButton(): Locator {
+    return this.page.getByRole('button', { name: 'Continue' });
   }
 
-  get btnConfirmDelete(): Locator {
-    return this.deleteDialog.getByRole('button', { name: 'Yes, delete' });
+  get cancelAmendment(): Locator {
+    return this.page.getByRole('link', { name: 'Cancel amendment' });
   }
 
-  get btnCancelDelete(): Locator {
-    return this.deleteDialog.getByRole('button', { name: 'Cancel' });
+  changeLink(name: string | RegExp): Locator {
+    return this.page.getByRole('link', { name });
   }
 
-  get successBanner(): Locator {
-    return this.page.locator('#success-banner');
+  summaryCard(name: string): Locator {
+    return this.page.locator('.govuk-summary-card', { hasText: name });
+  }
+
+  async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
+    await super.open(journeyId, attemptSignIn);
+    if (attemptSignIn) await this.heading.waitFor();
   }
 }

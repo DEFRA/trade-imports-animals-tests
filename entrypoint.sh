@@ -11,10 +11,13 @@ echo "run_id: $RUN_ID"
 
 case "${PROFILE:-default}" in
   default)
-    npm test
+    # Record a non-zero npm test exit in the FAILED marker: a run that dies
+    # before Playwright starts (e.g. the workspace run's reseed needs the
+    # workspace checkout this image does not have) must not report a pass.
+    npm test || echo "npm test exited $? before completing" >> FAILED
     ;;
   a11y)
-    npm run test:a11y
+    npm run test:a11y || echo "npm run test:a11y exited $? before completing" >> FAILED
     ;;
   browserstack)
     echo "browserstack profile runs are not implemented yet."

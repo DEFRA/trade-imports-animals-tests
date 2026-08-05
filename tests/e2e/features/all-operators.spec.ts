@@ -1,55 +1,34 @@
 import { test, expect } from '@fixtures';
-import {
-  PLACE_OF_ORIGIN_NAME,
-  CONSIGNOR_NAME,
-  CONSIGNEE_NAME,
-  IMPORTER_NAME,
-  DESTINATION_NAME,
-  CPH_NUMBER,
-} from '@domain/constants/journey-options';
 
-test.describe('All operator addresses', () => {
-  test.beforeEach(async ({ apiJourney, notificationActions }) => {
-    const created = await apiJourney.createFullNotification();
-    await notificationActions.toNotificationView(created.referenceNumber);
-  });
+test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  // The api seed unlocks only origin + commodity, so the review page is reached
+  // through the full journey walk — the addresses leg of that walk picks the
+  // canned parties whose names and countries are asserted here.
+  test('check your answers lists all six operators with the picked name and country', async ({ journey, pages }) => {
+    await journey.toReview();
 
-  test('all six operators appear in the addresses section of the notification view', async ({ pages }) => {
-    await expect(pages.notificationView.summaryValue('Place of origin')).toContainText(PLACE_OF_ORIGIN_NAME);
-    await expect(pages.notificationView.summaryValue('Consignor')).toContainText(CONSIGNOR_NAME);
-    await expect(pages.notificationView.summaryValue('Consignee')).toContainText(CONSIGNEE_NAME);
-    await expect(pages.notificationView.summaryValue('Importer')).toContainText(IMPORTER_NAME);
-    await expect(pages.notificationView.summaryValue('Place of destination')).toContainText(DESTINATION_NAME);
-    await expect(pages.notificationView.summaryValue('County Parish Holding number (CPH)')).toContainText(CPH_NUMBER);
-  });
+    const card = pages.notificationView.summaryCard('Roles and addresses');
+    const operator = (key: string) =>
+      card
+        .locator('.govuk-summary-list__row')
+        .filter({ has: pages.page.locator('dt', { hasText: key }) })
+        .locator('.govuk-summary-list__value');
 
-  test('place of origin shows name and country', async ({ pages }) => {
-    const value = pages.notificationView.summaryValue('Place of origin');
-    await expect(value).toContainText(PLACE_OF_ORIGIN_NAME);
-    await expect(value).toContainText('Ireland');
-  });
+    await expect(operator('Place of origin')).toContainText('Origin Farm');
+    await expect(operator('Place of origin')).toContainText('Ireland');
 
-  test('consignor shows name and country', async ({ pages }) => {
-    const value = pages.notificationView.summaryValue('Consignor');
-    await expect(value).toContainText(CONSIGNOR_NAME);
-    await expect(value).toContainText('Switzerland');
-  });
+    await expect(operator('Consignor')).toContainText('Astra Rosales');
+    await expect(operator('Consignor')).toContainText('Switzerland');
 
-  test('consignee shows name and country', async ({ pages }) => {
-    const value = pages.notificationView.summaryValue('Consignee');
-    await expect(value).toContainText(CONSIGNEE_NAME);
-    await expect(value).toContainText('United Kingdom');
-  });
+    await expect(operator('Consignee')).toContainText('British Livestock Ltd');
+    await expect(operator('Consignee')).toContainText('United Kingdom');
 
-  test('importer shows name and country', async ({ pages }) => {
-    const value = pages.notificationView.summaryValue('Importer');
-    await expect(value).toContainText(IMPORTER_NAME);
-    await expect(value).toContainText('United Kingdom');
-  });
+    await expect(operator('Importer')).toContainText('Import Co UK');
+    await expect(operator('Importer')).toContainText('United Kingdom');
 
-  test('place of destination shows name and country', async ({ pages }) => {
-    const value = pages.notificationView.summaryValue('Place of destination');
-    await expect(value).toContainText(DESTINATION_NAME);
-    await expect(value).toContainText('United Kingdom');
+    await expect(operator('Place of destination')).toContainText('Tech Imports Ltd');
+    await expect(operator('Place of destination')).toContainText('United Kingdom');
+
+    await expect(operator('County Parish Holding number (CPH)')).toContainText('123456789');
   });
 });

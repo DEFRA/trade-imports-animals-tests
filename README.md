@@ -70,25 +70,24 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                             | Test scope                                     | Target               | Config                                | Generates Report |
-| ----------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                          | e2e test suite                                 | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                 | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`       | e2e + e2e integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:smoke` | Smoke (`@smoke`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`  | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`    | e2e (CI shards)                                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                            | Test scope                                     | Target               | Config                                | Generates Report |
+| ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                         | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
-| Playwright Parameters            | Action                                     |
-| -------------------------------- | ------------------------------------------ |
-| `-- --headed`                    | Run tests in headed mode (see the browser) |
-| `-- tests/example.spec.ts`       | Run a specific test file                   |
-| `-- --grep "@smoke"`             | Run tests with a specific tag              |
-| `-- --debug`                     | Run tests in debug mode                    |
-| `-- --ui`                        | Run tests with UI mode                     |
-| `-- --project=frontend-chromium` | Run tests in a specific project            |
+| Playwright Parameters      | Action                                     |
+| -------------------------- | ------------------------------------------ |
+| `-- --headed`              | Run tests in headed mode (see the browser) |
+| `-- tests/example.spec.ts` | Run a specific test file                   |
+| `-- --grep "@smoke"`       | Run tests with a specific tag              |
+| `-- --debug`               | Run tests in debug mode                    |
+| `-- --ui`                  | Run tests with UI mode                     |
+| `-- --project=e2e`         | Run tests in a specific project            |
 
 ### Test Reports
 
@@ -102,8 +101,8 @@ After tests run, Playwright results and report are generated automatically, and 
 ### Test Configuration
 
 Shared settings (projects, reporters, `retries: 1`, `trace: on-first-retry`)
-live in `utils/playwright/shared-config.ts`. Two configs extend it, one per
-target host:
+live in `utils/playwright/shared-config.ts`. The target-specific configs extend
+those settings:
 
 | File                                  | Target               |
 | ------------------------------------- | -------------------- |
@@ -113,28 +112,37 @@ target host:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
-The `docker-compose` config target `localhost:3000` / `localhost:3001`, so
+The `docker-compose` config targets `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
 against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
-Tests are split across two Playwright projects targeting different services:
+Both configs split tests across the same two Playwright projects:
 
-| Project             | Test scope                      |
-| ------------------- | ------------------------------- |
-| `frontend-chromium` | All tests excluding admin pages |
-| `admin-chromium`    | Admin pages only                |
+| Project | Test scope                      |
+| ------- | ------------------------------- |
+| `e2e`   | All tests excluding admin pages |
+| `admin` | Admin pages only                |
 
 ## Local Testing
 
 ### Local workspace stack
 
-1. Start the workspace stack: `./scripts/stack/run-stack.sh` from the
-   [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace).
-2. Run tests with `npm run test:docker-compose`.
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace),
+   start the locally built stack:
 
-To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
+   ```bash
+   ./scripts/stack/run-stack.sh -d
+   ```
+
+2. Run the E2E and admin projects with `npm run test:docker-compose`.
+
+`npm run test:docker-compose` targets the stack frontend on :3000 and the
+admin service on :3001.
+
+To debug, append Playwright flags, e.g.
+`npm run test:docker-compose -- --headed --workers=1`.
 
 `npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
 which delegates to the workspace stack's `bounce-mongo.sh`. Seed fixtures for
@@ -161,7 +169,7 @@ See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 To run tests against a CDP environment from your local machine:
 
 1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
-2. Run tests with `npm run test`.
+2. Run tests with `npm test`.
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
@@ -172,30 +180,15 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
-### Updating macOS baselines
-
-```bash
-npm run test:docker-compose:visual -- --update-snapshots
-npm run test:docker-compose:visual -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
-```
-
-Produces `*-darwin.png` on local macOS. Host Playwright runs against the workspace
-stack; updated snapshots are written to your working tree for commit.
-
-### Updating Linux baselines
-
-```bash
-npm run test:docker-compose:visual:container -- --update-snapshots
-npm run test:docker-compose:visual:container -- tests/e2e/visual/<spec>.visual.spec.ts --update-snapshots
-```
-
-Produces `*-linux.png` files that match CI rendering. Playwright runs in a Linux
-container against the workspace stack; updated snapshots are written into your
-working tree for commit.
+Regenerate the E2E baseline against the stack frontend with
+`npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
+`npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
+used by CI. Both commands reseed the workspace database, run the `e2e` project's
+`@visual` spec, and write the updated snapshot into the working tree for commit.
 
 ## Running Tests on GitHub
 
-E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it (sharded ×3, reports published to GitHub Pages).
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
 
 ### GitHub Actions workflow
 

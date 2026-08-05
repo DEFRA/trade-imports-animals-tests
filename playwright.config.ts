@@ -8,8 +8,8 @@ import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
 const environment = getEnvironment();
 
 const projectBaseUrls: Record<string, string> = {
-  'frontend-chromium': `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
-  'admin-chromium': `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
+  e2e: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
+  admin: `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,
 };
 
 const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'cdp'), {
