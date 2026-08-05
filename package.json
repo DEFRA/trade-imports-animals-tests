@@ -24,7 +24,6 @@
     "test": "npm run _clean_and_test -- --grep-invert '@compose|@a11y'",
     "test:a11y": "npm run _clean_and_test -- --grep '@a11y'",
     "test:browserstack": "echo 'BrowserStack Playwright tests not implemented yet'",
-    "test:local": "npm run test:docker-compose",
     "test:docker-compose": "npm run _reset_and_clean_and_test_docker_compose -- --grep-invert '@a11y'",
     "test:docker-compose:a11y": "npm run _reset_and_clean_and_test_docker_compose -- --grep '@a11y'",
     "test:docker-compose:ci": "npm run _test_docker_compose -- --grep-invert '@a11y' --reporter=list,html,allure-playwright",

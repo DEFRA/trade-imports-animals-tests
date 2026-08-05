@@ -74,7 +74,6 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
 | `npm test`                         | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:local`               | Alias for `npm run test:docker-compose`        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
@@ -137,12 +136,13 @@ Both configs split tests across the same two Playwright projects:
    ./scripts/stack/run-stack.sh -d
    ```
 
-2. Run the E2E and admin projects with `npm run test:local`.
+2. Run the E2E and admin projects with `npm run test:docker-compose`.
 
-`npm run test:local` is an alias for `npm run test:docker-compose`, which
-targets the stack frontend on :3000 and the admin service on :3001.
+`npm run test:docker-compose` targets the stack frontend on :3000 and the
+admin service on :3001.
 
-To debug, append Playwright flags, e.g. `npm run test:local -- --headed --workers=1`.
+To debug, append Playwright flags, e.g.
+`npm run test:docker-compose -- --headed --workers=1`.
 
 `npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
 which delegates to the workspace stack's `bounce-mongo.sh`. Seed fixtures for
