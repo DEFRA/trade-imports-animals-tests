@@ -6,6 +6,7 @@ import { fileUploadPaths, fileUploadNames } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { timeouts } from '@config/timeouts';
 import { toUtcDate } from '@utils/date-utils';
+import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 /**
  * Integration seam: real uploader -> backend/Mongo persistence -> reload.
@@ -15,6 +16,10 @@ import { toUtcDate } from '@utils/date-utils';
  * accompanying_documents projection + that the uploaded row survives a fresh page load.
  */
 test.describe('Accompanying document persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
+  });
+
   test('uploads a document that persists to Mongo and reloads', async ({ journey, journeyContext, pages }) => {
     test.slow();
     await journey.toAccompanyingDocuments();

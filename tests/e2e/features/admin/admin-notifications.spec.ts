@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
-import { skipIfCdpEnvironment } from '@utils/playwright/environment';
+import { skipIfCdpEnvironment, isComposeEnvironment } from '@utils/playwright/environment';
 
 /** Integration seam: the admin operator UI over real notifications and audit records. */
 test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, () => {
@@ -64,7 +64,9 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
         .toBe(false);
     });
 
-    await test.step('writes a successful delete audit record for one notification delete', async () => {
+    await test.step('writes a successful delete audit record for one notification delete', async (step) => {
+      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+
       const client = new MongoDbClient();
 
       try {
@@ -152,7 +154,9 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       );
     });
 
-    await test.step('writes a failed delete audit record for one notification delete', async () => {
+    await test.step('writes a failed delete audit record for one notification delete', async (step) => {
+      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+
       const client = new MongoDbClient();
 
       try {

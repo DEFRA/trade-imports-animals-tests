@@ -3,6 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
+import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const POINT_OF_ENTRY = 'GB ABD';
@@ -27,6 +28,10 @@ const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventAc
 });
 
 test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }, () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
+  });
+
   test('does not write an outbox event before submission', async ({ journey, journeyContext }) => {
     test.slow();
     await journey.toDeclaration();

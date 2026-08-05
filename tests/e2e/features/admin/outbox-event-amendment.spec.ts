@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
+import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMISSION_AMENDED = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 const EXPECTED_ACTOR: OutboxEventActor = {
@@ -25,6 +26,10 @@ const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventAc
 });
 
 test.describe('Notification amendment outbox event', { tag: ['@integration', '@mongodb'] }, () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
+  });
+
   test('records the authenticated actor and cumulative status changes on amendment', async ({
     journey,
     journeyContext,
