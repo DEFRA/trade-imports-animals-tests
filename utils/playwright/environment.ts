@@ -47,3 +47,12 @@ export function isComposeEnvironment(): boolean {
 export function skipIfComposeEnvironment(reason: string): void {
   test.skip(isComposeEnvironment(), reason);
 }
+
+/**
+ * Skip a test everywhere except the Docker Compose stack. Guards assertions that
+ * read Mongo directly — MONGODB_URI is only applied by the compose Playwright
+ * config, so these cannot run against a CDP environment.
+ */
+export function skipUnlessComposeEnvironment(reason: string): void {
+  test.skip(!isComposeEnvironment(), reason);
+}

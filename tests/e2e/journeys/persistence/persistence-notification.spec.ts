@@ -2,6 +2,7 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
+import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 /**
  * Integration seam: real UI-create -> backend/Mongo persistence -> reload.
@@ -11,6 +12,10 @@ import { timeouts } from '@config/timeouts';
  * Assertions cover a representative field per section rather than every field.
  */
 test.describe('Notification persistence round-trip', { tag: ['@integration', '@mongodb'] }, () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('the round-trip asserts on Mongo directly, which only the compose stack exposes');
+  });
+
   test('draft notification persists as DRAFT up to declaration', async ({ journey, journeyContext }) => {
     await journey.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
