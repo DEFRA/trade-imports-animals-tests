@@ -1,8 +1,10 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const PROJECT_ENV_VARS: Record<string, string> = {
-  e2e: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
-  admin: 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+  // Both set projects select subtrees on the same frontend service. Never put a set prefix in the base URL.
+  'frontend-live-animals-chromium': 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
+  'frontend-plant-products-chromium': 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
+  'admin-chromium': 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
 };
 
 /**

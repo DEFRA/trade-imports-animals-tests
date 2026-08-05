@@ -1,36 +1,82 @@
 import { type Page } from '@playwright/test';
-import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
-import { AdditionalDetailsPage } from './notification/additional-details-page';
-import { AddressesPage } from './notification/addresses-page';
-import { AnimalIdentificationPage } from './notification/animal-identification-page';
-import { ArrivalDetailsPage } from './notification/arrival-details-page';
-import { CommoditySelectionPage } from './notification/commodity-selection-page';
-import { ConsignmentDetailsPage } from './notification/consignment-details-page';
-import { ContactAddressPage } from './notification/contact-address-page';
-import { CphNumberPage } from './notification/cph-number-page';
-import { DeclarationPage } from './notification/declaration-page';
-import { ImportPurposePage } from './notification/import-purpose-page';
-import { ImportReasonPage } from './notification/import-reason-page';
-import { ImportTypePage } from './notification/import-type-page';
-import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
-import { NotificationDashboardPage } from './notification/notification-dashboard-page';
-import { NotificationViewPage } from './notification/notification-view-page';
-import { OriginOfImportPage } from './notification/origin-of-import-page';
-import { OverviewPage } from './notification/overview-page';
-import { PartyPickerPage } from './notification/party-picker-page';
-import { TransitedCountriesPage } from './notification/transited-countries-page';
-import { TransporterPage } from './notification/transporter-page';
-import { TransporterSelectionPage } from './notification/transporter-selection-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
 import { AdminDlqEventsPage } from './admin/admin-dlq-events-page';
 import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { AboutTheConsignmentPage } from './plant-products/about-the-consignment-page';
+import { PlantCancelAmendPage } from './plant-products/cancel-amend-page';
+import { PlantAccompanyingDocumentsPage } from './plant-products/accompanying-documents-page';
+import { PlantConfirmationPage } from './plant-products/confirmation-page';
+import { ConsignorConfirmationPage } from './plant-products/consignor-confirmation-page';
+import { ConsignorCreatePage } from './plant-products/consignor-create-page';
+import { ConsignorPickerPage } from './plant-products/consignor-picker-page';
+import { ContactDetailsPage } from './plant-products/contact-details-page';
+import { CountryOfOriginPage } from './plant-products/country-of-origin-page';
+import { PlantDeleteConfirmationPage } from './plant-products/delete-confirmation-page';
+import { CommodityAdditionalDetailsPage } from './plant-products/commodity-additional-details-page';
+import { CommodityBasicDescriptionPage } from './plant-products/commodity-basic-description-page';
+import { CommodityBulkDetailsPage } from './plant-products/commodity-bulk-details-page';
+import { CommodityInputMethodPage } from './plant-products/commodity-input-method-page';
+import { CommoditySearchPage } from './plant-products/commodity-search-page';
+import { CommoditySummaryPage } from './plant-products/commodity-summary-page';
+import { PlantDeclarationPage } from './plant-products/declaration-page';
+import { GoodsMovementServicesPage } from './plant-products/goods-movement-services-page';
+import { PlantHubPage } from './plant-products/hub-page';
+import { PlantImportTypePage } from './plant-products/import-type-page';
+import { PlantOriginOfImportPage } from './plant-products/origin-of-import-page';
+import { PlantNotificationDashboardPage } from './plant-products/plant-notification-dashboard-page';
+import { NominatedContactPage } from './plant-products/nominated-contact-page';
+import { PlantNotificationViewPage } from './plant-products/notification-view-page';
+import { ReviewNotificationPage } from './plant-products/review-notification-page';
+import { TradersAddressesPage } from './plant-products/traders-addresses-page';
+import { TransportBeforeBipPage } from './plant-products/transport-before-bip-page';
+import { VarietyOfGenusAndSpeciesPage } from './plant-products/variety-of-genus-and-species-page';
+import { AccompanyingDocumentsPage } from './live-animals/accompanying-documents-page';
+import { AdditionalDetailsPage } from './live-animals/additional-details-page';
+import { AddressesPage } from './live-animals/addresses-page';
+import { AnimalIdentificationPage } from './live-animals/animal-identification-page';
+import { ArrivalDetailsPage } from './live-animals/arrival-details-page';
+import { CommoditySelectionPage } from './live-animals/commodity-selection-page';
+import { ConsignmentDetailsPage } from './live-animals/consignment-details-page';
+import { ContactAddressPage } from './live-animals/contact-address-page';
+import { CphNumberPage } from './live-animals/cph-number-page';
+import { DeclarationPage } from './live-animals/declaration-page';
+import { ImportPurposePage } from './live-animals/import-purpose-page';
+import { ImportReasonPage } from './live-animals/import-reason-page';
+import { ImportTypePage } from './live-animals/import-type-page';
+import { NotificationCancelAmendPage } from './live-animals/notification-cancel-amend-page';
+import { NotificationDashboardPage } from './live-animals/notification-dashboard-page';
+import { NotificationViewPage } from './live-animals/notification-view-page';
+import { OriginOfImportPage } from './live-animals/origin-of-import-page';
+import { OverviewPage } from './live-animals/overview-page';
+import { PartyPickerPage } from './live-animals/party-picker-page';
+import { TransitedCountriesPage } from './live-animals/transited-countries-page';
+import { TransporterPage } from './live-animals/transporter-page';
+import { TransporterSelectionPage } from './live-animals/transporter-selection-page';
 
-export function createPageObjects(page: Page) {
+export function createSharedPageObjects(page: Page) {
   return {
     page,
+    signIn: new SignInPage(page),
+    signOut: new SignOutPage(page),
+  };
+}
+
+export function createAdminPageObjects(page: Page) {
+  return {
+    ...createSharedPageObjects(page),
+    adminDashboard: new AdminDashboardPage(page),
+    adminDlqEvents: new AdminDlqEventsPage(page),
+    adminNotifications: new AdminNotificationsPage(page),
+    adminOutboxEvents: new AdminOutboxEventsPage(page),
+  };
+}
+
+export function createLiveAnimalsPageObjects(page: Page) {
+  return {
+    ...createSharedPageObjects(page),
     notificationDashboard: new NotificationDashboardPage(page),
     importType: new ImportTypePage(page),
     overview: new OverviewPage(page),
@@ -57,13 +103,44 @@ export function createPageObjects(page: Page) {
     notificationView: new NotificationViewPage(page),
     declaration: new DeclarationPage(page),
     notificationCancelAmend: new NotificationCancelAmendPage(page),
-    signIn: new SignInPage(page),
-    signOut: new SignOutPage(page),
-    adminDashboard: new AdminDashboardPage(page),
-    adminDlqEvents: new AdminDlqEventsPage(page),
-    adminNotifications: new AdminNotificationsPage(page),
-    adminOutboxEvents: new AdminOutboxEventsPage(page),
   };
 }
 
-export type PageObjects = ReturnType<typeof createPageObjects>;
+export function createPlantProductsPageObjects(page: Page) {
+  return {
+    ...createSharedPageObjects(page),
+    plantNotificationDashboard: new PlantNotificationDashboardPage(page),
+    importType: new PlantImportTypePage(page),
+    hub: new PlantHubPage(page),
+    countryOfOrigin: new CountryOfOriginPage(page),
+    originOfImport: new PlantOriginOfImportPage(page),
+    aboutTheConsignment: new AboutTheConsignmentPage(page),
+    commodityInputMethod: new CommodityInputMethodPage(page),
+    commoditySearch: new CommoditySearchPage(page),
+    commodityBasicDescription: new CommodityBasicDescriptionPage(page),
+    varietyOfGenusAndSpecies: new VarietyOfGenusAndSpeciesPage(page),
+    commoditySummary: new CommoditySummaryPage(page),
+    commodityBulkDetails: new CommodityBulkDetailsPage(page),
+    commodityAdditionalDetails: new CommodityAdditionalDetailsPage(page),
+    transportBeforeBip: new TransportBeforeBipPage(page),
+    goodsMovementServices: new GoodsMovementServicesPage(page),
+    contactDetails: new ContactDetailsPage(page),
+    nominatedContact: new NominatedContactPage(page),
+    accompanyingDocuments: new PlantAccompanyingDocumentsPage(page),
+    tradersAddresses: new TradersAddressesPage(page),
+    consignorPicker: new ConsignorPickerPage(page),
+    consignorCreate: new ConsignorCreatePage(page),
+    consignorConfirmation: new ConsignorConfirmationPage(page),
+    reviewNotification: new ReviewNotificationPage(page),
+    notificationView: new PlantNotificationViewPage(page),
+    cancelAmend: new PlantCancelAmendPage(page),
+    deleteConfirmation: new PlantDeleteConfirmationPage(page),
+    declaration: new PlantDeclarationPage(page),
+    confirmation: new PlantConfirmationPage(page),
+  };
+}
+
+export type SharedPageObjects = ReturnType<typeof createSharedPageObjects>;
+export type AdminPageObjects = ReturnType<typeof createAdminPageObjects>;
+export type LiveAnimalsPageObjects = ReturnType<typeof createLiveAnimalsPageObjects>;
+export type PlantProductsPageObjects = ReturnType<typeof createPlantProductsPageObjects>;

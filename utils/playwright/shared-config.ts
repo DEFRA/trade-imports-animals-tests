@@ -24,8 +24,30 @@ export default defineConfig({
 
   projects: [
     {
-      name: 'e2e',
-      testIgnore: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
+      name: 'frontend-live-animals-chromium',
+      // Set-neutral specs exercise both mounts and live at features/*.spec.ts.
+      testMatch: [
+        '**/tests/e2e/features/live-animals/**/*.spec.ts',
+        '**/tests/e2e/features/*.spec.ts',
+        '**/tests/e2e/pages/live-animals/**/*.spec.ts',
+        '**/tests/e2e/journeys/live-animals/**/*.spec.ts',
+        '**/tests/e2e/visual/live-animals/**/*.spec.ts',
+        '**/tests/a11y/live-animals/**/*.spec.ts',
+      ],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 1000 },
+      },
+    },
+    {
+      name: 'frontend-plant-products-chromium',
+      testMatch: [
+        '**/tests/e2e/features/plant-products/**/*.spec.ts',
+        '**/tests/e2e/pages/plant-products/**/*.spec.ts',
+        '**/tests/e2e/journeys/plant-products/**/*.spec.ts',
+        '**/tests/e2e/visual/plant-products/**/*.spec.ts',
+        '**/tests/a11y/plant-products/**/*.spec.ts',
+      ],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 1000 },

@@ -12,7 +12,7 @@ test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, ()
   test(
     'shows the outbox event for a submitted notification',
     { tag: '@smoke' },
-    async ({ journey, journeyContext, adminNavigation, pages }) => {
+    async ({ liveAnimalsJourney: journey, journeyContext, adminNavigation, adminPages: pages }) => {
       test.slow();
       await journey.submitNotification();
       const referenceNumber = journeyContext.journeyId;
@@ -40,7 +40,7 @@ test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, ()
     },
   );
 
-  test('shows the empty state for an unknown reference number', async ({ adminNavigation, pages }) => {
+  test('shows the empty state for an unknown reference number', async ({ adminNavigation, adminPages: pages }) => {
     const unknownRef = 'GBN-AG-00-000000';
     await adminNavigation.toOutboxEvents(unknownRef);
     await expect(pages.adminOutboxEvents.emptyStateMessage).toBeVisible();

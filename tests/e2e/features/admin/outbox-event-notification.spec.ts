@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
-import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
-import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
+import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/live-animals/constants/journey-options';
+import { type OutboxEventActor, type OutboxEventDocument } from '@domain/live-animals/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
@@ -27,7 +27,7 @@ const actorWithNullableFields = (actor?: OutboxEventActor | null): OutboxEventAc
 });
 
 test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }, () => {
-  test('does not write an outbox event before submission', async ({ journey, journeyContext }) => {
+  test('does not write an outbox event before submission', async ({ liveAnimalsJourney: journey, journeyContext }) => {
     test.slow();
     await journey.toDeclaration();
     const aggregateId = aggregateIdFor(journeyContext.journeyId);
@@ -42,7 +42,7 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
     }
   });
 
-  test('records a NotificationSubmitted outbox event on UI submission', async ({ journey, journeyContext }) => {
+  test('records a NotificationSubmitted outbox event on UI submission', async ({ liveAnimalsJourney: journey, journeyContext }) => {
     test.slow();
     await journey.submitNotification();
     const referenceNumber = journeyContext.journeyId;

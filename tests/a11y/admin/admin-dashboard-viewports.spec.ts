@@ -1,7 +1,7 @@
 import { test, WCAG_STANDARD, scanViewports, waitForViewportSettle } from '@fixtures/a11y';
 
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
-  test.beforeEach(async ({ adminNavigation, pages }) => {
+  test.beforeEach(async ({ adminNavigation, adminPages: pages }) => {
     await adminNavigation.toAdminDashboard();
     await pages.adminDashboard.heading.waitFor();
   });

@@ -1,0 +1,24 @@
+import { test, expect } from '@fixtures';
+
+test.describe('Transporter page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  test.beforeEach(async ({ liveAnimalsJourney: journey }) => {
+    await journey.toTransporter();
+  });
+
+  test('renders the page controls', async ({ liveAnimalsPages: pages }) => {
+    await expect(pages.transporter.heading).toBeVisible();
+    await expect(pages.transporter.transporterType('Commercial')).toBeVisible();
+    await expect(pages.transporter.saveAndContinue).toBeVisible();
+  });
+
+  test('leaves the transporter type unchecked on load', async ({ liveAnimalsPages: pages }) => {
+    await expect(pages.transporter.transporterType('Commercial')).not.toBeChecked();
+  });
+
+  test('accepts a valid transporter type', async ({ liveAnimalsPages: pages }) => {
+    await pages.transporter.transporterType('Commercial').check();
+    await pages.transporter.saveAndContinue.click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+  });
+});

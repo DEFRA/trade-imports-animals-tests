@@ -22,6 +22,8 @@
     "_reset_and_clean_and_test_docker_compose": "npm run database:reseed && npm run _clean && npm run _test_docker_compose --",
     "_assert_stack": "sh ./bin/assert-stack.sh",
     "test": "npm run _clean_and_test -- --grep-invert '@compose|@a11y'",
+    "test:live-animals": "npm run _reset_and_clean_and_test_docker_compose -- --project=frontend-live-animals-chromium --grep-invert '@a11y'",
+    "test:plant-products": "npm run _reset_and_clean_and_test_docker_compose -- --project=frontend-plant-products-chromium --grep-invert '@a11y'",
     "test:a11y": "npm run _clean_and_test -- --grep '@a11y'",
     "test:browserstack": "echo 'BrowserStack Playwright tests not implemented yet'",
     "test:docker-compose": "npm run _reset_and_clean_and_test_docker_compose -- --grep-invert '@a11y'",

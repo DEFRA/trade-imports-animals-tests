@@ -77,17 +77,19 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:live-animals`        | Live-animals project only                      | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:plant-products`      | Plant-products project only                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
-| Playwright Parameters      | Action                                     |
-| -------------------------- | ------------------------------------------ |
-| `-- --headed`              | Run tests in headed mode (see the browser) |
-| `-- tests/example.spec.ts` | Run a specific test file                   |
-| `-- --grep "@smoke"`       | Run tests with a specific tag              |
-| `-- --debug`               | Run tests in debug mode                    |
-| `-- --ui`                  | Run tests with UI mode                     |
-| `-- --project=e2e`         | Run tests in a specific project            |
+| Playwright Parameters                         | Action                                     |
+| --------------------------------------------- | ------------------------------------------ |
+| `-- --headed`                                 | Run tests in headed mode (see the browser) |
+| `-- tests/example.spec.ts`                    | Run a specific test file                   |
+| `-- --grep "@smoke"`                          | Run tests with a specific tag              |
+| `-- --debug`                                  | Run tests in debug mode                    |
+| `-- --ui`                                     | Run tests with UI mode                     |
+| `-- --project=frontend-live-animals-chromium` | Run tests in a specific project            |
 
 ### Test Reports
 
@@ -118,12 +120,13 @@ against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
-Both configs split tests across the same two Playwright projects:
+Both configs split tests across the same three Playwright projects:
 
-| Project | Test scope                      |
-| ------- | ------------------------------- |
-| `e2e`   | All tests excluding admin pages |
-| `admin` | Admin pages only                |
+| Project                            | Test scope           |
+| ---------------------------------- | -------------------- |
+| `frontend-live-animals-chromium`   | Live-animals tests   |
+| `frontend-plant-products-chromium` | Plant-products tests |
+| `admin-chromium`                   | Admin pages only     |
 
 ## Local Testing
 
@@ -183,8 +186,9 @@ Baselines are stored alongside their spec files in `*-snapshots/` directories an
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands reseed the workspace database, run the `e2e` project's
-`@visual` spec, and write the updated snapshot into the working tree for commit.
+used by CI. Both commands reseed the workspace database, run the
+`frontend-live-animals-chromium` project's `@visual` spec, and write the updated
+snapshot into the working tree for commit.
 
 ## Running Tests on GitHub
 

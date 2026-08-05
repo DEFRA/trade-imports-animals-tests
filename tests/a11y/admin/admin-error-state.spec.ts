@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 test.describe(`Accessibility (admin) ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test('each admin page has no accessibility violations when validation errors are shown', async ({
     adminNavigation,
-    pages,
+    adminPages: pages,
     runA11yScan,
   }) => {
     await test.step('Admin notifications delete with an unknown reference', async () => {
