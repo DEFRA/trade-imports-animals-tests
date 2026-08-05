@@ -72,12 +72,13 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 
 | Command                            | Test scope                                     | Target               | Config                                | Generates Report |
 | ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                         | E2E suite against :3000 plus admin             | workspace stack      | `playwright.e2e.config.ts`            | ✓                |
-| `npm run test:cdp`                 | E2E test suite                                 | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm test`                         | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`   | E2E (CI shards)                                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:live-animals`        | Live-animals project only                      | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:plant-products`      | Plant-products project only                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -105,32 +106,27 @@ Shared settings (projects, reporters, `retries: 1`, `trace: on-first-retry`)
 live in `utils/playwright/shared-config.ts`. The target-specific configs extend
 those settings:
 
-| File                                  | Target                |
-| ------------------------------------- | --------------------- |
-| `playwright.config.ts`                | CDP services          |
-| `playwright.docker-compose.config.ts` | docker-compose stack  |
-| `playwright.e2e.config.ts`            | workspace test target |
+| File                                  | Target               |
+| ------------------------------------- | -------------------- |
+| `playwright.config.ts`                | CDP services         |
+| `playwright.docker-compose.config.ts` | docker-compose stack |
 
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
-The `docker-compose` config target `localhost:3000` / `localhost:3001`, so
+The `docker-compose` config targets `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
 against that stack via the workspace reusable workflow.
 
 ### Test Projects
 
-The workspace E2E config splits tests across three Playwright projects:
+Both configs split tests across the same three Playwright projects:
 
-| Project              | Test scope           |
-| -------------------- | -------------------- |
-| `e2e-live-animals`   | Live-animals tests   |
-| `e2e-plant-products` | Plant-products tests |
-| `admin`              | Admin pages only     |
-
-The CDP and docker-compose configs use equivalent projects named
-`frontend-live-animals-chromium`, `frontend-plant-products-chromium`, and
-`admin-chromium`.
+| Project                            | Test scope           |
+| ---------------------------------- | -------------------- |
+| `frontend-live-animals-chromium`   | Live-animals tests   |
+| `frontend-plant-products-chromium` | Plant-products tests |
+| `admin-chromium`                   | Admin pages only     |
 
 ## Local Testing
 
@@ -143,12 +139,13 @@ The CDP and docker-compose configs use equivalent projects named
    ./scripts/stack/run-stack.sh -d
    ```
 
-2. Run the E2E and admin projects with `npm test`.
+2. Run the E2E and admin projects with `npm run test:docker-compose`.
 
-`npm test` checks that the frontend, backend, admin, and MongoDB services are
-available, cleans previous reports, reseeds MongoDB, and then runs the suite.
+`npm run test:docker-compose` targets the stack frontend on :3000 and the
+admin service on :3001.
 
-To debug, append Playwright flags, e.g. `npm run test:docker-compose -- --headed --workers=1`.
+To debug, append Playwright flags, e.g.
+`npm run test:docker-compose -- --headed --workers=1`.
 
 `npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
 which delegates to the workspace stack's `bounce-mongo.sh`. Seed fixtures for
@@ -175,7 +172,7 @@ See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
 To run tests against a CDP environment from your local machine:
 
 1. Set `PLAYWRIGHT_ENVIRONMENT` to one of `dev`, `test`, or `perf-test` in your `.env`.
-2. Run tests with `npm run test:cdp`.
+2. Run tests with `npm test`.
 
 Use `.env.example` as a template.
 When running via the CDP Portal, `ENVIRONMENT` is provided by the portal; use `PLAYWRIGHT_ENVIRONMENT` and avoid setting `ENVIRONMENT` locally.
@@ -186,15 +183,16 @@ Visual regression tests (tagged `@visual`) guard rendered composition — layout
 
 Baselines are stored alongside their spec files in `*-snapshots/` directories and must be committed. Each platform requires its own baseline — update both when visual changes are intentional.
 
-Regenerate the E2E baseline against the :3000 frontend with
+Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands reseed the workspace database, run the `e2e` project's
-`@visual` spec, and write the updated snapshot into the working tree for commit.
+used by CI. Both commands reseed the workspace database, run the
+`frontend-live-animals-chromium` project's `@visual` spec, and write the updated
+snapshot into the working tree for commit.
 
 ## Running Tests on GitHub
 
-E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it (sharded ×3, reports published to GitHub Pages).
+E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
 
 ### GitHub Actions workflow
 

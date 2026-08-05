@@ -5,6 +5,11 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
     liveAnimalsJourney: journey,
     liveAnimalsPages: pages,
   }) => {
+    // Proving scope needs three commodity shapes, and each one walks the hub,
+    // selection and consignment pages — roughly 25 loads against a CI runner
+    // hosting the whole stack, which does not fit the default budget.
+    test.slow();
+
     const journeyId = await journey.startNotification();
     // Commodities is gated on origin; answering it unlocks the section each added
     // line then opens.

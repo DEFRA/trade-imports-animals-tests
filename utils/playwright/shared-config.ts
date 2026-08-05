@@ -33,7 +33,6 @@ export default defineConfig({
         '**/tests/e2e/journeys/live-animals/**/*.spec.ts',
         '**/tests/e2e/visual/live-animals/**/*.spec.ts',
         '**/tests/a11y/live-animals/**/*.spec.ts',
-        '**/tests/cross-browser/**/*.spec.ts',
       ],
       use: {
         ...devices['Desktop Chrome'],
@@ -55,7 +54,7 @@ export default defineConfig({
       },
     },
     {
-      name: 'admin-chromium',
+      name: 'admin',
       testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],

@@ -1,7 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
-import { RestClientError } from '@adapters/http/rest-client';
-import type { Fulfilment, PersistedFulfilmentEntry } from '@domain/live-animals/models/api/fulfilment';
+import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/live-animals/models/api/notification-fulfilments';
 import type { LiveAnimalsPageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/live-animals/journey';
 
@@ -34,8 +33,8 @@ const record = (obligationId: string, fulfilmentId: string, value: unknown): Per
 
 // Captured verbatim from a real UI unlock (startNotification + answerOrigin + answerCommodity), not
 // invented — Mapper A projects the commodity code to a string, so an invented array value makes the
-// first UI save's PUT /notifications fail deserialization. Keep in step with journey.ts's unlock.
-const UNLOCKED_FULFILMENT: PersistedFulfilmentEntry[] = [
+// first UI save's POST /notifications fail deserialization. Keep in step with journey.ts's unlock.
+const UNLOCKED_FULFILMENTS: PersistedFulfilmentEntry[] = [
   scalar('a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', 'FR'),
   scalar('b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'no'),
   scalar('c23d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f', ''),
@@ -54,59 +53,44 @@ export class ApiJourney {
     private readonly context: JourneyContext,
   ) {}
 
-  private remember(fulfilment: Fulfilment): Fulfilment {
-    this.context.journeyId = fulfilment.id;
-    this.context.referenceNumber = fulfilment.id;
-    return fulfilment;
+  private remember(aggregate: NotificationFulfilments): NotificationFulfilments {
+    this.context.journeyId = aggregate.id;
+    this.context.referenceNumber = aggregate.id;
+    return aggregate;
   }
 
-  // A UI save-and-continue persists three shapes (fulfilment + current-notification + proposed-
-  // notification projections). POST /fulfilments creates only the fulfilment, so an API seed must
-  // create the two projections too — otherwise the UI's GET /notifications/{id} 404s and the first
-  // save fails, and submit skips the notification cascade so admin never sees it.
-  private async seedProjections(fulfilment: Fulfilment): Promise<Fulfilment> {
-    await this.api.replaceNotification(fulfilment.id);
-    await this.api.replaceProposedNotification(fulfilment.id);
-    return fulfilment;
+  // Notification mints the reference number (main's saveOriginOfImport with blank ref),
+  // and the notification-fulfilments aggregate is bootstrapped at that same ref.
+  // Matches the frontend's own create flow post-cascade-removal.
+  private async mintNotificationAndBootstrapFulfilments(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
+    const notification = await this.api.createNotification();
+    return this.api.replaceNotificationFulfilments(notification.referenceNumber, contents);
   }
 
-  async createEmptyNotification(): Promise<Fulfilment> {
-    const created = await this.api.createFulfilment();
-    return this.remember(await this.seedProjections(created));
+  async createEmptyNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments());
   }
 
-  async createFullNotification(): Promise<Fulfilment> {
-    const created = await this.api.createFulfilment();
-    const replaced = await this.api.replaceFulfilment(created.id, UNLOCKED_FULFILMENT);
-    return this.remember(await this.seedProjections(replaced));
+  async createFullNotification(): Promise<NotificationFulfilments> {
+    return this.remember(await this.mintNotificationAndBootstrapFulfilments(UNLOCKED_FULFILMENTS));
   }
 
-  async createUpToPage(): Promise<Fulfilment> {
+  async createUpToPage(): Promise<NotificationFulfilments> {
     return this.createFullNotification();
   }
 
-  async createSubmittedNotification(): Promise<Fulfilment> {
+  async createSubmittedNotification(): Promise<NotificationFulfilments> {
     const draft = await this.createFullNotification();
-    return this.remember(await this.api.submitNotification(draft.id));
+    await this.api.submitNotificationFulfilments(draft.id);
+    await this.api.submitNotification(draft.id);
+    return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
-  async createAmendNotification(): Promise<Fulfilment> {
+  async createAmendNotification(): Promise<NotificationFulfilments> {
     const submitted = await this.createSubmittedNotification();
-    return this.remember(await this.amendWhenOutboxFree(submitted.id));
-  }
-
-  // Submit's outbox write holds a short per-aggregate lock; an API amend fired
-  // straight after can land inside it and 500 (no user can click that fast).
-  private async amendWhenOutboxFree(id: string, attempts = 3): Promise<Fulfilment> {
-    for (let attempt = 1; ; attempt += 1) {
-      try {
-        return await this.api.amendNotification(id);
-      } catch (error) {
-        const transientLock = error instanceof RestClientError && error.status === 500;
-        if (!transientLock || attempt >= attempts) throw error;
-        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
-      }
-    }
+    await this.api.amendNotificationFulfilments(submitted.id);
+    await this.api.amendNotification(submitted.id);
+    return this.remember({ ...submitted, status: 'AMEND' });
   }
 
   async resumeInUi<T extends { open(journeyId: string): Promise<void>; heading: Locator }>(journeyId: string, targetPage: T): Promise<T> {
