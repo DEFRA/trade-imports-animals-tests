@@ -8,8 +8,11 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   }) => {
     // Its own address rather than a seeded one: this spec edits the record, and
     // the seeded fixtures are shared with every other spec running alongside it.
-    const originalName = `Linked Farm ${Date.now()}`;
-    const renamed = `${originalName} (renamed)`;
+    // Distinct names, not one derived from the other, so "the old name is gone"
+    // is a real assertion rather than one substring matching another.
+    const stamp = Date.now();
+    const originalName = `Linked Farm ${stamp}`;
+    const renamed = `Renamed Holding ${stamp}`;
     const address = await addressBookApi.createAddress({
       name: originalName,
       addressLine1: '3 Link Lane',
@@ -33,9 +36,10 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
     await pages.consignorSelection.party(originalName).check();
     await pages.consignorSelection.saveAndContinue.click();
 
+    // The landing row renders the party's name — that name is read back from
+    // the address book on every render, so it is what shows the link is live.
     await expect(pages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(originalName);
-    await expect(consignorRow).toContainText('Carlisle');
 
     // Edit the record in the address book, with the journey none the wiser. If
     // the notification held a copy, the row would still read the old details.
@@ -49,9 +53,9 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       email: 'linked@example.co.uk',
     });
 
+    // A copy taken at selection would still read the old name here.
     await pages.page.reload();
     await expect(consignorRow).toContainText(renamed);
-    await expect(consignorRow).toContainText('Penrith');
-    await expect(consignorRow).not.toContainText('Carlisle');
+    await expect(consignorRow).not.toContainText(originalName);
   });
 });

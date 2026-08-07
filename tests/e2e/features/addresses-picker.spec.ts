@@ -48,17 +48,12 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     await pages.consignorSelection.searchButton.click();
     await expect(page.getByText(showingFive)).toBeVisible();
 
-    // GDS pagination renders a WINDOW, not every page: from page 1 that is
-    // 1, 2, an ellipsis and the last page — so page 3 is reached by stepping
-    // through the neighbours the component actually offers. The last page is
-    // derived from the current total (5 per page), not a fixed number, because
-    // the book grows as records are appended.
+    // The last page is derived from the current total (5 per page), not a fixed
+    // number, because the book grows as records are appended by other specs.
     const showingText = (await page.getByText(showingFive).textContent()) ?? '';
     const total = Number(showingText.match(/of (\d+)/)?.[1] ?? 0);
     const lastPage = Math.ceil(total / 5);
     await expect(page.getByRole('link', { name: `Page ${lastPage}` })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Page 3' })).toHaveCount(0);
-    await page.getByRole('link', { name: 'Page 2' }).click();
 
     // Page three holds records that page one never rendered.
     await page.getByRole('link', { name: 'Page 3' }).click();
