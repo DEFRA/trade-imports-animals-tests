@@ -27,9 +27,14 @@ const ORGANISATION_ID = '5900001';
  * The picker shows five per page, and this list is in page order — so rows 1-5
  * are page one, 6-10 page two, and the rest page three.
  *
- * Page one holds the five parties the shared journey walk picks by name
- * (flows/journey.ts), so that walk never has to paginate. Pages two and three
- * exist so the pagination and search specs have somewhere to go.
+ * Page one holds the five parties the shared journey walk picks from the
+ * paginated pickers (flows/journey.ts `fillAddressesToCph`), so that walk never
+ * has to paginate. Pages two and three exist so the pagination and search specs
+ * have somewhere to go.
+ *
+ * The walk picks a SIXTH party on the contact-address page (`answerContact`),
+ * which is a flat unpaginated radio list — so that record only has to exist,
+ * not to sit on any particular page.
  *
  * `countryCode` is what the address book stores and the frontend maps back to
  * a display name through the reference-data country list. That list is the
@@ -45,12 +50,13 @@ const records = [
   ['British Livestock Ltd', '10 Market Street', 'Leeds', 'LS1 6HB', 'United Kingdom'],
   ['Import Co UK', '20 Trade Road', 'London', 'EC1A 1BB', 'United Kingdom'],
 
+  ['Animal and Plant Health Agency', 'Woodham Lane', 'Addlestone', 'KT15 3NB', 'United Kingdom'],
   ['Danish Meat Export ApS', 'Havnegade 21', 'Copenhagen', '1058', 'DK'],
   ['Jutland Swine ApS', 'Sondergade 4', 'Aarhus', '8000', 'DK'],
   ['Laiterie du Nord SARL', '12 Rue de la Gare', 'Lille', '59000', 'FR'],
   ['Nordvik Seafood AS', 'Havnegata 8', 'Alesund', '6002', 'NO'],
-  ['Alpine Dairy GmbH', 'Bahnhofstrasse 17', 'Innsbruck', '6020', 'AT'],
 
+  ['Alpine Dairy GmbH', 'Bahnhofstrasse 17', 'Innsbruck', '6020', 'AT'],
   ['Irish Beef Traders Ltd', 'Castle Road 9', 'Kilkenny', 'R95 F2X8', 'IE'],
   ['Iberian Swine SA', 'Calle Mayor 44', 'Huesca', '22001', 'ES'],
 ];

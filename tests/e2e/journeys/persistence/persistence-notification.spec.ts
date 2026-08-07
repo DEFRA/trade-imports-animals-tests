@@ -61,16 +61,16 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.reasonForImport).toBe('internalMarket');
       expect(doc.additionalDetails.certifiedFor).toBe('slaughter');
       expect(doc.additionalDetails.unweanedAnimals).toBe('no');
-      expect(doc.placeOfOrigin.name).toBe('Origin Farm');
-      expect(doc.consignor?.name).toBe('Astra Rosales');
-      expect(doc.consignee.name).toBe('British Livestock Ltd');
-      expect(doc.importer.name).toBe('Import Co UK');
-      expect(doc.destination?.name).toBe('Tech Imports Ltd');
+      const referencedParties = [doc.placeOfOrigin, doc.consignor, doc.consignee, doc.importer, doc.destination, doc.consignment];
+      for (const party of referencedParties) {
+        expect(party?.addressId).toEqual(expect.any(String));
+        expect(party?.name).toBeUndefined();
+        expect(party?.address).toBeUndefined();
+      }
       expect(doc.cphNumber).toBe('123456789');
       expect(doc.transport.portOfEntry).toBe('GB ABD');
       expect(doc.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(doc.transport.transporter?.type).toBe('Commercial');
-      expect(doc.consignment?.name).toBe('Animal and Plant Health Agency');
     } finally {
       await client.close();
     }
