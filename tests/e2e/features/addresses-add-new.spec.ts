@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Add a new address', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('adding a new address from the consignor spoke copies it into the consignor and the spoke then offers it', async ({
+  test('adding a new address from the consignor spoke saves it to the address book, links the consignor to it, and the spoke then offers it', async ({
     journey,
     pages,
   }) => {
@@ -17,7 +17,9 @@ test.describe('Add a new address', { tag: ['@integration', '@duplicated-in-front
     const consignorRow = pages.addresses.partyRow('Consignor or exporter');
     await pages.addresses.addParty('Consignor or exporter').click();
 
-    // The spoke offers a way out of the canned book: the create-address form.
+    // The spoke offers a way out of the saved book: the create-address form,
+    // which writes through to the address book rather than holding the address
+    // on the notification.
     await pages.page.getByRole('button', { name: 'Add a new address' }).click();
     await expect(pages.page.getByRole('heading', { name: 'Add a new address' })).toBeVisible();
 
@@ -34,7 +36,8 @@ test.describe('Add a new address', { tag: ['@integration', '@duplicated-in-front
     await pages.page.getByLabel('Email address').fill('farm@example.co.uk');
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
 
-    // Saved by copy into the launching party, back on the landing page.
+    // The launching party is now linked to the saved record, back on the
+    // landing page — the name shown is read back from the address book.
     await expect(pages.addresses.heading).toBeVisible();
     await expect(consignorRow).toContainText(createdName);
 

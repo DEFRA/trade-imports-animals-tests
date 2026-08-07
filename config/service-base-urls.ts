@@ -17,6 +17,15 @@ export function getBackendBaseUrl(): string {
 }
 
 /**
+ * Base URL for the address book, reachable directly so a spec can edit or
+ * delete an address behind the journey's back and then check what the
+ * notification shows.
+ */
+export function getAddressBookBaseUrl(): string {
+  return getServiceBaseUrl('TRADE_IMPORTS_ADDRESS_BOOK_URL');
+}
+
+/**
  * Connection URI for MongoDB, reachable directly by specs asserting on
  * persisted state.
  */
