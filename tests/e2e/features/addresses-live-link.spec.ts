@@ -1,6 +1,11 @@
 import { test, expect } from '@fixtures';
+import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () => {
+  test.beforeEach(() => {
+    skipUnlessComposeEnvironment('the spec edits the address book directly, which only the compose stack exposes');
+  });
+
   test('editing a linked address in the address book changes what the draft notification shows', async ({
     journey,
     pages,

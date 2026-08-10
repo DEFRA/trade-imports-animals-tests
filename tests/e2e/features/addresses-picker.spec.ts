@@ -55,7 +55,10 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     const lastPage = Math.ceil(total / 5);
     await expect(page.getByRole('link', { name: `Page ${lastPage}` })).toBeVisible();
 
-    // Page three holds records that page one never rendered.
+    // Page three holds records that page one never rendered. From page 1 the
+    // pagination window is {1, 2, last}, so Page 3 is only linked once we are
+    // on page 2 (window {1, 2, 3, last}).
+    await page.getByRole('link', { name: 'Page 2' }).click();
     await page.getByRole('link', { name: 'Page 3' }).click();
     await expect(pages.consignorSelection.party('Irish Beef Traders Ltd')).toBeVisible();
     await expect(pages.consignorSelection.party(consignorName)).toHaveCount(0);
