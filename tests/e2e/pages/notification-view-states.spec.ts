@@ -77,4 +77,43 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(pages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toBeVisible();
     });
   });
+
+  test.describe('COPY OF SUBMITTED', () => {
+    test('saves an edited answer and submits the copy end to end', async ({ journey, journeyContext, pages }) => {
+      test.slow();
+      await journey.submitNotification();
+      const originalReferenceNumber = journeyContext.journeyId;
+
+      await pages.notificationView.open(originalReferenceNumber);
+      await pages.notificationView.btnCopyAsNew.click();
+      await pages.overview.heading.waitFor();
+
+      const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
+        /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+      )?.[0];
+      expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+      expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
+
+      await pages.overview.task('Where is this consignment coming from?').click();
+      await pages.originOfImport.heading.waitFor();
+      await pages.originOfImport.internalReference.fill('Imports789GB');
+      await pages.originOfImport.saveAndContinue.click();
+      await pages.overview.heading.waitFor();
+      await expect(pages.page.getByText('Sorry, there is a problem with the service')).toHaveCount(0);
+
+      await pages.overview.task('Check and submit').click();
+      await pages.notificationView.heading.waitFor();
+      await expect(pages.notificationView.journeyStrip).toContainText(copiedReferenceNumber);
+      await pages.notificationView.continueButton.click();
+      await pages.declaration.heading.waitFor();
+      await pages.declaration.confirmation.check();
+      await pages.declaration.continueButton.click();
+
+      await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+      await expect(pages.page.getByText('Sorry, there is a problem with the service')).toHaveCount(0);
+
+      await pages.notificationView.open(copiedReferenceNumber);
+      await expect(pages.notificationView.journeyStrip.locator('.govuk-tag')).toHaveText('Submitted');
+    });
+  });
 });

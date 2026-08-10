@@ -14,7 +14,8 @@ const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 /**
  * HTTP client for the spike's dual persistence surface. Every write path that
  * needs to reflect in admin (which reads notifications) requires both a
- * notification-fulfilments call and a notification call.
+ * notification-fulfilments call and a notification call — except copy, which is a
+ * single call to /notification-fulfilments/{id}/copy that writes both aggregates.
  *
  * Methods suffixed *NotificationFulfilments hit /notification-fulfilments/{id}/…;
  * methods suffixed *Notification hit /notifications/{id}/…
@@ -72,6 +73,10 @@ export class NotificationApiClient {
     return this.rest.post<Notification>('/notifications', body);
   }
 
+  async getNotification(id: string): Promise<Notification> {
+    return this.rest.get<Notification>(`/notifications/${id}`);
+  }
+
   /**
    * Whole-record update of an existing notification. `referenceNumber` in the
    * body is required — main's `saveOriginOfImport` delegates to
@@ -92,10 +97,6 @@ export class NotificationApiClient {
 
   async cancelAmendNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
-  }
-
-  async copyNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy`);
   }
 
   async softDeleteNotification(id: string): Promise<Notification> {

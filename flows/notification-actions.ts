@@ -14,6 +14,14 @@ export class NotificationActions {
     await this.pages.overview.heading.waitFor();
   }
 
+  /** Copy straight from the dashboard row, with no prior visit to the notification. */
+  async copyFromDashboard(referenceNumber: string): Promise<void> {
+    await this.pages.notificationDashboard.open();
+    await this.pages.notificationDashboard.searchForReference(referenceNumber);
+    await this.pages.notificationDashboard.copyAsNew(referenceNumber).click();
+    await this.pages.overview.heading.waitFor();
+  }
+
   async deleteNotification(journeyId: string): Promise<void> {
     await this.pages.notificationDashboard.open();
     await this.pages.notificationDashboard.searchFor(journeyId);
