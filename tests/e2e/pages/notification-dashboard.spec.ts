@@ -102,6 +102,30 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
         )?.[0];
         expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
         expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
+
+        await pages.notificationDashboard.open();
+        await pages.notificationDashboard.searchForReference(originalReferenceNumber);
+        const sourceCard = pages.notificationDashboard.notificationCardDetails(0);
+        await expect(sourceCard.heading).toContainText(originalReferenceNumber);
+        const [commodity, origin, consignor, consignee, arrival] = await Promise.all([
+          sourceCard.commodity.textContent(),
+          sourceCard.origin.textContent(),
+          sourceCard.consignor.textContent(),
+          sourceCard.consignee.textContent(),
+          sourceCard.arrivalAtDestination.textContent(),
+        ]);
+        await expect(sourceCard.status).toContainText('Submitted');
+
+        await pages.notificationDashboard.open();
+        await pages.notificationDashboard.searchForReference(copiedReferenceNumber);
+        const copyCard = pages.notificationDashboard.notificationCardDetails(0);
+        await expect(copyCard.heading).toContainText(copiedReferenceNumber);
+        await expect(copyCard.status).toContainText('Draft');
+        await expect(copyCard.commodity).toHaveText(commodity);
+        await expect(copyCard.origin).toHaveText(origin);
+        await expect(copyCard.consignor).toHaveText(consignor);
+        await expect(copyCard.consignee).toHaveText(consignee);
+        await expect(copyCard.arrivalAtDestination).toHaveText(arrival);
       },
     );
   });

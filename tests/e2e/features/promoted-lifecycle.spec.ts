@@ -16,6 +16,24 @@ test.describe('Promoted lifecycle across both aggregates', { tag: ['@compose', '
     expect(draft.id).toBe(id);
     expect(draft.status).toBe(notificationFulfilmentsStatuses.draft);
 
+    await notificationApi.saveNotification(id, {
+      origin: { countryCode: 'FR', requiresRegionCode: 'yes', internalReference: 'INTERNAL-REF-1' },
+      commodity: {
+        name: 'Live bovine animals',
+        commodityComplement: [
+          {
+            typeOfCommodity: 'LIVE',
+            totalNoOfAnimals: 10,
+            totalNoOfPackages: 5,
+            species: [{ value: '1148346', text: 'Bos taurus', noOfAnimals: 10, noOfPackages: 5 }],
+          },
+        ],
+      },
+      transport: { portOfEntry: 'GBFXT', arrivalDate: '2026-09-01' },
+      consignor: { name: 'Consignor Ltd', address: { addressLine1: '1 Farm Road', city: 'Hamburg', country: 'DE' } },
+      consignee: { name: 'Consignee Ltd', address: { addressLine1: '2 Market Street', city: 'Leeds', country: 'GB' } },
+    });
+
     // Submit both sides.
     const submittedNotificationFulfilments = await notificationApi.submitNotificationFulfilments(id);
     const submittedNotification = await notificationApi.submitNotification(id);
@@ -35,15 +53,27 @@ test.describe('Promoted lifecycle across both aggregates', { tag: ['@compose', '
     expect(cancelledNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.submitted);
     expect(cancelledNotification.status).toBe(notificationStatuses.submitted);
 
-    // NotificationFulfilments copy carries an idempotency key; the notification
-    // copy on main has no equivalent (POST /notifications/{id}/copy takes no key),
-    // so this spec only exercises the notification-fulfilments side of copy.
+    // One Idempotency-Key-guarded call writes both aggregates at the copy's reference.
     const key = randomUUID();
+    const source = await notificationApi.getNotification(id);
     const copiedNotificationFulfilments = await notificationApi.copyNotificationFulfilments(id, key);
-    const repeatedCopy = await notificationApi.copyNotificationFulfilments(id, key);
     expect(copiedNotificationFulfilments.id).not.toBe(id);
-    expect(repeatedCopy.id).toBe(copiedNotificationFulfilments.id);
     expect(copiedNotificationFulfilments.status).toBe(notificationFulfilmentsStatuses.draft);
+
+    const copiedNotification = await notificationApi.getNotification(copiedNotificationFulfilments.id);
+    expect(copiedNotification.referenceNumber).toBe(copiedNotificationFulfilments.id);
+    expect(copiedNotification.status).toBe(notificationStatuses.draft);
+    expect(copiedNotification.origin).toEqual(source.origin);
+    expect(copiedNotification.commodity).toEqual(source.commodity);
+    expect(copiedNotification.transport).toEqual(source.transport);
+    expect(copiedNotification.consignor).toEqual(source.consignor);
+    expect(copiedNotification.consignee).toEqual(source.consignee);
+    expect(copiedNotification.origin?.internalReference).toBe('INTERNAL-REF-1');
+    expect(copiedNotification.transport?.arrivalDate).toBeTruthy();
+
+    const repeatedCopy = await notificationApi.copyNotificationFulfilments(id, key);
+    expect(repeatedCopy.id).toBe(copiedNotificationFulfilments.id);
+    expect(await notificationApi.getNotification(repeatedCopy.id)).toEqual(copiedNotification);
 
     // Soft-delete both sides; both are idempotent.
     const deletedNotificationFulfilments = await notificationApi.softDeleteNotificationFulfilments(id);
