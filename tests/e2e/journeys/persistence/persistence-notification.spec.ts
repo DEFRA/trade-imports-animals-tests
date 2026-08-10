@@ -61,12 +61,16 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.reasonForImport).toBe('internalMarket');
       expect(doc.additionalDetails.certifiedFor).toBe('slaughter');
       expect(doc.additionalDetails.unweanedAnimals).toBe('no');
-      const referencedParties = [doc.placeOfOrigin, doc.consignor, doc.consignee, doc.importer, doc.destination, doc.consignment];
-      for (const party of referencedParties) {
-        expect(party?.addressId).toEqual(expect.any(String));
-        expect(party?.name).toBeUndefined();
-        expect(party?.address).toBeUndefined();
-      }
+      // Linked ids must be the deterministic seeded records the journey picked
+      // (seeds/mongodb/30-seed-address-book.js: _id = 69c12f11beef2026 + index),
+      // not merely "some string" — a role mix-up or the same id on every party
+      // would otherwise pass (EUDPA-294 AC3).
+      expect(doc.consignor).toEqual({ addressId: '69c12f11beef202600000001' }); // Astra Rosales
+      expect(doc.destination).toEqual({ addressId: '69c12f11beef202600000002' }); // Tech Imports Ltd
+      expect(doc.placeOfOrigin).toEqual({ addressId: '69c12f11beef202600000003' }); // Origin Farm
+      expect(doc.consignee).toEqual({ addressId: '69c12f11beef202600000004' }); // British Livestock Ltd
+      expect(doc.importer).toEqual({ addressId: '69c12f11beef202600000005' }); // Import Co UK
+      expect(doc.consignment).toEqual({ addressId: '69c12f11beef202600000006' }); // Animal and Plant Health Agency
       expect(doc.cphNumber).toBe('123456789');
       expect(doc.transport.portOfEntry).toBe('GB ABD');
       expect(doc.transport.transporter?.name).toBe('García Livestock Transport SL');

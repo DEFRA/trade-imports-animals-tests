@@ -87,4 +87,20 @@ export class AddressBookApiClient {
   async updateAddress(addressId: string, record: Omit<AddressBookRecord, 'id' | 'deleted'>): Promise<AddressBookRecord> {
     return this.rest.put<AddressBookRecord>(this.path(addressId), record, this.headers);
   }
+
+  /**
+   * One address by id, including soft-deleted tombstones (`deleted: true`).
+   * List endpoints omit tombstones; this is the only way to detect a deletion.
+   */
+  async getAddress(addressId: string): Promise<AddressBookRecord> {
+    return this.rest.get<AddressBookRecord>(this.path(addressId), this.headers);
+  }
+
+  /**
+   * Soft-deletes an address (204, idempotent). The tombstone stays readable via
+   * {@link getAddress}; list/search no longer return it.
+   */
+  async deleteAddress(addressId: string): Promise<void> {
+    await this.rest.delete(this.path(addressId), this.headers);
+  }
 }

@@ -31,6 +31,10 @@ export class RestClient {
     return this.send<T>('PUT', path, body, headers);
   }
 
+  async delete<T = void>(path: string, headers?: Record<string, string>): Promise<T> {
+    return this.send<T>('DELETE', path, undefined, headers);
+  }
+
   private async send<T>(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<T> {
     const url = `${this.baseUrl}${path}`;
     const response = await this.request.fetch(url, {

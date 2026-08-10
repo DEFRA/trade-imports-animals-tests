@@ -13,8 +13,8 @@ const dockerComposeConfig = withServiceBaseUrls(
   {
     ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'),
     // Unbounded local workers overwhelm the defra-id auth stub and tip the
-    // heaviest reaches into 30s timeouts. Four workers is the empirically clean ceiling.
-    workers: process.env.CI ? '50%' : 4,
+    // heaviest reaches into 30s timeouts. Cap local concurrency at 1 for stability.
+    workers: process.env.CI ? '50%' : 1,
   },
   {
     MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
