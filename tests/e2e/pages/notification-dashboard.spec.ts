@@ -129,4 +129,85 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       },
     );
   });
+
+  // Verified red-first against an unfixed frontend: copy and amend FAIL there,
+  // delete and cancel-amend PASS. Those two route through a confirmation GET
+  // that loads the journey, and loading adopts it into the session — so their
+  // guard was never reachable from the dashboard. Keep them for the invariant
+  // below, but do not read a green delete as proof the guard fix works.
+  test.describe('actions on a notification this session never opened', () => {
+    test('copies a submitted notification straight from its dashboard row', async ({ pages, apiJourney, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const sourceReferenceNumber = created.id;
+
+      await notificationActions.copyFromDashboard(sourceReferenceNumber);
+
+      await expect(pages.overview.heading).toBeVisible();
+      const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
+        /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+      )?.[0];
+      expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+      expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
+    });
+
+    test('amends a submitted notification straight from its dashboard row', async ({ pages, apiJourney, notificationActions }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const referenceNumber = created.id;
+
+      await notificationActions.amendNotification(referenceNumber);
+
+      await expect(pages.overview.heading).toBeVisible();
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCardDetails(0).status).toContainText('Amending');
+    });
+
+    test('deletes a draft notification straight from its dashboard row', async ({ pages, apiJourney, notificationActions }) => {
+      const created = await apiJourney.createFullNotification();
+      const referenceNumber = created.id;
+
+      await notificationActions.deleteNotification(referenceNumber);
+
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCard(referenceNumber)).toHaveCount(0);
+    });
+
+    // The other half of the fix: an action that genuinely cannot proceed must
+    // SAY so. Before the fix this redirected dashboard to dashboard, which is
+    // indistinguishable from a refresh — the reported symptom.
+    test('reports that a notification deleted behind the user cannot be copied', async ({
+      pages,
+      apiJourney,
+      notificationApi,
+    }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const referenceNumber = created.id;
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.copyAsNew(referenceNumber)).toBeVisible();
+
+      await notificationApi.softDeleteNotificationFulfilments(referenceNumber);
+      await pages.notificationDashboard.copyAsNew(referenceNumber).click();
+
+      await expect(pages.page.getByRole('heading', { name: 'You cannot copy this notification' })).toBeVisible();
+      await expect(
+        pages.page.getByText('It may have been deleted or changed since the list was loaded.'),
+      ).toBeVisible();
+    });
+
+    test('cancels an amendment straight from its dashboard row', async ({ pages, apiJourney }) => {
+      const created = await apiJourney.createAmendNotification();
+      const referenceNumber = created.id;
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await pages.notificationDashboard.cancelAmend(referenceNumber).click();
+      await pages.page.getByRole('button', { name: 'Yes, cancel amendment' }).click();
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.notificationCardDetails(0).status).toContainText('Submitted');
+    });
+  });
 });
