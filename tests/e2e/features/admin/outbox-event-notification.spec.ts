@@ -68,10 +68,12 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
       expect(data.specifiedConsignment.unloadingBaseportLocation?.identifier).toBe(POINT_OF_ENTRY);
       expect(data.specifiedConsignment.includedConsignmentItem).toHaveLength(1);
       expect(actorWithNullableFields(doc.actor)).toEqual(EXPECTED_ACTOR);
-      expect(statusChanges).toHaveLength(1);
-      expect(statusChanges[0].status).toBe('SUBMITTED');
+      expect(statusChanges).toHaveLength(2);
+      expect(statusChanges[0].status).toBe('DRAFT');
       expect(statusChanges[0].dateChanged).toEqual(expect.any(Date));
-      expect(actorWithNullableFields(statusChanges[0].actor)).toEqual(EXPECTED_ACTOR);
+      expect(statusChanges[1].status).toBe('SUBMITTED');
+      expect(statusChanges[1].dateChanged).toEqual(expect.any(Date));
+      expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
     } finally {
       await client.close();
     }
