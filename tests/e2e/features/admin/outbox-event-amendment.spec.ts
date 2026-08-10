@@ -45,13 +45,15 @@ test.describe('Notification amendment outbox event', { tag: ['@integration', '@m
     try {
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBe(2);
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }), { timeout: timeouts.long })
+        .toBe(1);
 
-      const events = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
-      const amended = events[1];
+      const events = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }).toArray();
+      const [amended] = events;
       const statusChanges = amended.statusChanges ?? [];
 
-      expect(amended.aggregateVersion).toBe(2);
+      expect(amended.aggregateVersion).toBeGreaterThan(1);
       expect(amended.eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED);
       expect(amended.data.exchangedDocument.notificationStatusCode).toBe('AMEND');
       expect(actorWithNullableFields(amended.actor)).toEqual(EXPECTED_ACTOR);

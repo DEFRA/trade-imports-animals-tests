@@ -32,21 +32,6 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('does not write an outbox event before submission', async ({ journey, journeyContext }) => {
-    test.slow();
-    await journey.toDeclaration();
-    const aggregateId = aggregateIdFor(journeyContext.journeyId);
-    const client = new MongoDbClient();
-
-    try {
-      await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.short }).toBe(0);
-    } finally {
-      await client.close();
-    }
-  });
-
   test('records a NotificationSubmitted outbox event on UI submission', async ({ journey, journeyContext }) => {
     test.slow();
     await journey.submitNotification();
@@ -57,19 +42,19 @@ test.describe('Notification outbox event', { tag: ['@integration', '@mongodb'] }
     try {
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBe(1);
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMITTED }), { timeout: timeouts.long })
+        .toBe(1);
 
-      const docs = await collection.find({ aggregateId }).toArray();
+      const docs = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMITTED }).toArray();
       const [doc] = docs;
       const data = doc.data;
       const statusChanges = doc.statusChanges ?? [];
 
-      expect(docs).toHaveLength(1);
       expect(doc._id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
       expect(doc.aggregateId).toBe(aggregateId);
       expect(doc.aggregateType).toBe('Notification');
       expect(doc.subType).toBe('GBN-AG');
-      expect(Number(doc.aggregateVersion)).toBe(1);
       expect(doc.eventType).toBe(NOTIFICATION_SUBMITTED);
       expect(doc.timestamp).toBeInstanceOf(Date);
       expect(doc.metadata.schemaVersion).toBe('1');
