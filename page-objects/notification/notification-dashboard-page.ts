@@ -207,6 +207,12 @@ export class NotificationDashboardPage extends BasePage {
     });
   }
 
+  cancelAmend(reference: string): Locator {
+    return this.notificationCard(reference).getByRole('link', {
+      name: `Cancel amendment notification ${reference}`,
+    });
+  }
+
   async open(attemptSignIn: boolean = true): Promise<void> {
     await this.navigateToFrontend('/');
     await this.signInWhenRequested(attemptSignIn);
