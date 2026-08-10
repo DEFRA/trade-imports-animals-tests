@@ -106,6 +106,11 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
     );
   });
 
+  // Verified red-first against an unfixed frontend: copy and amend FAIL there,
+  // delete and cancel-amend PASS. Those two route through a confirmation GET
+  // that loads the journey, and loading adopts it into the session — so their
+  // guard was never reachable from the dashboard. Keep them for the invariant
+  // below, but do not read a green delete as proof the guard fix works.
   test.describe('actions on a notification this session never opened', () => {
     test('copies a submitted notification straight from its dashboard row', async ({ pages, apiJourney, notificationActions }) => {
       const created = await apiJourney.createSubmittedNotification();
