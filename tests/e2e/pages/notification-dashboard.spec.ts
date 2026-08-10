@@ -148,6 +148,30 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.notificationCard(referenceNumber)).toHaveCount(0);
     });
 
+    // The other half of the fix: an action that genuinely cannot proceed must
+    // SAY so. Before the fix this redirected dashboard to dashboard, which is
+    // indistinguishable from a refresh — the reported symptom.
+    test('reports that a notification deleted behind the user cannot be copied', async ({
+      pages,
+      apiJourney,
+      notificationApi,
+    }) => {
+      const created = await apiJourney.createSubmittedNotification();
+      const referenceNumber = created.id;
+
+      await pages.notificationDashboard.open();
+      await pages.notificationDashboard.searchForReference(referenceNumber);
+      await expect(pages.notificationDashboard.copyAsNew(referenceNumber)).toBeVisible();
+
+      await notificationApi.softDeleteNotificationFulfilments(referenceNumber);
+      await pages.notificationDashboard.copyAsNew(referenceNumber).click();
+
+      await expect(pages.page.getByRole('heading', { name: 'You cannot copy this notification' })).toBeVisible();
+      await expect(
+        pages.page.getByText('It may have been deleted or changed since the list was loaded.'),
+      ).toBeVisible();
+    });
+
     test('cancels an amendment straight from its dashboard row', async ({ pages, apiJourney }) => {
       const created = await apiJourney.createAmendNotification();
       const referenceNumber = created.id;
