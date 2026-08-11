@@ -31,19 +31,31 @@ const record = (obligationId: string, fulfilmentId: string, value: unknown): Per
   records: [{ fulfilmentId, value }],
 });
 
+// Obligation UUIDs mirror the frontend obligation model — keep in step with
+// repos/trade-imports-animals-frontend/src/server/app/sets/live-animals/obligations/sections/
+const COUNTRY_OF_ORIGIN = 'a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+const REGION_OF_ORIGIN_CODE_REQUIREMENT = 'b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e';
+const REGION_OF_ORIGIN_CODE = 'c23d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f';
+const INTERNAL_REFERENCE_NUMBER = '10e5f607-1829-4a3b-84c5-06d7e8f9a0b1';
+const COMMODITY_SELECTION = '21f60718-192a-4d4e-8bcd-17e8f9a0b1c3';
+const COMMODITY_TYPE = '22071829-2a3b-4e5f-8cde-28f9a0b1c2d4';
+const SPECIES_SELECTION = '2318293a-3b4c-4f60-8def-39a0b1c2d3e5';
+const NUMBER_OF_ANIMALS = '24192a3b-4c5d-4a71-8ef0-4ab1c2d3e4f6';
+const NUMBER_OF_PACKAGES = '252a3b4c-5d6e-4b82-8f01-5bc2d3e4f507';
+
 // Captured verbatim from a real UI unlock (startNotification + answerOrigin + answerCommodity), not
 // invented — Mapper A projects the commodity code to a string, so an invented array value makes the
 // first UI save's POST /notifications fail deserialization. Keep in step with journey.ts's unlock.
 const UNLOCKED_FULFILMENTS: PersistedFulfilmentEntry[] = [
-  scalar('a01b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', 'FR'),
-  scalar('b12c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'no'),
-  scalar('c23d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f', ''),
-  scalar('10e5f607-1829-4a3b-84c5-06d7e8f9a0b1', ''),
-  record('21f60718-192a-4d4e-8bcd-17e8f9a0b1c3', 'line0', 'Cow'),
-  record('22071829-2a3b-4e5f-8cde-28f9a0b1c2d4', 'line0', '16'),
-  record('2318293a-3b4c-4f60-8def-39a0b1c2d3e5', 'line0', '1148346'),
-  record('24192a3b-4c5d-4a71-8ef0-4ab1c2d3e4f6', 'line0', 1),
-  record('252a3b4c-5d6e-4b82-8f01-5bc2d3e4f507', 'line0', '5'),
+  scalar(COUNTRY_OF_ORIGIN, 'FR'),
+  scalar(REGION_OF_ORIGIN_CODE_REQUIREMENT, 'no'),
+  scalar(REGION_OF_ORIGIN_CODE, ''),
+  scalar(INTERNAL_REFERENCE_NUMBER, ''),
+  record(COMMODITY_SELECTION, 'line0', 'Cow'),
+  record(COMMODITY_TYPE, 'line0', '16'),
+  record(SPECIES_SELECTION, 'line0', '1148346'),
+  record(NUMBER_OF_ANIMALS, 'line0', 1),
+  record(NUMBER_OF_PACKAGES, 'line0', '5'),
 ];
 
 export class ApiJourney {

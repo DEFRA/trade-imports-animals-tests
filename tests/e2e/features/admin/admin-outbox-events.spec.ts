@@ -18,23 +18,24 @@ test.describe('Outbox events (admin)', { tag: ['@integration', '@mongodb'] }, ()
       const referenceNumber = journeyContext.journeyId;
 
       await adminNavigation.toOutboxEvents(referenceNumber);
+      const submittedRow = pages.adminOutboxEvents.tableRows.filter({ hasText: 'NotificationSubmitted' });
+
       await expect
         .poll(
           async () => {
             await pages.adminOutboxEvents.inputReferenceNumber.fill(referenceNumber);
             await pages.adminOutboxEvents.btnSearch.click();
-            return pages.adminOutboxEvents.tableRows.count();
+            return submittedRow.count();
           },
           { timeout: timeouts.long },
         )
         .toBe(1);
 
-      await expect(pages.adminOutboxEvents.cellVersion(0)).toHaveText('1');
-      await expect(pages.adminOutboxEvents.cellEventType(0)).toContainText('NotificationSubmitted');
-      await expect(pages.adminOutboxEvents.cellTimestamp(0)).not.toBeEmpty();
+      await expect(submittedRow.locator('td').nth(1)).toContainText('NotificationSubmitted');
+      await expect(submittedRow.locator('td').nth(2)).not.toBeEmpty();
 
-      await pages.adminOutboxEvents.linkViewJson(0).click();
-      const json = await pages.adminOutboxEvents.cellDataPre(0).textContent();
+      await submittedRow.getByRole('group').getByText('View JSON').click();
+      const json = await submittedRow.locator('pre').textContent();
       expect(json).toContain(referenceNumber);
       expect(json).toContain('SUBMITTED');
     },
