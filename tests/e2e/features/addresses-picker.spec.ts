@@ -4,10 +4,34 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
   test('the picker searches and pages the address book, and the row selected on a later page is the one that saves', async ({
     journey,
     pages,
+    addressBookApi,
   }) => {
     const page = pages.page;
-    // Happy-path consignor record — appears on page one of the book.
-    const consignorName = 'Astra Rosales';
+    // Own records for the pagination leg: create the target first, then five
+    // newer ones so newest-first listing pushes the target off page one. The
+    // shared E2E fixtures still back the search (ApS) assertions.
+    const stamp = Date.now();
+    const targetName = `Paged Consignor ${stamp}`;
+    await addressBookApi.createAddress({
+      name: targetName,
+      addressLine1: '1 Later Page Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 1AA',
+      countryCode: 'United Kingdom',
+      phone: '01228 555 0199',
+      email: 'paged@example.co.uk',
+    });
+    for (let i = 0; i < 5; i += 1) {
+      await addressBookApi.createAddress({
+        name: `Newer Than Target ${stamp} ${i}`,
+        addressLine1: `${i} Front Row`,
+        townOrCity: 'Carlisle',
+        postcode: 'CA1 1BB',
+        countryCode: 'United Kingdom',
+        phone: '01228 555 0198',
+        email: 'newer@example.co.uk',
+      });
+    }
 
     await journey.startNotification();
     await journey.unlockSections();
@@ -16,17 +40,13 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     const consignorRow = pages.addresses.partyRow('Consignor or exporter');
     await pages.addresses.addParty('Consignor or exporter').click();
 
-    // The book opens on page 1 — five of the organisation's records, seeded by
-    // seeds/mongodb/30-seed-address-book.js. It is a shared, mutable SERVER
-    // book now, not a list inside the frontend: a run that adds an address
-    // grows it, so both the total and the page count are matched from what the
-    // page actually shows, never a literal.
     const showingFive = /Showing 5 of \d+ addresses/;
     await expect(page.getByText(showingFive)).toBeVisible();
-    await expect(pages.consignorSelection.party(consignorName)).toBeVisible();
 
     // View details expands the row in place (no navigation, so nothing typed or
     // ticked is lost) and shows the rest of the record.
+    await pages.consignorSelection.search.fill('Tech Imports Ltd');
+    await pages.consignorSelection.searchButton.click();
     const detailedRow = page.locator('tr', { hasText: 'Tech Imports Ltd' });
     const rowDetails = detailedRow.locator('details');
     await expect(rowDetails.locator('.govuk-details__text')).toBeHidden();
@@ -48,37 +68,33 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     await pages.consignorSelection.searchButton.click();
     await expect(page.getByText(showingFive)).toBeVisible();
 
-    // The last page is derived from the current total (5 per page), not a fixed
-    // number, because the book grows as records are appended by other specs.
+    // Target was pushed off page one by the five newer creates — step Next
+    // until it appears, then select it (cross-page selection without JS).
+    await expect(pages.consignorSelection.party(targetName)).toHaveCount(0);
     const showingText = (await page.getByText(showingFive).textContent()) ?? '';
     const total = Number(showingText.match(/of (\d+)/)?.[1] ?? 0);
     const lastPage = Math.ceil(total / 5);
-    await expect(page.getByRole('link', { name: `Page ${lastPage}` })).toBeVisible();
+    for (let step = 1; step < lastPage; step += 1) {
+      await page.getByRole('link', { name: /Next/ }).click();
+      if ((await pages.consignorSelection.party(targetName).count()) > 0) {
+        break;
+      }
+    }
+    await expect(pages.consignorSelection.party(targetName)).toBeVisible();
 
-    // Page three holds records that page one never rendered. From page 1 the
-    // pagination window is {1, 2, last}, so Page 3 is only linked once we are
-    // on page 2 (window {1, 2, 3, last}).
-    await page.getByRole('link', { name: 'Page 2' }).click();
-    await page.getByRole('link', { name: 'Page 3' }).click();
-    await expect(pages.consignorSelection.party('Irish Beef Traders Ltd')).toBeVisible();
-    await expect(pages.consignorSelection.party(consignorName)).toHaveCount(0);
-
-    // Selecting there and saving LINKS the consignor to that record — the
-    // notification stores its id, and the name shown is read back from the
-    // address book on every render (EUDPA-294).
-    await pages.consignorSelection.party('Iberian Swine SA').check();
+    await pages.consignorSelection.party(targetName).check();
     await pages.consignorSelection.saveAndContinue.click();
     await expect(pages.addresses.heading).toBeVisible();
-    await expect(consignorRow).toContainText('Iberian Swine SA');
+    await expect(consignorRow).toContainText(targetName);
 
     // Re-entering opens on page one, where the chosen record is not rendered —
     // the picker still knows it (carried, not re-ticked), and a save from this
     // page keeps it. That is the no-JS selection-across-pagination guarantee.
     await consignorRow.getByRole('link', { name: 'Change' }).click();
-    await expect(page.getByText('Selected address: Iberian Swine SA')).toBeVisible();
-    await expect(pages.consignorSelection.party('Iberian Swine SA')).toHaveCount(0);
+    await expect(page.getByText(`Selected address: ${targetName}`)).toBeVisible();
+    await expect(pages.consignorSelection.party(targetName)).toHaveCount(0);
     await pages.consignorSelection.saveAndContinue.click();
     await expect(pages.addresses.heading).toBeVisible();
-    await expect(consignorRow).toContainText('Iberian Swine SA');
+    await expect(consignorRow).toContainText(targetName);
   });
 });

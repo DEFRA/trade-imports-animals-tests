@@ -1,18 +1,13 @@
 import { test, expect } from '@fixtures';
-import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () => {
-  test.beforeEach(() => {
-    skipUnlessComposeEnvironment('the spec edits the address book directly, which only the compose stack exposes');
-  });
-
   test('editing a linked address in the address book changes what the draft notification shows', async ({
     journey,
     pages,
     addressBookApi,
   }) => {
-    // Its own address rather than a seeded one: this spec edits the record, and
-    // the seeded fixtures are shared with every other spec running alongside it.
+    // Its own address rather than a shared fixture: this spec edits the record,
+    // and the E2E fixtures are shared with every other spec running alongside it.
     // Distinct names, not one derived from the other, so "the old name is gone"
     // is a real assertion rather than one substring matching another.
     const stamp = Date.now();
@@ -81,7 +76,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   });
 
   test('deleting a linked address treats it as never entered and hides it from the picker', async ({ journey, pages, addressBookApi }) => {
-    // Own record so parallel specs do not race on a shared seed when this one
+    // Own record so parallel specs do not race on a shared fixture when this one
     // soft-deletes behind the journey's back.
     const stamp = Date.now();
     const name = `Doomed Farm ${stamp}`;

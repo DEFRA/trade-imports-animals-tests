@@ -116,16 +116,16 @@ export class Journey {
   async fillAddressesToCph(): Promise<void> {
     await this.pages.overview.task('Roles and addresses').click();
     const parties = [
-      ['Consignor or exporter', 'Astra Rosales'],
-      ['Place of destination', 'Tech Imports Ltd'],
-      ['Place of origin', 'Origin Farm'],
-      ['Consignee', 'British Livestock Ltd'],
-      ['Importer', 'Import Co UK'],
+      ['Consignor or exporter', 'Astra Rosales', 'consignorSelection'],
+      ['Place of destination', 'Tech Imports Ltd', 'destinationSelection'],
+      ['Place of origin', 'Origin Farm', 'placeOfOriginSelection'],
+      ['Consignee', 'British Livestock Ltd', 'consigneeSelection'],
+      ['Importer', 'Import Co UK', 'importerSelection'],
     ] as const;
-    for (const [role, name] of parties) {
+    for (const [role, name, picker] of parties) {
       await this.pages.addresses.addParty(role).click();
-      await this.pages.page.getByRole('radio', { name }).check();
-      await this.pages.page.getByRole('button', { name: 'Save and continue' }).click();
+      await this.pages[picker].select(name);
+      await this.pages[picker].saveAndContinue.click();
       await this.pages.addresses.heading.waitFor();
     }
     await this.pages.addresses.continueButton.click();

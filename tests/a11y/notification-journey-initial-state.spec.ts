@@ -103,26 +103,26 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.addresses.addParty('Consignor or exporter').click();
       await pages.consignorSelection.heading.waitFor();
       await runA11yScan();
-      await pages.consignorSelection.party('Astra Rosales').check();
+      await pages.consignorSelection.select('Astra Rosales');
       await pages.consignorSelection.saveAndContinue.click();
       await pages.addresses.heading.waitFor();
     });
 
     await test.step('Remaining addresses and CPH number', async () => {
       await pages.addresses.addParty('Place of destination').click();
-      await pages.destinationSelection.party('Tech Imports Ltd').check();
+      await pages.destinationSelection.select('Tech Imports Ltd');
       await pages.destinationSelection.saveAndContinue.click();
       await pages.addresses.heading.waitFor();
       await pages.addresses.addParty('Place of origin').click();
-      await pages.placeOfOriginSelection.party('Origin Farm').check();
+      await pages.placeOfOriginSelection.select('Origin Farm');
       await pages.placeOfOriginSelection.saveAndContinue.click();
       await pages.addresses.heading.waitFor();
       await pages.addresses.addParty('Consignee').click();
-      await pages.consigneeSelection.party('British Livestock Ltd').check();
+      await pages.consigneeSelection.select('British Livestock Ltd');
       await pages.consigneeSelection.saveAndContinue.click();
       await pages.addresses.heading.waitFor();
       await pages.addresses.addParty('Importer').click();
-      await pages.importerSelection.party('Import Co UK').check();
+      await pages.importerSelection.select('Import Co UK');
       await pages.importerSelection.saveAndContinue.click();
       await pages.addresses.heading.waitFor();
       await pages.addresses.continueButton.click();
