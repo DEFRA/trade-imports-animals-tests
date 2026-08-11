@@ -71,20 +71,20 @@ export class ApiJourney {
     return aggregate;
   }
 
-  // Notification mints the reference number (main's saveOriginOfImport with blank ref),
-  // and the notification-fulfilments aggregate is bootstrapped at that same ref.
-  // Matches the frontend's own create flow post-cascade-removal.
-  private async mintNotificationAndBootstrapFulfilments(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
-    const notification = await this.api.createNotification();
-    return this.api.replaceNotificationFulfilments(notification.referenceNumber, contents);
+  // EUDPA-323: one call mints the merged aggregate and seeds fulfilments; the
+  // response is a Notification, so we fetch the fulfilment-view projection for
+  // the returned shape ApiJourney callers expect.
+  private async mintMergedNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
+    const notification = await this.api.createNotification({ fulfilments: contents });
+    return this.api.getNotificationFulfilments(notification.referenceNumber);
   }
 
   async createEmptyNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilments());
+    return this.remember(await this.mintMergedNotification());
   }
 
   async createFullNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilments(UNLOCKED_FULFILMENTS));
+    return this.remember(await this.mintMergedNotification(UNLOCKED_FULFILMENTS));
   }
 
   async createUpToPage(): Promise<NotificationFulfilments> {
@@ -93,14 +93,12 @@ export class ApiJourney {
 
   async createSubmittedNotification(): Promise<NotificationFulfilments> {
     const draft = await this.createFullNotification();
-    await this.api.submitNotificationFulfilments(draft.id);
     await this.api.submitNotification(draft.id);
     return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
   async createAmendNotification(): Promise<NotificationFulfilments> {
     const submitted = await this.createSubmittedNotification();
-    await this.api.amendNotificationFulfilments(submitted.id);
     await this.api.amendNotification(submitted.id);
     return this.remember({ ...submitted, status: 'AMEND' });
   }

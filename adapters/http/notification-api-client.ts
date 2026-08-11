@@ -12,12 +12,9 @@ const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 
 /**
- * HTTP client for the spike's dual persistence surface. Every write path that
- * needs to reflect in admin (which reads notifications) requires both a
- * notification-fulfilments call and a notification call.
- *
- * Methods suffixed *NotificationFulfilments hit /notification-fulfilments/{id}/…;
- * methods suffixed *Notification hit /notifications/{id}/…
+ * HTTP client for the merged notification aggregate (EUDPA-323). Writes and lifecycle
+ * transitions live under {@code /notifications/…}; the fulfilment-view GET stays on
+ * {@code /notification-fulfilments/{id}} for journey rehydrate.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
@@ -26,60 +23,34 @@ export class NotificationApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  // --- NotificationFulfilments aggregate (spike-only, POST /notification-fulfilments…) ---
+  // --- Fulfilment-view read (surviving endpoint) ---
 
-  async createNotificationFulfilments(): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>('/notification-fulfilments');
-  }
-
-  async replaceNotificationFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
-    return this.rest.put<NotificationFulfilments>(`/notification-fulfilments/${id}`, { id, fulfilments });
-  }
-
+  /**
+   * Read the merged aggregate through the fulfilment-view projection. Returns id
+   * (= referenceNumber), status, dates, and the opaque fulfilments payload.
+   */
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
     return this.rest.get<NotificationFulfilments>(`/notification-fulfilments/${id}`);
   }
 
-  async submitNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/submit`);
-  }
-
-  async amendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/amend`);
-  }
-
-  async cancelAmendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/cancel-amend`);
-  }
-
-  async copyNotificationFulfilments(id: string, idempotencyKey: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/copy`, undefined, {
-      'Idempotency-Key': idempotencyKey,
-    });
-  }
-
-  async softDeleteNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/soft-delete`);
-  }
-
-  // --- Notification aggregate (matches main, POST /notifications…) ---
+  // --- Notification write surface (merged, POST/PUT/DELETE /notifications…) ---
 
   /**
-   * Mint a new notification. Empty body → server mints the reference number via
-   * ReferenceNumberGenerator and returns it in the response body.
+   * Mint a new merged notification. Empty body → server mints the reference number
+   * via ReferenceNumberGenerator; pass a body with `fulfilments` (and any
+   * notification-shape fields) to seed content at create time.
    */
   async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.post<Notification>('/notifications', body);
   }
 
   /**
-   * Whole-record update of an existing notification. `referenceNumber` in the
-   * body is required — main's `saveOriginOfImport` delegates to
-   * `updateNotification` (find-by-ref, replace), and 404s if the record does
-   * not exist.
+   * Replace the merged aggregate at the given reference. Body carries the
+   * notification-shape fields + the opaque fulfilments payload. Backend enforces
+   * a state guard (DRAFT or AMEND only).
    */
-  async saveNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', { referenceNumber: id, ...body });
+  async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
+    return this.rest.put<Notification>(`/notifications/${id}`, body);
   }
 
   async submitNotification(id: string): Promise<Notification> {
@@ -94,12 +65,27 @@ export class NotificationApiClient {
     return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
   }
 
+  /**
+   * Copy the merged aggregate. Copy dedup dropped pending EUDPA-314 — no
+   * Idempotency-Key header; retries produce distinct copies.
+   */
   async copyNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/copy`);
   }
 
   async softDeleteNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
+  }
+
+  /**
+   * Convenience: replace and coerce the response to the fulfilment-view shape by
+   * fetching through the read projection immediately after. Used by ApiJourney to
+   * mint + seed a full notification in one flow and keep the fulfilment-shape
+   * return type expected downstream.
+   */
+  async replaceAndReadAsFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
+    await this.replaceNotification(id, { referenceNumber: id, fulfilments });
+    return this.getNotificationFulfilments(id);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {
