@@ -4,8 +4,8 @@ import { getAddressBookBaseUrl, getDeveloperApiKey } from '@config/service-base-
 
 /**
  * The organisation CRN 2100010101 — the default E2E sign-in — belongs to, and
- * the one the shared E2E address-book fixtures are created under via the API
- * (`ensureE2eAddressBook` / worker fixture `e2eAddressBook`).
+ * the one the shared journey address-book fixtures are created under via the API
+ * (`ensureE2eAddressBook` in Playwright globalSetup).
  */
 export const E2E_ORGANISATION_ID = '5900001';
 

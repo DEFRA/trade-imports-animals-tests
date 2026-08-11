@@ -3,14 +3,15 @@ import type { AddressBookApiClient, AddressBookRecord } from '@adapters/http/add
 type AddressBookCreate = Omit<AddressBookRecord, 'id' | 'deleted'>;
 
 /**
- * Shared address-book records the journey and address specs pick by name.
+ * Shared address-book records the journey helpers pick by name (Astra Rosales,
+ * Tech Imports Ltd, … plus pagination/search fodder).
  *
- * Seeded through the address-book API (not Mongo) so the same setup works on
- * compose and CDP. Order here is creation order when the book is empty:
- * later rows are newer and land on earlier picker pages (newest first). The
- * five journey parties are created last so a fresh book shows them on page one;
- * specs that select a party still search by name so parallel creates cannot
- * knock a fixture off page one and break the walk.
+ * Seeded once through the address-book API in Playwright `globalSetup` — not
+ * per worker — so parallel runs cannot create duplicate names. Address-feature
+ * specs that do not need these names inject their own unique records in-test.
+ *
+ * Order is creation order when the book is empty: later rows are newer and land
+ * on earlier picker pages (newest first). Journey parties are created last.
  */
 export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
   // Page-three / pagination fodder (created first → oldest)
@@ -137,12 +138,19 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
   },
 ];
 
-/** Creates any missing E2E fixture by name; leaves existing records alone. */
+/**
+ * Ensures exactly one live record per journey fixture name.
+ * Creates when missing; soft-deletes extras left over from an earlier race.
+ */
 export async function ensureE2eAddressBook(api: AddressBookApiClient): Promise<void> {
   for (const record of E2E_ADDRESS_BOOK_FIXTURES) {
     const matches = (await api.listAddresses(record.name)).filter((item) => item.name === record.name);
     if (matches.length === 0) {
       await api.createAddress(record);
+      continue;
+    }
+    for (const extra of matches.slice(1)) {
+      await api.deleteAddress(extra.id);
     }
   }
 }

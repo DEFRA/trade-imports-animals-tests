@@ -6,7 +6,6 @@ import { NotificationActions } from '@flows/notification-actions';
 import { ApiJourney } from '@flows/api-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
-import { ensureE2eAddressBook } from '@domain/fixtures/e2e-address-book';
 
 export interface PageFixtures {
   pages: PageObjects;
@@ -19,12 +18,7 @@ export interface PageFixtures {
   apiJourney: ApiJourney;
 }
 
-type WorkerFixtures = {
-  /** Ensures the shared E2E address-book fixtures exist once per worker (API, not Mongo). */
-  e2eAddressBook: void;
-};
-
-export const test = base.extend<PageFixtures, WorkerFixtures>({
+export const test = base.extend<PageFixtures>({
   pages: async ({ page }, use) => {
     await use(createPageObjects(page));
   },
@@ -50,18 +44,6 @@ export const test = base.extend<PageFixtures, WorkerFixtures>({
   apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
     await use(new ApiJourney(pages, notificationApi, journeyContext));
   },
-  e2eAddressBook: [
-    async ({ playwright }, use) => {
-      const request = await playwright.request.newContext();
-      try {
-        await ensureE2eAddressBook(new AddressBookApiClient(request));
-      } finally {
-        await request.dispose();
-      }
-      await use();
-    },
-    { scope: 'worker', auto: true },
-  ],
 });
 
 export { expect };

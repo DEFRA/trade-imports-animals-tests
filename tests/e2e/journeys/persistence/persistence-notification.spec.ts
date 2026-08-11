@@ -40,8 +40,8 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     pages,
     addressBookApi,
   }) => {
-    // Resolve linked ids from the live address book (API-seeded fixtures), not
-    // hard-coded Mongo ObjectIds — a role mix-up or the same id on every party
+    // Resolve linked ids from the once-seeded journey fixtures (API globalSetup),
+    // not hard-coded Mongo ObjectIds — a role mix-up or the same id on every party
     // would otherwise pass if we only asserted "some string" (EUDPA-294 AC3).
     const consignor = await addressBookApi.findByName('Astra Rosales');
     const destination = await addressBookApi.findByName('Tech Imports Ltd');

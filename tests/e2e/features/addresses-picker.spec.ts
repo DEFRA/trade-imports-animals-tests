@@ -9,7 +9,7 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     const page = pages.page;
     // Own records for the pagination leg: create the target first, then five
     // newer ones so newest-first listing pushes the target off page one. The
-    // shared E2E fixtures still back the search (ApS) assertions.
+    // once-seeded journey fixtures still back the search (ApS) / details rows.
     const stamp = Date.now();
     const targetName = `Paged Consignor ${stamp}`;
     await addressBookApi.createAddress({
