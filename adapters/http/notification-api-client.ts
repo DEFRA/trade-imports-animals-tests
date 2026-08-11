@@ -12,9 +12,9 @@ const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 
 /**
- * HTTP client for the merged notification aggregate (EUDPA-323). Writes and lifecycle
- * transitions live under {@code /notifications/…}; the fulfilment-view GET stays on
- * {@code /notification-fulfilments/{id}} for journey rehydrate.
+ * HTTP client for the merged notification aggregate (EUDPA-323). All read, write and lifecycle
+ * transitions live under {@code /notifications/…}; the fulfilment-view GET is a sub-resource at
+ * {@code /notifications/{ref}/fulfilments} for journey rehydrate.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
@@ -23,14 +23,14 @@ export class NotificationApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  // --- Fulfilment-view read (surviving endpoint) ---
+  // --- Fulfilment-view read ---
 
   /**
    * Read the merged aggregate through the fulfilment-view projection. Returns id
    * (= referenceNumber), status, dates, and the opaque fulfilments payload.
    */
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.get<NotificationFulfilments>(`/notification-fulfilments/${id}`);
+    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`);
   }
 
   // --- Notification write surface (merged, POST/PUT/DELETE /notifications…) ---
