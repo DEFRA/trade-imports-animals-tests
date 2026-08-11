@@ -48,6 +48,13 @@ export class NotificationApiClient {
    * Replace the merged aggregate at the given reference. Body carries the
    * notification-shape fields + the opaque fulfilments payload. Backend enforces
    * a state guard (DRAFT or AMEND only).
+   *
+   * Intentionally retained as an API-client extension point: today's ApiJourney
+   * bootstrap seeds fulfilments through createNotification(...) directly, so no
+   * production caller invokes replaceNotification, but future specs covering the
+   * write-then-mutate flow (e.g. dashboard-driven edits, amend-then-replace)
+   * need a first-class client method to hit PUT /notifications/{ref} rather
+   * than an ad-hoc REST call.
    */
   async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.put<Notification>(`/notifications/${id}`, body);
@@ -79,9 +86,13 @@ export class NotificationApiClient {
 
   /**
    * Convenience: replace and coerce the response to the fulfilment-view shape by
-   * fetching through the read projection immediately after. Used by ApiJourney to
-   * mint + seed a full notification in one flow and keep the fulfilment-shape
-   * return type expected downstream.
+   * fetching through the read projection immediately after. Intentionally
+   * retained as an API-client extension point: ApiJourney was simplified to
+   * seed via createNotification({fulfilments: contents}) so no production
+   * caller invokes this today, but the bootstrap-then-replace flow (e.g.
+   * mint-then-mutate specs, admin re-seed) is expected to want a one-call
+   * helper that returns the fulfilment-view shape without the caller having
+   * to plumb the follow-up GET.
    */
   async replaceAndReadAsFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
     await this.replaceNotification(id, { referenceNumber: id, fulfilments });
