@@ -52,4 +52,23 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.arrivalDetails.arrivalDateError).toContainText(OUT_OF_RANGE_MESSAGE);
     await expect(pages.arrivalDetails.heading).toBeVisible();
   });
+
+  test('does not save an arrival date outside the allowed window', async ({ journey, pages }) => {
+    const rejected = getRelativeDatePickerValue({ yearOffset: -1 });
+    await journey.fillArrivalDetails();
+    await pages.arrivalDetails.fillArrivalDate(rejected);
+    await pages.arrivalDetails.saveAndContinue.click();
+    await expect(pages.arrivalDetails.arrivalDateError).toContainText(OUT_OF_RANGE_MESSAGE);
+    const notificationUrl = pages.page.url();
+
+    // Back to the overview and in again — NOT journey.toArrivalDetails(), which
+    // starts a fresh notification and would leave the field empty either way.
+    await pages.page.locator('.govuk-back-link').click();
+    await pages.overview.task('Arrival details').click();
+    await pages.arrivalDetails.heading.waitFor();
+
+    // Same notification, or the empty field below proves nothing.
+    expect(pages.page.url()).toBe(notificationUrl);
+    await expect(pages.arrivalDetails.arrivalDate).not.toHaveValue(rejected);
+  });
 });

@@ -111,8 +111,8 @@ function todayInServiceZone(): { year: number; month: number; day: number } {
     month: '2-digit',
     day: '2-digit',
   }).formatToParts(new Date());
-  const valueOf = (type: Intl.DateTimeFormatPartTypes): number => Number(parts.find((part) => part.type === type).value);
-  return { year: valueOf('year'), month: valueOf('month'), day: valueOf('day') };
+  const partValue = (type: Intl.DateTimeFormatPartTypes): number => Number(parts.find((part) => part.type === type).value);
+  return { year: partValue('year'), month: partValue('month'), day: partValue('day') };
 }
 
 /**
@@ -122,7 +122,10 @@ function todayInServiceZone(): { year: number; month: number; day: number } {
  * `arrivalWindow`. Use this when asserting against app output such as the date
  * picker's `data-min-date`.
  */
-export function getRelativeAppDateText({ dayOffset = 0, monthOffset = 0 }: RelativeDateTimeOptions = {}): string {
+export function getRelativeAppDateText({
+  dayOffset = 0,
+  monthOffset = 0,
+}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
   const { year, month, day } = todayInServiceZone();
   const targetMonth = month - 1 + monthOffset;
   // Day 0 of the following month is the last day of the target month.
