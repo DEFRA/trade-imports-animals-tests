@@ -14,7 +14,7 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
 
     // Fulfilment-view read reflects the same notification under a shape-specialised projection.
     const initial = await notificationApi.getNotificationFulfilments(id);
-    expect(initial.id).toBe(id);
+    expect(initial.referenceNumber).toBe(id);
     expect(initial.status).toBe(notificationFulfilmentsStatuses.draft);
     expect(initial.fulfilments).toEqual([]);
 

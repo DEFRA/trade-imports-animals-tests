@@ -66,17 +66,17 @@ export class ApiJourney {
   ) {}
 
   private remember(aggregate: NotificationFulfilments): NotificationFulfilments {
-    this.context.journeyId = aggregate.id;
-    this.context.referenceNumber = aggregate.id;
+    this.context.journeyId = aggregate.referenceNumber;
+    this.context.referenceNumber = aggregate.referenceNumber;
     return aggregate;
   }
 
   private async mintNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
     const n = await this.api.createNotification({ fulfilments: contents });
     return {
-      id: n.referenceNumber,
+      referenceNumber: n.referenceNumber,
       status: n.status,
-      createdAt: n.created,
+      created: n.created,
       submittedAt: n.submittedAt ?? null,
       fulfilments: n.fulfilments ?? [],
     };
@@ -96,13 +96,13 @@ export class ApiJourney {
 
   async createSubmittedNotification(): Promise<NotificationFulfilments> {
     const draft = await this.createFullNotification();
-    await this.api.submitNotification(draft.id);
+    await this.api.submitNotification(draft.referenceNumber);
     return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
   async createAmendNotification(): Promise<NotificationFulfilments> {
     const submitted = await this.createSubmittedNotification();
-    await this.api.amendNotification(submitted.id);
+    await this.api.amendNotification(submitted.referenceNumber);
     return this.remember({ ...submitted, status: 'AMEND' });
   }
 
