@@ -1,6 +1,6 @@
 import type { PageObjects } from '@page-objects';
 import type { JourneyOptions } from '@domain/constants/journey-options';
-import { getRelativeDatePickerValue } from '@utils/date-utils';
+import { getRelativeAppDateText } from '@utils/date-utils';
 
 export type JourneyContext = {
   journeyId?: string;
@@ -11,8 +11,10 @@ export type JourneyContext = {
 const COUNTRY = 'France';
 const PORT = 'Aberdeen Harbour (GB ABD)';
 // Inside the arrival-date window (1 week back to 6 months ahead) wherever the
-// wall clock happens to be.
-export const ARRIVAL_DATE = getRelativeDatePickerValue({ monthOffset: 1 });
+// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
+// so a CYA assertion compares against the app's shape, not the typed string it
+// happens to echo back.
+export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 
 export class Journey {
   constructor(

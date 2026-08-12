@@ -39,7 +39,7 @@ export class ArrivalDetailsPage extends NotificationPage {
   }
 
   get datePicker(): Locator {
-    return this.page.locator('.moj-datepicker');
+    return this.page.locator('[data-module="moj-date-picker"]');
   }
 
   async fillArrivalDate(date: string): Promise<void> {
