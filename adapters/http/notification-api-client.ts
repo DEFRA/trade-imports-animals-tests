@@ -26,10 +26,11 @@ export class NotificationApiClient {
   }
 
   /**
-   * Mint a new notification. Empty body → server mints the reference number via
-   * ReferenceNumberGenerator and returns it in the response body.
+   * Create or update a notification. If `body.referenceNumber` is absent the
+   * server mints a new one via `ReferenceNumberGenerator`; if present it
+   * updates the existing record (404 if unknown).
    */
-  async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
+  async saveNotification(body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.post<Notification>('/notifications', body);
   }
 

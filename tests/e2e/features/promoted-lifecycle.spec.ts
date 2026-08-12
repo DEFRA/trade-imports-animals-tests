@@ -8,7 +8,7 @@ test.describe('Merged notification aggregate lifecycle (EUDPA-323)', { tag: ['@c
   }) => {
     // Create the merged aggregate. Backend mints the reference number and returns
     // the merged Notification entity carrying the empty fulfilments payload.
-    const notification = await notificationApi.createNotification({ fulfilments: [] });
+    const notification = await notificationApi.saveNotification({ fulfilments: [] });
     const id = notification.referenceNumber;
     expect(notification.status).toBe(notificationStatuses.draft);
 

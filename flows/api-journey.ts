@@ -72,7 +72,7 @@ export class ApiJourney {
   }
 
   private async mintMergedNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
-    const n = await this.api.createNotification({ fulfilments: contents });
+    const n = await this.api.saveNotification({ fulfilments: contents });
     return {
       id: n.referenceNumber,
       status: n.status,
