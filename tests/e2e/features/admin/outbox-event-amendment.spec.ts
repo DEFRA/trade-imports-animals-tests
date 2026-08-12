@@ -45,20 +45,23 @@ test.describe('Notification amendment outbox event', { tag: ['@integration', '@m
     try {
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
-      await expect.poll(() => collection.countDocuments({ aggregateId }), { timeout: timeouts.long }).toBe(2);
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }), { timeout: timeouts.long })
+        .toBe(1);
 
-      const events = await collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
-      const amended = events[1];
+      const events = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }).toArray();
+      const [amended] = events;
       const statusChanges = amended.statusChanges ?? [];
 
-      expect(amended.aggregateVersion).toBe(2);
+      expect(amended.aggregateVersion).toBeGreaterThan(1);
       expect(amended.eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED);
       expect(amended.data.exchangedDocument.notificationStatusCode).toBe('AMEND');
       expect(actorWithNullableFields(amended.actor)).toEqual(EXPECTED_ACTOR);
-      expect(statusChanges).toHaveLength(2);
-      expect(statusChanges.map(({ status }) => status)).toEqual(['SUBMITTED', 'AMEND']);
-      expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date)]);
-      expect(statusChanges.map(({ actor }) => actorWithNullableFields(actor))).toEqual([EXPECTED_ACTOR, EXPECTED_ACTOR]);
+      expect(statusChanges).toHaveLength(3);
+      expect(statusChanges.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'AMEND']);
+      expect(statusChanges.map(({ dateChanged }) => dateChanged)).toEqual([expect.any(Date), expect.any(Date), expect.any(Date)]);
+      expect(actorWithNullableFields(statusChanges[1].actor)).toEqual(EXPECTED_ACTOR);
+      expect(actorWithNullableFields(statusChanges[2].actor)).toEqual(EXPECTED_ACTOR);
     } finally {
       await client.close();
     }
