@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { getRelativeDatePickerValue } from '@utils/date-utils';
 
 const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
 const PORT_CODE = 'GB ABD';
@@ -17,7 +18,7 @@ test.describe('Port of entry plain select', { tag: ['@integration', '@duplicated
 
     await pages.arrivalDetails.selectPort(PORT_OPTION);
     await expect(select).toHaveValue(PORT_CODE);
-    await pages.arrivalDetails.fillArrivalDate('12/12/2026');
+    await pages.arrivalDetails.fillArrivalDate(getRelativeDatePickerValue({ monthOffset: 1 }));
     await pages.arrivalDetails.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'What type of transporter will move the animals?' })).toBeVisible();
 

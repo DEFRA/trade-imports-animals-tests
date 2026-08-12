@@ -30,8 +30,20 @@ export class ArrivalDetailsPage extends NotificationPage {
     return this.page.getByLabel('Transport document reference');
   }
 
+  get arrivalDate(): Locator {
+    return this.page.locator('input[name="arrivalDateAtPort"]');
+  }
+
+  get arrivalDateError(): Locator {
+    return this.page.locator('#arrivalDateAtPort-error');
+  }
+
+  get datePicker(): Locator {
+    return this.page.locator('.moj-datepicker');
+  }
+
   async fillArrivalDate(date: string): Promise<void> {
-    await this.page.locator('input[name="arrivalDateAtPort"]').fill(date);
+    await this.arrivalDate.fill(date);
   }
 
   get saveAndContinue(): Locator {

@@ -1,5 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
+import { ARRIVAL_DATE } from '@flows/journey';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the hub groups its tasks under the six numbered group headings', async ({ journey, pages }) => {
@@ -77,7 +78,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
 
     const arrivalDetails = pages.notificationView.summaryCard('Arrival details');
     await expect(value(arrivalDetails, 'Port of entry')).toHaveText('Aberdeen Harbour (GB ABD)');
-    await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText('12/12/2026');
+    await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
     await expect(value(arrivalDetails, 'Means of transport')).toHaveText('Road Vehicle');
     await expect(value(arrivalDetails, 'Countries that the consignment will travel through')).toHaveText('Belgium, France');
     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
