@@ -71,12 +71,15 @@ export class ApiJourney {
     return aggregate;
   }
 
-  // EUDPA-323: one call mints the merged aggregate and seeds fulfilments; the
-  // response is a Notification, so we fetch the fulfilment-view projection for
-  // the returned shape ApiJourney callers expect.
   private async mintMergedNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
-    const notification = await this.api.createNotification({ fulfilments: contents });
-    return this.api.getNotificationFulfilments(notification.referenceNumber);
+    const n = await this.api.createNotification({ fulfilments: contents });
+    return {
+      id: n.referenceNumber,
+      status: n.status,
+      createdAt: n.created,
+      submittedAt: n.submittedAt ?? null,
+      fulfilments: n.fulfilments ?? [],
+    };
   }
 
   async createEmptyNotification(): Promise<NotificationFulfilments> {
