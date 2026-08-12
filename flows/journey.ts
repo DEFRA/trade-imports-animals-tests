@@ -1,5 +1,6 @@
 import type { PageObjects } from '@page-objects';
 import type { JourneyOptions } from '@domain/constants/journey-options';
+import { getRelativeAppDateText } from '@utils/date-utils';
 
 export type JourneyContext = {
   journeyId?: string;
@@ -9,6 +10,11 @@ export type JourneyContext = {
 
 const COUNTRY = 'France';
 const PORT = 'Aberdeen Harbour (GB ABD)';
+// Inside the arrival-date window (1 week back to 6 months ahead) wherever the
+// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
+// so a CYA assertion compares against the app's shape, not the typed string it
+// happens to echo back.
+export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 
 export class Journey {
   constructor(
@@ -140,7 +146,7 @@ export class Journey {
   }
 
   async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
-    await this.pages.arrivalDetails.fillArrivalDate('12/12/2026');
+    await this.pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
     await this.pages.arrivalDetails.selectPort(PORT);
     await this.pages.page.getByRole('radio', { name: means, exact: true }).check();
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
@@ -148,9 +154,9 @@ export class Journey {
   }
 
   // Re-navigate from the hub to the transporter-type page within an already
-  // unlocked journey. Arrival details is enforced-at-continue, so it must be
-  // filled to save through; a road vehicle keeps transited countries in scope,
-  // which is answered on the way.
+  // unlocked journey. The page itself saves through unfilled; it is filled
+  // because a road vehicle keeps transited countries in scope, which is
+  // answered on the way.
   async reachTransporterFromHub(): Promise<void> {
     await this.pages.overview.task('Arrival details').click();
     await this.pages.arrivalDetails.heading.waitFor();
