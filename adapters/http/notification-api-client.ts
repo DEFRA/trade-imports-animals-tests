@@ -65,21 +65,28 @@ export class NotificationApiClient {
   // --- Notification aggregate (matches main, POST /notifications…) ---
 
   /**
-   * Mint a new notification. Empty body → server mints the reference number via
-   * ReferenceNumberGenerator and returns it in the response body.
+   * Mint a new notification. Empty nested notification → server mints the
+   * reference number via ReferenceNumberGenerator and returns it in the response.
+   * Body shape is {@code SaveNotificationDto}: `{ notification, actor? }`.
    */
-  async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', body);
+  async createNotification(notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>('/notifications', {
+      notification,
+      ...(actor ? { actor } : {}),
+    });
   }
 
   /**
-   * Whole-record update of an existing notification. `referenceNumber` in the
-   * body is required — main's `saveOriginOfImport` delegates to
-   * `updateNotification` (find-by-ref, replace), and 404s if the record does
-   * not exist.
+   * Whole-record update of an existing notification. `referenceNumber` on the
+   * nested notification is required — main's save path updates by ref and 404s
+   * if the record does not exist. Optional actor supplies organisationId so
+   * address-book party references can be resolved for NotificationEdited.
    */
-  async saveNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', { referenceNumber: id, ...body });
+  async saveNotification(id: string, notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>('/notifications', {
+      notification: { referenceNumber: id, ...notification },
+      ...(actor ? { actor } : {}),
+    });
   }
 
   async submitNotification(id: string): Promise<Notification> {
