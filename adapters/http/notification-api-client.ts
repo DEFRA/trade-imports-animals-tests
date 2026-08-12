@@ -26,21 +26,18 @@ export class NotificationApiClient {
   }
 
   /**
-   * Create or update a notification. If `body.referenceNumber` is absent the
-   * server mints a new one via `ReferenceNumberGenerator`; if present it
-   * updates the existing record (404 if unknown).
+   * Mint a new notification. Empty body → server mints the reference number via
+   * ReferenceNumberGenerator and returns it in the response body.
    */
-  async saveNotification(body: Record<string, unknown> = {}): Promise<Notification> {
+  async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.post<Notification>('/notifications', body);
   }
 
   /**
-   * Whole-record update of an existing notification. `referenceNumber` in the
-   * body is required — main's `saveOriginOfImport` delegates to
-   * `updateNotification` (find-by-ref, replace), and 404s if the record does
-   * not exist.
+   * Whole-record replace of an existing notification via PUT /notifications/{id}.
+   * 404 if the reference is unknown.
    */
-  async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
+  async saveNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.put<Notification>(`/notifications/${id}`, body);
   }
 

@@ -2,23 +2,23 @@ import { test, expect } from '@fixtures';
 import { notificationFulfilmentsStatuses } from '@domain/models/api/notification-fulfilments';
 import { notificationStatuses } from '@domain/models/api/notification';
 
-test.describe('Merged notification aggregate lifecycle (EUDPA-323)', { tag: ['@compose', '@integration'] }, () => {
-  test('creates, submits, amends, cancels, copies and soft-deletes the merged aggregate via the /notifications endpoints; fulfilment view reflects each transition; copy no longer dedupes', async ({
+test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, () => {
+  test('creates, submits, amends, cancels, copies and soft-deletes a notification; fulfilment view reflects each transition; copy no longer dedupes', async ({
     notificationApi,
   }) => {
-    // Create the merged aggregate. Backend mints the reference number and returns
-    // the merged Notification entity carrying the empty fulfilments payload.
-    const notification = await notificationApi.saveNotification({ fulfilments: [] });
+    // Create the notification. Backend mints the reference number and returns
+    // the notification entity carrying the empty fulfilments payload.
+    const notification = await notificationApi.createNotification({ fulfilments: [] });
     const id = notification.referenceNumber;
     expect(notification.status).toBe(notificationStatuses.draft);
 
-    // Fulfilment-view read reflects the same aggregate under a shape-specialised projection.
+    // Fulfilment-view read reflects the same notification under a shape-specialised projection.
     const initial = await notificationApi.getNotificationFulfilments(id);
     expect(initial.id).toBe(id);
     expect(initial.status).toBe(notificationFulfilmentsStatuses.draft);
     expect(initial.fulfilments).toEqual([]);
 
-    // Submit — single call to the merged endpoint.
+    // Submit.
     const submitted = await notificationApi.submitNotification(id);
     expect(submitted.status).toBe(notificationStatuses.submitted);
     const submittedFulfilments = await notificationApi.getNotificationFulfilments(id);
@@ -42,7 +42,7 @@ test.describe('Merged notification aggregate lifecycle (EUDPA-323)', { tag: ['@c
     expect(firstCopy.status).toBe(notificationStatuses.draft);
     expect(secondCopy.status).toBe(notificationStatuses.draft);
 
-    // Soft-delete is idempotent — repeated calls return the DELETED aggregate unchanged.
+    // Soft-delete is idempotent — repeated calls return the DELETED notification unchanged.
     const deleted = await notificationApi.softDeleteNotification(id);
     expect(deleted.status).toBe(notificationStatuses.deleted);
     const repeatDelete = await notificationApi.softDeleteNotification(id);

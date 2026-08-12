@@ -71,8 +71,8 @@ export class ApiJourney {
     return aggregate;
   }
 
-  private async mintMergedNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
-    const n = await this.api.saveNotification({ fulfilments: contents });
+  private async mintNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
+    const n = await this.api.createNotification({ fulfilments: contents });
     return {
       id: n.referenceNumber,
       status: n.status,
@@ -83,11 +83,11 @@ export class ApiJourney {
   }
 
   async createEmptyNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintMergedNotification());
+    return this.remember(await this.mintNotification());
   }
 
   async createFullNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintMergedNotification(UNLOCKED_FULFILMENTS));
+    return this.remember(await this.mintNotification(UNLOCKED_FULFILMENTS));
   }
 
   async createUpToPage(): Promise<NotificationFulfilments> {
