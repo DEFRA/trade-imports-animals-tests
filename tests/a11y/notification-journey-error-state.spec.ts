@@ -23,6 +23,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import with validation errors', async () => {
       await pages.overview.task('Where is this consignment coming from?').click();
       await pages.originOfImport.heading.waitFor();
+      await pages.originOfImport.countryOfOrigin.selectOption({ label: 'Select a country' });
       await pages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan({ exclude: conditionalRadioInput });

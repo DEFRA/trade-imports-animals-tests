@@ -55,9 +55,7 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
     test.beforeEach(async ({ pages }) => {
       await pages.signIn.signIn();
       await pages.notificationDashboard.btnCreateNewNotification.click();
-      journeyId = pages.importType.journeyIdFromUrl();
-      await pages.importType.liveAnimals.check();
-      await pages.importType.continueButton.click();
+      journeyId = pages.originOfImport.journeyIdFromUrl();
       await pages.originOfImport.selectCountry('France');
       await pages.originOfImport.radioRequiresOriginCode('No').check();
       await pages.originOfImport.saveAndContinue.click();

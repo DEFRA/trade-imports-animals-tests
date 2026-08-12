@@ -12,13 +12,13 @@ test.describe('Country of origin plain select', { tag: ['@integration', '@duplic
     await expect(select.locator('option').first()).toHaveText('Select a country');
     await expect(select.locator('option')).toHaveCount(33);
 
-    await pages.originOfImport.selectCountry('France');
-    await expect(select).toHaveValue('FR');
+    await pages.originOfImport.selectCountry('Belgium');
+    await expect(select).toHaveValue('BE');
     await pages.originOfImport.radioRequiresOriginCode('No').check();
     await pages.originOfImport.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
 
     await pages.overview.task('Where is this consignment coming from?').click();
-    await expect(select).toHaveValue('FR');
+    await expect(select).toHaveValue('BE');
   });
 });

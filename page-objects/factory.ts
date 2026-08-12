@@ -11,7 +11,6 @@ import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
 import { ImportPurposePage } from './notification/import-purpose-page';
 import { ImportReasonPage } from './notification/import-reason-page';
-import { ImportTypePage } from './notification/import-type-page';
 import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { NotificationViewPage } from './notification/notification-view-page';
@@ -32,7 +31,6 @@ export function createPageObjects(page: Page) {
   return {
     page,
     notificationDashboard: new NotificationDashboardPage(page),
-    importType: new ImportTypePage(page),
     overview: new OverviewPage(page),
     originOfImport: new OriginOfImportPage(page),
     commoditySelection: new CommoditySelectionPage(page),
