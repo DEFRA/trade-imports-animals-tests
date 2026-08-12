@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
+import type { NotificationFulfilments } from '@domain/models/api/notification-fulfilments';
 import type { Notification } from '@domain/models/api/notification';
 
 // Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
@@ -12,9 +12,7 @@ const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 
 /**
- * HTTP client for the merged notification aggregate (EUDPA-323). All read, write and lifecycle
- * transitions live under {@code /notifications/…}; the fulfilment-view GET is a sub-resource at
- * {@code /notifications/{ref}/fulfilments} for journey rehydrate.
+ * HTTP client for the notification api.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
@@ -27,26 +25,19 @@ export class NotificationApiClient {
     return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`);
   }
 
-  // --- Notification write surface (merged, POST/PUT/DELETE /notifications…) ---
-
   /**
-   * Mint a new merged notification. Empty body → server mints the reference number
-   * via ReferenceNumberGenerator; pass a body with `fulfilments` (and any
-   * notification-shape fields) to seed content at create time.
+   * Mint a new notification. Empty body → server mints the reference number via
+   * ReferenceNumberGenerator and returns it in the response body.
    */
   async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.post<Notification>('/notifications', body);
   }
 
   /**
-   * Replaces an existing notification (opaque fulfilments and notification-shape).
-   *
-   * Intentionally retained as an API-client extension point: today's ApiJourney
-   * bootstrap seeds fulfilments through createNotification(...) directly, so no
-   * production caller invokes replaceNotification, but future specs covering the
-   * write-then-mutate flow (e.g. dashboard-driven edits, amend-then-replace)
-   * need a first-class client method to hit PUT /notifications/{ref} rather
-   * than an ad-hoc REST call.
+   * Whole-record update of an existing notification. `referenceNumber` in the
+   * body is required — main's `saveOriginOfImport` delegates to
+   * `updateNotification` (find-by-ref, replace), and 404s if the record does
+   * not exist.
    */
   async replaceNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
     return this.rest.put<Notification>(`/notifications/${id}`, body);
@@ -70,21 +61,6 @@ export class NotificationApiClient {
 
   async softDeleteNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
-  }
-
-  /**
-   * Convenience: replace and coerce the response to the fulfilment-view shape by
-   * fetching through the read projection immediately after. Intentionally
-   * retained as an API-client extension point: ApiJourney was simplified to
-   * seed via createNotification({fulfilments: contents}) so no production
-   * caller invokes this today, but the bootstrap-then-replace flow (e.g.
-   * mint-then-mutate specs, admin re-seed) is expected to want a one-call
-   * helper that returns the fulfilment-view shape without the caller having
-   * to plumb the follow-up GET.
-   */
-  async replaceAndReadAsFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
-    await this.replaceNotification(id, { referenceNumber: id, fulfilments });
-    return this.getNotificationFulfilments(id);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {
