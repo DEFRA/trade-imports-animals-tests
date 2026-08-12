@@ -23,12 +23,6 @@ export class NotificationApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  // --- Fulfilment-view read ---
-
-  /**
-   * Read the merged aggregate through the fulfilment-view projection. Returns id
-   * (= referenceNumber), status, dates, and the opaque fulfilments payload.
-   */
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
     return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`);
   }
@@ -45,9 +39,7 @@ export class NotificationApiClient {
   }
 
   /**
-   * Replace the merged aggregate at the given reference. Body carries the
-   * notification-shape fields + the opaque fulfilments payload. Backend enforces
-   * a state guard (DRAFT or AMEND only).
+   * Replaces an existing notification (opaque fulfilments and notification-shape).
    *
    * Intentionally retained as an API-client extension point: today's ApiJourney
    * bootstrap seeds fulfilments through createNotification(...) directly, so no
@@ -72,10 +64,6 @@ export class NotificationApiClient {
     return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
   }
 
-  /**
-   * Copy the merged aggregate. Copy dedup dropped pending EUDPA-314 — no
-   * Idempotency-Key header; retries produce distinct copies.
-   */
   async copyNotification(id: string): Promise<Notification> {
     return this.rest.post<Notification>(`/notifications/${id}/copy`);
   }

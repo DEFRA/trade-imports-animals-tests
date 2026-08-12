@@ -96,7 +96,5 @@ export type Notification = {
   created?: string;
   updated?: string;
   submittedAt?: string | null;
-  // EUDPA-323: the merged aggregate carries the opaque fulfilments payload
-  // alongside the notification-shape display fields.
   fulfilments?: PersistedFulfilmentEntry[];
 };
