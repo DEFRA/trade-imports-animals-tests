@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
-  test('starts a journey at the promoted import-type filter and lists the draft', async ({ journey, pages }) => {
+  test('starts a journey at the origin page and lists the draft', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
 
     await expect(pages.page).toHaveURL(new RegExp(`/notifications/${journeyId}$`));
@@ -26,10 +26,10 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.heading).toBeVisible();
     });
 
-    test('allows creating a new notification', async ({ journey, pages }) => {
+    test('allows creating a new notification, landing on the journey entry page', async ({ journey, pages }) => {
       await journey.toNotificationDashboard();
       await pages.notificationDashboard.btnCreateNewNotification.click();
-      await expect(pages.importType.heading).toBeVisible();
+      await expect(pages.originOfImport.heading).toBeVisible();
     });
 
     test('displays the notification list and result count', async ({ apiJourney, pages }) => {

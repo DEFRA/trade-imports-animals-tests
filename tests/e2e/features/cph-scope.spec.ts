@@ -3,9 +3,6 @@ import { test, expect } from '@fixtures';
 test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the CPH page and addresses-hub row show only when a CPH-triggering commodity line exists', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
-    // Commodities is gated on origin (RULE 1); answering it also unlocks the
-    // addresses section each added line opens.
-    await journey.answerOrigin();
 
     const page = pages.page;
     const cphRow = page.locator('.govuk-summary-list__row', {

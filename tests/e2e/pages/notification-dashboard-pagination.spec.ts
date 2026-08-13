@@ -5,7 +5,7 @@ test.describe('Dashboard pagination', { tag: '@integration' }, () => {
     await journey.toNotificationDashboard();
     for (let index = 0; index < 26; index += 1) {
       await pages.notificationDashboard.btnCreateNewNotification.click();
-      await pages.importType.heading.waitFor();
+      await pages.originOfImport.heading.waitFor();
       await pages.notificationDashboard.open(false);
     }
 

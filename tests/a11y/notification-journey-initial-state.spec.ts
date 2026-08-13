@@ -15,24 +15,21 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await runA11yScan();
     });
 
-    await test.step('Import type', async () => {
-      await pages.notificationDashboard.btnCreateNewNotification.click();
-      await pages.importType.heading.waitFor();
-      await runA11yScan();
-    });
-
     await test.step('Origin of import', async () => {
-      await pages.importType.liveAnimals.check();
-      await pages.importType.continueButton.click();
+      await pages.notificationDashboard.btnCreateNewNotification.click();
       await pages.originOfImport.heading.waitFor();
       await runA11yScan({ exclude: conditionalRadioInput });
     });
 
+    // The entry guard holds the journey on origin until it is answered, so the
+    // overview is only reachable once origin has been saved.
     await test.step('Overview', async () => {
-      await pages.overview.open(pages.originOfImport.journeyIdFromUrl());
+      const journeyId = pages.originOfImport.journeyIdFromUrl();
+      await journey.fillOriginOfImport();
+      await journey.saveOriginOfImport();
+      await pages.overview.open(journeyId);
       await pages.overview.heading.waitFor();
       await runA11yScan();
-      await journey.answerOrigin();
     });
 
     await test.step('Commodity selection', async () => {

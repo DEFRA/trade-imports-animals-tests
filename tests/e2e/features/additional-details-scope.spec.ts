@@ -8,9 +8,6 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
     test.slow();
 
     const journeyId = await journey.startNotification();
-    // Commodities is gated on origin; answering it unlocks the section each added
-    // line then opens.
-    await journey.answerOrigin();
 
     const certifiedFor = pages.page.getByRole('group', { name: 'What are the animals certified for?' });
     const unweaned = pages.page.getByRole('group', {

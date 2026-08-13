@@ -31,25 +31,30 @@ export class Journey {
     await this.pages.notificationDashboard.heading.waitFor();
   }
 
-  async startNotification(): Promise<string> {
+  private async createNotificationAtOrigin(): Promise<string> {
     await this.toNotificationDashboard();
     await this.pages.notificationDashboard.btnCreateNewNotification.click();
-    await this.pages.importType.heading.waitFor();
-    const journeyId = this.pages.importType.journeyIdFromUrl();
+    await this.pages.originOfImport.heading.waitFor();
+    const journeyId = this.pages.originOfImport.journeyIdFromUrl();
     this.context.journeyId = journeyId;
     this.context.referenceNumber = journeyId;
-    await this.pages.importType.liveAnimals.check();
-    await this.pages.importType.continueButton.click();
-    await this.pages.originOfImport.heading.waitFor();
+    return journeyId;
+  }
+
+  // Origin is the journey entry: the entry guard holds a new notification there
+  // until it is answered, so reaching the overview means answering it.
+  async startNotification(): Promise<string> {
+    const journeyId = await this.createNotificationAtOrigin();
+    await this.fillOriginOfImport();
+    await this.saveOriginOfImport();
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor();
     return journeyId;
   }
 
+  // Origin unanswered, as a brand-new notification first shows it.
   async toOriginOfImport(): Promise<void> {
-    const journeyId = await this.startNotification();
-    await this.pages.originOfImport.open(journeyId);
-    await this.pages.originOfImport.heading.waitFor();
+    await this.createNotificationAtOrigin();
   }
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
@@ -108,7 +113,6 @@ export class Journey {
   }
 
   async unlockSections(): Promise<void> {
-    await this.answerOrigin();
     await this.answerCommodity();
   }
 
@@ -209,7 +213,6 @@ export class Journey {
   // unlockSections first.
   async toCommoditySelection(): Promise<void> {
     await this.startNotification();
-    await this.answerOrigin();
     await this.pages.overview.task('What are you importing?').click();
     await this.pages.commoditySelection.heading.waitFor();
   }

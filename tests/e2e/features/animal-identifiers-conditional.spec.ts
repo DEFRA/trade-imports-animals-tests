@@ -6,7 +6,6 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     pages,
   }) => {
     await journey.startNotification();
-    await journey.answerOrigin();
 
     // Batch-create a Cats commodity line — the counts are submit-enforced, so
     // the consignment details page can be left blank.
@@ -61,7 +60,6 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     pages,
   }) => {
     await journey.startNotification();
-    await journey.answerOrigin();
 
     // Fish is in no typed-identifier list, so the notInUnionOf gate turns the
     // free-text fallbacks ON and every typed input OFF.
