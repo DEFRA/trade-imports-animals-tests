@@ -3,16 +3,17 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions, CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
+import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMITTED = 'uk.gov.defra.imports.notification.NotificationSubmitted';
 const POINT_OF_ENTRY = 'GB ABD';
 const EXPECTED_ACTOR: OutboxEventActor = {
-  id: '2100010101',
+  id: users.andrew.crn,
   source: 'dynamics-contact',
   userType: 'B2C',
-  displayName: 'Andrew Farmer',
-  organisationId: '5900001',
+  displayName: users.andrew.displayName,
+  organisationId: users.andrew.organisationId,
   onBehalfOfOrganisationId: null,
 };
 
