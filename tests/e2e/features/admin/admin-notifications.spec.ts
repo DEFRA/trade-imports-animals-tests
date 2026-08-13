@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
+import { defaultUser } from '@config/users';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment, isComposeEnvironment } from '@utils/playwright/environment';
@@ -82,7 +83,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
         expect(docs[0].numberOfNotifications).toBe(1);
         expect(docs[0].notificationReferenceNumbers).toEqual([referenceNumber]);
         expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe('2100010101');
+        expect(docs[0].userId).toBe(defaultUser.crn);
       } finally {
         await client.close();
       }
@@ -131,7 +132,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
         expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
         expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
         expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe('2100010101');
+        expect(docs[0].userId).toBe(defaultUser.crn);
       } finally {
         await client.close();
       }
@@ -172,7 +173,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
         expect(docs[0].numberOfNotifications).toBe(1);
         expect(docs[0].notificationReferenceNumbers).toEqual([invalidReference]);
         expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe('2100010101');
+        expect(docs[0].userId).toBe(defaultUser.crn);
       } finally {
         await client.close();
       }

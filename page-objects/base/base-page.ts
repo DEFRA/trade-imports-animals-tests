@@ -1,9 +1,13 @@
 import { Page, Locator, errors } from '@playwright/test';
+import { defaultUser } from '@config/users';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
+import { OrganisationPickerPage } from '@page-objects/auth/organisation-picker-page';
 
 const SIGN_IN_FORM_PROBE_MS = 5_000;
 
-function requireBaseUrl(envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL'): string {
+function requireBaseUrl(
+  envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL' | 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
+): string {
   const baseUrl = process.env[envVar];
   if (!baseUrl) {
     throw new Error(`${envVar} is not set. Ensure Playwright config applies project base URLs before running tests.`);
@@ -22,7 +26,7 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'About' });
   }
 
-  user(email: string = 'test.user11@defra.gov.uk'): Locator {
+  user(email: string = defaultUser.email): Locator {
     return this.page.getByText(email);
   }
 
@@ -40,7 +44,17 @@ export class BasePage {
     await this.page.goto(`${baseUrl}${path}`);
   }
 
-  protected async signInWhenRequested(attemptSignIn: boolean): Promise<void> {
+  async navigateToInsFrontend(path: string = '/'): Promise<void> {
+    const baseUrl = requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
+    await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  /**
+   * organisationSbi is only needed for identities with more than one
+   * organisation — defra-id-stub shows its "Choose your organisation" picker
+   * after sign-in exclusively for those, so single-org identities never hit it.
+   */
+  protected async signInWhenRequested(attemptSignIn: boolean, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
     // Under concurrent load the auth stub can be slow; the caller may retry
@@ -55,7 +69,7 @@ export class BasePage {
       if (error instanceof errors.TimeoutError) return;
       throw error;
     }
-    await signInPage.signIn();
+    await signInPage.signIn({ userId: options?.userId });
     const transientError = this.page.getByRole('heading', {
       level: 1,
       name: 'Sorry, we are unable to sign you in.',
@@ -63,8 +77,21 @@ export class BasePage {
     if (await transientError.isVisible()) {
       await this.page.getByRole('link', { name: 'try again' }).click();
       await signInPage.inputUserId.waitFor();
-      await signInPage.signIn();
+      await signInPage.signIn({ userId: options?.userId });
     }
+    await this.selectOrganisationIfPrompted(options?.organisationSbi);
+  }
+
+  private async selectOrganisationIfPrompted(organisationSbi?: string): Promise<void> {
+    const organisationPicker = new OrganisationPickerPage(this.page);
+    if (!organisationSbi) {
+      if (await organisationPicker.heading.isVisible()) {
+        throw new Error('Signed-in identity has more than one organisation but no organisationSbi was provided to select one.');
+      }
+      return;
+    }
+    await organisationPicker.heading.waitFor({ state: 'visible' });
+    await organisationPicker.select(organisationSbi);
   }
 }
 

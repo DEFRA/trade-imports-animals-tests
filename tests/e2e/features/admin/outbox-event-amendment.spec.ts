@@ -2,15 +2,16 @@ import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
+import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMISSION_AMENDED = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
 const EXPECTED_ACTOR: OutboxEventActor = {
-  id: '2100010101',
+  id: users.andrew.crn,
   source: 'dynamics-contact',
   userType: 'B2C',
-  displayName: 'Andrew Farmer',
-  organisationId: '5900001',
+  displayName: users.andrew.displayName,
+  organisationId: users.andrew.organisationId,
   onBehalfOfOrganisationId: null,
 };
 

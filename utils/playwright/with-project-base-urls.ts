@@ -3,11 +3,12 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 const PROJECT_ENV_VARS: Record<string, string> = {
   e2e: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL',
   admin: 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL',
+  ins: 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
 };
 
 /**
- * Sets TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL and TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL
- * so tests can navigate cross-service using absolute URLs.
+ * Sets TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL, TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL and
+ * TRADE_IMPORTS_INS_FRONTEND_BASE_URL so tests can navigate cross-service using absolute URLs.
  */
 export function applyProjectBaseUrlEnvVars(projectBaseUrls: Record<string, string>): void {
   for (const [projectName, baseURL] of Object.entries(projectBaseUrls)) {
@@ -20,8 +21,8 @@ export function applyProjectBaseUrlEnvVars(projectBaseUrls: Record<string, strin
 
 /**
  * Returns a config with per-project baseURLs overridden from a lookup map.
- * Also sets TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL and TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL
- * environment variables so tests can navigate cross-service using absolute URLs.
+ * Also sets the per-project base URL environment variables (see PROJECT_ENV_VARS)
+ * so tests can navigate cross-service using absolute URLs.
  */
 export function withProjectBaseUrls(
   baseConfig: PlaywrightTestConfig,

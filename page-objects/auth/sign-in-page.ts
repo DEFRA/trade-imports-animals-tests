@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { defaultPassword, defaultUser } from '@config/users';
 
 export class SignInPage {
   readonly expectedUrl = new RegExp('/dcidmtest.onmicrosoft.com/oauth2/authresp$');
@@ -26,8 +27,8 @@ export class SignInPage {
   }
 
   async signIn(options?: { userId?: string; password?: string }): Promise<void> {
-    const userId = options?.userId ?? '2100010101';
-    const password = options?.password ?? process.env.AUTH_PASSWORD ?? 'Password123';
+    const userId = options?.userId ?? defaultUser.crn;
+    const password = options?.password ?? defaultPassword;
     await this.inputUserId.fill(userId);
 
     if (process.env.PWDEBUG) {

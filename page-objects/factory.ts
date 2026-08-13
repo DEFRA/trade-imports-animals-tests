@@ -27,6 +27,9 @@ import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { OrganisationPickerPage } from './auth/organisation-picker-page';
+import { InsAddressBookListPage } from './ins/ins-address-book-list-page';
+import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
 
 export function createPageObjects(page: Page) {
   return {
@@ -59,10 +62,13 @@ export function createPageObjects(page: Page) {
     notificationCancelAmend: new NotificationCancelAmendPage(page),
     signIn: new SignInPage(page),
     signOut: new SignOutPage(page),
+    organisationPicker: new OrganisationPickerPage(page),
     adminDashboard: new AdminDashboardPage(page),
     adminDlqEvents: new AdminDlqEventsPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     adminOutboxEvents: new AdminOutboxEventsPage(page),
+    insAddressBookList: new InsAddressBookListPage(page),
+    insAddressBookAdd: new InsAddressBookAddPage(page),
   };
 }
 
