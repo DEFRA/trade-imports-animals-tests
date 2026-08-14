@@ -10,7 +10,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
   test.describe('from an amending notification', () => {
     test.beforeEach(async ({ apiJourney, notificationActions }) => {
       const created = await apiJourney.createAmendNotification();
-      await notificationActions.toNotificationView(created.id);
+      await notificationActions.toNotificationView(created.referenceNumber);
     });
 
     test('shows the Cancel amendment link while the notification is amending', async ({ pages }) => {
@@ -46,7 +46,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
     { tag: '@smoke' },
     async ({ pages, apiJourney, notificationActions }) => {
       const created = await apiJourney.createAmendNotification();
-      await notificationActions.toNotificationView(created.id);
+      await notificationActions.toNotificationView(created.referenceNumber);
 
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');

@@ -1,7 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
-import type { NotificationFulfilments, PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
+import type { NotificationFulfilments } from '@domain/models/api/notification-fulfilments';
 import type { Notification } from '@domain/models/api/notification';
 
 // Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
@@ -12,12 +12,7 @@ const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 
 /**
- * HTTP client for the spike's dual persistence surface. Every write path that
- * needs to reflect in admin (which reads notifications) requires both a
- * notification-fulfilments call and a notification call.
- *
- * Methods suffixed *NotificationFulfilments hit /notification-fulfilments/{id}/…;
- * methods suffixed *Notification hit /notifications/{id}/…
+ * HTTP client for the notification api.
  */
 export class NotificationApiClient {
   private readonly rest: RestClient;
@@ -26,43 +21,9 @@ export class NotificationApiClient {
     this.rest = new RestClient(baseUrl, request, apiKey);
   }
 
-  // --- NotificationFulfilments aggregate (spike-only, POST /notification-fulfilments…) ---
-
-  async createNotificationFulfilments(): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>('/notification-fulfilments');
-  }
-
-  async replaceNotificationFulfilments(id: string, fulfilments: PersistedFulfilmentEntry[]): Promise<NotificationFulfilments> {
-    return this.rest.put<NotificationFulfilments>(`/notification-fulfilments/${id}`, { id, fulfilments });
-  }
-
   async getNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.get<NotificationFulfilments>(`/notification-fulfilments/${id}`);
+    return this.rest.get<NotificationFulfilments>(`/notifications/${id}/fulfilments`);
   }
-
-  async submitNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/submit`);
-  }
-
-  async amendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/amend`);
-  }
-
-  async cancelAmendNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/cancel-amend`);
-  }
-
-  async copyNotificationFulfilments(id: string, idempotencyKey: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/copy`, undefined, {
-      'Idempotency-Key': idempotencyKey,
-    });
-  }
-
-  async softDeleteNotificationFulfilments(id: string): Promise<NotificationFulfilments> {
-    return this.rest.post<NotificationFulfilments>(`/notification-fulfilments/${id}/soft-delete`);
-  }
-
-  // --- Notification aggregate (matches main, POST /notifications…) ---
 
   /**
    * Mint a new notification. Empty nested notification → server mints the
@@ -77,13 +38,12 @@ export class NotificationApiClient {
   }
 
   /**
-   * Whole-record update of an existing notification. `referenceNumber` on the
-   * nested notification is required — main's save path updates by ref and 404s
-   * if the record does not exist. Optional actor supplies organisationId so
-   * address-book party references can be resolved for NotificationEdited.
+   * Whole-record replace of an existing notification via PUT /notifications/{id}.
+   * 404 if the reference is unknown. The optional actor supplies organisationId so
+   * address-book party references resolve onto the NotificationEdited event.
    */
   async saveNotification(id: string, notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', {
+    return this.rest.put<Notification>(`/notifications/${id}`, {
       notification: { referenceNumber: id, ...notification },
       ...(actor ? { actor } : {}),
     });

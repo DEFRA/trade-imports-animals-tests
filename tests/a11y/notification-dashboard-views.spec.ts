@@ -24,7 +24,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Notification dashboard (search match)', async () => {
       const created = await apiJourney.createSubmittedNotification();
       await journey.toNotificationDashboard();
-      await pages.notificationDashboard.searchForReference(created.id);
+      await pages.notificationDashboard.searchForReference(created.referenceNumber);
       await pages.notificationDashboard.heading.waitFor();
       await runA11yScan();
     });
