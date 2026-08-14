@@ -15,10 +15,10 @@ export type PersistedFulfilmentEntry =
     };
 
 export type NotificationFulfilments = {
-  id: string;
+  referenceNumber: string;
   fulfilments: PersistedFulfilmentEntry[];
   submittedFulfilments?: PersistedFulfilmentEntry[] | null;
   status: NotificationFulfilmentsStatus;
-  createdAt: string;
+  created: string;
   submittedAt?: string | null;
 };

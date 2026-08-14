@@ -36,7 +36,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
 
   test('cancelling checkbox deletion keeps the notification visible', async ({ apiJourney, adminNavigation, pages }) => {
     test.slow();
-    const { id: referenceNumber } = await apiJourney.createSubmittedNotification();
+    const { referenceNumber } = await apiJourney.createSubmittedNotification();
 
     await adminNavigation.toNotifications();
     await pages.adminNotifications.findRowByReference(referenceNumber);
@@ -48,7 +48,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
 
   test('deletes a notification by checkbox', async ({ apiJourney, adminNavigation, pages }) => {
     test.slow();
-    const { id: referenceNumber } = await apiJourney.createSubmittedNotification();
+    const { referenceNumber } = await apiJourney.createSubmittedNotification();
 
     await adminNavigation.toNotifications();
 

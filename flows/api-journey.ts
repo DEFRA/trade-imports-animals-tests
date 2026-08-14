@@ -66,25 +66,28 @@ export class ApiJourney {
   ) {}
 
   private remember(aggregate: NotificationFulfilments): NotificationFulfilments {
-    this.context.journeyId = aggregate.id;
-    this.context.referenceNumber = aggregate.id;
+    this.context.journeyId = aggregate.referenceNumber;
+    this.context.referenceNumber = aggregate.referenceNumber;
     return aggregate;
   }
 
-  // Notification mints the reference number (main's saveOriginOfImport with blank ref),
-  // and the notification-fulfilments aggregate is bootstrapped at that same ref.
-  // Matches the frontend's own create flow post-cascade-removal.
-  private async mintNotificationAndBootstrapFulfilments(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
-    const notification = await this.api.createNotification();
-    return this.api.replaceNotificationFulfilments(notification.referenceNumber, contents);
+  private async mintNotification(contents: PersistedFulfilmentEntry[] = []): Promise<NotificationFulfilments> {
+    const n = await this.api.createNotification({ fulfilments: contents });
+    return {
+      referenceNumber: n.referenceNumber,
+      status: n.status,
+      created: n.created,
+      submittedAt: n.submittedAt ?? null,
+      fulfilments: n.fulfilments ?? [],
+    };
   }
 
   async createEmptyNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilments());
+    return this.remember(await this.mintNotification());
   }
 
   async createFullNotification(): Promise<NotificationFulfilments> {
-    return this.remember(await this.mintNotificationAndBootstrapFulfilments(UNLOCKED_FULFILMENTS));
+    return this.remember(await this.mintNotification(UNLOCKED_FULFILMENTS));
   }
 
   async createUpToPage(): Promise<NotificationFulfilments> {
@@ -93,15 +96,13 @@ export class ApiJourney {
 
   async createSubmittedNotification(): Promise<NotificationFulfilments> {
     const draft = await this.createFullNotification();
-    await this.api.submitNotificationFulfilments(draft.id);
-    await this.api.submitNotification(draft.id);
+    await this.api.submitNotification(draft.referenceNumber);
     return this.remember({ ...draft, status: 'SUBMITTED' });
   }
 
   async createAmendNotification(): Promise<NotificationFulfilments> {
     const submitted = await this.createSubmittedNotification();
-    await this.api.amendNotificationFulfilments(submitted.id);
-    await this.api.amendNotification(submitted.id);
+    await this.api.amendNotification(submitted.referenceNumber);
     return this.remember({ ...submitted, status: 'AMEND' });
   }
 

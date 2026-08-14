@@ -8,14 +8,14 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   }) => {
     await test.step('Check your answers (draft)', async () => {
       const draft = await apiJourney.createFullNotification();
-      await apiJourney.resumeInUi(draft.id, pages.notificationView);
+      await apiJourney.resumeInUi(draft.referenceNumber, pages.notificationView);
       await runA11yScan();
     });
 
     const submitted = await apiJourney.createSubmittedNotification();
 
     await test.step('Check your answers (submitted, read-only)', async () => {
-      await apiJourney.resumeInUi(submitted.id, pages.notificationView);
+      await apiJourney.resumeInUi(submitted.referenceNumber, pages.notificationView);
       // The Delete action renders only in the read-only SUBMITTED state, so its
       // presence proves the scan sees the submitted view rather than the draft.
       await pages.page.getByRole('button', { name: 'Delete' }).waitFor();
@@ -23,7 +23,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import notification submitted (confirmation)', async () => {
-      await pages.notificationView.navigateToFrontend(`/notifications/${submitted.id}/confirmation`);
+      await pages.notificationView.navigateToFrontend(`/notifications/${submitted.referenceNumber}/confirmation`);
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
       await runA11yScan();
     });

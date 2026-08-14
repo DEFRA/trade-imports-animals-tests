@@ -19,17 +19,17 @@ test.describe('Notification dashboard search', () => {
     const created = await apiJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.id);
+    await pages.notificationDashboard.searchForReference(created.referenceNumber);
 
-    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${created.id.replace(/-/g, '\\-')}(?:&|$)`));
+    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}(?:&|$)`));
     await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
-    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(created.id);
+    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(created.referenceNumber);
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Result');
   });
 
   test('opens notification view when clicking View after searching by reference number', async ({ pages, apiJourney, journey }) => {
     const created = await apiJourney.createSubmittedNotification();
-    const referenceNumber = created.id;
+    const referenceNumber = created.referenceNumber;
     await journey.toNotificationDashboard();
 
     await pages.notificationDashboard.searchForReference(referenceNumber);
@@ -63,12 +63,12 @@ test.describe('Notification dashboard search', () => {
     const created = await apiJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.id);
+    await pages.notificationDashboard.searchForReference(created.referenceNumber);
     await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
 
-    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${created.id.replace(/-/g, '\\-')}`));
+    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}`));
     await expect(pages.page).toHaveURL(/sort=createdAt%2Cdesc/);
-    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(created.id);
+    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(created.referenceNumber);
   });
 
   test('preserves referenceNumber in the URL when a page param is present', async ({ pages }) => {

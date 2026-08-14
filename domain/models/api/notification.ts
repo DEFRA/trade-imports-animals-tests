@@ -1,3 +1,5 @@
+import type { PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
+
 export const notificationStatuses = {
   draft: 'DRAFT',
   submitted: 'SUBMITTED',
@@ -93,4 +95,6 @@ export type Notification = {
   status?: NotificationStatus;
   created?: string;
   updated?: string;
+  submittedAt?: string | null;
+  fulfilments?: PersistedFulfilmentEntry[];
 };

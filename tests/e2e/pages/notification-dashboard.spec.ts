@@ -35,7 +35,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
     test('displays the notification list and result count', async ({ apiJourney, pages }) => {
       const created = await apiJourney.createFullNotification();
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(created.id);
+      await pages.notificationDashboard.searchForReference(created.referenceNumber);
 
       await expect(pages.notificationDashboard.heading).toBeVisible();
       await expect(pages.notificationDashboard.totalResults).toBeVisible();
@@ -61,7 +61,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   test.describe('notification card actions by status', () => {
     test('shows resume, copy and delete actions for a draft notification', async ({ pages, apiJourney }) => {
       const created = await apiJourney.createFullNotification();
-      const referenceNumber = created.id;
+      const referenceNumber = created.referenceNumber;
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.searchForReference(referenceNumber);
@@ -74,7 +74,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
 
     test('shows view, copy and amend actions for a submitted notification', async ({ pages, apiJourney }) => {
       const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.id;
+      const referenceNumber = created.referenceNumber;
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.searchForReference(referenceNumber);
