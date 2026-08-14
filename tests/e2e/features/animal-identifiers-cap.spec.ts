@@ -7,7 +7,6 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
   }) => {
     test.slow();
     await journey.startNotification();
-    await journey.answerOrigin();
 
     // A cattle line with a declared count of 2 (M = 2).
     await pages.overview.task('What are you importing?').click();

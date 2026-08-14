@@ -11,7 +11,6 @@ import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
 import { ImportPurposePage } from './notification/import-purpose-page';
 import { ImportReasonPage } from './notification/import-reason-page';
-import { ImportTypePage } from './notification/import-type-page';
 import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { NotificationViewPage } from './notification/notification-view-page';
@@ -27,12 +26,14 @@ import { AdminNotificationsPage } from './admin/admin-notifications-page';
 import { AdminOutboxEventsPage } from './admin/admin-outbox-events-page';
 import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
+import { OrganisationPickerPage } from './auth/organisation-picker-page';
+import { InsAddressBookListPage } from './ins/ins-address-book-list-page';
+import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
 
 export function createPageObjects(page: Page) {
   return {
     page,
     notificationDashboard: new NotificationDashboardPage(page),
-    importType: new ImportTypePage(page),
     overview: new OverviewPage(page),
     originOfImport: new OriginOfImportPage(page),
     commoditySelection: new CommoditySelectionPage(page),
@@ -59,10 +60,13 @@ export function createPageObjects(page: Page) {
     notificationCancelAmend: new NotificationCancelAmendPage(page),
     signIn: new SignInPage(page),
     signOut: new SignOutPage(page),
+    organisationPicker: new OrganisationPickerPage(page),
     adminDashboard: new AdminDashboardPage(page),
     adminDlqEvents: new AdminDlqEventsPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     adminOutboxEvents: new AdminOutboxEventsPage(page),
+    insAddressBookList: new InsAddressBookListPage(page),
+    insAddressBookAdd: new InsAddressBookAddPage(page),
   };
 }
 

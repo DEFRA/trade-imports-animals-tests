@@ -7,6 +7,7 @@ import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 const projectBaseUrls: Record<string, string> = {
   e2e: 'http://localhost:3000',
   admin: 'http://localhost:3001',
+  ins: 'http://localhost:3002',
 };
 
 const dockerComposeConfig = withServiceBaseUrls(

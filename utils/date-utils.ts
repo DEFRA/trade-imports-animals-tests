@@ -94,6 +94,49 @@ export function getRelativeDateInput(options: RelativeDateTimeOptions = {}): Dat
 }
 
 /**
+ * Gets a date-picker value relative to now, in the `dd/mm/yyyy` shape the
+ * arrival-date and date-of-issue inputs accept.
+ */
+export function getRelativeDatePickerValue(options: RelativeDateTimeOptions = {}): string {
+  const { day, month, year } = getRelativeDateInput(options);
+  return `${day}/${month}/${year}`;
+}
+
+const SERVICE_TIME_ZONE = 'Europe/London';
+
+function todayInServiceZone(): { year: number; month: number; day: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: SERVICE_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const partValue = (type: Intl.DateTimeFormatPartTypes): number => Number(parts.find((part) => part.type === type).value);
+  return { year: partValue('year'), month: partValue('month'), day: partValue('day') };
+}
+
+/**
+ * Gets a date relative to today in the `d/m/yyyy` shape the app itself renders —
+ * no leading zeros, and month arithmetic clamped to the last day of the target
+ * month. Anchored on the Europe/London civil day, matching the frontend's
+ * `arrivalWindow`. Use this when asserting against app output such as the date
+ * picker's `data-min-date`.
+ */
+export function getRelativeAppDateText({
+  dayOffset = 0,
+  monthOffset = 0,
+}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+  const { year, month, day } = todayInServiceZone();
+  const targetMonth = month - 1 + monthOffset;
+  // Day 0 of the following month is the last day of the target month.
+  const lastDayOfTargetMonth = new Date(Date.UTC(year, targetMonth + 1, 0)).getUTCDate();
+  const clamped = new Date(Date.UTC(year, targetMonth, Math.min(day, lastDayOfTargetMonth)));
+  clamped.setUTCDate(clamped.getUTCDate() + dayOffset);
+
+  return `${clamped.getUTCDate()}/${clamped.getUTCMonth() + 1}/${clamped.getUTCFullYear()}`;
+}
+
+/**
  * Formats a Date for display using en-GB locale and optional format options.
  */
 export function toDisplayDate(

@@ -27,7 +27,12 @@ export default defineConfig({
   projects: [
     {
       name: 'e2e',
-      testIgnore: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
+      testIgnore: [
+        '**/tests/e2e/features/admin/**/*.spec.ts',
+        '**/tests/e2e/pages/admin/**/*.spec.ts',
+        '**/tests/a11y/admin/**/*.spec.ts',
+        '**/tests/e2e/features/ins/**/*.spec.ts',
+      ],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 1000 },
@@ -36,6 +41,14 @@ export default defineConfig({
     {
       name: 'admin',
       testMatch: ['**/tests/e2e/features/admin/**/*.spec.ts', '**/tests/e2e/pages/admin/**/*.spec.ts', '**/tests/a11y/admin/**/*.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 1000 },
+      },
+    },
+    {
+      name: 'ins',
+      testMatch: ['**/tests/e2e/features/ins/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 1000 },

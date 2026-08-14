@@ -1,5 +1,6 @@
 import type { PageObjects } from '@page-objects';
 import type { JourneyOptions } from '@domain/constants/journey-options';
+import { getRelativeAppDateText } from '@utils/date-utils';
 
 export type JourneyContext = {
   journeyId?: string;
@@ -9,6 +10,11 @@ export type JourneyContext = {
 
 const COUNTRY = 'France';
 const PORT = 'Aberdeen Harbour (GB ABD)';
+// Inside the arrival-date window (1 week back to 6 months ahead) wherever the
+// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
+// so a CYA assertion compares against the app's shape, not the typed string it
+// happens to echo back.
+export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
 
 export class Journey {
   constructor(
@@ -25,25 +31,30 @@ export class Journey {
     await this.pages.notificationDashboard.heading.waitFor();
   }
 
-  async startNotification(): Promise<string> {
+  private async createNotificationAtOrigin(): Promise<string> {
     await this.toNotificationDashboard();
     await this.pages.notificationDashboard.btnCreateNewNotification.click();
-    await this.pages.importType.heading.waitFor();
-    const journeyId = this.pages.importType.journeyIdFromUrl();
+    await this.pages.originOfImport.heading.waitFor();
+    const journeyId = this.pages.originOfImport.journeyIdFromUrl();
     this.context.journeyId = journeyId;
     this.context.referenceNumber = journeyId;
-    await this.pages.importType.liveAnimals.check();
-    await this.pages.importType.continueButton.click();
-    await this.pages.originOfImport.heading.waitFor();
+    return journeyId;
+  }
+
+  // Origin is the journey entry: the entry guard holds a new notification there
+  // until it is answered, so reaching the overview means answering it.
+  async startNotification(): Promise<string> {
+    const journeyId = await this.createNotificationAtOrigin();
+    await this.fillOriginOfImport();
+    await this.saveOriginOfImport();
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor();
     return journeyId;
   }
 
+  // Origin unanswered, as a brand-new notification first shows it.
   async toOriginOfImport(): Promise<void> {
-    const journeyId = await this.startNotification();
-    await this.pages.originOfImport.open(journeyId);
-    await this.pages.originOfImport.heading.waitFor();
+    await this.createNotificationAtOrigin();
   }
 
   async fillOriginOfImport(options: JourneyOptions = {}): Promise<void> {
@@ -102,7 +113,6 @@ export class Journey {
   }
 
   async unlockSections(): Promise<void> {
-    await this.answerOrigin();
     await this.answerCommodity();
   }
 
@@ -140,7 +150,7 @@ export class Journey {
   }
 
   async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
-    await this.pages.arrivalDetails.fillArrivalDate('12/12/2026');
+    await this.pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
     await this.pages.arrivalDetails.selectPort(PORT);
     await this.pages.page.getByRole('radio', { name: means, exact: true }).check();
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
@@ -148,9 +158,9 @@ export class Journey {
   }
 
   // Re-navigate from the hub to the transporter-type page within an already
-  // unlocked journey. Arrival details is enforced-at-continue, so it must be
-  // filled to save through; a road vehicle keeps transited countries in scope,
-  // which is answered on the way.
+  // unlocked journey. The page itself saves through unfilled; it is filled
+  // because a road vehicle keeps transited countries in scope, which is
+  // answered on the way.
   async reachTransporterFromHub(): Promise<void> {
     await this.pages.overview.task('Arrival details').click();
     await this.pages.arrivalDetails.heading.waitFor();
@@ -203,7 +213,6 @@ export class Journey {
   // unlockSections first.
   async toCommoditySelection(): Promise<void> {
     await this.startNotification();
-    await this.answerOrigin();
     await this.pages.overview.task('What are you importing?').click();
     await this.pages.commoditySelection.heading.waitFor();
   }
