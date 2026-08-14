@@ -10,12 +10,24 @@ export class ArrivalDetailsPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Arrival details' });
   }
 
+  // Progressive enhancement swaps the native <select> for an
+  // accessible-autocomplete combobox that keeps the field's id and label.
   get portOfEntry(): Locator {
-    return this.page.locator('select#portOfEntry');
+    return this.page.getByLabel('Port of entry', { exact: true });
   }
 
-  async selectPort(name: string): Promise<void> {
-    await this.portOfEntry.selectOption({ label: name });
+  // The native <select> behind the enhancement — hidden and renamed with a
+  // "-select" suffix, it still submits the selected port code.
+  get portOfEntryValue(): Locator {
+    return this.page.locator('select#portOfEntry-select');
+  }
+
+  // Drive the type-ahead the way a user does: type to filter, then pick the
+  // matching option by its "{name} ({code})" label.
+  async selectPort(label: string): Promise<void> {
+    await this.portOfEntry.click();
+    await this.portOfEntry.fill(label);
+    await this.page.getByRole('option', { name: label, exact: true }).click();
   }
 
   get meansOfTransport(): Locator {
