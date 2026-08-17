@@ -76,12 +76,18 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.reasonForImport).toBe('internalMarket');
       expect(doc.additionalDetails.certifiedFor).toBe('slaughter');
       expect(doc.additionalDetails.unweanedAnimals).toBe('no');
+      // Four roles are references — the id alone, with no copy of the address
+      // beside it, so a later edit in the address book shows through.
       expect(doc.consignor).toEqual({ addressId: consignor.id });
       expect(doc.destination).toEqual({ addressId: destination.id });
-      expect(doc.placeOfOrigin).toEqual({ addressId: placeOfOrigin.id });
       expect(doc.consignee).toEqual({ addressId: consignee.id });
       expect(doc.importer).toEqual({ addressId: importer.id });
-      expect(doc.consignment).toEqual({ addressId: contact.id });
+      // Place of origin and the contact address are held as copies,
+      // so they carry the details and never an addressId.
+      expect(doc.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name });
+      expect(doc.placeOfOrigin.addressId).toBeUndefined();
+      expect(doc.consignment).toMatchObject({ name: contact.name });
+      expect(doc.consignment.addressId).toBeUndefined();
       expect(doc.cphNumber).toBe('123456789');
       expect(doc.transport.portOfEntry).toBe('GB ABD');
       expect(doc.transport.transporter?.name).toBe('García Livestock Transport SL');
