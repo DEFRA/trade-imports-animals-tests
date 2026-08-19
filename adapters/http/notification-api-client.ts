@@ -26,19 +26,27 @@ export class NotificationApiClient {
   }
 
   /**
-   * Mint a new notification. Empty body → server mints the reference number via
-   * ReferenceNumberGenerator and returns it in the response body.
+   * Mint a new notification. Empty nested notification → server mints the
+   * reference number via ReferenceNumberGenerator and returns it in the response.
+   * Body shape is {@code SaveNotificationDto}: `{ notification, actor? }`.
    */
-  async createNotification(body: Record<string, unknown> = {}): Promise<Notification> {
-    return this.rest.post<Notification>('/notifications', body);
+  async createNotification(notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>('/notifications', {
+      notification,
+      ...(actor ? { actor } : {}),
+    });
   }
 
   /**
    * Whole-record replace of an existing notification via PUT /notifications/{id}.
-   * 404 if the reference is unknown.
+   * 404 if the reference is unknown. The optional actor supplies organisationId so
+   * address-book party references resolve onto the NotificationEdited event.
    */
-  async saveNotification(id: string, body: Record<string, unknown> = {}): Promise<Notification> {
-    return this.rest.put<Notification>(`/notifications/${id}`, body);
+  async saveNotification(id: string, notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.put<Notification>(`/notifications/${id}`, {
+      notification: { referenceNumber: id, ...notification },
+      ...(actor ? { actor } : {}),
+    });
   }
 
   async submitNotification(id: string): Promise<Notification> {

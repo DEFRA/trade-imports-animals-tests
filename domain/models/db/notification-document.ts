@@ -1,5 +1,36 @@
 import type { ObjectId } from 'mongodb';
 
+/**
+ * A Standard Address Block as the backend stores it. Field names follow the
+ * address book, which is the system of record (EUDPA-294 replaced an older
+ * shape carrying `addressLine3`, `city` and a free-text `country`).
+ */
+type StoredAddress = {
+  addressLine1: string;
+  addressLine2?: string;
+  townOrCity: string;
+  county?: string;
+  postcode: string;
+  countryCode: string;
+};
+
+/**
+ * A party on a notification, held one of two ways (EUDPA-294 AC5).
+ *
+ * Picked from the address book, only `addressId` is stored — the details are
+ * resolved on read, so an edit in the address book shows through without the
+ * notification being rewritten. Entered inline, or created before the address
+ * book existed, the details are on the notification and there is no
+ * `addressId`. Every field is therefore optional.
+ */
+type StoredParty = {
+  addressId?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: StoredAddress;
+};
+
 export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
@@ -29,51 +60,11 @@ export type NotificationDocument = {
     certifiedFor?: string;
     unweanedAnimals: string;
   };
-  placeOfOrigin?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2?: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
-  consignor?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
-  consignee?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2?: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
-  importer?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2?: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
-  destination?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
+  placeOfOrigin?: StoredParty;
+  consignor?: StoredParty;
+  consignee?: StoredParty;
+  importer?: StoredParty;
+  destination?: StoredParty;
   cphNumber?: string;
   transport: {
     portOfEntry?: string;
@@ -82,27 +73,16 @@ export type NotificationDocument = {
     transportIdentification?: string;
     transportDocumentReference?: string;
     transitedCountries?: string[];
+    // Not an address-book record: a transporter carries an approval number and
+    // a type, which the address book has no room for, so it stays inline.
     transporter?: {
       name: string;
-      address: {
-        addressLine1: string;
-        addressLine2: string;
-        addressLine3?: string;
-        country: string;
-      };
+      address: StoredAddress;
       approvalNumber: string;
       type: string;
     };
   };
-  consignment?: {
-    name: string;
-    address: {
-      addressLine1: string;
-      addressLine2?: string;
-      addressLine3?: string;
-      country: string;
-    };
-  };
+  consignment?: StoredParty;
   status: string;
   created: Date;
   updated: Date;

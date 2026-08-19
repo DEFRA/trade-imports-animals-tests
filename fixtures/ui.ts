@@ -5,6 +5,7 @@ import { AdminNavigation } from '@flows/admin-navigation';
 import { NotificationActions } from '@flows/notification-actions';
 import { ApiJourney } from '@flows/api-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
+import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 
 export interface PageFixtures {
   pages: PageObjects;
@@ -13,6 +14,7 @@ export interface PageFixtures {
   adminNavigation: AdminNavigation;
   notificationActions: NotificationActions;
   notificationApi: NotificationApiClient;
+  addressBookApi: AddressBookApiClient;
   apiJourney: ApiJourney;
 }
 
@@ -35,6 +37,9 @@ export const test = base.extend<PageFixtures>({
   },
   notificationApi: async ({ request }, use) => {
     await use(new NotificationApiClient(request));
+  },
+  addressBookApi: async ({ request }, use) => {
+    await use(new AddressBookApiClient(request));
   },
   apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
     await use(new ApiJourney(pages, notificationApi, journeyContext));

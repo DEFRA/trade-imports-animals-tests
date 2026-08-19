@@ -9,20 +9,40 @@ export const notificationStatuses = {
 
 export type NotificationStatus = (typeof notificationStatuses)[keyof typeof notificationStatuses];
 
-export type OperatorAddress = {
+/**
+ * A Standard Address Block on the wire. Field names follow the address book
+ * (EUDPA-294 replaced an older shape carrying `addressLine3`, `city` and a
+ * free-text `country`).
+ */
+export type PartyAddress = {
   addressLine1: string;
   addressLine2?: string;
-  addressLine3?: string;
-  city?: string;
-  country: string;
+  townOrCity: string;
+  county?: string;
+  postcode: string;
+  countryCode: string;
 };
 
-export type Operator = {
+/**
+ * A party on a notification — linked via `addressId` and/or held inline.
+ * Backend `NotificationResponse` returns `ConsignmentParty` with this shape
+ * (resolved from the address book on read when `addressId` is set).
+ */
+export type ConsignmentParty = {
+  addressId?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: PartyAddress;
+};
+
+/**
+ * Transporter stays inline: approval number and type are not address-book
+ * fields, so it never carries an `addressId`.
+ */
+export type Transporter = {
   name: string;
-  address: OperatorAddress;
-};
-
-export type Transporter = Operator & {
+  address: PartyAddress;
   approvalNumber: string;
   type: string;
 };
@@ -84,12 +104,12 @@ export type Notification = {
   commodity?: Commodity | null;
   reasonForImport?: string | null;
   additionalDetails?: AdditionalDetails | null;
-  placeOfOrigin?: Operator | null;
-  consignor?: Operator | null;
-  consignee?: Operator | null;
-  importer?: Operator | null;
-  destination?: Operator | null;
-  consignment?: Operator | null;
+  placeOfOrigin?: ConsignmentParty | null;
+  consignor?: ConsignmentParty | null;
+  consignee?: ConsignmentParty | null;
+  importer?: ConsignmentParty | null;
+  destination?: ConsignmentParty | null;
+  consignment?: ConsignmentParty | null;
   cphNumber?: string | null;
   transport?: Transport | null;
   status?: NotificationStatus;
