@@ -12,6 +12,8 @@ throwIfProdEnvironment();
  */
 export default defineConfig({
   testDir: './tests',
+  // Path is relative to the env-specific config that spreads this object (repo root).
+  globalSetup: './utils/playwright/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,

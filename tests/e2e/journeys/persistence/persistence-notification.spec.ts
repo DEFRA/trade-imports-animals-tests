@@ -34,7 +34,22 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
     }
   });
 
-  test('submitted notification persists the journey answers and reloads read-only', async ({ journey, journeyContext, pages }) => {
+  test('submitted notification persists the journey answers and reloads read-only', async ({
+    journey,
+    journeyContext,
+    pages,
+    addressBookApi,
+  }) => {
+    // Resolve linked ids from the once-seeded journey fixtures (API globalSetup),
+    // not hard-coded Mongo ObjectIds — a role mix-up or the same id on every party
+    // would otherwise pass if we only asserted "some string" (EUDPA-294 AC3).
+    const consignor = await addressBookApi.findByName('Astra Rosales');
+    const destination = await addressBookApi.findByName('Tech Imports Ltd');
+    const placeOfOrigin = await addressBookApi.findByName('Origin Farm');
+    const consignee = await addressBookApi.findByName('British Livestock Ltd');
+    const importer = await addressBookApi.findByName('Import Co UK');
+    const contact = await addressBookApi.findByName('Animal and Plant Health Agency');
+
     await journey.submitNotification();
     const referenceNumber = journeyContext.journeyId;
     const client = new MongoDbClient();
@@ -61,16 +76,22 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.reasonForImport).toBe('internalMarket');
       expect(doc.additionalDetails.certifiedFor).toBe('slaughter');
       expect(doc.additionalDetails.unweanedAnimals).toBe('no');
-      expect(doc.placeOfOrigin.name).toBe('Origin Farm');
-      expect(doc.consignor?.name).toBe('Astra Rosales');
-      expect(doc.consignee.name).toBe('British Livestock Ltd');
-      expect(doc.importer.name).toBe('Import Co UK');
-      expect(doc.destination?.name).toBe('Tech Imports Ltd');
+      // Four roles are references — the id alone, with no copy of the address
+      // beside it, so a later edit in the address book shows through.
+      expect(doc.consignor).toEqual({ addressId: consignor.id });
+      expect(doc.destination).toEqual({ addressId: destination.id });
+      expect(doc.consignee).toEqual({ addressId: consignee.id });
+      expect(doc.importer).toEqual({ addressId: importer.id });
+      // Place of origin and the contact address are held as copies,
+      // so they carry the details and never an addressId.
+      expect(doc.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name });
+      expect(doc.placeOfOrigin.addressId).toBeUndefined();
+      expect(doc.consignment).toMatchObject({ name: contact.name });
+      expect(doc.consignment.addressId).toBeUndefined();
       expect(doc.cphNumber).toBe('123456789');
       expect(doc.transport.portOfEntry).toBe('GB ABD');
       expect(doc.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(doc.transport.transporter?.type).toBe('Commercial');
-      expect(doc.consignment?.name).toBe('Animal and Plant Health Agency');
     } finally {
       await client.close();
     }

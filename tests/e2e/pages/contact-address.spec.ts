@@ -29,24 +29,7 @@ test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-fr
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
 
-  test('adding a new contact address saves it and offers it selected', async ({ pages }) => {
-    // The book is a persistent server store, so a fresh unique name each run keeps
-    // the created record unambiguous among the offered radios.
-    const createdName = `Created Contact ${Date.now()}`;
-
-    await pages.page.getByRole('link', { name: 'Add a new contact address' }).click();
-    await expect(pages.page.getByRole('heading', { name: 'Add a new address' })).toBeVisible();
-
-    await pages.page.getByLabel('Name or organisation name').fill(createdName);
-    await pages.page.getByLabel('Address line 1').fill('12 Contact Way');
-    await pages.page.getByLabel('Town or city').fill('Penrith');
-    await pages.page.getByLabel('Postal or zip code').fill('CA11 7AA');
-    await pages.page.getByLabel('Country').selectOption('United Kingdom');
-    await pages.page.getByLabel('Telephone number').fill('01768 555 0102');
-    await pages.page.getByLabel('Email address').fill('contact@example.co.uk');
-    await pages.page.getByRole('button', { name: 'Save and continue' }).click();
-
-    await expect(pages.contactAddress.heading).toBeVisible();
-    await expect(pages.contactAddress.address(createdName)).toBeChecked();
+  test('offers no way to add an address', async ({ pages }) => {
+    await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveCount(0);
   });
 });

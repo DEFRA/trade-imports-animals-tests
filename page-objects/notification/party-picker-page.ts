@@ -29,4 +29,11 @@ export class PartyPickerPage extends NotificationPage {
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
+
+  /** Search then tick — the book is shared and newest-first, so a fixture may not be on page one. */
+  async select(name: string): Promise<void> {
+    await this.search.fill(name);
+    await this.searchButton.click();
+    await this.party(name).check();
+  }
 }
