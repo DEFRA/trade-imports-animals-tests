@@ -70,13 +70,14 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                            | Test scope                                     | Target               | Config                                | Generates Report |
-| ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                         | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                | Test scope                                     | Target               | Config                                | Generates Report |
+| -------------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                             | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                    | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`          | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`     | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security` | Security (`@security`, ZAP) test suite         | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`       | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -151,6 +152,9 @@ mongo init by `run-stack.sh` — the directory may hold no active fixtures,
 since the preference is to seed notification state at test level through the
 front door (the backend API) rather than the back door (writing directly
 into Mongo).
+
+For the security (`@security`, OWASP ZAP) profile against this stack, see
+[`zap/README.md`](zap/README.md).
 
 #### Workspace stack commands (run from the workspace root)
 

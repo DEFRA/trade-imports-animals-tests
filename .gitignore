@@ -63,6 +63,7 @@ FAILED
 # Test reports
 allure-report/
 allure-results/
+zap-report/
 
 # Headroom
 .tokensave/

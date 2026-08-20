@@ -1,0 +1,30 @@
+# TEMPORARY — local proving-ground only, not part of any CI pipeline.
+# Superseded by docker/stack/security.compose.yml once this profile is
+# proven — see workareas/analysis/zap-playwright-flow.md and zap/README.md.
+services:
+  zap:
+    image: zaproxy/zap-stable
+    # Host networking, not extra_hosts: the app stack's own OIDC redirects
+    # always target "localhost" baked into the running containers' config,
+    # not something Playwright's request can rewrite — so ZAP's "localhost"
+    # must be the real host's. OrbStack's host networking makes this
+    # transparent.
+    network_mode: host
+    volumes:
+      - ./zap-automation.yaml:/zap/plan/zap-automation.yaml:ro
+      - ../zap-report:/zap/wrk/zap-report
+    # Matches docker/stack/backend.compose.yml's healthcheck timing
+    # convention for JVM services with add-ons to load. Pair with
+    # `docker compose up -d --wait` so "up" doesn't return until ZAP is
+    # actually accepting requests, not just started.
+    healthcheck:
+      test: ['CMD', 'curl', '--silent', '--output', '/dev/null', '--fail', 'http://localhost:${ZAP_PORT:-8090}/']
+      interval: 5s
+      retries: 10
+      start_period: 30s
+    command: >
+      zap.sh -daemon -host 0.0.0.0 -port ${ZAP_PORT:-8090}
+      -config api.key=${ZAP_API_KEY:-local-dev-key}
+      -config api.addrs.addr.name=.*
+      -config api.addrs.addr.regex=true
+      -config anticsrf.tokens.token.name=crumb
