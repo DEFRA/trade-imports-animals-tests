@@ -14,7 +14,12 @@ const RULES_FILE = pathFromHere('../zap/rules.tsv');
 // zap/docker-compose.yml) so ZAP's report job and this host-side read see
 // the same files.
 const REPORT_DIR = pathFromHere('../zap-report');
-const REPORT_NAMES = ['frontend-security-report', 'admin-security-report', 'ins-security-report'];
+const REPORT_NAMES = [
+  'animals-frontend-security-report',
+  'animals-admin-security-report',
+  'ins-frontend-security-report',
+  'animals-backend-security-report',
+];
 
 type RuleAction = 'IGNORE' | 'WARN' | 'FAIL';
 

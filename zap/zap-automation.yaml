@@ -14,6 +14,9 @@ env:
     - name: ins
       urls:
         - http://localhost:3002
+    - name: backend
+      urls:
+        - http://localhost:8085
   parameters:
     failOnError: false
     progressToStdout: true
@@ -60,7 +63,7 @@ jobs:
     parameters:
       template: traditional-json
       reportDir: /zap/wrk/zap-report
-      reportFile: frontend-security-report
+      reportFile: animals-frontend-security-report
       reportTitle: 'Live-animals frontend — security scan'
     sites:
       - http://localhost:3000
@@ -68,7 +71,7 @@ jobs:
     parameters:
       template: traditional-html
       reportDir: /zap/wrk/zap-report
-      reportFile: frontend-security-report
+      reportFile: animals-frontend-security-report
       reportTitle: 'Live-animals frontend — security scan'
     sites:
       - http://localhost:3000
@@ -89,7 +92,7 @@ jobs:
     parameters:
       template: traditional-json
       reportDir: /zap/wrk/zap-report
-      reportFile: admin-security-report
+      reportFile: animals-admin-security-report
       reportTitle: 'Live-animals admin — security scan'
     sites:
       - http://localhost:3001
@@ -97,7 +100,7 @@ jobs:
     parameters:
       template: traditional-html
       reportDir: /zap/wrk/zap-report
-      reportFile: admin-security-report
+      reportFile: animals-admin-security-report
       reportTitle: 'Live-animals admin — security scan'
     sites:
       - http://localhost:3001
@@ -118,7 +121,7 @@ jobs:
     parameters:
       template: traditional-json
       reportDir: /zap/wrk/zap-report
-      reportFile: ins-security-report
+      reportFile: ins-frontend-security-report
       reportTitle: 'INS frontend — security scan'
     sites:
       - http://localhost:3002
@@ -126,7 +129,36 @@ jobs:
     parameters:
       template: traditional-html
       reportDir: /zap/wrk/zap-report
-      reportFile: ins-security-report
+      reportFile: ins-frontend-security-report
       reportTitle: 'INS frontend — security scan'
     sites:
       - http://localhost:3002
+
+  # animals-backend
+  - type: activeScan
+    parameters:
+      context: backend
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 90
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-backend-security-report
+      reportTitle: 'Live-animals backend — security scan'
+    sites:
+      - http://localhost:8085
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-backend-security-report
+      reportTitle: 'Live-animals backend — security scan'
+    sites:
+      - http://localhost:8085
