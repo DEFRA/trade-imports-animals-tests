@@ -1,3 +1,5 @@
+FROM zaproxy/zap-stable AS zap
+
 FROM mcr.microsoft.com/playwright:v1.61.1-jammy
 
 ENV TZ="Europe/London"
@@ -15,6 +17,12 @@ RUN apt-get update -qq \
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install
+
+# ZAP daemon for the security profile (see zap/README.md, entrypoint.sh) —
+# reuses the same image already proven locally, rather than a second install
+# mechanism.
+COPY --from=zap --chown=pwuser:pwuser /zap /zap
+ENV PATH="/zap:${PATH}"
 
 WORKDIR /app
 

@@ -15,9 +15,9 @@ export function createZapClient(): ZapClient {
 
 const PLAN_POLL_INTERVAL_MS = 2_000;
 // Headroom over the plan's worst case: every app's activeScan cap
-// (zap-automation.yaml) plus passive-wait/delay/report overhead. A safety
-// ceiling on the whole run, not a coverage cap — see zap-run-and-gate.ts
-// for that check.
+// (zap-automation-active.yaml — the passive plan has none) plus
+// passive-wait/delay/report overhead. A safety ceiling on the whole run,
+// not a coverage cap — see zap-run-and-gate.ts for that check.
 const PLAN_TIMEOUT_MS = 5 * 60 * 60 * 1000;
 
 // Runs against the already-running daemon via automation's runPlan, not

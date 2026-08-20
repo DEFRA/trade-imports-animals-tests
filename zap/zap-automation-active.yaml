@@ -1,0 +1,166 @@
+# ZAP Automation Framework plan — passive + active scan, scan execution and
+# report generation only. Gating is deliberately not done here; see
+# zap-run-and-gate.ts and rules.tsv. See zap-automation-passive.yaml for the
+# passive-only plan (no activeScan jobs) used where active scan's risk
+# isn't acceptable to run routinely.
+#
+# Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
+env:
+  contexts:
+    - name: frontend
+      urls:
+        - http://localhost:3000
+    - name: admin
+      urls:
+        - http://localhost:3001
+    - name: ins
+      urls:
+        - http://localhost:3002
+    - name: backend
+      urls:
+        - http://localhost:8085
+  parameters:
+    failOnError: false
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # ZAP's site-tree bookkeeping lags slightly behind the last spec to finish
+  # navigating — without this, the report job for whichever app finished
+  # last can run before its site is registered ("invalid site" from ZAP).
+  - type: delay
+    parameters:
+      time: '5'
+
+  # frontend — traditional-json/traditional-html (not the -plus "with
+  # requests and responses" variants, which write multiple files per alert
+  # and need a directory, not a single reportFile path)
+  - type: activeScan
+    parameters:
+      context: frontend
+      # Capped so a stuck scan can't hang forever — deliberately generous,
+      # since this profile runs on demand, not on every commit. Frontend's
+      # cap has to be the largest of the three: every spec that leaves a
+      # live, unsubmitted notification in this context adds real attack
+      # surface for active scan to cover, not just the one full-submission
+      # journey. See zap-run-and-gate.ts's truncation check: if this ever
+      # fires for real, raise the cap rather than treat it as complete.
+      maxScanDurationInMins: 90
+    # DOM XSS needs a real browser via Selenium, which the plain ZAP image
+    # doesn't ship — it fails to launch every time (harmless but noisy) and
+    # is also ~2 orders of magnitude slower than other rules. Reflected/
+    # stored XSS rules are unaffected and still run. Also a poor fit for
+    # this app regardless: GOV.UK Design System + Nunjucks server-rendered
+    # pages, GDS progressive enhancement keeps client-side DOM handling to a
+    # minimum, so DOM-based XSS is a small slice of the real risk surface.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-frontend-security-report
+      reportTitle: 'Live-animals frontend — security scan'
+    sites:
+      - http://localhost:3000
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-frontend-security-report
+      reportTitle: 'Live-animals frontend — security scan'
+    sites:
+      - http://localhost:3000
+
+  # admin
+  - type: activeScan
+    parameters:
+      context: admin
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 90
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-admin-security-report
+      reportTitle: 'Live-animals admin — security scan'
+    sites:
+      - http://localhost:3001
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-admin-security-report
+      reportTitle: 'Live-animals admin — security scan'
+    sites:
+      - http://localhost:3001
+
+  # ins-frontend
+  - type: activeScan
+    parameters:
+      context: ins
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 90
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: ins-frontend-security-report
+      reportTitle: 'INS frontend — security scan'
+    sites:
+      - http://localhost:3002
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: ins-frontend-security-report
+      reportTitle: 'INS frontend — security scan'
+    sites:
+      - http://localhost:3002
+
+  # animals-backend
+  - type: activeScan
+    parameters:
+      context: backend
+      # See the frontend activeScan job above for the cap's reasoning.
+      maxScanDurationInMins: 90
+    # DOM XSS disabled — see the frontend activeScan job above for why.
+    policyDefinition:
+      rules:
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: Off
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-backend-security-report
+      reportTitle: 'Live-animals backend — security scan'
+    sites:
+      - http://localhost:8085
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/wrk/zap-report
+      reportFile: animals-backend-security-report
+      reportTitle: 'Live-animals backend — security scan'
+    sites:
+      - http://localhost:8085

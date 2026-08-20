@@ -11,7 +11,8 @@ services:
     # transparent.
     network_mode: host
     volumes:
-      - ./zap-automation.yaml:/zap/plan/zap-automation.yaml:ro
+      - ./zap-automation-active.yaml:/zap/plan/zap-automation-active.yaml:ro
+      - ./zap-automation-passive.yaml:/zap/plan/zap-automation-passive.yaml:ro
       - ../zap-report:/zap/wrk/zap-report
     # Matches docker/stack/backend.compose.yml's healthcheck timing
     # convention for JVM services with add-ons to load. Pair with

@@ -2,13 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createZapClient, runAutomationPlan } from '@utils/zap-utils';
+import { zapAutomationPlan } from '@config/zap';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
-// The plan file's path as ZAP (running in its own container) sees it, per
-// the volume mount in zap/docker-compose.yml — not the host path where this
-// script itself resolves it, since ZAP can't see the host filesystem.
-const ZAP_AUTOMATION_PLAN = '/zap/plan/zap-automation.yaml';
 const RULES_FILE = pathFromHere('../zap/rules.tsv');
 // zap-report/ is bind-mounted into the ZAP container (see
 // zap/docker-compose.yml) so ZAP's report job and this host-side read see
@@ -73,8 +70,9 @@ async function loadReportAlerts(reportName: string): Promise<ZapAlert[]> {
   return (report.site ?? []).flatMap((site) => site.alerts ?? []);
 }
 
-// Must match maxScanDurationInMins in zap-automation.yaml (all three
-// activeScan jobs). A scan that finished at (or within a few seconds of)
+// Must match maxScanDurationInMins in zap-automation-active.yaml (all
+// activeScan jobs — the passive plan has none, so this simply never
+// matches there). A scan that finished at (or within a few seconds of)
 // this ceiling almost certainly got cut off mid-way rather than completing
 // naturally — an incomplete scan reporting "no findings" is a false clean,
 // not a real one, so this is treated as a hard failure rather than a
@@ -96,14 +94,14 @@ function findTruncatedActiveScans(info: string[]): string[] {
 
 async function main(): Promise<void> {
   const client = createZapClient();
-  const progress = await runAutomationPlan(client, ZAP_AUTOMATION_PLAN);
+  const progress = await runAutomationPlan(client, zapAutomationPlan);
 
   const failures: string[] = [];
 
   const truncatedScans = findTruncatedActiveScans(progress.info);
   if (truncatedScans.length > 0) {
     failures.push(
-      `Active scan hit its ${ACTIVE_SCAN_CAP_MINS}-minute cap and was likely cut short before covering everything — increase maxScanDurationInMins in zap-automation.yaml, don't treat this as a clean scan: ${truncatedScans.join('; ')}`,
+      `Active scan hit its ${ACTIVE_SCAN_CAP_MINS}-minute cap and was likely cut short before covering everything — increase maxScanDurationInMins in zap-automation-active.yaml, don't treat this as a clean scan: ${truncatedScans.join('; ')}`,
     );
   }
 

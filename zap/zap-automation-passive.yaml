@@ -1,6 +1,7 @@
-# ZAP Automation Framework plan — scan execution and report generation only.
-# Gating is deliberately not done here; see zap-run-and-gate.ts and
-# rules.tsv.
+# ZAP Automation Framework plan — passive scan only, no activeScan jobs.
+# Safe to run against a real deployed environment on demand, no destructive
+# risk. Gating is deliberately not done here; see zap-run-and-gate.ts and
+# rules.tsv. See zap-automation-active.yaml for the passive + active plan.
 #
 # Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
 env:
@@ -36,29 +37,6 @@ jobs:
   # frontend — traditional-json/traditional-html (not the -plus "with
   # requests and responses" variants, which write multiple files per alert
   # and need a directory, not a single reportFile path)
-  - type: activeScan
-    parameters:
-      context: frontend
-      # Capped so a stuck scan can't hang forever — deliberately generous,
-      # since this profile runs on demand, not on every commit. Frontend's
-      # cap has to be the largest of the three: every spec that leaves a
-      # live, unsubmitted notification in this context adds real attack
-      # surface for active scan to cover, not just the one full-submission
-      # journey. See zap-run-and-gate.ts's truncation check: if this ever
-      # fires for real, raise the cap rather than treat it as complete.
-      maxScanDurationInMins: 90
-    # DOM XSS needs a real browser via Selenium, which the plain ZAP image
-    # doesn't ship — it fails to launch every time (harmless but noisy) and
-    # is also ~2 orders of magnitude slower than other rules. Reflected/
-    # stored XSS rules are unaffected and still run. Also a poor fit for
-    # this app regardless: GOV.UK Design System + Nunjucks server-rendered
-    # pages, GDS progressive enhancement keeps client-side DOM handling to a
-    # minimum, so DOM-based XSS is a small slice of the real risk surface.
-    policyDefinition:
-      rules:
-        - id: 40026
-          name: Cross Site Scripting (DOM Based)
-          threshold: Off
   - type: report
     parameters:
       template: traditional-json
@@ -77,17 +55,6 @@ jobs:
       - http://localhost:3000
 
   # admin
-  - type: activeScan
-    parameters:
-      context: admin
-      # See the frontend activeScan job above for the cap's reasoning.
-      maxScanDurationInMins: 90
-    # DOM XSS disabled — see the frontend activeScan job above for why.
-    policyDefinition:
-      rules:
-        - id: 40026
-          name: Cross Site Scripting (DOM Based)
-          threshold: Off
   - type: report
     parameters:
       template: traditional-json
@@ -106,17 +73,6 @@ jobs:
       - http://localhost:3001
 
   # ins-frontend
-  - type: activeScan
-    parameters:
-      context: ins
-      # See the frontend activeScan job above for the cap's reasoning.
-      maxScanDurationInMins: 90
-    # DOM XSS disabled — see the frontend activeScan job above for why.
-    policyDefinition:
-      rules:
-        - id: 40026
-          name: Cross Site Scripting (DOM Based)
-          threshold: Off
   - type: report
     parameters:
       template: traditional-json
@@ -135,17 +91,6 @@ jobs:
       - http://localhost:3002
 
   # animals-backend
-  - type: activeScan
-    parameters:
-      context: backend
-      # See the frontend activeScan job above for the cap's reasoning.
-      maxScanDurationInMins: 90
-    # DOM XSS disabled — see the frontend activeScan job above for why.
-    policyDefinition:
-      rules:
-        - id: 40026
-          name: Cross Site Scripting (DOM Based)
-          threshold: Off
   - type: report
     parameters:
       template: traditional-json
