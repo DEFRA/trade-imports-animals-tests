@@ -29,6 +29,9 @@ import { SignOutPage } from './auth/sign-out-page';
 import { OrganisationPickerPage } from './auth/organisation-picker-page';
 import { InsAddressBookListPage } from './ins/ins-address-book-list-page';
 import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
+import { InsAddressBookViewPage } from './ins/ins-address-book-view-page';
+import { InsAddressBookEditPage } from './ins/ins-address-book-edit-page';
+import { InsAddressBookDeletePage } from './ins/ins-address-book-delete-page';
 
 export function createPageObjects(page: Page) {
   return {
@@ -67,6 +70,9 @@ export function createPageObjects(page: Page) {
     adminOutboxEvents: new AdminOutboxEventsPage(page),
     insAddressBookList: new InsAddressBookListPage(page),
     insAddressBookAdd: new InsAddressBookAddPage(page),
+    insAddressBookView: new InsAddressBookViewPage(page),
+    insAddressBookEdit: new InsAddressBookEditPage(page),
+    insAddressBookDelete: new InsAddressBookDeletePage(page),
   };
 }
 
