@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createZapClient, runAutomationPlan } from '@utils/zap-utils';
-import { zapAutomationPlan } from '@config/zap';
+import { zapAutomationPlan, zapProfile } from '@config/zap';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
@@ -11,12 +11,9 @@ const RULES_FILE = pathFromHere('../zap/rules.tsv');
 // zap/docker-compose.yml) so ZAP's report job and this host-side read see
 // the same files.
 const REPORT_DIR = pathFromHere('../zap-report');
-const REPORT_NAMES = [
-  'animals-frontend-security-report',
-  'animals-admin-security-report',
-  'ins-frontend-security-report',
-  'animals-backend-security-report',
-];
+// Matches reportFile in zap-automation-*.yaml — one combined report
+// covering every site ZAP touched this run.
+const REPORT_NAME = 'security-scan';
 
 type RuleAction = 'IGNORE' | 'WARN' | 'FAIL';
 
@@ -26,10 +23,13 @@ interface ZapAlert {
   name?: string;
   riskcode: string;
   riskdesc?: string;
+  // ZAP's own occurrence count for this alert type — how many pages/
+  // requests it was found on, not how many distinct alert types exist.
+  count?: string;
 }
 
 interface ZapReport {
-  site?: Array<{ alerts?: ZapAlert[] }>;
+  site?: Array<{ '@name'?: string; alerts?: ZapAlert[] }>;
 }
 
 // zap/rules.tsv — OWASP's own convention (from zap-baseline.py/
@@ -63,11 +63,175 @@ function resolveAction(alert: ZapAlert, rules: Map<string, RuleAction>): RuleAct
   return Number(alert.riskcode) === 3 ? 'FAIL' : 'WARN';
 }
 
-async function loadReportAlerts(reportName: string): Promise<ZapAlert[]> {
-  const reportPath = path.join(REPORT_DIR, `${reportName}.json`);
+interface SiteAlerts {
+  siteName: string;
+  alerts: ZapAlert[];
+}
+
+// ZAP's site tree can split the same host into more than one <site> node
+// (seen locally: two entries both named http://localhost:8085) — group by
+// name and dedupe by pluginid within each group so a finding recorded
+// under both nodes isn't double-counted, while the same pluginid on two
+// genuinely different hosts still counts separately. Both the site names
+// and the alerts come entirely from the report itself — nothing here is
+// cross-referenced against the ZAP_TRADE_IMPORTS_*_URL env vars.
+async function loadReportSites(): Promise<SiteAlerts[]> {
+  const reportPath = path.join(REPORT_DIR, `${REPORT_NAME}.json`);
   const content = await fs.readFile(reportPath, 'utf8');
   const report = JSON.parse(content) as ZapReport;
-  return (report.site ?? []).flatMap((site) => site.alerts ?? []);
+
+  const groups = new Map<string, Map<string, ZapAlert>>();
+  for (const site of report.site ?? []) {
+    const siteName = site['@name'] ?? 'unknown';
+    const group = groups.get(siteName) ?? new Map<string, ZapAlert>();
+    groups.set(siteName, group);
+    for (const alert of site.alerts ?? []) {
+      if (!group.has(alert.pluginid)) group.set(alert.pluginid, alert);
+    }
+  }
+
+  return [...groups.entries()]
+    .map(([siteName, alertMap]) => ({ siteName, alerts: [...alertMap.values()] }))
+    .sort((a, b) => a.siteName.localeCompare(b.siteName));
+}
+
+// ZAP's own riskcode convention (see resolveAction's High-risk check below).
+const RISK_LABELS: Record<string, string> = { '3': 'High', '2': 'Medium', '1': 'Low', '0': 'Informational' };
+
+interface SiteSummary {
+  siteName: string;
+  counts: Record<string, number>;
+  failCount: number;
+}
+
+function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>): SiteSummary {
+  const counts: Record<string, number> = { High: 0, Medium: 0, Low: 0, Informational: 0 };
+  let failCount = 0;
+  for (const alert of site.alerts) {
+    const label = RISK_LABELS[alert.riskcode] ?? 'Informational';
+    counts[label] += Number(alert.count ?? 1);
+    // Gated per alert type, not per instance — an 81-instance finding that
+    // fails the gate is one thing to fix, not 81.
+    if (resolveAction(alert, rules) === 'FAIL') failCount += 1;
+  }
+  return { siteName: site.siteName, counts, failCount };
+}
+
+// CDP's own "Report" link is driven by whichever directory gets published —
+// it looks for index.html inside it (see entrypoint.sh). This is that
+// landing page: one row per site the report covers, so anyone fixing a
+// finding in app code can see which host it's on. It's one combined file
+// covering every site, so the file links themselves live once in their own
+// table below, not repeated per row.
+async function writeIndexHtml(
+  summaries: SiteSummary[],
+  truncatedScans: string[],
+  failed: boolean,
+  started: string,
+  finished: string,
+): Promise<void> {
+  const rows = summaries
+    .map(
+      (s) => `
+        <tr>
+          <td>${s.siteName}</td>
+          <td class="${s.failCount > 0 ? 'fail' : 'pass'}">${s.failCount > 0 ? 'FAIL' : 'pass'}</td>
+          <td>${s.counts.High}</td>
+          <td>${s.counts.Medium}</td>
+          <td>${s.counts.Low}</td>
+          <td>${s.counts.Informational}</td>
+        </tr>`,
+    )
+    .join('');
+
+  const totals = summaries.reduce(
+    (acc, s) => ({
+      High: acc.High + s.counts.High,
+      Medium: acc.Medium + s.counts.Medium,
+      Low: acc.Low + s.counts.Low,
+      Informational: acc.Informational + s.counts.Informational,
+    }),
+    { High: 0, Medium: 0, Low: 0, Informational: 0 },
+  );
+
+  const truncationSection =
+    truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="color-scheme" content="light dark" />
+<title>ZAP security scan — ${failed ? 'FAILED' : 'passed'}</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --border: #ccc;
+  --th-bg: #f0f0f0;
+  --fail: #b30000;
+  --pass: #007a3d;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --text: #e0e0e0;
+    --border: #444;
+    --th-bg: #2a2a2a;
+    --fail: #ff6b6b;
+    --pass: #4caf80;
+  }
+}
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 2rem;
+  background: var(--bg);
+  color: var(--text);
+}
+h2 { font-size: 1rem; margin: 2rem 0 0.5rem; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+th { background: var(--th-bg); }
+tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
+.fail { color: var(--fail); }
+.pass { color: var(--pass); }
+</style>
+</head>
+<body>
+<h1>ZAP security scan — <span class="${failed ? 'fail' : 'pass'}">${failed ? 'FAILED' : 'passed'}</span></h1>
+<p>profile: ${zapProfile}</p>
+<p>started: ${started}</p>
+<p>finished: ${finished}</p>
+${truncationSection}
+<h2>Sites</h2>
+<table>
+<thead><tr><th>Site</th><th>Result</th><th>High</th><th>Medium</th><th>Low</th><th>Informational</th></tr></thead>
+<tbody>${rows}</tbody>
+<tfoot>
+<tr>
+  <td>Total</td>
+  <td>—</td>
+  <td>${totals.High}</td>
+  <td>${totals.Medium}</td>
+  <td>${totals.Low}</td>
+  <td>${totals.Informational}</td>
+</tr>
+</tfoot>
+</table>
+<h2>Artefacts</h2>
+<table>
+<thead><tr><th>File</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><a href="${REPORT_NAME}.html">${REPORT_NAME}.html</a></td><td>Full alert detail for every site above, human-readable</td></tr>
+<tr><td><a href="${REPORT_NAME}.json">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
+<tr><td><a href="zap.log">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
+</tbody>
+</table>
+</body>
+</html>
+`;
+
+  await fs.writeFile(path.join(REPORT_DIR, 'index.html'), html, 'utf8');
 }
 
 // Must match maxScanDurationInMins in zap-automation-active.yaml (all
@@ -106,15 +270,23 @@ async function main(): Promise<void> {
   }
 
   const rules = await loadRules();
-  for (const reportName of REPORT_NAMES) {
-    const alerts = await loadReportAlerts(reportName);
-    for (const alert of alerts) {
+  const sites = await loadReportSites();
+  const summaries = sites.map((site) => summariseSite(site, rules));
+
+  for (const site of sites) {
+    for (const alert of site.alerts) {
       if (resolveAction(alert, rules) === 'FAIL') {
         const description = alert.alert ?? alert.name ?? 'unknown alert';
-        failures.push(`[${reportName}] ${alert.pluginid} ${description} (${alert.riskdesc ?? alert.riskcode})`);
+        failures.push(`[${site.siteName}] ${alert.pluginid} ${description} (${alert.riskdesc ?? alert.riskcode})`);
       }
     }
   }
+
+  // Written before the throw below, not after — a failing run is exactly
+  // when someone most needs the report, and entrypoint.sh's publish step
+  // runs regardless of this script's exit code, so the index has to exist
+  // on disk either way.
+  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished);
 
   if (failures.length > 0) {
     throw new Error(`ZAP security scan found ${failures.length} failure(s):\n${failures.join('\n')}`);

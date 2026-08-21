@@ -21,11 +21,23 @@ export const zapPort = process.env.ZAP_PORT || '8090';
 // repo. entrypoint.sh overrides this for CDP; local uses the default.
 const zapPlanDir = process.env.ZAP_PLAN_DIR || '/zap/plan';
 
-// Filename picked by PROFILE, not set independently — one thing to keep in
-// sync, not two. Fails safe: anything other than an explicit, exact
-// 'security:active' gets the passive plan, not the reverse.
+// Single source of truth for which plan is running — the filename below and
+// the profile label shown in index.html both derive from this rather than
+// checking process.env.PROFILE independently. Fails safe: anything other
+// than an explicit, exact 'security:active' is treated as passive, not the
+// reverse.
+const isActiveProfile = process.env.PROFILE === 'security:active';
+
+export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'passive';
+
 function zapAutomationPlanFile(): string {
-  return process.env.PROFILE === 'security:active' ? 'zap-automation-active.yaml' : 'zap-automation-passive.yaml';
+  return isActiveProfile ? 'zap-automation-active.yaml' : 'zap-automation-passive.yaml';
 }
 
 export const zapAutomationPlan = `${zapPlanDir}/${zapAutomationPlanFile()}`;
+
+// Registers contexts (dataDrivenNodes, excludePaths) before any traffic
+// exists, so new site-tree nodes are classified correctly as the Playwright
+// run creates them — see zap-automation-context.yaml's header for why this
+// has to run before, not as part of, zapAutomationPlan above.
+export const zapContextPlan = `${zapPlanDir}/zap-automation-context.yaml`;

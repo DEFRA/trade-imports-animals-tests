@@ -31,10 +31,17 @@ container's life.
 ## Files
 
 - `docker-compose.yml` — standalone ZAP daemon, proxy on `localhost:8090` by default (`ZAP_PORT` overrides).
+- `zap-automation-context.yaml` — context registration only (dataDrivenNodes,
+  excludePaths), no scanning. Run via `_zap_prime_context` _before_ the
+  Playwright run, because Structural Modifiers only apply to site-tree nodes
+  as they're added — registering the context after traffic already exists
+  (which is when the two plans below would otherwise first create it) is too
+  late. Keep its `env.contexts` block in sync with the two plans below.
 - `zap-automation-passive.yaml` — the Automation Framework plan: scopes each
-  app as its own context, generates a JSON + HTML report per app from
-  passive scanning alone (automatic, via the proxy). The default here and
-  on CDP — safe to run on demand with no destructive risk.
+  app as its own context, generates one combined JSON + HTML report covering
+  every site ZAP touched from passive scanning alone (automatic, via the
+  proxy). The default here and on CDP — safe to run on demand with no
+  destructive risk.
 - `zap-automation-active.yaml` — the same, plus a scoped active scan per
   context once passive scanning settles. Safe to run routinely locally
   (disposable), invoked deliberately elsewhere.

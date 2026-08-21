@@ -1,5 +1,15 @@
 FROM zaproxy/zap-stable AS zap
 
+# Client Side Integration tries to create a Firefox profile on every daemon
+# startup; this image never ships Firefox (only /zap gets copied below), so
+# it fails every time — harmless but noisy. zap.sh -addonuninstall only
+# writes state into ~/.ZAP, which isn't part of the final image and is fresh
+# in every container anyway, so it doesn't stick. Deleting the add-on's
+# bundled plugin file does: ZAP loads add-ons straight from /zap/plugin/*.zap
+# at startup, and won't re-fetch a removed one via auto-update (confirmed —
+# auto-update only updates add-ons that are already installed).
+RUN rm -f /zap/plugin/client-alpha-*.zap
+
 FROM mcr.microsoft.com/playwright:v1.61.1-jammy
 
 ENV TZ="Europe/London"
