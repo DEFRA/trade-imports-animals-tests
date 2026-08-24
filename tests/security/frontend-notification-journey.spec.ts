@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Security scan (frontend)', { tag: '@security' }, () => {
-  test('routes the notification journey through the ZAP proxy', async ({ journey, pages, journeyContext }) => {
+test.describe('Security scan (frontend, submitted)', { tag: '@security' }, () => {
+  test('routes a submitted notification journey through the ZAP proxy', async ({ journey, pages, journeyContext }) => {
     test.slow();
     await journey.submitNotification();
 

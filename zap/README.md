@@ -9,7 +9,7 @@ this doc only covers running locally.
 ## Running locally
 
 1. Bring up the app stack from the workspace root: `./scripts/stack/run-stack.sh`
-2. Start ZAP and wait for it to be ready: `docker compose -f zap/docker-compose.yml up -d --wait`
+2. Back in this repo's root (`trade-imports-animals-tests/`), start ZAP and wait for it to be ready: `docker compose -f zap/docker-compose.yml up -d --wait`
    (`--wait` blocks until the container's healthcheck reports healthy — same
    convention `run-stack.sh` uses for the app stack — so this doesn't return
    until ZAP is actually accepting requests, not just started.)

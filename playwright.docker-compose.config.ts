@@ -33,7 +33,7 @@ const dockerComposeConfig = withServiceBaseUrls(
 /**
  * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).
  * In-container runs (PLAYWRIGHT_IN_CONTAINER=1) add a Chromium host-resolver rule for OIDC localhost redirects.
- * PROFILE=security (security profile only) routes traffic through ZAP's proxy.
+ * PROFILE=security or security:active routes traffic through ZAP's proxy.
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig(

@@ -1,4 +1,4 @@
-FROM zaproxy/zap-stable AS zap
+FROM zaproxy/zap-stable:2.17.0 AS zap
 
 # Client Side Integration tries to create a Firefox profile on every daemon
 # startup; this image never ships Firefox (only /zap gets copied below), so

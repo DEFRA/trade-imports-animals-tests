@@ -106,7 +106,11 @@ jobs:
       # live, unsubmitted notification in this context adds real attack
       # surface for active scan to cover, not just the one full-submission
       # journey. See zap-run-and-gate.ts's truncation check: if this ever
-      # fires for real, raise the cap rather than treat it as complete.
+      # fires for real, raise this value, the other three activeScan jobs'
+      # maxScanDurationInMins below, and ACTIVE_SCAN_CAP_MINS in
+      # utils/zap-run-and-gate.ts together — they must match exactly, or the
+      # truncation-detection heuristic desyncs (false truncation failures,
+      # or a missed real one).
       maxScanDurationInMins: 90
     # DOM XSS needs a real browser via Selenium, which the plain ZAP image
     # doesn't ship — it fails to launch every time (harmless but noisy) and

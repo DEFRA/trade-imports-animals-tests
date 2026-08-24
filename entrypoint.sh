@@ -91,6 +91,22 @@ run_security_profile() {
     # ready), and the readiness failure itself is exactly the kind of thing
     # zap.log explains. Returning early here used to skip both.
     echo "ZAP did not become ready before timing out" >> FAILED
+
+    # No scan ran, so zap-run-and-gate.ts's index.html (which needs a
+    # completed scan's alert data) never gets written either — publish a
+    # minimal one of our own so the published report explains the failure
+    # instead of shipping a bare zap.log with no landing page.
+    cat > "$REPORT_DIR/index.html" <<EOF
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>ZAP security scan — FAILED</title></head>
+<body>
+<h1>ZAP security scan — FAILED</h1>
+<p>ZAP did not become ready before timing out — no scan ran.</p>
+<p>See <a href="zap.log">zap.log</a> for diagnostics.</p>
+</body>
+</html>
+EOF
   fi
 
   # wait, not just kill: zap.log is only complete once the process has

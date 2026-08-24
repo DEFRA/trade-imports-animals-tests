@@ -1,7 +1,7 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Security scan (admin)', { tag: '@security' }, () => {
-  test('routes the admin journey through the ZAP proxy', async ({ apiJourney, adminNavigation, pages }) => {
+  test('routes admin navigation through the ZAP proxy', async ({ apiJourney, adminNavigation, pages }) => {
     test.slow();
     // Seeded via API, bypassing the ZAP proxy on purpose — the frontend
     // submission journey is already scanned elsewhere.
