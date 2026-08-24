@@ -30,7 +30,7 @@ container's life.
 
 ## Files
 
-- `docker-compose.yml` — standalone ZAP daemon, proxy on `localhost:8090` by default (`ZAP_PORT` overrides).
+- `docker-compose.yml` — standalone ZAP daemon, proxy on `localhost:9095` by default (`ZAP_PORT` overrides).
 - `zap-automation-context.yaml` — context registration only (dataDrivenNodes,
   excludePaths), no scanning. Run via `_zap_prime_context` _before_ the
   Playwright run, because Structural Modifiers only apply to site-tree nodes

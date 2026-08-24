@@ -11,9 +11,11 @@
 export const zapEnabled = process.env.PROFILE === 'security' || process.env.PROFILE === 'security:active';
 
 export const zapApiKey = process.env.ZAP_API_KEY || 'local-dev-key';
-// ZAP's own documented example alternate port, clear of this workspace's
-// service-port cluster (8085-8089).
-export const zapPort = process.env.ZAP_PORT || '8090';
+// Deliberately outside this workspace's two growing port sequences (3xxx
+// Node apps, 808x Java services currently at 8085-8089) rather than the
+// next free slot after either — a workspace-assigned range only grows, so
+// "next free slot" today is "taken by the next new service" eventually.
+export const zapPort = process.env.ZAP_PORT || '9095';
 
 // Directory containing the two plan files — differs by environment: local
 // ZAP runs in its own container with the plan files bind-mounted here;

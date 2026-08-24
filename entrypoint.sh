@@ -57,7 +57,7 @@ run_security_profile() {
   mkdir -p /app/zap-report /zap/wrk
   ln -sfn /app/zap-report /zap/wrk/zap-report
 
-  zap.sh -daemon -host 127.0.0.1 -port "${ZAP_PORT:-8090}" \
+  zap.sh -daemon -host 127.0.0.1 -port "${ZAP_PORT:-9095}" \
     -config api.key="$ZAP_API_KEY" \
     -config api.addrs.addr.name=.* \
     -config api.addrs.addr.regex=true \
@@ -68,7 +68,7 @@ run_security_profile() {
   zap_ready=false
   i=0
   while [ $i -lt 10 ]; do
-    if curl --silent --output /dev/null --fail "http://127.0.0.1:${ZAP_PORT:-8090}/"; then
+    if curl --silent --output /dev/null --fail "http://127.0.0.1:${ZAP_PORT:-9095}/"; then
       zap_ready=true
       break
     fi
