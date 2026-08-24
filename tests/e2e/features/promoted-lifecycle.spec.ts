@@ -34,9 +34,12 @@ test.describe('Notification lifecycle', { tag: ['@compose', '@integration'] }, (
     const cancelled = await notificationApi.cancelAmendNotification(id);
     expect(cancelled.status).toBe(notificationStatuses.submitted);
 
-    // Copy no longer dedupes (Idempotency-Key dropped pending EUDPA-314) — two calls produce two distinct copies.
-    const firstCopy = await notificationApi.copyNotification(id);
-    const secondCopy = await notificationApi.copyNotification(id);
+    // Copy no longer dedupes — two calls produce two distinct copies.
+    // Copy is a WYSIWYG operation post-EUDPA-314, so the caller passes the
+    // source's current concurrencyToken; copy does not mutate the source, so
+    // both calls carry the same token.
+    const firstCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
+    const secondCopy = await notificationApi.copyNotification(id, cancelled.concurrencyToken);
     expect(firstCopy.referenceNumber).not.toBe(id);
     expect(secondCopy.referenceNumber).not.toBe(firstCopy.referenceNumber);
     expect(firstCopy.status).toBe(notificationStatuses.draft);

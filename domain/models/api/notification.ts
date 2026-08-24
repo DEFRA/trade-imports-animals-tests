@@ -117,4 +117,5 @@ export type Notification = {
   updated?: string;
   submittedAt?: string | null;
   fulfilments?: PersistedFulfilmentEntry[];
+  concurrencyToken?: number;
 };

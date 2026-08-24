@@ -61,8 +61,8 @@ export class NotificationApiClient {
     return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
   }
 
-  async copyNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy`);
+  async copyNotification(id: string, concurrencyToken: number): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`);
   }
 
   async softDeleteNotification(id: string): Promise<Notification> {
