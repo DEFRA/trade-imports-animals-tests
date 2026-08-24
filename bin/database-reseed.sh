@@ -10,7 +10,7 @@ set -eu
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TESTS_REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKSPACE_BOUNCE_MONGO="$TESTS_REPO_ROOT/../../scripts/stack/bounce-mongo.sh"
-WORKSPACE_PROJECT="trade-imports-animals"
+WORKSPACE_PROJECT="trade-imports"
 
 project="$(docker ps --filter 'label=com.docker.compose.service=mongodb' --format '{{.Label "com.docker.compose.project"}}' | head -1)"
 
