@@ -1,7 +1,7 @@
 #!/bin/sh
 # Wipe mongo's volume and recreate the container so init scripts re-run on
 # a fresh DB. Delegates to the workspace stack's bounce-mongo.sh
-# (https://github.com/DEFRA/trade-imports-animals-workspace) — the workspace
+# (https://github.com/DEFRA/trade-imports-workspace) — the workspace
 # stack is the only compose stack.
 #
 # Errors out if the stack isn't up — this script is a reseed, not a stand-up.

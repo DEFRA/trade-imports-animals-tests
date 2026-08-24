@@ -31,7 +31,7 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
-    await pages.page.getByRole('link', { name: 'Back' }).click();
+    await pages.consignmentDetails.linkBack.click();
     await expect(pages.commoditySelection.species('Bos taurus')).toBeChecked();
     await expect(pages.commoditySelection.species('Felis catus')).toBeChecked();
   });
