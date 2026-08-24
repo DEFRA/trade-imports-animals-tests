@@ -34,6 +34,18 @@ export class BasePage {
     return this.page.getByRole('link', { name: 'Sign out' });
   }
 
+  /**
+   * `exact` is load-bearing, not decoration. Playwright matches an accessible
+   * name as a case-insensitive SUBSTRING unless you opt out, and the service's
+   * alpha phase banner links "give your feedback by email" on every page —
+   * "feed(back)". Without `exact` this resolves to two links and every click
+   * fails on strict mode. Reach for this getter rather than rolling the locator
+   * per spec, so the guard cannot be forgotten again.
+   */
+  get linkBack(): Locator {
+    return this.page.getByRole('link', { name: 'Back', exact: true });
+  }
+
   async navigateToFrontend(path: string = '/'): Promise<void> {
     const baseUrl = requireBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
     await this.page.goto(`${baseUrl}${path}`);

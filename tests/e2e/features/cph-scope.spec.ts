@@ -59,7 +59,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // value, and the back link returns to the addresses hub.
     await cphRow.getByRole('link', { name: 'Change' }).click();
     await expect(pages.cphNumber.cphNumber).toHaveValue('123456789');
-    await page.getByRole('link', { name: 'Back' }).click();
+    await pages.cphNumber.linkBack.click();
     await expect(pages.addresses.heading).toBeVisible();
 
     // The sequential fallback stays: Continue from the addresses landing still
