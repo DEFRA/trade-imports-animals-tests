@@ -57,8 +57,9 @@ run_security_profile() {
   mkdir -p /app/zap-report /zap/wrk
   ln -sfn /app/zap-report /zap/wrk/zap-report
 
-  # Suppresses ZAP's check-for-updates call on startup (the news feed has
-  # no equivalent flag — see the /etc/hosts blackhole in the Dockerfile).
+  # CDP has no internet route, so ZAP's check-for-updates call would
+  # otherwise stall on startup instead of failing fast. No equivalent flag
+  # exists for ZAP's news-feed call, so that one still stalls briefly.
   zap.sh -daemon -host 127.0.0.1 -port "${ZAP_PORT:-9095}" \
     -config api.key="$ZAP_API_KEY" \
     -config api.addrs.addr.name=.* \
