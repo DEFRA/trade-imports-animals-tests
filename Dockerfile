@@ -34,6 +34,11 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 COPY --from=zap --chown=pwuser:pwuser /zap /zap
 ENV PATH="/zap:${PATH}"
 
+# CDP has no internet route — ZAP's startup calls to these hosts would
+# otherwise stall ~20s each on a dropped connection instead of failing
+# fast, blowing entrypoint.sh's readiness timeout. Blackhole both.
+RUN printf '127.0.0.1 cfu.zaproxy.org\n127.0.0.1 news.zaproxy.org\n' >> /etc/hosts
+
 WORKDIR /app
 
 # Install Node dependencies from lockfile; skip lifecycle scripts for security
