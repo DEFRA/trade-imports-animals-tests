@@ -107,7 +107,7 @@ run_security_profile() {
 <body>
 <h1>ZAP security scan — FAILED</h1>
 <p>ZAP did not become ready before timing out — no scan ran.</p>
-<p>See <a href="zap.log">zap.log</a> for diagnostics.</p>
+<p>See <a href="zap.html">zap.log</a> for diagnostics.</p>
 </body>
 </html>
 EOF
@@ -121,10 +121,19 @@ EOF
 
   # ZAP's own internal log — separate from what it prints to stdout, and
   # the only place some of its own errors ever get written ("ZAP errors
-  # logged - see the zap.log file for details"). Copied after kill so it's
-  # complete, and into $REPORT_DIR so it survives the container being torn
-  # down — linked from index.html (see zap-run-and-gate.ts).
-  cp "$HOME/.ZAP/zap.log" "$REPORT_DIR/zap.log" || echo "could not copy ZAP's own log (zap.log) into $REPORT_DIR"
+  # logged - see the zap.log file for details"). Read after kill so it's
+  # complete, and written as escaped HTML rather than plain text: CDP's
+  # report viewer 403s a bare .log file, but .html files (this one included)
+  # already serve fine — linked from index.html (see zap-run-and-gate.ts).
+  if [ -f "$HOME/.ZAP/zap.log" ]; then
+    {
+      echo '<!doctype html><meta charset="utf-8"><title>zap.log</title><pre>'
+      sed -e 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' "$HOME/.ZAP/zap.log"
+      echo '</pre>'
+    } > "$REPORT_DIR/zap.html"
+  else
+    echo "could not find ZAP's own log (zap.log) to publish into $REPORT_DIR"
+  fi
 }
 
 case "${PROFILE:-default}" in

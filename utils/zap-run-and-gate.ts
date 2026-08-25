@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createZapClient, runAutomationPlan } from '@utils/zap-utils';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
+import { getEnvironment } from '@utils/playwright/environment';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
@@ -157,6 +158,13 @@ async function writeIndexHtml(
   const truncationSection =
     truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
 
+  // CDP's report viewer 403s a bare .log file, but serves .html fine (this
+  // page proves it) — entrypoint.sh writes the escaped log there under that
+  // name for CDP runs. Locally there's no such viewer and no equivalent
+  // write step, so the plain file the docker-compose bind mount already
+  // produces is still what's on disk (see zap/docker-compose.yml).
+  const zapLogHref = getEnvironment() ? 'zap.html' : 'zap.log';
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -224,7 +232,7 @@ ${truncationSection}
 <tbody>
 <tr><td><a href="${REPORT_NAME}.html">${REPORT_NAME}.html</a></td><td>Full alert detail for every site above, human-readable</td></tr>
 <tr><td><a href="${REPORT_NAME}.json">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
-<tr><td><a href="zap.log">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
+<tr><td><a href="${zapLogHref}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
 </tbody>
 </table>
 </body>
