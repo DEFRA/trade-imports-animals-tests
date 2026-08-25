@@ -57,16 +57,15 @@ run_security_profile() {
   mkdir -p /app/zap-report /zap/wrk
   ln -sfn /app/zap-report /zap/wrk/zap-report
 
-  # CDP has no internet route, so ZAP's check-for-updates call would
-  # otherwise stall on startup instead of failing fast. No equivalent flag
-  # exists for ZAP's news-feed call, so that one still stalls briefly.
-  zap.sh -daemon -host 127.0.0.1 -port "${ZAP_PORT:-9095}" \
+  # CDP has no internet route, so ZAP's check-for-updates/news/telemetry
+  # calls would otherwise stall instead of failing fast. -silent is ZAP's
+  # own documented flag for all three (zaproxy.org/faq/what-calls-home-
+  # does-zap-make).
+  zap.sh -daemon -silent -host 127.0.0.1 -port "${ZAP_PORT:-9095}" \
     -config api.key="$ZAP_API_KEY" \
     -config api.addrs.addr.name=.* \
     -config api.addrs.addr.regex=true \
-    -config anticsrf.tokens.token.name=crumb \
-    -config start.checkForUpdates=false \
-    -config start.checkAddonUpdates=false &
+    -config anticsrf.tokens.token.name=crumb &
   zap_pid=$!
 
   # Mirrors zap/docker-compose.yml's healthcheck timing (5s interval, 10 retries).
