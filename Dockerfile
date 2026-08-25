@@ -1,3 +1,15 @@
+FROM zaproxy/zap-stable:2.17.0 AS zap
+
+# Client Side Integration tries to create a Firefox profile on every daemon
+# startup; this image never ships Firefox (only /zap gets copied below), so
+# it fails every time — harmless but noisy. zap.sh -addonuninstall only
+# writes state into ~/.ZAP, which isn't part of the final image and is fresh
+# in every container anyway, so it doesn't stick. Deleting the add-on's
+# bundled plugin file does: ZAP loads add-ons straight from /zap/plugin/*.zap
+# at startup, and won't re-fetch a removed one via auto-update (confirmed —
+# auto-update only updates add-ons that are already installed).
+RUN rm -f /zap/plugin/client-alpha-*.zap
+
 FROM mcr.microsoft.com/playwright:v1.61.1-jammy
 
 ENV TZ="Europe/London"
@@ -15,6 +27,12 @@ RUN apt-get update -qq \
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install
+
+# ZAP daemon for the security profile (see zap/README.md, entrypoint.sh) —
+# reuses the same image already proven locally, rather than a second install
+# mechanism.
+COPY --from=zap --chown=pwuser:pwuser /zap /zap
+ENV PATH="/zap:${PATH}"
 
 WORKDIR /app
 
