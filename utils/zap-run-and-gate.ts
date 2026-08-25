@@ -12,6 +12,10 @@ const RULES_FILE = pathFromHere('../zap/rules.tsv');
 // zap/docker-compose.yml) so ZAP's report job and this host-side read see
 // the same files.
 const REPORT_DIR = pathFromHere('../zap-report');
+// shared-config.ts's html reporter always writes here (no outputFolder
+// override, either config) — nested under REPORT_DIR below so it publishes
+// alongside everything else, with no separate S3 path needed on CDP.
+const PLAYWRIGHT_REPORT_DIR = pathFromHere('../playwright-report');
 // Matches reportFile in zap-automation-*.yaml — one combined report
 // covering every site ZAP touched this run.
 const REPORT_NAME = 'security-scan';
@@ -165,6 +169,17 @@ async function writeIndexHtml(
   // produces is still what's on disk (see zap/docker-compose.yml).
   const zapLogHref = getEnvironment() ? 'zap.html' : 'zap.log';
 
+  // Copied whole, not just index.html: Playwright's HTML report embeds test
+  // results inline, but attachments (screenshots, traces) sit alongside it
+  // in data/ and would 404 without it. Same copy either environment — no
+  // getEnvironment() branching needed, since publishing it is just a matter
+  // of it existing under REPORT_DIR before entrypoint.sh's one upload step.
+  try {
+    await fs.cp(PLAYWRIGHT_REPORT_DIR, path.join(REPORT_DIR, 'playwright-report'), { recursive: true });
+  } catch {
+    console.error(`could not copy Playwright's own report from ${PLAYWRIGHT_REPORT_DIR}`);
+  }
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -232,6 +247,7 @@ ${truncationSection}
 <tbody>
 <tr><td><a href="${REPORT_NAME}.html">${REPORT_NAME}.html</a></td><td>Full alert detail for every site above, human-readable</td></tr>
 <tr><td><a href="${REPORT_NAME}.json">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
+<tr><td><a href="playwright-report/index.html">playwright-report</a></td><td>The Playwright run itself — specs, steps, and any screenshots/traces</td></tr>
 <tr><td><a href="${zapLogHref}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
 </tbody>
 </table>
