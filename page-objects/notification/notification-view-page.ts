@@ -42,6 +42,18 @@ export class NotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card', { hasText: name });
   }
 
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
+  /** A summary list has no error state of its own, so an outstanding role
+   * carries the error-message markup inside its own value cell. */
+  partyError(card: string, role: string): Locator {
+    return this.summaryCard(card)
+      .locator('.govuk-summary-list__row', { has: this.page.getByText(role, { exact: true }) })
+      .locator('.govuk-error-message');
+  }
+
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
     await super.open(journeyId, attemptSignIn);
     if (attemptSignIn) await this.heading.waitFor();
