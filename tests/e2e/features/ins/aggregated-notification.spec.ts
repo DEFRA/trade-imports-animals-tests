@@ -13,7 +13,11 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
     skipUnlessComposeEnvironment('aggregated notification assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('creates and updates aggregated notification document through the submission lifecycle', async ({ journey, journeyContext }) => {
+  test('creates and updates aggregated notification document through the submission lifecycle', async ({
+    journey,
+    journeyContext,
+    pages,
+  }) => {
     test.slow();
 
     // Given — complete the journey up to the declaration page (notification is in DRAFT)
@@ -44,9 +48,9 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       const draftVersion = draftDoc.aggregateVersion;
 
       // When — notification is submitted
-      await journey.pages.declaration.confirmation.check();
-      await journey.pages.declaration.continueButton.click();
-      await journey.pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
+      await pages.declaration.confirmation.check();
+      await pages.declaration.continueButton.click();
+      await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
 
       // Then — same document is updated to SUBMITTED (no duplicate created)
       await expect.poll(() => collection.findOne({ _id: aggregateId, status: 'SUBMITTED' }), { timeout: timeouts.long }).not.toBeNull();
