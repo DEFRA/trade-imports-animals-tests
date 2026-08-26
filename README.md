@@ -10,6 +10,7 @@ This test suite provides a robust foundation for writing, executing, and maintai
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
 - [Visual Regression Tests](#visual-regression-tests)
+- [Security Testing](#security-testing)
 - [Running Tests on GitHub](#running-tests-on-github)
 - [Running Tests via CDP Portal](#running-tests-via-cdp-portal)
 - [Developer Workflow](#developer-workflow)
@@ -155,7 +156,7 @@ front door (the backend API) rather than the back door (writing directly
 into Mongo).
 
 For the security (`@security`, OWASP ZAP) profile against this stack, see
-[`zap/README.md`](zap/README.md).
+[Security Testing](#security-testing) below.
 
 #### Workspace stack commands (run from the workspace root)
 
@@ -190,6 +191,28 @@ Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
 used by CI. Both commands reseed the workspace database, run the `e2e` project's
 `@visual` spec, and write the updated snapshot into the working tree for commit.
+
+## Security Testing
+
+Security tests (tagged `@security`) run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
+
+Two profiles:
+
+- `security` — passive scan only, safe to run routinely
+- `security:active` — passive + a scoped active scan, safe to run routinely here since local is disposable (invoked deliberately elsewhere)
+
+### Running locally
+
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace), start the app stack: `tim docker up`
+2. Bring up ZAP too (additive — doesn't disturb what's already running): `tim docker up --profile security`
+   (this always waits for its containers' healthchecks, so it doesn't return until ZAP is actually accepting requests, not just started.)
+3. Run the profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
+   (to watch ZAP's own logs live while this runs, in another terminal: `docker logs -f trade-imports-zap-1`)
+4. Stop ZAP when done (or just leave it running — cheap to leave up between runs, same as the rest of the stack): `docker stop trade-imports-zap-1`
+
+Reports are written to `zap-report/` (gitignored). ZAP creates this directory automatically on first `up` — nothing to set up by hand. `_clean` only clears its _contents_ between runs, never the directory itself: ZAP bind-mounts it once at container start, so deleting the directory while ZAP is running would break that mount for the rest of the container's life.
+
+ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security` — see the workspace's `workareas/analysis/zap-playwright-*.md` docs for the full design. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
 
 ## Running Tests on GitHub
 

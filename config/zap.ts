@@ -33,13 +33,13 @@ const isActiveProfile = process.env.PROFILE === 'security:active';
 export const zapProfile: 'active' | 'passive' = isActiveProfile ? 'active' : 'passive';
 
 function zapAutomationPlanFile(): string {
-  return isActiveProfile ? 'zap-automation-active.yaml' : 'zap-automation-passive.yaml';
+  return isActiveProfile ? 'automation-active.yaml' : 'automation-passive.yaml';
 }
 
 export const zapAutomationPlan = `${zapPlanDir}/${zapAutomationPlanFile()}`;
 
 // Registers contexts (dataDrivenNodes, excludePaths) before any traffic
 // exists, so new site-tree nodes are classified correctly as the Playwright
-// run creates them — see zap-automation-context.yaml's header for why this
+// run creates them — see automation-context.yaml's header for why this
 // has to run before, not as part of, zapAutomationPlan above.
-export const zapContextPlan = `${zapPlanDir}/zap-automation-context.yaml`;
+export const zapContextPlan = `${zapPlanDir}/automation-context.yaml`;

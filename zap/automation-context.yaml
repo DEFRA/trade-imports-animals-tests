@@ -2,8 +2,8 @@
 #
 # Structural Modifiers (dataDrivenNodes) and excludePaths only apply to
 # site-tree nodes as they're *added* — they don't retroactively reshape
-# nodes that already exist. zap-automation-active.yaml / -passive.yaml only
-# create their contexts when zap-run-and-gate.ts runs, which is *after* the
+# nodes that already exist. automation-active.yaml / -passive.yaml only
+# create their contexts when run-and-gate.ts runs, which is *after* the
 # Playwright journeys have already driven traffic through the proxy — too
 # late for journeyId/addressId to be recognised as data rather than
 # structure. This plan runs first (via _zap_prime_context, before the
@@ -12,8 +12,8 @@
 # re-declare the same contexts harmlessly afterwards and do the actual
 # scanning + reporting.
 #
-# Keep this env block's contexts in sync with zap-automation-active.yaml /
-# zap-automation-passive.yaml (same duplication pattern already used
+# Keep this env block's contexts in sync with automation-active.yaml /
+# automation-passive.yaml (same duplication pattern already used
 # between those two).
 #
 # Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/

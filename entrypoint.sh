@@ -10,26 +10,22 @@
 
 echo "run_id: $RUN_ID"
 
-# zap-automation-*.yaml reference these via ${ENV_VAR} substitution (ZAP's
+# automation-*.yaml reference these via ${ENV_VAR} substitution (ZAP's
 # own Automation Framework mechanism) instead of hardcoding localhost — ZAP
 # resolves them from its own process environment, so they have to be
 # exported before zap.sh starts, not computed by the Node/tsx side (that
 # would only land in the Playwright child process's own env, never back up
-# to this shell). Frontend/admin/ins are always reached directly, built
-# straight from the same ENVIRONMENT CDP already sets.
+# to this shell). All four are reached directly, built straight from the
+# same ENVIRONMENT CDP already sets — unlike cdpServiceUrl() (used by the
+# laptop-targeting-CDP path outside this script), there's no CDP_LOCAL
+# branch here: this script only ever runs as a CDP-hosted job, already
+# inside CDP's network, where the direct per-service subdomain always
+# resolves.
 configure_zap_urls() {
   export ZAP_TRADE_IMPORTS_ANIMALS_FRONTEND_URL="https://trade-imports-animals-frontend.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL="https://trade-imports-animals-admin.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_INS_FRONTEND_URL="https://trade-imports-ins-frontend.${ENVIRONMENT}.cdp-int.defra.cloud"
-
-  # Mirrors cdpServiceUrl() — Playwright itself routes backend calls through
-  # the ephemeral gateway when CDP_LOCAL=true, so ZAP has to target the same
-  # host or its sites: filter matches nothing.
-  if [ "$CDP_LOCAL" = "true" ]; then
-    export ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL="https://ephemeral-protected.api.${ENVIRONMENT}.cdp-int.defra.cloud/trade-imports-animals-backend"
-  else
-    export ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL="https://trade-imports-animals-backend.${ENVIRONMENT}.cdp-int.defra.cloud"
-  fi
+  export ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL="https://trade-imports-animals-backend.${ENVIRONMENT}.cdp-int.defra.cloud"
 }
 
 # Starts ZAP as a background process (CDP has no separate container to run
@@ -50,9 +46,9 @@ run_security_profile() {
   # (it looks for index.html inside it) — see the final publish step below.
   export REPORT_DIR="zap-report"
 
-  # zap-automation-*.yaml hardcode reportDir: /zap/wrk/zap-report — locally
+  # automation-*.yaml hardcode reportDir: /zap/wrk/zap-report — locally
   # that's a bind mount onto ../zap-report; here there's no separate
-  # container to mount across, so symlink it to where zap-run-and-gate.ts
+  # container to mount across, so symlink it to where run-and-gate.ts
   # actually reads reports from instead of changing either side.
   mkdir -p /app/zap-report /zap/wrk
   ln -sfn /app/zap-report /zap/wrk/zap-report
@@ -96,7 +92,7 @@ run_security_profile() {
     # zap.log explains. Returning early here used to skip both.
     echo "ZAP did not become ready before timing out" >> FAILED
 
-    # No scan ran, so zap-run-and-gate.ts's index.html (which needs a
+    # No scan ran, so run-and-gate.ts's index.html (which needs a
     # completed scan's alert data) never gets written either — publish a
     # minimal one of our own so the published report explains the failure
     # instead of shipping a bare zap.log with no landing page.
@@ -124,7 +120,7 @@ EOF
   # logged - see the zap.log file for details"). Read after kill so it's
   # complete, and written as escaped HTML rather than plain text: CDP's
   # report viewer 403s a bare .log file, but .html files (this one included)
-  # already serve fine — linked from index.html (see zap-run-and-gate.ts).
+  # already serve fine — linked from index.html (see run-and-gate.ts).
   if [ -f "$HOME/.ZAP/zap.log" ]; then
     {
       echo '<!doctype html><meta charset="utf-8"><title>zap.log</title><pre>'
