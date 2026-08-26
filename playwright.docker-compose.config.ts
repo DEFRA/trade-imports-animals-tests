@@ -21,6 +21,7 @@ const dockerComposeConfig = withServiceBaseUrls(
   },
   {
     MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
+    INS_BACKEND_MONGODB_URI: process.env.INS_BACKEND_MONGODB_URI ?? 'mongodb://localhost:27017',
     TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
     TRADE_IMPORTS_ADDRESS_BOOK_URL: process.env.TRADE_IMPORTS_ADDRESS_BOOK_URL ?? 'http://localhost:8089',
     AWS_SQS_ENDPOINT: process.env.AWS_SQS_ENDPOINT ?? 'http://localhost:4566',

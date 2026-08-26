@@ -26,11 +26,19 @@ export function getAddressBookBaseUrl(): string {
 }
 
 /**
- * Connection URI for MongoDB, reachable directly by specs asserting on
+ * Connection URI for the animals-backend MongoDB, reachable directly by specs asserting on
  * persisted state.
  */
 export function getMongoDbUri(): string {
   return getServiceBaseUrl('MONGODB_URI');
+}
+
+/**
+ * Connection URI for the ins-backend MongoDB. Separate from the animals-backend
+ * MongoDB — in deployed environments these are distinct instances.
+ */
+export function getInsBackendMongoDbUri(): string {
+  return getServiceBaseUrl('INS_BACKEND_MONGODB_URI');
 }
 
 /**
