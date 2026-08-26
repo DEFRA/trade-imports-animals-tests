@@ -11,6 +11,15 @@ export type ResultsRange = {
 export class NotificationDashboardPage extends BasePage {
   readonly expectedUrl = '/';
 
+  /**
+   * The notification service signs out from its service navigation, where the item reads "Log out".
+   * The admin portal still renders "Sign out", so the base getter stays as it is and this overrides
+   * it here. `exact` keeps the match off any other link whose name merely contains "log out".
+   */
+  get linkSignOut(): Locator {
+    return this.page.getByRole('link', { name: 'Log out', exact: true });
+  }
+
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Import notification service' });
   }
