@@ -26,7 +26,7 @@ export function getAddressBookBaseUrl(): string {
 }
 
 /**
- * Connection URI for MongoDB, reachable directly by specs asserting on
+ * Connection URI for the animals-backend MongoDB, reachable directly by specs asserting on
  * persisted state.
  */
 export function getMongoDbUri(): string {
