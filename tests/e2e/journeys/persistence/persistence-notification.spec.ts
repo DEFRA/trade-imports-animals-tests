@@ -60,38 +60,42 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       await expect.poll(() => collection.countDocuments({ referenceNumber }), { timeout: timeouts.short }).toBe(1);
 
       const [doc] = await collection.find({ referenceNumber }).toArray();
-      const [complement] = doc.commodity.commodityComplement;
+      // Content fields live under doc.notification.* after the aggregate refactor
+      // (EUDPA-335). Aggregate-level fields — referenceNumber, status, fulfilments
+      // — stay at the document root.
+      const { notification } = doc;
+      const [complement] = notification.commodity.commodityComplement;
       const [species] = complement.species;
 
       expect(doc.referenceNumber).toBe(referenceNumber);
       expect(doc.status).toBe('SUBMITTED');
-      expect(doc.origin.countryCode).toBe('FR');
-      expect(doc.origin.requiresRegionCode).toBe('yes');
-      expect(doc.origin.internalReference).toBe('Imports456GB');
-      expect(doc.commodity.name).toBe('Cow');
+      expect(notification.origin.countryCode).toBe('FR');
+      expect(notification.origin.requiresRegionCode).toBe('yes');
+      expect(notification.origin.internalReference).toBe('Imports456GB');
+      expect(notification.commodity.name).toBe('Cow');
       expect(species.text).toBe('Bos taurus');
       expect(species.earTag).toBe('UK123456789012');
       expect(complement.totalNoOfAnimals).toBe(1);
       expect(complement.totalNoOfPackages).toBe(5);
-      expect(doc.reasonForImport).toBe('internalMarket');
-      expect(doc.additionalDetails.certifiedFor).toBe('slaughter');
-      expect(doc.additionalDetails.unweanedAnimals).toBe('no');
+      expect(notification.reasonForImport).toBe('internalMarket');
+      expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
+      expect(notification.additionalDetails.unweanedAnimals).toBe('no');
       // Four roles are references — the id alone, with no copy of the address
       // beside it, so a later edit in the address book shows through.
-      expect(doc.consignor).toEqual({ addressId: consignor.id });
-      expect(doc.destination).toEqual({ addressId: destination.id });
-      expect(doc.consignee).toEqual({ addressId: consignee.id });
-      expect(doc.importer).toEqual({ addressId: importer.id });
+      expect(notification.consignor).toEqual({ addressId: consignor.id });
+      expect(notification.destination).toEqual({ addressId: destination.id });
+      expect(notification.consignee).toEqual({ addressId: consignee.id });
+      expect(notification.importer).toEqual({ addressId: importer.id });
       // Place of origin and the contact address are held as copies,
       // so they carry the details and never an addressId.
-      expect(doc.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name });
-      expect(doc.placeOfOrigin.addressId).toBeUndefined();
-      expect(doc.consignment).toMatchObject({ name: contact.name });
-      expect(doc.consignment.addressId).toBeUndefined();
-      expect(doc.cphNumber).toBe('123456789');
-      expect(doc.transport.portOfEntry).toBe('GB ABD');
-      expect(doc.transport.transporter?.name).toBe('García Livestock Transport SL');
-      expect(doc.transport.transporter?.type).toBe('Commercial');
+      expect(notification.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name });
+      expect(notification.placeOfOrigin.addressId).toBeUndefined();
+      expect(notification.consignment).toMatchObject({ name: contact.name });
+      expect(notification.consignment.addressId).toBeUndefined();
+      expect(notification.cphNumber).toBe('123456789');
+      expect(notification.transport.portOfEntry).toBe('GB ABD');
+      expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
+      expect(notification.transport.transporter?.type).toBe('Commercial');
     } finally {
       await client.close();
     }

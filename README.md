@@ -10,6 +10,7 @@ This test suite provides a robust foundation for writing, executing, and maintai
 - [Running Tests](#running-tests)
 - [Local Testing](#local-testing)
 - [Visual Regression Tests](#visual-regression-tests)
+- [Security Testing](#security-testing)
 - [Running Tests on GitHub](#running-tests-on-github)
 - [Running Tests via CDP Portal](#running-tests-via-cdp-portal)
 - [Developer Workflow](#developer-workflow)
@@ -70,13 +71,15 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                            | Test scope                                     | Target               | Config                                | Generates Report |
-| ---------------------------------- | ---------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                         | E2E suite, excluding `@compose` and `@a11y`    | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                | Accessibility (`@a11y`) test suite             | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`      | E2E + E2E integration (`@compose`) test suites | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y` | Accessibility (`@a11y`) test suite             | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`   | E2E, for the workspace CI stack job            | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                                   | Target               | Config                                | Generates Report |
+| --------------------------------------------- | ------------------------------------------------------------ | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`                  | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                           | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites               | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                           | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | Security (`@security`, ZAP passive scan) test suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@security`, ZAP passive + active scan) test suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -152,6 +155,9 @@ since the preference is to seed notification state at test level through the
 front door (the backend API) rather than the back door (writing directly
 into Mongo).
 
+For the security (`@security`, OWASP ZAP) profile against this stack, see
+[Security Testing](#security-testing) below.
+
 #### Workspace stack commands (run from the workspace root)
 
 | Command                             | Purpose                                                |
@@ -186,6 +192,30 @@ Regenerate the E2E baseline against the stack frontend with
 used by CI. Both commands reseed the workspace database, run the `e2e` project's
 `@visual` spec, and write the updated snapshot into the working tree for commit.
 
+## Security Testing
+
+Security tests (tagged `@security`) run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
+
+Two profiles:
+
+- `security` — passive scan only, safe to run routinely
+- `security:active` — passive + a scoped active scan, safe to run routinely here since local is disposable (invoked deliberately elsewhere)
+
+### Running locally
+
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace), start the app stack: `tim docker up`
+2. Bring up ZAP too (additive — doesn't disturb what's already running): `tim docker up --profile security`
+   (this always waits for its containers' healthchecks, so it doesn't return until ZAP is actually accepting requests, not just started.)
+3. Run the profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
+   (to watch ZAP's own logs live while this runs, in another terminal: `docker logs -f trade-imports-zap-1`)
+4. Stop ZAP when done (or just leave it running — cheap to leave up between runs, same as the rest of the stack): `docker stop trade-imports-zap-1`
+
+Reports are written to `zap-report/` (gitignored). ZAP creates this directory automatically on first `up` — nothing to set up by hand. `_clean` only clears its _contents_ between runs, never the directory itself: ZAP bind-mounts it once at container start, so deleting the directory while ZAP is running would break that mount for the rest of the container's life.
+
+ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security` — see the workspace's `workareas/analysis/zap-playwright-*.md` docs for the full design. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
+
+> **Docker Desktop for Mac:** ZAP relies on `network_mode: host` to resolve the app stack's `localhost` OIDC redirects. OrbStack supports this out of the box; Docker Desktop only matches it on version 4.34+ with host networking explicitly enabled in Settings (off by default) — otherwise ZAP can't reach the stack.
+
 ## Running Tests on GitHub
 
 E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
@@ -201,10 +231,12 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ani
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE   | Test suite               | NPM script          |
-| --------- | ------------------------ | ------------------- |
-| `default` | e2e test suite           | `npm test`          |
-| `a11y`    | accessibility test suite | `npm run test:a11y` |
+| PROFILE           | Test suite                                      | NPM script                                                                     |
+| ----------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| `default`         | e2e test suite                                  | `npm test`                                                                     |
+| `a11y`            | accessibility test suite                        | `npm run test:a11y`                                                            |
+| `security`        | security test suite (ZAP passive scan)          | `npm run test:security`                                                        |
+| `security:active` | security test suite (ZAP passive + active scan) | `npm run test:security` (active plan selected via `PROFILE` in the ZAP config) |
 
 Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
 

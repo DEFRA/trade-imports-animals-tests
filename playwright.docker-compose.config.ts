@@ -3,6 +3,7 @@ import sharedConfig from './utils/playwright/shared-config';
 import { withContainerHostResolver } from './utils/playwright/with-container-host-resolver';
 import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
+import { withZapProxy } from './utils/playwright/with-zap-proxy';
 
 const projectBaseUrls: Record<string, string> = {
   e2e: 'http://localhost:3000',
@@ -32,8 +33,9 @@ const dockerComposeConfig = withServiceBaseUrls(
 /**
  * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).
  * In-container runs (PLAYWRIGHT_IN_CONTAINER=1) add a Chromium host-resolver rule for OIDC localhost redirects.
+ * PROFILE=security or security:active routes traffic through ZAP's proxy.
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig(
-  process.env.PLAYWRIGHT_IN_CONTAINER === '1' ? withContainerHostResolver(dockerComposeConfig) : dockerComposeConfig,
+  withZapProxy(process.env.PLAYWRIGHT_IN_CONTAINER === '1' ? withContainerHostResolver(dockerComposeConfig) : dockerComposeConfig),
 );

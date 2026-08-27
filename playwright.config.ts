@@ -4,6 +4,7 @@ import { getEnvironment } from './utils/playwright/environment';
 import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
+import { withZapProxy } from './utils/playwright/with-zap-proxy';
 
 const environment = getEnvironment();
 
@@ -20,6 +21,7 @@ const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectB
 
 /**
  * Base config: e2e against the deployed CDP environment.
+ * PROFILE=security or security:active routes traffic through ZAP's proxy.
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig(cdpConfig);
+export default defineConfig(withZapProxy(cdpConfig));
