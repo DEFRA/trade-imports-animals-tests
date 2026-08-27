@@ -34,14 +34,6 @@ export function getMongoDbUri(): string {
 }
 
 /**
- * Connection URI for the ins-backend MongoDB. Separate from the animals-backend
- * MongoDB — in deployed environments these are distinct instances.
- */
-export function getInsBackendMongoDbUri(): string {
-  return getServiceBaseUrl('INS_BACKEND_MONGODB_URI');
-}
-
-/**
  * Endpoint for the local SQS emulator (Floci in the compose stack), used to seed
  * messages directly onto a queue ahead of a test.
  */

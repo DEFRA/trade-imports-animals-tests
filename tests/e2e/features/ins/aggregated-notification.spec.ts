@@ -3,7 +3,7 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { defaultJourneyOptions } from '@domain/constants/journey-options';
 import { type AggregatedNotificationDocument } from '@domain/models/db/aggregated-notification-document';
 import { timeouts } from '@config/timeouts';
-import { getInsBackendMongoDbUri } from '@config/service-base-urls';
+import { getMongoDbUri } from '@config/service-base-urls';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
@@ -24,7 +24,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
     await journey.toDeclaration();
     const referenceNumber = journeyContext.journeyId;
     const aggregateId = aggregateIdFor(referenceNumber);
-    const client = new MongoDbClient(getInsBackendMongoDbUri());
+    const client = new MongoDbClient(getMongoDbUri());
 
     try {
       await client.connect();
