@@ -1,22 +1,22 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createZapClient, runAutomationPlan } from '@utils/zap-utils';
+import { createZapClient, runAutomationPlan } from '@utils/zap/client';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
 import { getEnvironment } from '@utils/playwright/environment';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
-const RULES_FILE = pathFromHere('../zap/rules.tsv');
+const RULES_FILE = pathFromHere('../../zap/rules.tsv');
 // zap-report/ is bind-mounted into the ZAP container (see
-// zap/docker-compose.yml) so ZAP's report job and this host-side read see
-// the same files.
-const REPORT_DIR = pathFromHere('../zap-report');
+// docker/stack/security.compose.yml) so ZAP's report job and this
+// host-side read see the same files.
+const REPORT_DIR = pathFromHere('../../zap-report');
 // shared-config.ts's html reporter always writes here (no outputFolder
 // override, either config) — nested under REPORT_DIR below so it publishes
 // alongside everything else, with no separate S3 path needed on CDP.
-const PLAYWRIGHT_REPORT_DIR = pathFromHere('../playwright-report');
-// Matches reportFile in zap-automation-*.yaml — one combined report
+const PLAYWRIGHT_REPORT_DIR = pathFromHere('../../playwright-report');
+// Matches reportFile in automation-*.yaml — one combined report
 // covering every site ZAP touched this run.
 const REPORT_NAME = 'security-scan';
 
@@ -258,7 +258,7 @@ ${truncationSection}
   await fs.writeFile(path.join(REPORT_DIR, 'index.html'), html, 'utf8');
 }
 
-// Must match maxScanDurationInMins in zap-automation-active.yaml (all
+// Must match maxScanDurationInMins in automation-active.yaml (all
 // activeScan jobs — the passive plan has none, so this simply never
 // matches there). A scan that finished at (or within a few seconds of)
 // this ceiling almost certainly got cut off mid-way rather than completing
@@ -289,7 +289,7 @@ async function main(): Promise<void> {
   const truncatedScans = findTruncatedActiveScans(progress.info);
   if (truncatedScans.length > 0) {
     failures.push(
-      `Active scan hit its ${ACTIVE_SCAN_CAP_MINS}-minute cap and was likely cut short before covering everything — increase maxScanDurationInMins in zap-automation-active.yaml, don't treat this as a clean scan: ${truncatedScans.join('; ')}`,
+      `Active scan hit its ${ACTIVE_SCAN_CAP_MINS}-minute cap and was likely cut short before covering everything — increase maxScanDurationInMins in automation-active.yaml, don't treat this as a clean scan: ${truncatedScans.join('; ')}`,
     );
   }
 

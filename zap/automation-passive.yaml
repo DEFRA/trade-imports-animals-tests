@@ -1,14 +1,14 @@
 # ZAP Automation Framework plan — passive scan only, no activeScan jobs.
 # Safe to run against a real deployed environment on demand, no destructive
-# risk. Gating is deliberately not done here; see zap-run-and-gate.ts and
-# rules.tsv. See zap-automation-active.yaml for the passive + active plan.
+# risk. Gating is deliberately not done here; see run-and-gate.ts and
+# rules.tsv. See automation-active.yaml for the passive + active plan.
 #
 # Job/parameter reference: https://www.zaproxy.org/docs/desktop/addons/automation-framework/
 env:
   contexts:
     # No activeScan job in this plan, so dataDrivenNodes here only benefits
     # site-tree/report tidiness (folding journeyId variants into one node),
-    # not attack coverage — see zap-automation-active.yaml for the full
+    # not attack coverage — see automation-active.yaml for the full
     # rationale, kept in sync here for a consistent site tree either way.
     - name: frontend
       urls:

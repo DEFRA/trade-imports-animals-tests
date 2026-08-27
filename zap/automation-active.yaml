@@ -1,6 +1,6 @@
 # ZAP Automation Framework plan — passive + active scan, scan execution and
 # report generation only. Gating is deliberately not done here; see
-# zap-run-and-gate.ts and rules.tsv. See zap-automation-passive.yaml for the
+# run-and-gate.ts and rules.tsv. See automation-passive.yaml for the
 # passive-only plan (no activeScan jobs) used where active scan's risk
 # isn't acceptable to run routinely.
 #
@@ -105,10 +105,10 @@ jobs:
       # cap has to be the largest of the three: every spec that leaves a
       # live, unsubmitted notification in this context adds real attack
       # surface for active scan to cover, not just the one full-submission
-      # journey. See zap-run-and-gate.ts's truncation check: if this ever
+      # journey. See run-and-gate.ts's truncation check: if this ever
       # fires for real, raise this value, the other three activeScan jobs'
       # maxScanDurationInMins below, and ACTIVE_SCAN_CAP_MINS in
-      # utils/zap-run-and-gate.ts together — they must match exactly, or the
+      # utils/zap/run-and-gate.ts together — they must match exactly, or the
       # truncation-detection heuristic desyncs (false truncation failures,
       # or a missed real one).
       maxScanDurationInMins: 90
