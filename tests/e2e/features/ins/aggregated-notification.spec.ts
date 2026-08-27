@@ -32,14 +32,28 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
 
       // When — notification has been edited but not yet submitted
       // Then — aggregated store should reflect DRAFT status with all fields populated.
-      // Poll until arrivalDate is present: NOTIFICATION_CREATED (emitted at creation) arrives
-      // before transport details are filled in, so we wait for a subsequent NOTIFICATION_EDITED
-      // to have propagated the full payload including arrivalDate.
+      // NOTIFICATION_CREATED fires immediately at creation (before transport details are filled in),
+      // so we poll for the specific fully-populated state rather than bare status=DRAFT. The document
+      // is captured inside the poll — no redundant second read needed.
+      let draftDoc: AggregatedNotificationDocument | null = null;
       await expect
-        .poll(() => collection.findOne({ _id: aggregateId, status: 'DRAFT', arrivalDate: { $exists: true } }), { timeout: timeouts.long })
+        .poll(
+          async () => {
+            draftDoc = await collection.findOne({
+              _id: aggregateId,
+              status: 'DRAFT',
+              referenceNumber: referenceNumber,
+              originCountry: defaultJourneyOptions.countryCode.value,
+              arrivalDate: { $exists: true },
+            });
+            return draftDoc;
+          },
+          { timeout: timeouts.long },
+        )
         .not.toBeNull();
 
-      const draftDoc = await collection.findOne({ _id: aggregateId });
+      if (!draftDoc) throw new Error('Expected draft document to exist after polling');
+
       expect(draftDoc._id).toBe(aggregateId);
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
