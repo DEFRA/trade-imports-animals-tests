@@ -10,8 +10,8 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
   test('replays outbox events and shows success banner', async ({ adminNavigation, pages, journeyContext }) => {
     await adminNavigation.toOutboxEvents(journeyContext.referenceNumber);
 
-    await test.step('shows two outbox events before replay', async () => {
-      await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(2);
+    await test.step('shows three outbox events before replay', async () => {
+      await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(3);
     });
 
     await test.step('replays all events and shows success banner', async () => {
@@ -20,8 +20,8 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
       await expect(pages.adminOutboxEvents.bannerSuccess).toContainText('All outbox events have been re-published to the SNS topic.');
     });
 
-    await test.step('still shows the two outbox events after replay', async () => {
-      await expect(pages.adminOutboxEvents.tableRows).toHaveCount(2);
+    await test.step('still shows the three outbox events after replay', async () => {
+      await expect(pages.adminOutboxEvents.tableRows).toHaveCount(3);
     });
   });
 
@@ -32,7 +32,7 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
       const referenceNumber = journeyContext.referenceNumber;
 
       await adminNavigation.toOutboxEvents(referenceNumber);
-      await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(2);
+      await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBe(3);
       await pages.adminOutboxEvents.btnReplay.click();
       await expect(pages.adminOutboxEvents.bannerSuccess).toBeVisible();
 
@@ -53,7 +53,7 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
         expect(doc?.result).toBe('SUCCESS');
         expect(doc?.notificationReferenceNumbers).toEqual([referenceNumber]);
         expect(doc?.numberOfNotifications).toBe(1);
-        expect(doc?.numberOfEvents).toBe(2);
+        expect(doc?.numberOfEvents).toBe(3);
         expect(doc?.userId).toBeDefined();
         expect(doc?.timestamp).toBeDefined();
       } finally {
