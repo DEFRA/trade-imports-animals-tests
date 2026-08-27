@@ -31,8 +31,13 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       const collection = client.collection<AggregatedNotificationDocument>('trade-imports-ins-backend', 'notifications');
 
       // When — notification has been edited but not yet submitted
-      // Then — aggregated store should reflect DRAFT status with all fields populated
-      await expect.poll(() => collection.findOne({ _id: aggregateId, status: 'DRAFT' }), { timeout: timeouts.long }).not.toBeNull();
+      // Then — aggregated store should reflect DRAFT status with all fields populated.
+      // Poll until arrivalDate is present: NOTIFICATION_CREATED (emitted at creation) arrives
+      // before transport details are filled in, so we wait for a subsequent NOTIFICATION_EDITED
+      // to have propagated the full payload including arrivalDate.
+      await expect
+        .poll(() => collection.findOne({ _id: aggregateId, status: 'DRAFT', arrivalDate: { $exists: true } }), { timeout: timeouts.long })
+        .not.toBeNull();
 
       const draftDoc = await collection.findOne({ _id: aggregateId });
       expect(draftDoc._id).toBe(aggregateId);
