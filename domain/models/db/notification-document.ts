@@ -31,9 +31,12 @@ type StoredParty = {
   address?: StoredAddress;
 };
 
-export type NotificationDocument = {
-  _id: ObjectId;
-  referenceNumber: string | null;
+/**
+ * Notification content held under {@link NotificationDocument#notification}.
+ * Aggregate metadata (referenceNumber, status, dates, fulfilments) lives at
+ * the document root; only the well-structured content sits here (EUDPA-335).
+ */
+type NotificationContent = {
   origin: {
     countryCode: string;
     requiresRegionCode: string;
@@ -83,6 +86,12 @@ export type NotificationDocument = {
     };
   };
   consignment?: StoredParty;
+};
+
+export type NotificationDocument = {
+  _id: ObjectId;
+  referenceNumber: string | null;
+  notification: NotificationContent;
   status: string;
   created: Date;
   updated: Date;
