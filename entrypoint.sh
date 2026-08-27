@@ -26,6 +26,7 @@ configure_zap_urls() {
   export ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL="https://trade-imports-animals-admin.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_INS_FRONTEND_URL="https://trade-imports-ins-frontend.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL="https://trade-imports-animals-backend.${ENVIRONMENT}.cdp-int.defra.cloud"
+  export ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL="https://trade-imports-address-book.${ENVIRONMENT}.cdp-int.defra.cloud"
 }
 
 # Starts ZAP as a background process (CDP has no separate container to run
