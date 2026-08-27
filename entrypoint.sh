@@ -5,8 +5,8 @@
 #   default (or unset)  — standard run via npm test
 #   a11y                — accessibility suite via npm run test:a11y
 #   browserstack        — not implemented (exits 1)
-#   security            — ZAP passive scan only, safe to run routinely
-#   security:active     — ZAP passive + active scan, invoked deliberately only
+#   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
+#   security:active     — ZAP passive + active scan (@active suite) via npm run test:security:active, invoked deliberately only
 
 echo "run_id: $RUN_ID"
 
@@ -31,8 +31,8 @@ configure_zap_urls() {
 # Starts ZAP as a background process (CDP has no separate container to run
 # it in, unlike local's docker-compose setup), points the security specs and
 # the gate at it, then shuts it down. Shared by both security profiles below
-# — which plan file gets used is picked up from PROFILE itself (see
-# config/zap.ts), not passed in here.
+# — both the ZAP plan file (see config/zap.ts) and, just below, which npm
+# script runs are picked up from PROFILE itself, not passed in here.
 run_security_profile() {
   configure_zap_urls
 
@@ -79,9 +79,14 @@ run_security_profile() {
   if [ "$zap_ready" = "true" ]; then
     # Chained, not two independent statements: the gate (and any active scan
     # it triggers) must never run against a spec run that failed or refused
-    # to start — e.g. the prod guard in shared-config.ts, which only test:security
-    # goes through, not this gate step on its own.
-    npm run test:security && npm run _zap_run_and_gate
+    # to start — e.g. the prod guard in shared-config.ts, which only
+    # test:security/test:security:active go through, not this gate step on
+    # its own.
+    if [ "$PROFILE" = "security:active" ]; then
+      npm run test:security:active && npm run _zap_run_and_gate
+    else
+      npm run test:security && npm run _zap_run_and_gate
+    fi
     security_exit_code=$?
     if [ $security_exit_code -ne 0 ]; then
       echo "security profile exited $security_exit_code before completing" >> FAILED

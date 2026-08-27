@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Security scan (frontend, draft)', { tag: '@security' }, () => {
+test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
   test('routes a draft validation error through the ZAP proxy', async ({ journey, pages }) => {
     await journey.toOriginOfImport();
 

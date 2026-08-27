@@ -71,15 +71,15 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                                       | Test scope                                                   | Target               | Config                                | Generates Report |
-| --------------------------------------------- | ------------------------------------------------------------ | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`                  | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                           | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites               | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                           | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | Security (`@security`, ZAP passive scan) test suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security:active` | Security (`@security`, ZAP passive + active scan) test suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                            | Target               | Config                                | Generates Report |
+| --------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the whole e2e suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -155,7 +155,7 @@ since the preference is to seed notification state at test level through the
 front door (the backend API) rather than the back door (writing directly
 into Mongo).
 
-For the security (`@security`, OWASP ZAP) profile against this stack, see
+For the security (OWASP ZAP) profiles against this stack, see
 [Security Testing](#security-testing) below.
 
 #### Workspace stack commands (run from the workspace root)
@@ -194,12 +194,12 @@ used by CI. Both commands reseed the workspace database, run the `e2e` project's
 
 ## Security Testing
 
-Security tests (tagged `@security`) run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
+Security profiles run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
 
 Two profiles:
 
-- `security` — passive scan only, safe to run routinely
-- `security:active` — passive + a scoped active scan, safe to run routinely here since local is disposable (invoked deliberately elsewhere)
+- `security` — passive scan against the whole e2e suite (cheap — no attack traffic — so run broadly), safe to run routinely
+- `security:active` — passive + a scoped active scan against the deliberately curated `@active`-tagged suite only (attacks are slow and expensive per URL), safe to run routinely here since local is disposable (invoked deliberately elsewhere)
 
 ### Running locally
 

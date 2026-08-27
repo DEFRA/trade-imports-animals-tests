@@ -5,7 +5,7 @@
 
 // Reuses entrypoint.sh's existing PROFILE convention (already set by CDP)
 // rather than a ZAP-specific flag — Playwright's config has no visibility
-// into --grep, so this can't be detected from the @security tag directly.
+// into --grep, so this can't be detected from the @active tag directly.
 // Two profile values, not one: security (routine, no active scan) and
 // security:active (deliberate only outside local).
 export const zapEnabled = process.env.PROFILE === 'security' || process.env.PROFILE === 'security:active';
