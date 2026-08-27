@@ -214,6 +214,8 @@ Reports are written to `zap-report/` (gitignored). ZAP creates this directory au
 
 ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security` — see the workspace's `workareas/analysis/zap-playwright-*.md` docs for the full design. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
 
+> **Docker Desktop for Mac:** ZAP relies on `network_mode: host` to resolve the app stack's `localhost` OIDC redirects. OrbStack supports this out of the box; Docker Desktop only matches it on version 4.34+ with host networking explicitly enabled in Settings (off by default) — otherwise ZAP can't reach the stack.
+
 ## Running Tests on GitHub
 
 E2E tests run in GitHub Actions via the workspace's reusable workflow, which starts the workspace stack with `run-stack.sh --branch <branch>` and runs this repo's published test image against it, with reports published to GitHub Pages.
