@@ -142,61 +142,68 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       email: 'replaceable@example.co.uk',
     });
 
-    // A complete notification, then swap the consignor for our own record —
-    // the shared fixtures cannot be deleted without breaking every spec
-    // running alongside this one.
-    await journey.toReview();
-    await pages.notificationView.changeLink('Change consignor').click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.changeParty('Consignor or exporter').click();
-    await pages.consignorSelection.select(name);
-    await pages.consignorSelection.saveAndContinue.click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.continueButton.click();
+    try {
+      // A complete notification, then swap the consignor for our own record —
+      // the shared fixtures cannot be deleted without breaking every spec
+      // running alongside this one.
+      await journey.toReview();
+      await pages.notificationView.changeLink('Change consignor').click();
+      await expect(pages.addresses.heading).toBeVisible();
+      await pages.addresses.changeParty('Consignor or exporter').click();
+      await pages.consignorSelection.select(name);
+      await pages.consignorSelection.saveAndContinue.click();
+      await expect(pages.addresses.heading).toBeVisible();
+      await pages.addresses.continueButton.click();
 
-    // The Change link brought us back here rather than into the section flow,
-    // which is what makes the replacement loop below close.
-    await expect(pages.notificationView.heading).toBeVisible();
-    const consignorRow = pages.notificationView
-      .summaryCard('Roles and addresses')
-      .locator('.govuk-summary-list__row', { has: pages.page.getByText('Consignor', { exact: true }) });
-    await expect(consignorRow).toContainText(name);
-    await expect(pages.notificationView.errorSummary).toHaveCount(0);
+      // The Change link brought us back here rather than into the section flow,
+      // which is what makes the replacement loop below close.
+      await expect(pages.notificationView.heading).toBeVisible();
+      const consignorRow = pages.notificationView
+        .summaryCard('Roles and addresses')
+        .locator('.govuk-summary-list__row', { has: pages.page.getByText('Consignor', { exact: true }) });
+      await expect(consignorRow).toContainText(name);
+      await expect(pages.notificationView.errorSummary).toHaveCount(0);
 
-    // A colleague deletes it while the draft is still open.
-    await addressBookApi.deleteAddress(address.id);
-    await pages.page.reload();
+      // A colleague deletes it while the draft is still open.
+      await addressBookApi.deleteAddress(address.id);
+      await pages.page.reload();
 
-    // AC1: named at the top of the page and against the role's own row.
-    const message = 'Select an address for the consignor';
-    await expect(pages.notificationView.errorSummary).toContainText(message);
-    await expect(pages.notificationView.partyError('Roles and addresses', 'Consignor')).toContainText(message);
-    await expect(consignorRow).not.toContainText(name);
+      // AC1: named at the top of the page and against the role's own row.
+      const message = 'Select an address for the consignor';
+      await expect(pages.notificationView.errorSummary).toContainText(message);
+      await expect(pages.notificationView.partyError('Roles and addresses', 'Consignor')).toContainText(message);
+      await expect(consignorRow).not.toContainText(name);
 
-    // AC1: and the submit is refused while it stands.
-    await pages.notificationView.continueButton.click();
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.errorSummary).toContainText(message);
+      // AC1: and the submit is refused while it stands.
+      await pages.notificationView.continueButton.click();
+      await expect(pages.notificationView.heading).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toContainText(message);
 
-    // AC3: the message is the way through to a replacement.
-    await pages.notificationView.errorSummary.getByRole('link', { name: message }).click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.addParty('Consignor or exporter').click();
-    await pages.consignorSelection.select('Astra Rosales');
-    await pages.consignorSelection.saveAndContinue.click();
-    await expect(pages.addresses.heading).toBeVisible();
-    await pages.addresses.continueButton.click();
+      // AC3: the message is the way through to a replacement.
+      await pages.notificationView.errorSummary.getByRole('link', { name: message }).click();
+      await expect(pages.addresses.heading).toBeVisible();
+      await pages.addresses.addParty('Consignor or exporter').click();
+      await pages.consignorSelection.select('Astra Rosales');
+      await pages.consignorSelection.saveAndContinue.click();
+      await expect(pages.addresses.heading).toBeVisible();
+      await pages.addresses.continueButton.click();
 
-    // AC3: back where the error was raised, with it gone.
-    await expect(pages.notificationView.heading).toBeVisible();
-    await expect(pages.notificationView.errorSummary).toHaveCount(0);
-    await expect(consignorRow).toContainText('Astra Rosales');
+      // AC3: back where the error was raised, with it gone.
+      await expect(pages.notificationView.heading).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toHaveCount(0);
+      await expect(consignorRow).toContainText('Astra Rosales');
 
-    // AC3: and the submit now goes through.
-    await pages.notificationView.continueButton.click();
-    await expect(pages.declaration.heading).toBeVisible();
-    await pages.declaration.confirmation.check();
-    await pages.declaration.continueButton.click();
-    await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+      // AC3: and the submit now goes through.
+      await pages.notificationView.continueButton.click();
+      await expect(pages.declaration.heading).toBeVisible();
+      await pages.declaration.confirmation.check();
+      await pages.declaration.continueButton.click();
+      await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+    } finally {
+      // Whatever happened above, the record must not outlive the run: the
+      // organisation's book is shared, and every later run pages through it.
+      // The delete is idempotent, so repeating the one in the body is safe.
+      await addressBookApi.deleteAddress(address.id);
+    }
   });
 });

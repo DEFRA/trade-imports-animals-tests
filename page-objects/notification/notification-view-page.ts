@@ -46,12 +46,20 @@ export class NotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-error-summary');
   }
 
-  /** A summary list has no error state of its own, so an outstanding role
-   * carries the error-message markup inside its own value cell. */
-  partyError(card: string, role: string): Locator {
+  /** The row for a role, found by its accessible term rather than by summary-list
+   * classes, so a markup change fails at the assertion instead of here. */
+  partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
-      .locator('.govuk-summary-list__row', { has: this.page.getByText(role, { exact: true }) })
-      .locator('.govuk-error-message');
+      .getByRole('term')
+      .filter({ has: this.page.getByText(role, { exact: true }) })
+      .locator('..');
+  }
+
+  /** A summary list has no error state of its own, so an outstanding role
+   * carries its message in the row's value cell — the first definition of the
+   * row, ahead of the actions cell. */
+  partyError(card: string, role: string): Locator {
+    return this.partyRow(card, role).getByRole('definition').first();
   }
 
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
