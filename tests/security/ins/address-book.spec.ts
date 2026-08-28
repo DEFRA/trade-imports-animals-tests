@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-test.describe('Security scan (ins)', { tag: '@security' }, () => {
+test.describe('Security scan (ins)', { tag: '@active' }, () => {
   test('routes address book navigation through the ZAP proxy', async ({ pages }) => {
     await pages.insAddressBookList.open();
 

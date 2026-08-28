@@ -23,5 +23,10 @@ declare module 'zaproxy' {
       runPlan(args: { filepath: string }): Promise<{ planId: string }>;
       planProgress(args: { planid: string }): Promise<ZapPlanProgress>;
     };
+    core: {
+      // ZAP's API returns counts as strings, not numbers — same convention
+      // as ZapAlert's riskcode/count elsewhere in this repo.
+      numberOfMessages(args: { baseurl?: string }): Promise<{ numberOfMessages: string }>;
+    };
   }
 }

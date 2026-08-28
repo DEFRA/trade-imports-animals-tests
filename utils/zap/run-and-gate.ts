@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createZapClient, runAutomationPlan } from '@utils/zap/client';
+import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
 import { getEnvironment } from '@utils/playwright/environment';
 
@@ -107,9 +107,10 @@ interface SiteSummary {
   siteName: string;
   counts: Record<string, number>;
   failCount: number;
+  messageCount: number;
 }
 
-function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>): SiteSummary {
+function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>, messageCount: number): SiteSummary {
   const counts: Record<string, number> = { High: 0, Medium: 0, Low: 0, Informational: 0 };
   let failCount = 0;
   for (const alert of site.alerts) {
@@ -119,7 +120,16 @@ function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>): SiteSu
     // fails the gate is one thing to fix, not 81.
     if (resolveAction(alert, rules) === 'FAIL') failCount += 1;
   }
-  return { siteName: site.siteName, counts, failCount };
+  return { siteName: site.siteName, counts, failCount, messageCount };
+}
+
+// Traffic volume, not an alert — reassurance that a site with few/no
+// alerts was actually reached through the proxy rather than silently
+// skipped. Queried live from ZAP rather than the static report, which
+// doesn't carry message counts at all.
+async function getMessageCount(client: ZapClient, siteName: string): Promise<number> {
+  const { numberOfMessages } = await client.core.numberOfMessages({ baseurl: siteName });
+  return Number(numberOfMessages);
 }
 
 // CDP's own "Report" link is driven by whichever directory gets published —
@@ -141,6 +151,7 @@ async function writeIndexHtml(
         <tr>
           <td>${s.siteName}</td>
           <td class="${s.failCount > 0 ? 'fail' : 'pass'}">${s.failCount > 0 ? 'FAIL' : 'pass'}</td>
+          <td>${s.messageCount}</td>
           <td>${s.counts.High}</td>
           <td>${s.counts.Medium}</td>
           <td>${s.counts.Low}</td>
@@ -151,12 +162,13 @@ async function writeIndexHtml(
 
   const totals = summaries.reduce(
     (acc, s) => ({
+      Messages: acc.Messages + s.messageCount,
       High: acc.High + s.counts.High,
       Medium: acc.Medium + s.counts.Medium,
       Low: acc.Low + s.counts.Low,
       Informational: acc.Informational + s.counts.Informational,
     }),
-    { High: 0, Medium: 0, Low: 0, Informational: 0 },
+    { Messages: 0, High: 0, Medium: 0, Low: 0, Informational: 0 },
   );
 
   const truncationSection =
@@ -228,12 +240,27 @@ tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 ${truncationSection}
 <h2>Sites</h2>
 <table>
-<thead><tr><th>Site</th><th>Result</th><th>High</th><th>Medium</th><th>Low</th><th>Informational</th></tr></thead>
+<thead>
+<tr>
+  <th rowspan="2">Site</th>
+  <th rowspan="2">Result</th>
+  <th>Traffic</th>
+  <th colspan="4">Alerts</th>
+</tr>
+<tr>
+  <th>Messages</th>
+  <th>High</th>
+  <th>Medium</th>
+  <th>Low</th>
+  <th>Informational</th>
+</tr>
+</thead>
 <tbody>${rows}</tbody>
 <tfoot>
 <tr>
   <td>Total</td>
   <td>—</td>
+  <td>${totals.Messages}</td>
   <td>${totals.High}</td>
   <td>${totals.Medium}</td>
   <td>${totals.Low}</td>
@@ -295,7 +322,7 @@ async function main(): Promise<void> {
 
   const rules = await loadRules();
   const sites = await loadReportSites();
-  const summaries = sites.map((site) => summariseSite(site, rules));
+  const summaries = await Promise.all(sites.map(async (site) => summariseSite(site, rules, await getMessageCount(client, site.siteName))));
 
   for (const site of sites) {
     for (const alert of site.alerts) {
