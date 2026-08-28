@@ -24,7 +24,7 @@ export class OriginOfImportPage extends NotificationPage {
   }
 
   get regionCode(): Locator {
-    return this.page.getByLabel('Region of origin code', { exact: true });
+    return this.page.getByLabel('Enter the region of origin code', { exact: true });
   }
 
   get internalReference(): Locator {
