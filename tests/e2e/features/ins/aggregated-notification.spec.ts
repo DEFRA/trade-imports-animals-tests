@@ -31,8 +31,23 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       const collection = client.collection<AggregatedNotificationDocument>('trade-imports-ins-backend', 'notifications');
 
       // When — notification has been edited but not yet submitted
-      // Then — aggregated store should reflect DRAFT status with all fields populated
-      await expect.poll(() => collection.findOne({ _id: aggregateId, status: 'DRAFT' }), { timeout: timeouts.long }).not.toBeNull();
+      // Then — aggregated store should reflect DRAFT status with all fields populated.
+      // The document is projected from outbox events one at a time, so it appears as DRAFT
+      // before the later events fill it in. Wait on the fields asserted below, not just on
+      // the document existing, or the read races the projection.
+      await expect
+        .poll(
+          () =>
+            collection.findOne({
+              _id: aggregateId,
+              status: 'DRAFT',
+              originCountry: { $ne: null },
+              arrivalDate: { $ne: null },
+              lastUpdated: { $ne: null },
+            }),
+          { timeout: timeouts.long },
+        )
+        .not.toBeNull();
 
       const draftDoc = await collection.findOne({ _id: aggregateId });
       expect(draftDoc._id).toBe(aggregateId);
