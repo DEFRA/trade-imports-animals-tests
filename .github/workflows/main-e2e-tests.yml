@@ -38,6 +38,12 @@ on:
 # Queue, never cancel. Every merged commit gets its own verdict, and the
 # reusable workflow's deploy-report job pushes to gh-pages — cancelling
 # mid-publish is banned by docs/best-practices/github-actions.md section 4.
+#
+# GitHub keeps at most one QUEUED run per group, so three merges in quick
+# succession can drop the middle commit's run before any job starts. That SHA
+# then carries no `main-e2e` status, which reads correctly as "never ran" — but
+# it does mean a merge can go unverified. Accepted: see
+# docs/adr/0002-post-merge-e2e-reports-and-main-stays-pushable.md.
 concurrency:
   group: main-e2e
   cancel-in-progress: false
@@ -50,11 +56,20 @@ permissions:
 
 jobs:
   main-e2e-pending:
+    # A manual dispatch must also be ON main: `main-e2e` (below) always tests
+    # main's images, so dispatching from a feature branch would stamp a status
+    # onto that branch's SHA describing a run that never touched its code.
     if: >
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref == 'refs/heads/main') ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    # Marking the commit pending is a courtesy, not a gate. If the API call
+    # fails, the E2E run and its verdict must still happen — without this, a
+    # blip here skips main-e2e AND the report, and the SHA gets no verdict at
+    # all, which is the one outcome this workflow exists to prevent.
+    continue-on-error: true
     steps:
       - name: Mark the commit pending
         uses: actions/github-script@v7
@@ -146,7 +161,11 @@ jobs:
             // `<!-- e2e-status -->` comment. No labels, so there is no
             // label-must-exist edge to handle.
             const marker = '<!-- main-e2e-red -->';
-            const { data: openIssues } = await github.rest.issues.listForRepo({
+            // Paginated deliberately: listForRepo returns issues AND pull
+            // requests, so a single page of 100 can be entirely PRs. Missing
+            // the tracking issue does not fail loudly — it silently opens a
+            // duplicate on every red run.
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
