@@ -1,0 +1,175 @@
+# Post-merge E2E for main. Reports, never blocks — the commit is already in,
+# so there is nothing left to gate. See EUDPA-358.
+#
+# Deliberately a separate file from workspace-e2e-tests.yml (the PR path).
+# A workflow_run-triggered run is attributed to the DEFAULT BRANCH, so every
+# PR E2E run already stamps its check runs onto main's HEAD commit. Reusing
+# that workflow's job ids here would add a second, indistinguishable set of
+# `e2e / e2e (N, 3)` check runs to the same SHA. The job ids below are
+# main-e2e* precisely so the post-merge shards read `main-e2e / e2e (N, 3)`.
+#
+# The verdict is published as a COMMIT STATUS with context `main-e2e`, not a
+# check run: commit statuses are a namespace the PR path never writes into, so
+# its presence at a SHA is unambiguous.
+#
+#   no `main-e2e` status  -> never ran
+#   pending               -> running (or the run was lost)
+#   failure / error       -> ran and failed
+#   success               -> ran and passed
+#
+# Query it with:
+#   gh api repos/DEFRA/trade-imports-animals-tests/commits/<sha>/status \
+#     --jq '.statuses[] | select(.context=="main-e2e")'
+#
+# That is also exactly the signal a required-status-check rule would consume,
+# so this reporting version installs the hook a future blocking gate needs
+# while blocking nothing today.
+name: Main E2E Tests
+
+on:
+  # Chained off Publish rather than `push: branches: [main]` so the tests image
+  # under test is the MERGED one. A direct push trigger would race Publish and
+  # exercise the previous :latest.
+  workflow_run:
+    workflows: ['Publish']
+    types: [completed]
+  workflow_dispatch:
+
+# Queue, never cancel. Every merged commit gets its own verdict, and the
+# reusable workflow's deploy-report job pushes to gh-pages — cancelling
+# mid-publish is banned by docs/best-practices/github-actions.md section 4.
+concurrency:
+  group: main-e2e
+  cancel-in-progress: false
+
+permissions:
+  contents: write # the reusable deploy-report job pushes to gh-pages
+  statuses: write # the `main-e2e` commit status
+  issues: write # the tracking issue
+  actions: read
+
+jobs:
+  main-e2e-pending:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the commit pending
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.HEAD_SHA,
+              state: 'pending',
+              context: 'main-e2e',
+              target_url: runUrl,
+              description: 'Post-merge E2E: running',
+            });
+
+  main-e2e:
+    needs: main-e2e-pending
+    # `branch: main` resolves to :latest for every service — no
+    # defradigital/*:main tag exists, so run-stack.sh falls back per service.
+    #
+    # HAZARD: dispatching "Publish Branch Image" FROM main would mint a
+    # defradigital/<svc>:main tag that then silently pins every post-merge run
+    # (and every local run-stack.sh --branch main) to that frozen image.
+    # Never dispatch Publish Branch Image from main.
+    #
+    # `main` rather than `latest` also lands the report at gh-pages e2e/main/,
+    # which the cleanup workflow's keep-list already preserves; e2e/latest/
+    # would be pruned nightly.
+    uses: DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main
+    with:
+      branch: main
+    secrets: inherit
+
+  main-e2e-report:
+    needs: [main-e2e]
+    # Bracket syntax throughout: `needs.main-e2e.result` parses as subtraction.
+    if: always() && needs['main-e2e'].result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      # Written inline rather than reusing
+      # DEFRA/trade-imports-workspace/.github/actions/report-e2e-status@main:
+      # that action iterates context.payload.workflow_run.pull_requests, which
+      # is EMPTY on a main push, so it would silently report nothing. Do not
+      # "simplify" this job into that action.
+      - name: Report the verdict
+        uses: actions/github-script@v7
+        env:
+          E2E_RESULT: ${{ needs['main-e2e'].result }}
+          REPORT_URL: ${{ needs['main-e2e'].outputs['report-url'] }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        with:
+          script: |
+            const result = process.env.E2E_RESULT;
+            const sha = process.env.HEAD_SHA;
+            const reportUrl = process.env.REPORT_URL;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // always() also fires on cancellation, so map anything that is
+            // neither success nor failure to `error` — that leaves no SHA
+            // stuck displaying `pending`.
+            const state = result === 'success' ? 'success' : result === 'failure' ? 'failure' : 'error';
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha,
+              state,
+              context: 'main-e2e',
+              target_url: reportUrl || runUrl,
+              description: `Post-merge E2E: ${result}`,
+            });
+
+            const links = [reportUrl ? `[Playwright report](${reportUrl})` : '', `[Workflow run](${runUrl})`]
+              .filter(Boolean)
+              .join(' | ');
+
+            await core.summary
+              .addHeading(`Main E2E: ${result}`)
+              .addRaw(`Commit \`${sha}\` — commit status \`main-e2e\` set to \`${state}\`.`, true)
+              .addRaw(links, true)
+              .write();
+
+            // Tracking issue, marker-driven — same pattern as the PR path's
+            // `<!-- e2e-status -->` comment. No labels, so there is no
+            // label-must-exist edge to handle.
+            const marker = '<!-- main-e2e-red -->';
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const tracking = openIssues.find((i) => !i.pull_request && (i.body || '').includes(marker));
+
+            if (state === 'success') {
+              if (tracking) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: tracking.number,
+                  body: `Green again at \`${sha}\`.\n\n${links}`,
+                });
+                await github.rest.issues.update({ owner, repo, issue_number: tracking.number, state: 'closed' });
+              }
+              return;
+            }
+
+            const body = [marker, `Post-merge E2E **${result}** at \`${sha}\`.`, '', links].join('\n');
+            if (tracking) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: tracking.number, body });
+            } else {
+              await github.rest.issues.create({ owner, repo, title: 'Main E2E is failing on main', body });
+            }
