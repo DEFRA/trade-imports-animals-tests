@@ -115,6 +115,23 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+### Authenticated session reuse
+
+Each worker signs in once per project and its tests restore that session
+instead of driving the identity provider every time (`fixtures/auth-state.ts`).
+Saved state lives under `playwright/.auth/` (gitignored, removed by `_clean`),
+holds only the `sid` auth cookie, and is never written unless a fresh context
+has proved it restores to a signed-in landing page. A spec that must start
+unauthenticated opts out with `test.use({ storageState: COLD_START })`.
+
+`E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
+again, so re-cap workers (e.g. `-- --workers=4`) to protect the auth stub.
+Reuse is on by default against the docker-compose stack. On CDP it stays off
+until `ENVIRONMENT=<env> npm run probe:cdp-session-reuse` has passed against
+the target environment — the probe signs in once per service and proves
+load-balanced replicas honour a session minted against another — after which a
+lane opts in with `E2E_SESSION_REUSE=on`.
+
 The `docker-compose` config targets `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
 against that stack via the workspace reusable workflow.

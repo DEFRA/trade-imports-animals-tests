@@ -8,6 +8,11 @@ import { withZapProxy } from './utils/playwright/with-zap-proxy';
 
 const environment = getEnvironment();
 
+// Session reuse stays off on CDP until `npm run probe:cdp-session-reuse` has
+// passed against the target environment's replicas (EUDPA-361); a lane with
+// that evidence opts in by setting E2E_SESSION_REUSE=on.
+process.env.E2E_SESSION_REUSE ??= 'off';
+
 const projectBaseUrls: Record<string, string> = {
   e2e: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
   admin: `https://trade-imports-animals-admin.${environment}.cdp-int.defra.cloud`,

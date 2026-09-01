@@ -14,10 +14,10 @@ const projectBaseUrls: Record<string, string> = {
 const dockerComposeConfig = withServiceBaseUrls(
   {
     ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'),
-    // Unbounded local workers overwhelm the defra-id auth stub and tip the
-    // heaviest reaches into 30s timeouts. Four workers is the empirically clean ceiling.
+    // Session reuse (fixtures/auth-state.ts) keeps the auth stub healthy at
+    // the shared default worker count. Running with E2E_SESSION_REUSE=off
+    // means per-test sign-ins: re-cap workers (e.g. `--workers=4`) with it.
     // Override locally with `--workers=1` when debugging flaky auth/timeouts.
-    workers: process.env.CI ? '50%' : 4,
   },
   {
     MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',

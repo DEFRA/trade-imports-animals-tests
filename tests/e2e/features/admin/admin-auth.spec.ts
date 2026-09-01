@@ -1,4 +1,8 @@
 import { test, expect } from '@fixtures';
+import { COLD_START } from '@fixtures/auth-state';
+
+// These tests ARE the sign-in journey, so they start unauthenticated.
+test.use({ storageState: COLD_START });
 
 test.describe('Authentication (admin)', { tag: '@auth' }, () => {
   test.beforeEach(async ({ journey, pages }) => {

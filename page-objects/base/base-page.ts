@@ -1,9 +1,7 @@
-import { Page, Locator, errors } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { defaultUser } from '@config/users';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/auth/organisation-picker-page';
-
-const SIGN_IN_FORM_PROBE_MS = 5_000;
 
 function requireBaseUrl(
   envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL' | 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
@@ -69,17 +67,12 @@ export class BasePage {
   protected async signInWhenRequested(attemptSignIn: boolean, options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     if (!attemptSignIn) return;
     const signInPage = new SignInPage(this.page);
-    // Under concurrent load the auth stub can be slow; the caller may retry
-    // after a goto that landed directly on a post-auth page. Only sign in if
-    // the sign-in form is actually present.
-    try {
-      await signInPage.inputUserId.waitFor({
-        state: 'visible',
-        timeout: SIGN_IN_FORM_PROBE_MS,
-      });
-    } catch (error) {
-      if (error instanceof errors.TimeoutError) return;
-      throw error;
+    // The OIDC chain is pure server 302s, so the caller's goto has already
+    // resolved: anywhere but the stub's sign-in form means this context is
+    // already authenticated — usually the worker's reused session.
+    if (!signInPage.expectedUrl.test(this.page.url())) {
+      this.requireDefaultIdentity(options);
+      return;
     }
     await signInPage.signIn({ userId: options?.userId });
     const transientError = this.page.getByRole('heading', {
@@ -92,6 +85,26 @@ export class BasePage {
       await signInPage.signIn({ userId: options?.userId });
     }
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
+  }
+
+  /**
+   * A warm session is always the worker's default identity (single-org, so no
+   * organisation was ever picked). A caller asking for anything else over a
+   * warm session would otherwise silently run as the default user.
+   */
+  private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
+    if (options?.userId && options.userId !== defaultUser.crn) {
+      throw new Error(
+        `Already signed in as the default user, so cannot sign in as ${options.userId}. ` +
+          'Start cold instead: browser.newContext({ storageState: COLD_START }) for one context, or test.use({ storageState: COLD_START }) for the spec.',
+      );
+    }
+    if (options?.organisationSbi) {
+      throw new Error(
+        `Already signed in with the default organisation, so cannot select SBI ${options.organisationSbi}. ` +
+          'Start cold instead: browser.newContext({ storageState: COLD_START }) for one context, or test.use({ storageState: COLD_START }) for the spec.',
+      );
+    }
   }
 
   private async selectOrganisationIfPrompted(organisationSbi?: string): Promise<void> {

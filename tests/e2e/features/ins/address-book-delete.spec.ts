@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { COLD_START } from '@fixtures/auth-state';
 import { createPageObjects } from '@page-objects';
 import { users } from '@config/users';
 
@@ -40,7 +41,8 @@ test.describe('Address book delete', { tag: '@integration' }, () => {
     await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
     await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
 
-    const contextB = await browser.newContext();
+    // browser.newContext() inherits the test's storageState; Sarah must start cold.
+    const contextB = await browser.newContext({ storageState: COLD_START });
     try {
       const pagesB = createPageObjects(await contextB.newPage());
 
