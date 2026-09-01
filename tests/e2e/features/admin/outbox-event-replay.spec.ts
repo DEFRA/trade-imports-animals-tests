@@ -26,7 +26,7 @@ test.describe('Outbox event replay', { tag: ['@compose', '@integration'] }, () =
   });
 
   test(
-    'writes a REPLAY_EVENTS audit record covering both outbox events',
+    'writes a REPLAY_EVENTS audit record covering three outbox events',
     { tag: '@mongodb' },
     async ({ adminNavigation, pages, journeyContext }) => {
       const referenceNumber = journeyContext.referenceNumber;
