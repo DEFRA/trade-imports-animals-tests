@@ -1,0 +1,18 @@
+name: Scheduled Security Scan
+
+on:
+  # TEMPORARY — disabled until a manual dispatch confirms this end-to-end;
+  # re-enable via a follow-up commit once verified. Risks a nightly
+  # failure otherwise if this merges before the workspace repo's
+  # security-active-scan.yml does.
+  # schedule:
+  #   # Provisional: tbd exact time once a real active-scan run's duration
+  #   # is known. An hour ahead of cleanup-e2e-reports.yml's own 03:00
+  #   # schedule.
+  #   - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    uses: DEFRA/trade-imports-workspace/.github/workflows/security-active-scan.yml@main
+    secrets: inherit
