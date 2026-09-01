@@ -1,8 +1,7 @@
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 
-// INS's one real redirect-to-sign-in-and-return test, so it starts
-// unauthenticated — the frontend and admin equivalents live in their auth specs.
+// INS's one real redirect-to-sign-in-and-return test, so it starts unauthenticated.
 test.use({ storageState: COLD_START });
 
 test.describe('Authentication (ins)', { tag: '@auth' }, () => {

@@ -11,24 +11,15 @@ const projectBaseUrls: Record<string, string> = {
   ins: 'http://localhost:3002',
 };
 
-const dockerComposeConfig = withServiceBaseUrls(
-  {
-    ...withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'),
-    // Session reuse (fixtures/auth-state.ts) keeps the auth stub healthy at
-    // the shared default worker count. Running with E2E_SESSION_REUSE=off
-    // means per-test sign-ins: re-cap workers (e.g. `--workers=4`) with it.
-    // Override locally with `--workers=1` when debugging flaky auth/timeouts.
-  },
-  {
-    MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
-    TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
-    TRADE_IMPORTS_ADDRESS_BOOK_URL: process.env.TRADE_IMPORTS_ADDRESS_BOOK_URL ?? 'http://localhost:8089',
-    AWS_SQS_ENDPOINT: process.env.AWS_SQS_ENDPOINT ?? 'http://localhost:4566',
-    NOTIFICATION_SQS_DLQ_URL:
-      process.env.NOTIFICATION_SQS_DLQ_URL ??
-      'http://localhost:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo',
-  },
-);
+const dockerComposeConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'), {
+  MONGODB_URI: process.env.MONGODB_URI ?? 'mongodb://localhost:27017',
+  TRADE_IMPORTS_ANIMALS_BACKEND_URL: process.env.TRADE_IMPORTS_ANIMALS_BACKEND_URL ?? 'http://localhost:8085',
+  TRADE_IMPORTS_ADDRESS_BOOK_URL: process.env.TRADE_IMPORTS_ADDRESS_BOOK_URL ?? 'http://localhost:8089',
+  AWS_SQS_ENDPOINT: process.env.AWS_SQS_ENDPOINT ?? 'http://localhost:4566',
+  NOTIFICATION_SQS_DLQ_URL:
+    process.env.NOTIFICATION_SQS_DLQ_URL ??
+    'http://localhost:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo',
+});
 
 /**
  * e2e against the workspace docker-compose stack (local dev, CI, and containerised runs).

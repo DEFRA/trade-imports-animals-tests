@@ -87,11 +87,6 @@ export class BasePage {
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
   }
 
-  /**
-   * A warm session is always the worker's default identity (single-org, so no
-   * organisation was ever picked). A caller asking for anything else over a
-   * warm session would otherwise silently run as the default user.
-   */
   private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
     if (options?.userId && options.userId !== defaultUser.crn) {
       throw new Error(

@@ -24,25 +24,11 @@ const SIGN_IN_ATTEMPTS = 2;
 
 type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
-/**
- * Opt-out token: `test.use({ storageState: COLD_START })` makes every test in
- * a spec start unauthenticated instead of restoring the worker's session.
- */
+/** Opt-out token: `test.use({ storageState: COLD_START })` starts every test in a spec unauthenticated. */
 const coldStartState: StorageState = { cookies: [], origins: [] };
 Object.freeze(coldStartState.cookies);
 Object.freeze(coldStartState.origins);
 export const COLD_START: StorageState = Object.freeze(coldStartState);
-
-/**
- * Kill switch: E2E_SESSION_REUSE=off makes every test sign in for itself —
- * re-cap workers (e.g. `--workers=4`) when you turn it off, since per-test
- * sign-ins overwhelm the auth stub at higher counts. The CDP config defaults
- * it off until `npm run probe:cdp-session-reuse` has passed for the target
- * environment.
- */
-export function sessionReuseEnabled(): boolean {
-  return process.env.E2E_SESSION_REUSE !== 'off';
-}
 
 export type AuthTarget = {
   landingPath: string;
@@ -60,20 +46,13 @@ export const AUTH_TARGETS: Record<string, AuthTarget> = {
 
 const slug = (baseUrl: string): string => baseUrl.replace(/^https?:\/\//, '').replace(/[^a-z0-9]+/gi, '-');
 
-// Keyed by project, base URL and worker — the three axes along which a session
-// is not interchangeable: the services share the `localhost` cookie domain but
-// keep separate session-store key prefixes, so a session minted against one is
-// a cache miss against the others.
+// The services share the `localhost` cookie domain but keep separate session-store
+// key prefixes, so a session minted against one is a cache miss against the others.
 function authStatePath(projectName: string, baseUrl: string, workerIndex: number): string {
   return resolve(AUTH_STATE_DIR, `${projectName}-${slug(baseUrl)}-w${workerIndex}.json`);
 }
 
-/**
- * Signs in once for a worker and saves the auth cookie for its tests to
- * restore. The state file is written to a temp path and only renamed into
- * place after a fresh context has proved it restores to a signed-in landing
- * page — no failure path leaves a state file behind.
- */
+/** Temp-then-rename, so a failed or unverified mint never leaves a state file behind. */
 export async function createWorkerAuthState(browser: Browser, workerInfo: WorkerInfo): Promise<string> {
   const { name } = workerInfo.project;
   const target = AUTH_TARGETS[name];
@@ -121,9 +100,8 @@ export async function createWorkerAuthState(browser: Browser, workerInfo: Worker
 }
 
 /**
- * Keeps only the auth cookie: the yar `session` cookie carries per-user
- * journey working state that must not bleed across a worker's tests, and the
- * identity stub's own cookies belong to the mint, not the suite.
+ * The yar `session` cookie carries per-user journey working state that must not bleed
+ * across a worker's tests, and the identity stub's own cookies belong to the mint.
  */
 export function stripToAuthCookie(state: StorageState, baseUrl: string): StorageState {
   const cookies = state.cookies.filter((cookie) => cookie.name === AUTH_COOKIE_NAME);
@@ -133,8 +111,7 @@ export function stripToAuthCookie(state: StorageState, baseUrl: string): Storage
   return { cookies, origins: [] };
 }
 
-// Opens the saved state in a fresh context and requires it to land signed in,
-// so over-stripping or a renamed session cookie fails the mint loudly.
+// Over-stripping or a renamed session cookie fails the mint loudly, not every test that restores it.
 async function verifySavedState(
   browser: Browser,
   contextOptions: BrowserContextOptions,

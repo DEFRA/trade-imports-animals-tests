@@ -3,16 +3,6 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { AUTH_COOKIE_NAME, AUTH_TARGETS, LANDING_TIMEOUT_MS, stripToAuthCookie, type AuthTarget } from '@fixtures/auth-state';
 import { getEnvironment, throwIfProdEnvironment } from '@utils/playwright/environment';
 
-/**
- * Evidence gatherer for session reuse on CDP (`npm run probe:cdp-session-reuse`
- * with ENVIRONMENT set, or E2E_PROBE_BASE_URL for a single-URL sanity run):
- * per service, it signs in once, saves the auth cookie, then repeats
- * authenticated navigations in fresh contexts and fails if any is bounced back
- * to the sign-in form — establishing that load-balanced replicas honour a
- * session minted against another, instead of presuming it from the shared
- * Redis session store. A failing environment keeps E2E_SESSION_REUSE off.
- */
-
 const NAVIGATIONS = 20;
 
 const CDP_SERVICES: Record<string, string> = {
