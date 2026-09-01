@@ -62,7 +62,7 @@ export class Journey {
     const requiresRegionCode = options.requiresRegionCode ?? 'No';
     await this.pages.originOfImport.radioRequiresOriginCode(requiresRegionCode).check();
     if (requiresRegionCode === 'Yes') {
-      await this.pages.originOfImport.regionCode.fill('FR-75');
+      await this.pages.originOfImport.regionCode.fill('75');
     }
     if (options.internalReference) {
       await this.pages.originOfImport.internalReference.fill(options.internalReference);
