@@ -42,8 +42,8 @@ on:
 # GitHub keeps at most one QUEUED run per group, so three merges in quick
 # succession can drop the middle commit's run before any job starts. That SHA
 # then carries no `main-e2e` status, which reads correctly as "never ran" — but
-# it does mean a merge can go unverified. Accepted: see
-# docs/adr/0002-post-merge-e2e-reports-and-main-stays-pushable.md.
+# it does mean a merge can go unverified. Accepted: the next merge's run covers
+# the same branch state, and "never ran" is not reported as a pass.
 concurrency:
   group: main-e2e
   cancel-in-progress: false
