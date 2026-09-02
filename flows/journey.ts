@@ -47,6 +47,10 @@ export class Journey {
     const journeyId = await this.createNotificationAtOrigin();
     await this.fillOriginOfImport();
     await this.saveOriginOfImport();
+    // Wait for the save to land before navigating away. Opening the overview
+    // regardless hides a failed save — the run then dies several steps later on
+    // a task stuck at "Cannot start yet", pointing at the wrong page entirely.
+    await this.pages.originOfImport.heading.waitFor({ state: 'hidden' });
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor();
     return journeyId;

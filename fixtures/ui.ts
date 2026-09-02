@@ -6,6 +6,12 @@ import { NotificationActions } from '@flows/notification-actions';
 import { ApiJourney } from '@flows/api-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { createWorkerAuthState } from '@fixtures/auth-state';
+import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
+
+export interface AuthWorkerFixtures {
+  workerAuthState: string | undefined;
+}
 
 export interface PageFixtures {
   pages: PageObjects;
@@ -18,7 +24,22 @@ export interface PageFixtures {
   apiJourney: ApiJourney;
 }
 
-export const test = base.extend<PageFixtures>({
+export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
+  workerAuthState: [
+    async ({ browser }, use, workerInfo) => {
+      if (!sessionReuseEnabled()) {
+        await use(undefined);
+        return;
+      }
+      await use(await createWorkerAuthState(browser, workerInfo));
+    },
+    // Its own timeout, so a slow mint is reported as a mint failure instead of
+    // eating the first test's budget.
+    { scope: 'worker', timeout: 120_000 },
+  ],
+  storageState: async ({ workerAuthState }, use) => {
+    await use(workerAuthState);
+  },
   pages: async ({ page }, use) => {
     await use(createPageObjects(page));
   },
