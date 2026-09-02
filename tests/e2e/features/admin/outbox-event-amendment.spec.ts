@@ -5,7 +5,7 @@ import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-const NOTIFICATION_SUBMISSION_AMENDED = 'uk.gov.defra.imports.notification.NotificationSubmissionAmended';
+const NOTIFICATION_AMENDMENT_REQUESTED = 'uk.gov.defra.imports.notification.NotificationAmendmentRequested';
 const EXPECTED_ACTOR: OutboxEventActor = {
   id: users.andrew.crn,
   source: 'dynamics-contact',
@@ -47,15 +47,15 @@ test.describe('Notification amendment outbox event', { tag: ['@integration', '@m
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
       await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }), { timeout: timeouts.long })
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_AMENDMENT_REQUESTED }), { timeout: timeouts.long })
         .toBe(1);
 
-      const events = await collection.find({ aggregateId, eventType: NOTIFICATION_SUBMISSION_AMENDED }).toArray();
+      const events = await collection.find({ aggregateId, eventType: NOTIFICATION_AMENDMENT_REQUESTED }).toArray();
       const [amended] = events;
       const statusChanges = amended.statusChanges ?? [];
 
       expect(amended.aggregateVersion).toBeGreaterThan(1);
-      expect(amended.eventType).toBe(NOTIFICATION_SUBMISSION_AMENDED);
+      expect(amended.eventType).toBe(NOTIFICATION_AMENDMENT_REQUESTED);
       expect(amended.data.exchangedDocument.notificationStatusCode).toBe('AMEND');
       expect(actorWithNullableFields(amended.actor)).toEqual(EXPECTED_ACTOR);
       expect(statusChanges).toHaveLength(3);
