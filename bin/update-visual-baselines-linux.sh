@@ -5,7 +5,6 @@
 # Usage: ./bin/update-visual-baselines-linux.sh [Playwright arguments]
 #
 # Prerequisites: workspace stack running (./scripts/stack/run-stack.sh).
-# Reseeds the database on the host before the container run.
 #
 # Override PLAYWRIGHT_IMAGE, NODE_MODULES_VOLUME, CONTAINER_USER, or any of the
 # service URLs below to customise the container run.
@@ -29,7 +28,6 @@ AWS_SQS_ENDPOINT="${AWS_SQS_ENDPOINT:-http://host.docker.internal:4566}"
 NOTIFICATION_SQS_DLQ_URL="${NOTIFICATION_SQS_DLQ_URL:-http://host.docker.internal:4566/000000000000/trade_imports_animals_eu_notifications_gateway-deadletter.fifo}"
 
 cd "$REPO_ROOT"
-npm run database:reseed
 
 # Named volumes mount root-owned; chown so CONTAINER_USER can npm ci (and own Linux node_modules).
 docker run --rm \
