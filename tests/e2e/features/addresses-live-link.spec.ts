@@ -158,9 +158,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       // The Change link brought us back here rather than into the section flow,
       // which is what makes the replacement loop below close.
       await expect(pages.notificationView.heading).toBeVisible();
-      const consignorRow = pages.notificationView
-        .summaryCard('Roles and addresses')
-        .locator('.govuk-summary-list__row', { has: pages.page.getByText('Consignor', { exact: true }) });
+      const consignorRow = pages.notificationView.partyRow('Roles and addresses', 'Consignor');
       await expect(consignorRow).toContainText(name);
       await expect(pages.notificationView.errorSummary).toHaveCount(0);
 
