@@ -7,10 +7,25 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     addressBookApi,
   }) => {
     const page = pages.page;
-    // Own records for the pagination leg: create the target first, then five
-    // newer ones so newest-first listing pushes the target off page one. The
-    // once-seeded journey fixtures still back the search (ApS) / details rows.
+    // Own records for every leg that counts rows: the address book is shared and
+    // never wiped, so a search has to be scoped to a token only this run minted.
     const stamp = Date.now();
+    const searchToken = `Kolding${stamp}`;
+    const searchMatches = [`Danish Meat Export ${searchToken}`, `Jutland Swine ${searchToken}`];
+    for (const name of searchMatches) {
+      await addressBookApi.createAddress({
+        name,
+        addressLine1: 'Havnegade 21',
+        townOrCity: 'Copenhagen',
+        postcode: '1058',
+        countryCode: 'DK',
+        phone: '01228 555 0197',
+        email: 'searchable@example.co.uk',
+      });
+    }
+
+    // Pagination leg: create the target first, then five newer ones so
+    // newest-first listing pushes the target off page one.
     const targetName = `Paged Consignor ${stamp}`;
     await addressBookApi.createAddress({
       name: targetName,
@@ -55,12 +70,12 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     await expect(rowDetails).toContainText('London');
 
     // Search is a server round-trip over the whole book and narrows it to a
-    // single page of results. The address book matches name, town and postcode
-    // — not country — so this searches on a fragment of the two Danish names.
-    await pages.consignorSelection.search.fill('ApS');
+    // single page of results. Searching this run's own token keeps the count
+    // exact however many records earlier runs left behind.
+    await pages.consignorSelection.search.fill(searchToken);
     await pages.consignorSelection.searchButton.click();
     await expect(page.getByText('Showing 2 of 2 addresses')).toBeVisible();
-    await expect(pages.consignorSelection.party('Jutland Swine ApS')).toBeVisible();
+    await expect(pages.consignorSelection.party(searchMatches[1])).toBeVisible();
     await expect(page.getByRole('link', { name: 'Page 2' })).toHaveCount(0);
 
     // Clearing the search restores the whole book and its pagination.

@@ -43,7 +43,7 @@ export const E2E_ADDRESS_BOOK_FIXTURES: readonly AddressBookCreate[] = [
     email: 'contact@example.com',
   },
 
-  // Page-two fodder (includes the two Danish names the picker search uses)
+  // Page-two fodder
   {
     name: 'Animal and Plant Health Agency',
     addressLine1: 'Woodham Lane',
