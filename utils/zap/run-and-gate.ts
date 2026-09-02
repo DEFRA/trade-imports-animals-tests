@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createZapClient, runAutomationPlan } from '@utils/zap/client';
+import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
-import { getEnvironment } from '@utils/playwright/environment';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
@@ -19,6 +18,13 @@ const PLAYWRIGHT_REPORT_DIR = pathFromHere('../../playwright-report');
 // Matches reportFile in automation-*.yaml — one combined report
 // covering every site ZAP touched this run.
 const REPORT_NAME = 'security-scan';
+// CDP's report viewer 403s anything that isn't .html, and GitHub Actions'
+// staticrypt password gate (security-active-scan.yml) only wraps .html
+// files — so ZAP's own log and its JSON report both get escaped into a
+// minimal <pre> page under these names rather than published as-is.
+// Linked from index.html below; see wrapAsHtml.
+const ZAP_LOG_ARTEFACT = 'zap-log.html';
+const JSON_REPORT_ARTEFACT = `${REPORT_NAME}-json.html`;
 
 type RuleAction = 'IGNORE' | 'WARN' | 'FAIL';
 
@@ -107,9 +113,10 @@ interface SiteSummary {
   siteName: string;
   counts: Record<string, number>;
   failCount: number;
+  messageCount: number;
 }
 
-function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>): SiteSummary {
+function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>, messageCount: number): SiteSummary {
   const counts: Record<string, number> = { High: 0, Medium: 0, Low: 0, Informational: 0 };
   let failCount = 0;
   for (const alert of site.alerts) {
@@ -119,7 +126,38 @@ function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>): SiteSu
     // fails the gate is one thing to fix, not 81.
     if (resolveAction(alert, rules) === 'FAIL') failCount += 1;
   }
-  return { siteName: site.siteName, counts, failCount };
+  return { siteName: site.siteName, counts, failCount, messageCount };
+}
+
+// Traffic volume, not an alert — reassurance that a site with few/no
+// alerts was actually reached through the proxy rather than silently
+// skipped. Queried live from ZAP rather than the static report, which
+// doesn't carry message counts at all.
+async function getMessageCount(client: ZapClient, siteName: string): Promise<number> {
+  const { numberOfMessages } = await client.core.numberOfMessages({ baseurl: siteName });
+  return Number(numberOfMessages);
+}
+
+// Escapes sourceName's content and wraps it in a minimal HTML page under
+// targetName, both relative to REPORT_DIR — see ZAP_LOG_ARTEFACT and
+// JSON_REPORT_ARTEFACT above for why. Silently no-ops if sourceName isn't
+// there: true on CDP for zap.log specifically, which isn't written to
+// REPORT_DIR until entrypoint.sh copies it in after this script has
+// already run (ZAP itself is still running at this point, so its log
+// isn't complete yet — entrypoint.sh writes the real zap-log.html once
+// it is).
+async function wrapAsHtml(sourceName: string, targetName: string): Promise<void> {
+  try {
+    const content = await fs.readFile(path.join(REPORT_DIR, sourceName), 'utf8');
+    const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    await fs.writeFile(
+      path.join(REPORT_DIR, targetName),
+      `<!doctype html><meta charset="utf-8"><title>${sourceName}</title><pre>${escaped}</pre>`,
+      'utf8',
+    );
+  } catch {
+    console.error(`could not wrap ${sourceName} as HTML`);
+  }
 }
 
 // CDP's own "Report" link is driven by whichever directory gets published —
@@ -141,6 +179,7 @@ async function writeIndexHtml(
         <tr>
           <td>${s.siteName}</td>
           <td class="${s.failCount > 0 ? 'fail' : 'pass'}">${s.failCount > 0 ? 'FAIL' : 'pass'}</td>
+          <td>${s.messageCount}</td>
           <td>${s.counts.High}</td>
           <td>${s.counts.Medium}</td>
           <td>${s.counts.Low}</td>
@@ -151,29 +190,26 @@ async function writeIndexHtml(
 
   const totals = summaries.reduce(
     (acc, s) => ({
+      Messages: acc.Messages + s.messageCount,
       High: acc.High + s.counts.High,
       Medium: acc.Medium + s.counts.Medium,
       Low: acc.Low + s.counts.Low,
       Informational: acc.Informational + s.counts.Informational,
     }),
-    { High: 0, Medium: 0, Low: 0, Informational: 0 },
+    { Messages: 0, High: 0, Medium: 0, Low: 0, Informational: 0 },
   );
 
   const truncationSection =
     truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
 
-  // CDP's report viewer 403s a bare .log file, but serves .html fine (this
-  // page proves it) — entrypoint.sh writes the escaped log there under that
-  // name for CDP runs. Locally there's no such viewer and no equivalent
-  // write step, so the plain file the docker-compose bind mount already
-  // produces is still what's on disk (see zap/docker-compose.yml).
-  const zapLogHref = getEnvironment() ? 'zap.html' : 'zap.log';
+  await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
+  await wrapAsHtml(`${REPORT_NAME}.json`, JSON_REPORT_ARTEFACT);
 
   // Copied whole, not just index.html: Playwright's HTML report embeds test
   // results inline, but attachments (screenshots, traces) sit alongside it
-  // in data/ and would 404 without it. Same copy either environment — no
-  // getEnvironment() branching needed, since publishing it is just a matter
-  // of it existing under REPORT_DIR before entrypoint.sh's one upload step.
+  // in data/ and would 404 without it. Publishing it is just a matter of
+  // it existing under REPORT_DIR before entrypoint.sh's one upload step —
+  // same for every environment.
   try {
     await fs.cp(PLAYWRIGHT_REPORT_DIR, path.join(REPORT_DIR, 'playwright-report'), { recursive: true });
   } catch {
@@ -228,12 +264,27 @@ tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 ${truncationSection}
 <h2>Sites</h2>
 <table>
-<thead><tr><th>Site</th><th>Result</th><th>High</th><th>Medium</th><th>Low</th><th>Informational</th></tr></thead>
+<thead>
+<tr>
+  <th rowspan="2">Site</th>
+  <th rowspan="2">Result</th>
+  <th>Traffic</th>
+  <th colspan="4">Alerts</th>
+</tr>
+<tr>
+  <th>Messages</th>
+  <th>High</th>
+  <th>Medium</th>
+  <th>Low</th>
+  <th>Informational</th>
+</tr>
+</thead>
 <tbody>${rows}</tbody>
 <tfoot>
 <tr>
   <td>Total</td>
   <td>—</td>
+  <td>${totals.Messages}</td>
   <td>${totals.High}</td>
   <td>${totals.Medium}</td>
   <td>${totals.Low}</td>
@@ -246,9 +297,9 @@ ${truncationSection}
 <thead><tr><th>File</th><th>Description</th></tr></thead>
 <tbody>
 <tr><td><a href="${REPORT_NAME}.html">${REPORT_NAME}.html</a></td><td>Full alert detail for every site above, human-readable</td></tr>
-<tr><td><a href="${REPORT_NAME}.json">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
+<tr><td><a href="${JSON_REPORT_ARTEFACT}">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
 <tr><td><a href="playwright-report/index.html">playwright-report</a></td><td>The Playwright run itself — specs, steps, and any screenshots/traces</td></tr>
-<tr><td><a href="${zapLogHref}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
+<tr><td><a href="${ZAP_LOG_ARTEFACT}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
 </tbody>
 </table>
 </body>
@@ -295,7 +346,7 @@ async function main(): Promise<void> {
 
   const rules = await loadRules();
   const sites = await loadReportSites();
-  const summaries = sites.map((site) => summariseSite(site, rules));
+  const summaries = await Promise.all(sites.map(async (site) => summariseSite(site, rules, await getMessageCount(client, site.siteName))));
 
   for (const site of sites) {
     for (const alert of site.alerts) {

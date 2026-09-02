@@ -23,7 +23,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import with validation errors', async () => {
       await pages.overview.task('Where is this consignment coming from?').click();
       await pages.originOfImport.heading.waitFor();
-      await pages.originOfImport.countryOfOrigin.selectOption({ label: 'Select a country' });
+      // A brand-new notification opens origin with no country chosen, so submitting
+      // straight away is the invalid submit. Assert that starting state rather than
+      // setting it: the control is a type-ahead, not a select to pick a blank from.
+      await expect(pages.originOfImport.countryOfOrigin).toHaveValue('');
       await pages.originOfImport.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan({ exclude: conditionalRadioInput });

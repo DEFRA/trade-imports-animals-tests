@@ -5,8 +5,8 @@
 #   default (or unset)  — standard run via npm test
 #   a11y                — accessibility suite via npm run test:a11y
 #   browserstack        — not implemented (exits 1)
-#   security            — ZAP passive scan only, safe to run routinely
-#   security:active     — ZAP passive + active scan, invoked deliberately only
+#   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
+#   security:active     — ZAP passive + active scan (@active suite) via npm run test:security:active, invoked deliberately only
 
 echo "run_id: $RUN_ID"
 
@@ -26,13 +26,14 @@ configure_zap_urls() {
   export ZAP_TRADE_IMPORTS_ANIMALS_ADMIN_URL="https://trade-imports-animals-admin.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_INS_FRONTEND_URL="https://trade-imports-ins-frontend.${ENVIRONMENT}.cdp-int.defra.cloud"
   export ZAP_TRADE_IMPORTS_ANIMALS_BACKEND_URL="https://trade-imports-animals-backend.${ENVIRONMENT}.cdp-int.defra.cloud"
+  export ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL="https://trade-imports-address-book.${ENVIRONMENT}.cdp-int.defra.cloud"
 }
 
 # Starts ZAP as a background process (CDP has no separate container to run
 # it in, unlike local's docker-compose setup), points the security specs and
 # the gate at it, then shuts it down. Shared by both security profiles below
-# — which plan file gets used is picked up from PROFILE itself (see
-# config/zap.ts), not passed in here.
+# — both the ZAP plan file (see config/zap.ts) and, just below, which npm
+# script runs are picked up from PROFILE itself, not passed in here.
 run_security_profile() {
   configure_zap_urls
 
@@ -64,7 +65,8 @@ run_security_profile() {
     -config anticsrf.tokens.token.name=crumb &
   zap_pid=$!
 
-  # Mirrors zap/docker-compose.yml's healthcheck timing (5s interval, 10 retries).
+  # Mirrors the workspace repo's docker/stack/security.compose.yml healthcheck
+  # timing (5s interval, 10 retries).
   zap_ready=false
   i=0
   while [ $i -lt 10 ]; do
@@ -79,9 +81,14 @@ run_security_profile() {
   if [ "$zap_ready" = "true" ]; then
     # Chained, not two independent statements: the gate (and any active scan
     # it triggers) must never run against a spec run that failed or refused
-    # to start — e.g. the prod guard in shared-config.ts, which only test:security
-    # goes through, not this gate step on its own.
-    npm run test:security && npm run _zap_run_and_gate
+    # to start — e.g. the prod guard in shared-config.ts, which only
+    # test:security/test:security:active go through, not this gate step on
+    # its own.
+    if [ "$PROFILE" = "security:active" ]; then
+      npm run test:security:active && npm run _zap_run_and_gate
+    else
+      npm run test:security && npm run _zap_run_and_gate
+    fi
     security_exit_code=$?
     if [ $security_exit_code -ne 0 ]; then
       echo "security profile exited $security_exit_code before completing" >> FAILED
@@ -103,7 +110,7 @@ run_security_profile() {
 <body>
 <h1>ZAP security scan — FAILED</h1>
 <p>ZAP did not become ready before timing out — no scan ran.</p>
-<p>See <a href="zap.html">zap.log</a> for diagnostics.</p>
+<p>See <a href="zap-log.html">zap.log</a> for diagnostics.</p>
 </body>
 </html>
 EOF
@@ -117,19 +124,26 @@ EOF
 
   # ZAP's own internal log — separate from what it prints to stdout, and
   # the only place some of its own errors ever get written ("ZAP errors
-  # logged - see the zap.log file for details"). Read after kill so it's
-  # complete, and written as escaped HTML rather than plain text: CDP's
-  # report viewer 403s a bare .log file, but .html files (this one included)
-  # already serve fine — linked from index.html (see run-and-gate.ts).
+  # logged - see the zap.log file for details"). run-and-gate.ts wraps this
+  # same file as HTML too (see wrapAsHtml there for why), but it runs
+  # before this point, while ZAP is still alive and the log incomplete —
+  # this is the one place that runs after kill+wait, so it's the version
+  # that actually ships.
   if [ -f "$HOME/.ZAP/zap.log" ]; then
     {
       echo '<!doctype html><meta charset="utf-8"><title>zap.log</title><pre>'
       sed -e 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' "$HOME/.ZAP/zap.log"
       echo '</pre>'
-    } > "$REPORT_DIR/zap.html"
+    } > "$REPORT_DIR/zap-log.html"
   else
     echo "could not find ZAP's own log (zap.log) to publish into $REPORT_DIR"
   fi
+
+  # security-scan-json.html already carries this (see run-and-gate.ts's
+  # wrapAsHtml) — the raw copy is just clutter on an already access-gated
+  # portal, not a security concern the way it is on GitHub Actions' public
+  # Pages site.
+  rm -f "$REPORT_DIR/security-scan.json"
 }
 
 case "${PROFILE:-default}" in

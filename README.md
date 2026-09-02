@@ -71,15 +71,15 @@ To keep TypeScript checks and editor behaviour consistent with this repository a
 
 This project uses **Playwright Test** as the test runner, with TypeScript for type-safe test development.
 
-| Command                                       | Test scope                                                   | Target               | Config                                | Generates Report |
-| --------------------------------------------- | ------------------------------------------------------------ | -------------------- | ------------------------------------- | ---------------- |
-| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`                  | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                           | CDP                  | `playwright.config.ts`                | ✓                |
-| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites               | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                           | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | Security (`@security`, ZAP passive scan) test suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security:active` | Security (`@security`, ZAP passive + active scan) test suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| Command                                       | Test scope                                            | Target               | Config                                | Generates Report |
+| --------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------- | ---------------- |
+| `npm test`                                    | E2E suite, excluding `@compose` and `@a11y`           | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
+| `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the whole e2e suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
 Optional: append these Playwright parameters to the command you're running (e.g. `npm test`) when needed.
 
@@ -132,7 +132,7 @@ Both configs split tests across the same two Playwright projects:
 
 ### Local workspace stack
 
-1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace),
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace),
    start the locally built stack:
 
    ```bash
@@ -155,7 +155,7 @@ since the preference is to seed notification state at test level through the
 front door (the backend API) rather than the back door (writing directly
 into Mongo).
 
-For the security (`@security`, OWASP ZAP) profile against this stack, see
+For the security (OWASP ZAP) profiles against this stack, see
 [Security Testing](#security-testing) below.
 
 #### Workspace stack commands (run from the workspace root)
@@ -194,16 +194,16 @@ used by CI. Both commands reseed the workspace database, run the `e2e` project's
 
 ## Security Testing
 
-Security tests (tagged `@security`) run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
+Security profiles run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
 
 Two profiles:
 
-- `security` — passive scan only, safe to run routinely
-- `security:active` — passive + a scoped active scan, safe to run routinely here since local is disposable (invoked deliberately elsewhere)
+- `security` — passive scan against the whole e2e suite (cheap — no attack traffic — so run broadly), safe to run routinely
+- `security:active` — passive + a scoped active scan against the deliberately curated `@active`-tagged suite only (attacks are slow and expensive per URL), safe to run routinely here since local is disposable (invoked deliberately elsewhere)
 
 ### Running locally
 
-1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace), start the app stack: `tim docker up`
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace), start the app stack: `tim docker up`
 2. Bring up ZAP too (additive — doesn't disturb what's already running): `tim docker up --profile security`
    (this always waits for its containers' healthchecks, so it doesn't return until ZAP is actually accepting requests, not just started.)
 3. Run the profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
@@ -212,7 +212,7 @@ Two profiles:
 
 Reports are written to `zap-report/` (gitignored). ZAP creates this directory automatically on first `up` — nothing to set up by hand. `_clean` only clears its _contents_ between runs, never the directory itself: ZAP bind-mounts it once at container start, so deleting the directory while ZAP is running would break that mount for the rest of the container's life.
 
-ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security` — see the workspace's `workareas/analysis/zap-playwright-*.md` docs for the full design. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
+ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security`. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
 
 > **Docker Desktop for Mac:** ZAP relies on `network_mode: host` to resolve the app stack's `localhost` OIDC redirects. OrbStack supports this out of the box; Docker Desktop only matches it on version 4.34+ with host networking explicitly enabled in Settings (off by default) — otherwise ZAP can't reach the stack.
 
@@ -222,7 +222,13 @@ E2E tests run in GitHub Actions via the workspace's reusable workflow, which sta
 
 ### GitHub Actions workflow
 
-The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-animals-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+
+### Scheduled security scan
+
+The `/.github/workflows/scheduled-security-scan.yml` workflow calls `DEFRA/trade-imports-workspace/.github/workflows/security-active-scan.yml@main`, which starts the workspace stack plus the `security` profile and runs a `security:active` scan against `main`/`:latest`, gating the run on FAIL-rated alerts the same way a failing test does. Currently manual dispatch only — the nightly schedule is disabled pending a verified end-to-end run (see the workflow file).
+
+The report publishes to GitHub Pages under `security-active/<date>/`, password-protected (`ZAP_REPORT_PASSWORD` secret) since the tests repo's Pages site is otherwise public and unauthenticated. Reports older than 7 days are pruned automatically.
 
 ## Running Tests via CDP Portal
 

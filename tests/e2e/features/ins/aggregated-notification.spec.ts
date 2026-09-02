@@ -32,6 +32,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
 
       // When — notification has been edited but not yet submitted
       // Then — aggregated store should reflect DRAFT status with all fields populated.
+
       // NOTIFICATION_CREATED fires immediately at creation (before transport details are filled in),
       // so we poll for the specific fully-populated state rather than bare status=DRAFT. The document
       // is captured inside the poll — no redundant second read needed.
