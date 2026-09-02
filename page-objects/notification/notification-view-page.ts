@@ -46,13 +46,12 @@ export class NotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-error-summary');
   }
 
-  /** The row for a role, found by its accessible term rather than by summary-list
-   * classes, so a markup change fails at the assertion instead of here. */
+  /** The summary-list row whose accessible term is the role, selected directly
+   * rather than climbing to it, so no XPath parent-axis hop is needed. */
   partyRow(card: string, role: string): Locator {
     return this.summaryCard(card)
-      .getByRole('term')
-      .filter({ has: this.page.getByText(role, { exact: true }) })
-      .locator('..');
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
   }
 
   /** A summary list has no error state of its own, so an outstanding role
