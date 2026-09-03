@@ -7,13 +7,16 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
   }) => {
     await journey.startNotification();
 
-    // Batch-create a Cats commodity line — the counts are submit-enforced, so
-    // the consignment details page can be left blank.
+    // Batch-create a Cats commodity line. The animal count is save-blocking,
+    // and a count of 2 keeps the identifier form open after the first record
+    // is committed — at the declared count the maximum-reached state replaces
+    // it, which is the cap spec's subject, not this one's.
     await pages.overview.task('What are you importing?').click();
     await pages.commoditySelection.selectSpecies(['Felis catus']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.consignmentDetails.heading).toBeVisible();
 
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
     await pages.consignmentDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
     await pages.overview.task('Animal identification details').click();
@@ -62,12 +65,15 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await journey.startNotification();
 
     // Fish is in no typed-identifier list, so the notInUnionOf gate turns the
-    // free-text fallbacks ON and every typed input OFF.
+    // free-text fallbacks ON and every typed input OFF. The animal count is
+    // save-blocking, and a count of 2 keeps the identifier form open after the
+    // first record is committed.
     await pages.overview.task('What are you importing?').click();
     await pages.commoditySelection.selectSpecies(['Salmo salar']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.consignmentDetails.heading).toBeVisible();
 
+    await pages.consignmentDetails.numberOfAnimals.fill('2');
     await pages.consignmentDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
     await pages.overview.task('Animal identification details').click();

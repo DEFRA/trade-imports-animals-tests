@@ -14,14 +14,17 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
       name: 'Does the consignment contain any unweaned animals?',
     });
 
-    // Each call ADDS a commodity line; counts are submit-enforced, so the
-    // consignment page saves blank straight back to the hub.
+    // Each call ADDS a commodity line. The animal count is save-blocking on
+    // every line, so each box the consignment page is showing — the lines
+    // added on earlier passes included — is filled before it hands back to the
+    // hub.
     const addCommodity = async (species: string): Promise<void> => {
       await pages.overview.open(journeyId);
       await pages.overview.task('What are you importing?').click();
       await pages.commoditySelection.selectSpecies([species]);
       await pages.commoditySelection.saveAndContinue.click();
       await pages.consignmentDetails.heading.waitFor();
+      await pages.consignmentDetails.fillEveryAnimalCount('1');
       await pages.consignmentDetails.saveAndContinue.click();
       await pages.overview.heading.waitFor();
     };

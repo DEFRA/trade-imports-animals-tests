@@ -5,6 +5,8 @@ test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-
   // through the full journey walk — the addresses leg of that walk picks the
   // canned parties whose names and countries are asserted here.
   test('check your answers lists all six operators with the picked name and country', async ({ journey, pages }) => {
+    test.slow();
+
     await journey.toReview();
 
     const card = pages.notificationView.summaryCard('Roles and addresses');

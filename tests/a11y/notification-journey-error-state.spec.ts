@@ -10,7 +10,9 @@ const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 // other sections are answered with valid input to unlock the next one.
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ journey }) => {
-    await journey.startNotification();
+    // Origin must stay unanswered — the first step exercises its own
+    // validation-error state, so startNotification() (which answers it) won't do.
+    await journey.startNotificationAtOrigin();
   });
 
   test('each notification journey page with validation has no accessibility violations when errors are shown', async ({

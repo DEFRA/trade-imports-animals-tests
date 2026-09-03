@@ -41,8 +41,8 @@ export class Journey {
     return journeyId;
   }
 
-  // Origin is the journey entry: the entry guard holds a new notification there
-  // until it is answered, so reaching the overview means answering it.
+  // Origin answered — most other tasks are gated behind it, so callers that
+  // want a usable task list reach the overview this way, not via startNotificationAtOrigin().
   async startNotification(): Promise<string> {
     const journeyId = await this.createNotificationAtOrigin();
     await this.fillOriginOfImport();
@@ -51,6 +51,15 @@ export class Journey {
     // regardless hides a failed save — the run then dies several steps later on
     // a task stuck at "Cannot start yet", pointing at the wrong page entirely.
     await this.pages.originOfImport.heading.waitFor({ state: 'hidden' });
+    await this.pages.overview.open(journeyId);
+    await this.pages.overview.heading.waitFor();
+    return journeyId;
+  }
+
+  // Origin unanswered — the entry guard is satisfied by the opening-run
+  // marker set at creation, not by answering origin itself.
+  async startNotificationAtOrigin(): Promise<string> {
+    const journeyId = await this.createNotificationAtOrigin();
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor();
     return journeyId;

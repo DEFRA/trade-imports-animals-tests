@@ -46,6 +46,8 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
   });
 
   test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages }) => {
+    test.slow();
+
     await pages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);

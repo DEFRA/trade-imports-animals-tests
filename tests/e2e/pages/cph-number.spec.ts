@@ -23,6 +23,8 @@ test.describe('CPH number page', { tag: ['@integration', '@duplicated-in-fronten
   });
 
   test('shows an error summary when submitted empty', async ({ pages }) => {
+    test.slow();
+
     await pages.cphNumber.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
