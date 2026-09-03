@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { planContexts } from '@utils/zap/check-context-sync';
 import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
 
@@ -136,6 +137,28 @@ function summariseSite(site: SiteAlerts, rules: Map<string, RuleAction>, message
 async function getMessageCount(client: ZapClient, siteName: string): Promise<number> {
   const { numberOfMessages } = await client.core.numberOfMessages({ baseurl: siteName });
   return Number(numberOfMessages);
+}
+
+/**
+ * Fails the run when a declared context recorded no traffic — the one failure
+ * mode that looks like success, since no requests means no site-tree node, no
+ * alerts, and a clean-looking report section. Catches a context nothing drives,
+ * a spec dropped from the corpus, and the quiet case where the API clients stop
+ * inheriting `use.proxy` from Playwright's own `request` fixture.
+ *
+ * Reads the plan rather than the report: a context with no traffic is absent
+ * from the report entirely, so the report cannot be asked what is missing.
+ */
+async function findContextsWithNoTraffic(client: ZapClient): Promise<string[]> {
+  const contexts = await planContexts();
+  const empty: string[] = [];
+  for (const { name, urls } of contexts) {
+    const counts = await Promise.all(urls.map((url) => getMessageCount(client, url)));
+    if (counts.every((count) => count === 0)) {
+      empty.push(`${name} (${urls.join(', ')})`);
+    }
+  }
+  return empty;
 }
 
 // Escapes sourceName's content and wraps it in a minimal HTML page under
@@ -317,7 +340,10 @@ ${truncationSection}
 // not a real one, so this is treated as a hard failure rather than a
 // warning. If it fires for real, the fix is to raise the cap, not to
 // ignore it.
-const ACTIVE_SCAN_CAP_MINS = 90;
+//
+// 60 is ~4.5x the slowest context measured (frontend 13m27s; 21m across all
+// five). See automation-active.yaml's frontend job for the headroom reasoning.
+const ACTIVE_SCAN_CAP_MINS = 60;
 const TRUNCATION_TOLERANCE_MINS = 0.5;
 
 function findTruncatedActiveScans(info: string[]): string[] {
@@ -341,6 +367,13 @@ async function main(): Promise<void> {
   if (truncatedScans.length > 0) {
     failures.push(
       `Active scan hit its ${ACTIVE_SCAN_CAP_MINS}-minute cap and was likely cut short before covering everything — increase maxScanDurationInMins in automation-active.yaml, don't treat this as a clean scan: ${truncatedScans.join('; ')}`,
+    );
+  }
+
+  const contextsWithNoTraffic = zapProfile === 'active' ? await findContextsWithNoTraffic(client) : [];
+  if (contextsWithNoTraffic.length > 0) {
+    failures.push(
+      `No traffic reached ${contextsWithNoTraffic.length} declared context(s), so their activeScan jobs scanned nothing and reported clean — drive them from a spec, or drop them from the plans: ${contextsWithNoTraffic.join('; ')}`,
     );
   }
 
