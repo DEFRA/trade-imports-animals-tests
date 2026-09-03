@@ -11,15 +11,17 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
       has: page.getByText('County Parish Holding number (CPH)', { exact: true }),
     });
 
-    // Add one commodity line for the given species, taking the fewest steps: the
-    // counts are submit-enforced, so the details page saves blank straight back
-    // to the hub.
+    // Add one commodity line for the given species, taking the fewest steps.
+    // The animal count is save-blocking on every line, so each box the details
+    // page is showing — the lines added on earlier passes included — is filled
+    // before the page will hand back to the hub.
     const addCommodity = async (species: string): Promise<void> => {
       await pages.overview.open(journeyId);
       await pages.overview.task('What are you importing?').click();
       await pages.commoditySelection.selectSpecies([species]);
       await pages.commoditySelection.saveAndContinue.click();
       await expect(pages.consignmentDetails.heading).toBeVisible();
+      await pages.consignmentDetails.fillEveryAnimalCount('1');
       await pages.consignmentDetails.saveAndContinue.click();
       await expect(pages.overview.heading).toBeVisible();
     };
