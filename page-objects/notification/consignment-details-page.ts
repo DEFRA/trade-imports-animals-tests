@@ -7,7 +7,7 @@ export class ConsignmentDetailsPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Consignment details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Commodity details' });
   }
 
   get numberOfAnimals(): Locator {

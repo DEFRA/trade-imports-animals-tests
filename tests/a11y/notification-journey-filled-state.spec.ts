@@ -27,7 +27,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.commoditySelection.saveAndContinue.click();
     });
 
-    await test.step('Consignment details', async () => {
+    await test.step('Commodity details', async () => {
       await pages.consignmentDetails.heading.waitFor();
       await pages.consignmentDetails.numberOfAnimals.fill('1');
       await pages.consignmentDetails.numberOfPackages.fill('5');
