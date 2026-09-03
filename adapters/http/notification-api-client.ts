@@ -39,12 +39,18 @@ export class NotificationApiClient {
 
   /**
    * Whole-record replace of an existing notification via PUT /notifications/{id}.
-   * 404 if the reference is unknown. The optional actor supplies organisationId so
-   * address-book party references resolve onto the NotificationEdited event.
+   * 404 if the reference is unknown, 400 without a matching concurrencyToken. The
+   * optional actor supplies organisationId so address-book party references
+   * resolve onto the NotificationEdited event.
    */
-  async saveNotification(id: string, notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+  async saveNotification(
+    id: string,
+    concurrencyToken: number,
+    notification: Record<string, unknown> = {},
+    actor?: Record<string, unknown>,
+  ): Promise<Notification> {
     return this.rest.put<Notification>(`/notifications/${id}`, {
-      notification: { referenceNumber: id, ...notification },
+      notification: { referenceNumber: id, concurrencyToken, ...notification },
       ...(actor ? { actor } : {}),
     });
   }

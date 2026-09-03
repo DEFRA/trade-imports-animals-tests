@@ -7,10 +7,28 @@ const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(rel
 
 const [BASELINE_FILE, ...OTHER_FILES] = ['automation-context.yaml', 'automation-passive.yaml', 'automation-active.yaml'];
 
+interface PlanContext {
+  name: string;
+  urls: string[];
+}
+
 async function loadContexts(fileName: string): Promise<unknown> {
   const content = await fs.readFile(pathFromHere(`../../zap/${fileName}`), 'utf8');
   const parsed = parse(content) as { env?: { contexts?: unknown } };
   return parsed.env?.contexts;
+}
+
+/**
+ * The contexts a plan declares, with `${ENV_VAR}` urls resolved — ZAP does that
+ * substitution itself at run time, so the parsed YAML still holds placeholders.
+ * checkContextSync keeps all three plans identical, so which is read does not matter.
+ */
+export async function planContexts(fileName: string = BASELINE_FILE): Promise<PlanContext[]> {
+  const contexts = ((await loadContexts(fileName)) ?? []) as PlanContext[];
+  return contexts.map(({ name, urls }) => ({
+    name,
+    urls: urls.map((url) => url.replace(/\$\{(\w+)\}/g, (_, variable: string) => process.env[variable] ?? '')),
+  }));
 }
 
 // ZAP's Automation Framework has no include/import mechanism for env: blocks

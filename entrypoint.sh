@@ -6,7 +6,8 @@
 #   a11y                — accessibility suite via npm run test:a11y
 #   browserstack        — not implemented (exits 1)
 #   security            — ZAP passive scan (broad e2e suite) via npm run test:security, safe to run routinely
-#   security:active     — ZAP passive + active scan (@active suite) via npm run test:security:active, invoked deliberately only
+#   security:active     — refused; the @active suite is destructive, so it only
+#                         runs against the disposable docker-compose stack
 
 echo "run_id: $RUN_ID"
 
@@ -54,6 +55,25 @@ run_security_profile() {
   mkdir -p /app/zap-report /zap/wrk
   ln -sfn /app/zap-report /zap/wrk/zap-report
 
+  # Compose-only. The @active suite deletes real data and the scan re-fires
+  # those deletes with fuzzed payloads; this script only ever runs on CDP,
+  # against a shared environment. Returning here is safe — ZAP has not
+  # started yet, so there is nothing to shut down or collect.
+  if [ "$PROFILE" = "security:active" ]; then
+    echo "PROFILE=security:active is not supported on CDP; run it against the workspace docker-compose stack" >> FAILED
+    cat > "$REPORT_DIR/index.html" <<EOF
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Security scan — refused</title></head>
+<body>
+<h1>Security scan — refused</h1>
+<p>security:active is destructive and only runs against the workspace docker-compose stack.</p>
+</body>
+</html>
+EOF
+    return
+  fi
+
   # CDP has no internet route, so ZAP's check-for-updates/news/telemetry
   # calls would otherwise stall instead of failing fast. -silent is ZAP's
   # own documented flag for all three (zaproxy.org/faq/what-calls-home-
@@ -85,6 +105,7 @@ run_security_profile() {
     # test:security/test:security:active go through, not this gate step on
     # its own.
     if [ "$PROFILE" = "security:active" ]; then
+      # Unreachable on CDP — refused at the top of this function.
       npm run test:security:active && npm run _zap_run_and_gate
     else
       npm run test:security && npm run _zap_run_and_gate

@@ -77,7 +77,7 @@ This project uses **Playwright Test** as the test runner, with TypeScript for ty
 | `npm run test:a11y`                           | Accessibility (`@a11y`) test suite                    | CDP                  | `playwright.config.ts`                | ✓                |
 | `npm run test:docker-compose`                 | E2E + E2E integration (`@compose`) test suites        | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:a11y`            | Accessibility (`@a11y`) test suite                    | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
-| `npm run test:docker-compose:security`        | ZAP passive scan against the whole e2e suite          | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
+| `npm run test:docker-compose:security`        | ZAP passive scan against the e2e suite                | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:security:active` | Security (`@active`, ZAP passive + active scan) suite | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 | `npm run test:docker-compose:ci`              | E2E, for the workspace CI stack job                   | docker-compose stack | `playwright.docker-compose.config.ts` | ✓                |
 
@@ -207,27 +207,12 @@ updated snapshot into the working tree for commit.
 
 ## Security Testing
 
-Security profiles run a DAST (Dynamic Application Security Testing) scan against real, authenticated user journeys, using [OWASP ZAP](https://www.zaproxy.org/) as a proxy — Playwright drives real journeys through it rather than ZAP crawling independently, so it observes exactly what a real user session touches, then attacks what it finds.
+Two profiles run a DAST scan with [OWASP ZAP](https://www.zaproxy.org/) as a proxy, driven by real Playwright journeys rather than a crawler:
 
-Two profiles:
+- `security` — passive scan across the e2e suite, cheap enough to run broadly
+- `security:active` — passive plus a scoped active scan against the `@active` suite; docker-compose only, because that suite is destructive
 
-- `security` — passive scan against the whole e2e suite (cheap — no attack traffic — so run broadly), safe to run routinely
-- `security:active` — passive + a scoped active scan against the deliberately curated `@active`-tagged suite only (attacks are slow and expensive per URL), safe to run routinely here since local is disposable (invoked deliberately elsewhere)
-
-### Running locally
-
-1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace), start the app stack: `tim docker up`
-2. Bring up ZAP too (additive — doesn't disturb what's already running): `tim docker up --profile security`
-   (this always waits for its containers' healthchecks, so it doesn't return until ZAP is actually accepting requests, not just started.)
-3. Run the profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
-   (to watch ZAP's own logs live while this runs, in another terminal: `docker logs -f trade-imports-zap-1`)
-4. Stop ZAP when done (or just leave it running — cheap to leave up between runs, same as the rest of the stack): `docker stop trade-imports-zap-1`
-
-Reports are written to `zap-report/` (gitignored). ZAP creates this directory automatically on first `up` — nothing to set up by hand. `_clean` only clears its _contents_ between runs, never the directory itself: ZAP bind-mounts it once at container start, so deleting the directory while ZAP is running would break that mount for the rest of the container's life.
-
-ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security`. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
-
-> **Docker Desktop for Mac:** ZAP relies on `network_mode: host` to resolve the app stack's `localhost` OIDC redirects. OrbStack supports this out of the box; Docker Desktop only matches it on version 4.34+ with host networking explicitly enabled in Settings (off by default) — otherwise ZAP can't reach the stack.
+See [`docs/security.md`](docs/security.md) for how to run it, what is scanned and why, and how the run is gated.
 
 ## Running Tests on GitHub
 
@@ -239,9 +224,7 @@ The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publis
 
 ### Scheduled security scan
 
-The `/.github/workflows/scheduled-security-scan.yml` workflow calls `DEFRA/trade-imports-workspace/.github/workflows/security-active-scan.yml@main`, which starts the workspace stack plus the `security` profile and runs a `security:active` scan against `main`/`:latest`, gating the run on FAIL-rated alerts the same way a failing test does. Currently manual dispatch only — the nightly schedule is disabled pending a verified end-to-end run (see the workflow file).
-
-The report publishes to GitHub Pages under `security-active/<date>/`, password-protected (`ZAP_REPORT_PASSWORD` secret) since the tests repo's Pages site is otherwise public and unauthenticated. Reports older than 7 days are pruned automatically.
+`.github/workflows/scheduled-security-scan.yml` calls the workspace's `security-active-scan.yml`. Manual dispatch only for now — see [`docs/security.md`](docs/security.md).
 
 ## Running Tests via CDP Portal
 
@@ -250,12 +233,12 @@ Test Suite URL: https://portal.cdp-int.defra.cloud/test-suites/trade-imports-ani
 In the CDP Portal, provide a `PROFILE` value to choose which test suite the container runs via `entrypoint.sh`.
 If `PROFILE` is not set, the `default` profile is used.
 
-| PROFILE           | Test suite                                      | NPM script                                                                     |
-| ----------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| `default`         | e2e test suite                                  | `npm test`                                                                     |
-| `a11y`            | accessibility test suite                        | `npm run test:a11y`                                                            |
-| `security`        | security test suite (ZAP passive scan)          | `npm run test:security`                                                        |
-| `security:active` | security test suite (ZAP passive + active scan) | `npm run test:security` (active plan selected via `PROFILE` in the ZAP config) |
+| PROFILE           | Test suite                                                                                     | NPM script              |
+| ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| `default`         | e2e test suite                                                                                 | `npm test`              |
+| `a11y`            | accessibility test suite                                                                       | `npm run test:a11y`     |
+| `security`        | security test suite (ZAP passive scan)                                                         | `npm run test:security` |
+| `security:active` | **not supported on CDP** — refused by `entrypoint.sh`; run it against the docker-compose stack | —                       |
 
 Tests are run from the CDP Portal under the Test Suites section. See the requirements below for how the portal run executes and publishes results.
 
