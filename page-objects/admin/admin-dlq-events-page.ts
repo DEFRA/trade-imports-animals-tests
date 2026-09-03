@@ -34,6 +34,16 @@ export class AdminDlqEventsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Confirm delete all', exact: true });
   }
 
+  /**
+   * The delete-all confirmation dialog. Both it and the buttons inside it are
+   * inert until dlq-events.js has run and showModal() has opened it, so a test
+   * that clicks straight through gets an unexplained timeout on the confirm
+   * button rather than a failure naming the dialog that never opened.
+   */
+  get deleteAllDialog(): Locator {
+    return this.page.getByRole('dialog', { name: /delete all messages/i });
+  }
+
   get bannerSuccess(): Locator {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
   }

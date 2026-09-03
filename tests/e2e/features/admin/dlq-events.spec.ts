@@ -4,15 +4,23 @@ import { SqsClient } from '@adapters/queue/sqs-client';
 import { seedDlqMessage } from '@domain/fixtures/dlq-event';
 import { timeouts } from '@config/timeouts';
 
+// Delete-all flakes roughly one run in four and the cause is not established.
+// The default 'on-first-retry' keeps a trace of the attempt that passed, never
+// of the one that failed, so the failure has never been observable.
+test.use({ trace: 'retain-on-failure' });
+
 /**
- * Confirm the seeded message is listed on the DLQ page. The list is fetched on page load, so if the
- * just-seeded message hasn't propagated yet, reload and re-check rather than waiting on stale content.
+ * Confirm the seeded message is listed on the DLQ page. The list is fetched on page load, so a
+ * message that arrived after the render needs a fresh page rather than a wait on stale content.
  */
 async function expectSeededRowListed(pages: PageObjects, eventId: string): Promise<void> {
   await expect(async () => {
-    if (!(await pages.adminDlqEvents.rowById(eventId).isVisible())) {
-      await pages.page.reload();
-    }
+    // Reload every attempt. The previous form asked a non-waiting isVisible()
+    // first and reloaded only when it said no, so a slow render could skip the
+    // reload and then assert against the page that never had the row. The
+    // reload settles on 'load', which also means the page's own script has run
+    // before anything clicks the buttons it wires up.
+    await pages.page.reload();
     await expect(pages.adminDlqEvents.rowById(eventId)).toBeVisible({ timeout: timeouts.short });
   }).toPass({ timeout: timeouts.medium });
 }
@@ -51,7 +59,12 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await adminNavigation.toDlqEvents();
     await expectSeededRowListed(pages, eventId);
 
+    // Delete all opens a dialog rather than submitting, and the confirm button
+    // inside it is inert until it does. Gate on the dialog so a click that
+    // failed to open it fails here, naming the cause, instead of timing out on
+    // a button that was never reachable.
     await pages.adminDlqEvents.btnDeleteAll.click();
+    await expect(pages.adminDlqEvents.deleteAllDialog).toBeVisible();
     await pages.adminDlqEvents.btnConfirmDeleteAll.click();
 
     // As above: the banner is proof the real gateway delete-all call succeeded.
