@@ -42,6 +42,25 @@ export class NotificationViewPage extends NotificationPage {
     return this.page.locator('.govuk-summary-card', { hasText: name });
   }
 
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
+  }
+
+  /** The summary-list row whose accessible term is the role, selected directly
+   * rather than climbing to it, so no XPath parent-axis hop is needed. */
+  partyRow(card: string, role: string): Locator {
+    return this.summaryCard(card)
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.getByRole('term').and(this.page.getByText(role, { exact: true })) });
+  }
+
+  /** A summary list has no error state of its own, so an outstanding role
+   * carries its message in the row's value cell — the first definition of the
+   * row, ahead of the actions cell. */
+  partyError(card: string, role: string): Locator {
+    return this.partyRow(card, role).getByRole('definition').first();
+  }
+
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
     await super.open(journeyId, attemptSignIn);
     if (attemptSignIn) await this.heading.waitFor();

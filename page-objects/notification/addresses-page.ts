@@ -22,6 +22,10 @@ export class AddressesPage extends NotificationPage {
     return this.partyRow(role).getByRole('link', { name: 'Add' });
   }
 
+  changeParty(role: PartyRole): Locator {
+    return this.partyRow(role).getByRole('link', { name: 'Change' });
+  }
+
   get continueButton(): Locator {
     return this.page.getByRole('button', { name: 'Continue' });
   }
