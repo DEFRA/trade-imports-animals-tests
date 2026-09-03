@@ -15,7 +15,7 @@ export class ConsignmentDetailsPage extends NotificationPage {
   }
 
   get numberOfPackages(): Locator {
-    return this.page.getByLabel('Number of packages (optional)');
+    return this.page.getByLabel('Number of packages (when required)');
   }
 
   get saveAndContinue(): Locator {
