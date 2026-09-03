@@ -5,8 +5,12 @@ import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
 import { withZapProxy } from './utils/playwright/with-zap-proxy';
+import { sessionReuseOptedIn } from './utils/playwright/session-reuse';
 
 const environment = getEnvironment();
+
+// Off on CDP until the session-reuse probe has passed for the target environment.
+process.env.E2E_SESSION_REUSE = sessionReuseOptedIn() ? 'on' : 'off';
 
 const projectBaseUrls: Record<string, string> = {
   e2e: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,

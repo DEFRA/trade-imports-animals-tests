@@ -3,8 +3,7 @@ import { zapEnabled, zapPort } from '@config/zap';
 
 // No-ops unless zapEnabled, so other profiles are unaffected. ZAP acts as a
 // MITM proxy with its own certs, hence ignoreHTTPSErrors here (scoped to
-// this config only) — see workareas/analysis/zap-playwright-flow.md for
-// the full rationale. --ignore-certificate-errors is added alongside it:
+// this config only). --ignore-certificate-errors is added alongside it:
 // ignoreHTTPSErrors alone has known gaps with proxy-issued (MITM) certs in
 // Chromium specifically, unlike a normal self-signed/expired cert.
 //

@@ -52,6 +52,7 @@ FAILED
 # Playwright
 /test-results/
 /playwright-report/
+/playwright/.auth/
 /playwright/.cache/
 /blob-report/
 /.playwright-cli/

@@ -8,8 +8,16 @@ test.describe('Origin of import (visual regression)', { tag: '@visual' }, () => 
     await journey.toOriginOfImport();
   });
 
-  // No mask: the page no longer shows the signed-in user's email address, so there is nothing varying to hide.
-  test('shows expected page appearance on first load', async ({ page }) => {
-    await expect(page).toHaveScreenshot('origin-of-import.png', { fullPage: true });
+  // Mask the status strip: it now renders from the first request, and the
+  // notification reference inside it is minted per run, so an unmasked strip
+  // would never match the baseline twice. Masking the whole strip rather than
+  // the reference alone keeps the masked box a fixed size — the strip is a
+  // full-width block, the reference is not. The strip's own content is covered
+  // by tests/e2e/features/reference-strip.spec.ts.
+  test('shows expected page appearance on first load', async ({ page, pages }) => {
+    await expect(page).toHaveScreenshot('origin-of-import.png', {
+      fullPage: true,
+      mask: [pages.originOfImport.journeyStrip],
+    });
   });
 });

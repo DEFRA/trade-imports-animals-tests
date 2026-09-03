@@ -1,4 +1,5 @@
 import { test, expect } from '@fixtures';
+import { COLD_START } from '@fixtures/auth-state';
 import { createPageObjects } from '@page-objects';
 import { users } from '@config/users';
 
@@ -19,7 +20,8 @@ test.describe('Address book cross-user visibility', { tag: '@integration' }, () 
     await pages.insAddressBookAdd.save();
     await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
 
-    const contextB = await browser.newContext();
+    // browser.newContext() inherits the test's storageState; Sarah must start cold.
+    const contextB = await browser.newContext({ storageState: COLD_START });
     try {
       const pagesB = createPageObjects(await contextB.newPage());
 

@@ -3,7 +3,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createZapClient, runAutomationPlan, type ZapClient } from '@utils/zap/client';
 import { zapAutomationPlan, zapProfile } from '@config/zap';
-import { getEnvironment } from '@utils/playwright/environment';
 
 const pathFromHere = (relativePath: string): string => fileURLToPath(new URL(relativePath, import.meta.url));
 
@@ -19,6 +18,13 @@ const PLAYWRIGHT_REPORT_DIR = pathFromHere('../../playwright-report');
 // Matches reportFile in automation-*.yaml — one combined report
 // covering every site ZAP touched this run.
 const REPORT_NAME = 'security-scan';
+// CDP's report viewer 403s anything that isn't .html, and GitHub Actions'
+// staticrypt password gate (security-active-scan.yml) only wraps .html
+// files — so ZAP's own log and its JSON report both get escaped into a
+// minimal <pre> page under these names rather than published as-is.
+// Linked from index.html below; see wrapAsHtml.
+const ZAP_LOG_ARTEFACT = 'zap-log.html';
+const JSON_REPORT_ARTEFACT = `${REPORT_NAME}-json.html`;
 
 type RuleAction = 'IGNORE' | 'WARN' | 'FAIL';
 
@@ -132,6 +138,28 @@ async function getMessageCount(client: ZapClient, siteName: string): Promise<num
   return Number(numberOfMessages);
 }
 
+// Escapes sourceName's content and wraps it in a minimal HTML page under
+// targetName, both relative to REPORT_DIR — see ZAP_LOG_ARTEFACT and
+// JSON_REPORT_ARTEFACT above for why. Silently no-ops if sourceName isn't
+// there: true on CDP for zap.log specifically, which isn't written to
+// REPORT_DIR until entrypoint.sh copies it in after this script has
+// already run (ZAP itself is still running at this point, so its log
+// isn't complete yet — entrypoint.sh writes the real zap-log.html once
+// it is).
+async function wrapAsHtml(sourceName: string, targetName: string): Promise<void> {
+  try {
+    const content = await fs.readFile(path.join(REPORT_DIR, sourceName), 'utf8');
+    const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    await fs.writeFile(
+      path.join(REPORT_DIR, targetName),
+      `<!doctype html><meta charset="utf-8"><title>${sourceName}</title><pre>${escaped}</pre>`,
+      'utf8',
+    );
+  } catch {
+    console.error(`could not wrap ${sourceName} as HTML`);
+  }
+}
+
 // CDP's own "Report" link is driven by whichever directory gets published —
 // it looks for index.html inside it (see entrypoint.sh). This is that
 // landing page: one row per site the report covers, so anyone fixing a
@@ -174,18 +202,14 @@ async function writeIndexHtml(
   const truncationSection =
     truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
 
-  // CDP's report viewer 403s a bare .log file, but serves .html fine (this
-  // page proves it) — entrypoint.sh writes the escaped log there under that
-  // name for CDP runs. Locally there's no such viewer and no equivalent
-  // write step, so the plain file the docker-compose bind mount already
-  // produces is still what's on disk (see zap/docker-compose.yml).
-  const zapLogHref = getEnvironment() ? 'zap.html' : 'zap.log';
+  await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
+  await wrapAsHtml(`${REPORT_NAME}.json`, JSON_REPORT_ARTEFACT);
 
   // Copied whole, not just index.html: Playwright's HTML report embeds test
   // results inline, but attachments (screenshots, traces) sit alongside it
-  // in data/ and would 404 without it. Same copy either environment — no
-  // getEnvironment() branching needed, since publishing it is just a matter
-  // of it existing under REPORT_DIR before entrypoint.sh's one upload step.
+  // in data/ and would 404 without it. Publishing it is just a matter of
+  // it existing under REPORT_DIR before entrypoint.sh's one upload step —
+  // same for every environment.
   try {
     await fs.cp(PLAYWRIGHT_REPORT_DIR, path.join(REPORT_DIR, 'playwright-report'), { recursive: true });
   } catch {
@@ -273,9 +297,9 @@ ${truncationSection}
 <thead><tr><th>File</th><th>Description</th></tr></thead>
 <tbody>
 <tr><td><a href="${REPORT_NAME}.html">${REPORT_NAME}.html</a></td><td>Full alert detail for every site above, human-readable</td></tr>
-<tr><td><a href="${REPORT_NAME}.json">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
+<tr><td><a href="${JSON_REPORT_ARTEFACT}">${REPORT_NAME}.json</a></td><td>The same alert detail, machine-readable</td></tr>
 <tr><td><a href="playwright-report/index.html">playwright-report</a></td><td>The Playwright run itself — specs, steps, and any screenshots/traces</td></tr>
-<tr><td><a href="${zapLogHref}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
+<tr><td><a href="${ZAP_LOG_ARTEFACT}">zap.log</a></td><td>ZAP's own internal diagnostics, not the alert reports above</td></tr>
 </tbody>
 </table>
 </body>

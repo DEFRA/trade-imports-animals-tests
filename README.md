@@ -115,6 +115,23 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+### Authenticated session reuse
+
+Each worker signs in once per project and its tests restore that session
+instead of driving the identity provider every time (`fixtures/auth-state.ts`).
+Saved state lives under `playwright/.auth/` (gitignored, removed by `_clean`),
+holds only the `sid` auth cookie, and is never written unless a fresh context
+has proved it restores to a signed-in landing page. A spec that must start
+unauthenticated opts out with `test.use({ storageState: COLD_START })`.
+
+`E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
+again, so re-cap workers (e.g. `-- --workers=4`) to protect the auth stub.
+Reuse is on by default against the docker-compose stack. On CDP it stays off
+until `ENVIRONMENT=<env> npm run probe:cdp-session-reuse` has passed against
+the target environment — the probe signs in once per service and proves
+load-balanced replicas honour a session minted against another — after which a
+lane opts in with `E2E_SESSION_REUSE=on`.
+
 The `docker-compose` config targets `localhost:3000` / `localhost:3001`, so
 start the workspace stack first. CI runs `npm run test:docker-compose:ci`
 against that stack via the workspace reusable workflow.
@@ -132,7 +149,7 @@ Both configs split tests across the same two Playwright projects:
 
 ### Local workspace stack
 
-1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace),
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace),
    start the locally built stack:
 
    ```bash
@@ -147,13 +164,10 @@ admin service on :3001.
 To debug, append Playwright flags, e.g.
 `npm run test:docker-compose -- --headed --workers=1`.
 
-`npm run test:docker-compose` reseeds the database first via `npm run database:reseed`,
-which delegates to the workspace stack's `bounce-mongo.sh`. Seed fixtures for
-this repo are staged from [`seeds/mongodb/`](seeds/mongodb/) into the stack's
-mongo init by `run-stack.sh` — the directory may hold no active fixtures,
-since the preference is to seed notification state at test level through the
-front door (the backend API) rather than the back door (writing directly
-into Mongo).
+The suite does not wipe the database before it runs, and does not need to.
+Every spec creates the state it asserts on through the front door (the
+backend API), scoped to that run, so the specs pass against a database that
+already holds the records of earlier runs.
 
 For the security (OWASP ZAP) profiles against this stack, see
 [Security Testing](#security-testing) below.
@@ -165,7 +179,6 @@ For the security (OWASP ZAP) profiles against this stack, see
 | `./scripts/stack/run-stack.sh`      | Start the full stack from published images             |
 | `./scripts/stack/run-stack.sh -d`   | Start the stack built from local source under `repos/` |
 | `./scripts/stack/stop-stack.sh`     | Stop the stack and wipe volumes                        |
-| `./scripts/stack/bounce-mongo.sh`   | Recreate MongoDB and rerun the init + seed scripts     |
 | `./scripts/stack/bounce-backend.sh` | Recreate the backend container (picks up Java changes) |
 
 See `docker/stack/AGENTS.md` in the workspace for the full flag reference.
@@ -189,8 +202,8 @@ Baselines are stored alongside their spec files in `*-snapshots/` directories an
 Regenerate the E2E baseline against the stack frontend with
 `npm run test:visual:update:macos` for the host-rendered `*-darwin.png` image and
 `npm run test:visual:update:linux` for the container-rendered `*-linux.png` image
-used by CI. Both commands reseed the workspace database, run the `e2e` project's
-`@visual` spec, and write the updated snapshot into the working tree for commit.
+used by CI. Both commands run the `e2e` project's `@visual` spec and write the
+updated snapshot into the working tree for commit.
 
 ## Security Testing
 
@@ -203,7 +216,7 @@ Two profiles:
 
 ### Running locally
 
-1. From the [workspace root](https://github.com/DEFRA/trade-imports-animals-workspace), start the app stack: `tim docker up`
+1. From the [workspace root](https://github.com/DEFRA/trade-imports-workspace), start the app stack: `tim docker up`
 2. Bring up ZAP too (additive — doesn't disturb what's already running): `tim docker up --profile security`
    (this always waits for its containers' healthchecks, so it doesn't return until ZAP is actually accepting requests, not just started.)
 3. Run the profile: `npm run test:docker-compose:security` or `npm run test:docker-compose:security:active`
@@ -212,7 +225,7 @@ Two profiles:
 
 Reports are written to `zap-report/` (gitignored). ZAP creates this directory automatically on first `up` — nothing to set up by hand. `_clean` only clears its _contents_ between runs, never the directory itself: ZAP bind-mounts it once at container start, so deleting the directory while ZAP is running would break that mount for the rest of the container's life.
 
-ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security` — see the workspace's `workareas/analysis/zap-playwright-*.md` docs for the full design. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
+ZAP itself runs as part of the shared workspace stack (`docker/stack/security.compose.yml`), opt-in via `--profile security`. The same plan files and gate are reused by CDP's `entrypoint.sh` (`security`/`security:active` profiles), which runs ZAP as an in-process daemon there rather than a separate container.
 
 > **Docker Desktop for Mac:** ZAP relies on `network_mode: host` to resolve the app stack's `localhost` OIDC redirects. OrbStack supports this out of the box; Docker Desktop only matches it on version 4.34+ with host networking explicitly enabled in Settings (off by default) — otherwise ZAP can't reach the stack.
 
@@ -222,7 +235,13 @@ E2E tests run in GitHub Actions via the workspace's reusable workflow, which sta
 
 ### GitHub Actions workflow
 
-The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-animals-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+The `/.github/workflows/workspace-e2e-tests.yml` workflow triggers after `Publish Branch Image` completes and calls `DEFRA/trade-imports-workspace/.github/workflows/e2e-tests.yml@main` with the branch name, then reports the result back to the PR.
+
+### Scheduled security scan
+
+The `/.github/workflows/scheduled-security-scan.yml` workflow calls `DEFRA/trade-imports-workspace/.github/workflows/security-active-scan.yml@main`, which starts the workspace stack plus the `security` profile and runs a `security:active` scan against `main`/`:latest`, gating the run on FAIL-rated alerts the same way a failing test does. Currently manual dispatch only — the nightly schedule is disabled pending a verified end-to-end run (see the workflow file).
+
+The report publishes to GitHub Pages under `security-active/<date>/`, password-protected (`ZAP_REPORT_PASSWORD` secret) since the tests repo's Pages site is otherwise public and unauthenticated. Reports older than 7 days are pruned automatically.
 
 ## Running Tests via CDP Portal
 
