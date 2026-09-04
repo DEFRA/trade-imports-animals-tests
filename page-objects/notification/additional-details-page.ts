@@ -8,7 +8,7 @@ export class AdditionalDetailsPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Additional animal details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Additional details' });
   }
 
   certifiedFor(name: string): Locator {

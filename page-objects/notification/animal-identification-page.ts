@@ -7,7 +7,7 @@ export class AnimalIdentificationPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Animal identification details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Identification details' });
   }
 
   get earTag(): Locator {
