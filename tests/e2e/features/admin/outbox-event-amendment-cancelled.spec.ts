@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { DEFAULT_ACTOR } from '@domain/constants/actor';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -20,7 +21,7 @@ test.describe('Notification amendment cancelled outbox event', { tag: ['@integra
     test.slow();
     await apiJourney.createAmendNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.cancelAmendNotification(referenceNumber);
+    await notificationApi.cancelAmendNotification(referenceNumber, DEFAULT_ACTOR);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

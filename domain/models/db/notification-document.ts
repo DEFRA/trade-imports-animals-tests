@@ -1,4 +1,5 @@
 import type { ObjectId } from 'mongodb';
+import type { PersistedFulfilmentEntry } from '@domain/models/api/notification-fulfilments';
 
 /**
  * A Standard Address Block as the backend stores it. Field names follow the
@@ -92,6 +93,8 @@ export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
   notification: NotificationContent;
+  /** The frontend's opaque answers payload, stored byte-faithfully beside the content. */
+  fulfilments: PersistedFulfilmentEntry[];
   status: string;
   created: Date;
   updated: Date;

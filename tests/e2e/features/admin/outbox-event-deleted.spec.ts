@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { DEFAULT_ACTOR } from '@domain/constants/actor';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -17,7 +18,7 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
     test.slow();
     await apiJourney.createEmptyNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.softDeleteNotification(referenceNumber);
+    await notificationApi.softDeleteNotification(referenceNumber, DEFAULT_ACTOR);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();
@@ -55,7 +56,7 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
     test.slow();
     await apiJourney.createSubmittedNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.softDeleteNotification(referenceNumber);
+    await notificationApi.softDeleteNotification(referenceNumber, DEFAULT_ACTOR);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

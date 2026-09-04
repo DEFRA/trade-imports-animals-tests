@@ -55,24 +55,31 @@ export class NotificationApiClient {
     });
   }
 
-  async submitNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`));
+  /**
+   * Every transition takes the actor as its whole body, as the frontend sends
+   * it. It is where the backend gets the organisation it resolves the
+   * notification's address-book parties against, and the events that carry a
+   * GBNAG document — submit, amend, cancel-amend, and deleting a submitted
+   * notification — resolve them strictly, so they reject a call without it.
+   */
+  async submitNotification(id: string, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`, actor));
   }
 
-  async amendNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`));
+  async amendNotification(id: string, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`, actor));
   }
 
-  async cancelAmendNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
+  async cancelAmendNotification(id: string, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`, actor);
   }
 
-  async copyNotification(id: string, concurrencyToken: number): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`);
+  async copyNotification(id: string, concurrencyToken: number, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`, actor);
   }
 
-  async softDeleteNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
+  async softDeleteNotification(id: string, actor?: Record<string, unknown>): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, actor);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {

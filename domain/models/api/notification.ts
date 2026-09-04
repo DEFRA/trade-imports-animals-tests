@@ -38,11 +38,13 @@ export type ConsignmentParty = {
 
 /**
  * Transporter stays inline: approval number and type are not address-book
- * fields, so it never carries an `addressId`.
+ * fields, so it never carries an `addressId`. Its address is whatever the
+ * transporter record happened to carry rather than a Standard Address Block, so
+ * every part of it is optional.
  */
 export type Transporter = {
   name: string;
-  address: PartyAddress;
+  address: Partial<PartyAddress>;
   approvalNumber: string;
   type: string;
 };

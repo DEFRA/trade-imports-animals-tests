@@ -62,8 +62,8 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
   },
-  apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
-    await use(new ApiJourney(pages, notificationApi, journeyContext));
+  apiJourney: async ({ notificationApi, addressBookApi, journeyContext }, use) => {
+    await use(new ApiJourney(notificationApi, addressBookApi, journeyContext));
   },
 });
 
