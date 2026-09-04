@@ -116,16 +116,14 @@ function todayInServiceZone(): { year: number; month: number; day: number } {
 }
 
 /**
- * Gets a date relative to today in the `d/m/yyyy` shape the app itself renders —
- * no leading zeros, and month arithmetic clamped to the last day of the target
- * month. Anchored on the Europe/London civil day, matching the frontend's
- * `arrivalWindow`. Use this when asserting against app output such as the date
- * picker's `data-min-date`.
+ * Gets a date relative to today as the app counts days — month arithmetic
+ * clamped to the last day of the target month, anchored on the Europe/London
+ * civil day to match the frontend's `arrivalWindow`.
  */
-export function getRelativeAppDateText({
+export function getRelativeAppDate({
   dayOffset = 0,
   monthOffset = 0,
-}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+}: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): Date {
   const { year, month, day } = todayInServiceZone();
   const targetMonth = month - 1 + monthOffset;
   // Day 0 of the following month is the last day of the target month.
@@ -133,7 +131,38 @@ export function getRelativeAppDateText({
   const clamped = new Date(Date.UTC(year, targetMonth, Math.min(day, lastDayOfTargetMonth)));
   clamped.setUTCDate(clamped.getUTCDate() + dayOffset);
 
-  return `${clamped.getUTCDate()}/${clamped.getUTCMonth() + 1}/${clamped.getUTCFullYear()}`;
+  return clamped;
+}
+
+/**
+ * Gets a date relative to today in the `d/m/yyyy` shape the app itself renders —
+ * no leading zeros. Use this when asserting against app output such as the date
+ * picker's `data-min-date`, or when typing into a date input.
+ */
+export function getRelativeAppDateText(options: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+  const date = getRelativeAppDate(options);
+  return `${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`;
+}
+
+/**
+ * The same date as the day/month/year parts a journey answer stores — unpadded
+ * strings, exactly as the app records what was typed into a date input.
+ */
+export function getRelativeAppDateParts(options: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): DateInput {
+  const date = getRelativeAppDate(options);
+  return {
+    day: String(date.getUTCDate()),
+    month: String(date.getUTCMonth() + 1),
+    year: String(date.getUTCFullYear()),
+  };
+}
+
+/**
+ * The same date as the `yyyy-mm-dd` the notification document holds — the shape
+ * the frontend's mapper projects a journey date answer into.
+ */
+export function getRelativeAppDateIso(options: Pick<RelativeDateTimeOptions, 'dayOffset' | 'monthOffset'> = {}): string {
+  return getRelativeAppDate(options).toISOString().slice(0, 'yyyy-mm-dd'.length);
 }
 
 /**
