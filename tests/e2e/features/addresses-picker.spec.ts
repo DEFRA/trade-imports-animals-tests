@@ -89,11 +89,8 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     const target = pages.consignorSelection.party(targetName);
     const nextLink = page.getByRole('link', { name: /Next/ });
     const currentPageNumber = page.locator('[aria-current="page"]');
-    // Other workers keep adding to this shared book while the walk is running,
-    // and newest-first listing pushes the target back a page each time they do.
-    // Follow Next until it runs out rather than to a last page computed before
-    // the walk started, and let each page land before reading it — a count()
-    // taken straight after the click can still see the page being left.
+    // Other workers add to the shared book mid-walk, so follow Next until it runs out
+    // rather than to a last page computed before the walk started.
     for (let landedOn = 1; (await target.count()) === 0; landedOn += 1) {
       if ((await nextLink.count()) === 0) {
         break;
