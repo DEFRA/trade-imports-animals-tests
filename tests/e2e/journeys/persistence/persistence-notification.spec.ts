@@ -80,18 +80,17 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.reasonForImport).toBe('internalMarket');
       expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      // Four roles are references — the id alone, with no copy of the address
-      // beside it, so a later edit in the address book shows through.
+      // Every party is a reference — the id alone, with no copy of the address
+      // beside it, so a later edit in the address book shows through on a draft
+      // or amendment. The submitted freeze holds the details separately.
       expect(notification.consignor).toEqual({ addressId: consignor.id });
       expect(notification.destination).toEqual({ addressId: destination.id });
       expect(notification.consignee).toEqual({ addressId: consignee.id });
       expect(notification.importer).toEqual({ addressId: importer.id });
-      // Place of origin and the contact address are held as copies,
-      // so they carry the details and never an addressId.
-      expect(notification.placeOfOrigin).toMatchObject({ name: placeOfOrigin.name });
-      expect(notification.placeOfOrigin.addressId).toBeUndefined();
-      expect(notification.consignment).toMatchObject({ name: contact.name });
-      expect(notification.consignment.addressId).toBeUndefined();
+      expect(notification.placeOfOrigin).toEqual({ addressId: placeOfOrigin.id });
+      expect(notification.consignment).toEqual({ addressId: contact.id });
+      expect(doc.submittedNotificationBaseline?.placeOfOrigin?.name).toBe(placeOfOrigin.name);
+      expect(doc.submittedNotificationBaseline?.consignment?.name).toBe(contact.name);
       expect(notification.cphNumber).toBe('123456789');
       expect(notification.transport.portOfEntry).toBe('GB ABD');
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
