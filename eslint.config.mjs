@@ -17,16 +17,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: [
-      'node_modules',
-      'dist',
-      'seeds',
-      'test-results',
-      'playwright-report',
-      'allure-results',
-      'allure-report',
-      'zap-report',
-      '*.mjs',
-    ],
+    ignores: ['node_modules', 'dist', 'test-results', 'playwright-report', 'allure-results', 'allure-report', 'zap-report', '*.mjs'],
   },
 );

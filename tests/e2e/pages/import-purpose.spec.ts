@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Import purpose page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toImportPurpose();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('importReason');
+    await apiJourney.resumeInUi(referenceNumber, pages.importPurpose);
   });
 
   test('renders the page controls', async ({ pages }) => {

@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toContactAddress();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('transporterSelection');
+    await apiJourney.resumeInUi(referenceNumber, pages.contactAddress);
   });
 
   test('renders the page controls', async ({ pages }) => {

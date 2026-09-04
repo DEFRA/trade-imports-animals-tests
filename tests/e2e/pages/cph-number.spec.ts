@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('CPH number page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toCphNumber();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('addresses');
+    await apiJourney.resumeInUi(referenceNumber, pages.cphNumber);
   });
 
   test('renders the page controls', async ({ pages }) => {

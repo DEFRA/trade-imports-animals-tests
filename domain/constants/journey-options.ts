@@ -9,7 +9,7 @@ import { pointOfEntries, type PointOfEntry } from '@domain/constants/point-of-en
 import { meansOfTransport, type MeansOfTransport } from '@domain/constants/means-of-transport';
 import type { AccompanyingDocument } from '@domain/types/accompanying-document';
 import type { DateInput } from '@domain/types/date-time-input';
-import { getRelativeDateInput } from '@utils/date-utils';
+import { getRelativeAppDateText, getRelativeDateInput } from '@utils/date-utils';
 
 /**
  * The options schema and default test-notification content shared by every
@@ -59,6 +59,12 @@ export const defaultJourneyOptions: Required<JourneyOptions> = {
   transitedCountries: undefined,
 };
 
+// Inside the arrival-date window (1 week back to 6 months ahead) wherever the
+// wall clock happens to be, in the unpadded d/m/yyyy the app itself renders —
+// so a CYA assertion compares against the app's shape, not the typed string it
+// happens to echo back.
+export const ARRIVAL_DATE = getRelativeAppDateText({ monthOffset: 1 });
+
 export const EAR_TAG_PREFIX = 'FR';
 export const PASSPORT_PREFIX = 'FR-BOV-2024-';
 export const PLACE_OF_ORIGIN_NAME = 'Origin Farm';
@@ -67,5 +73,7 @@ export const CONSIGNEE_NAME = 'British Livestock Ltd';
 export const IMPORTER_NAME = 'Import Co UK';
 export const DESTINATION_NAME = 'Tech Imports Ltd';
 export const CPH_NUMBER = '123456789';
+export const TRANSPORT_IDENTIFICATION = 'FR-892-LK';
+export const TRANSPORT_DOCUMENT_REFERENCE = 'CMR-2026-884721';
 export const TRANSPORTER_NAME = 'García Livestock Transport SL';
 export const CONTACT_ADDRESS_NAME = 'Animal and Plant Health Agency';

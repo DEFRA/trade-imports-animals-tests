@@ -11,8 +11,9 @@ const expectedGroups = [
 ] as const;
 
 test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toCommoditySelection();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('originOfImport');
+    await apiJourney.resumeInUi(referenceNumber, pages.commoditySelection);
   });
 
   test('offers a search box and lists nothing until it is used', async ({ pages }) => {

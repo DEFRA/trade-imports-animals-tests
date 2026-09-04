@@ -6,8 +6,9 @@ const LATEST_ALLOWED = getRelativeAppDateText({ monthOffset: 6 });
 const OUT_OF_RANGE_MESSAGE = `Arrival date at port of entry must be between ${EARLIEST_ALLOWED} and ${LATEST_ALLOWED}`;
 
 test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toArrivalDetails();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('cphNumber');
+    await apiJourney.resumeInUi(referenceNumber, pages.arrivalDetails);
   });
 
   test('renders the page controls', async ({ pages }) => {

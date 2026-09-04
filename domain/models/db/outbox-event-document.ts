@@ -75,6 +75,23 @@ export type GbnAgLogisticsLocation = {
   typeCode?: string;
 };
 
+export type GbnAgReferencedDocument = {
+  typeCode?: string;
+  relationshipTypeCode?: string;
+  identifier?: string;
+  issueDateTime?: string;
+};
+
+export type GbnAgLogisticsTransportMovement = {
+  identifier?: string;
+  urlId?: string;
+  /** 1 vessel, 2 railway, 3 road vehicle, 4 airplane. */
+  modeCode?: number | null;
+  usedLogisticsTransportMeans?: { name?: string } | null;
+  transportContractRelatedReferencedDocument?: GbnAgReferencedDocument[] | null;
+  arrivalEvent?: Array<{ scheduledOccurrenceDateTime?: string }>;
+};
+
 export type GbnAgConsignmentItem = {
   includedTradeLineItem?: unknown[];
 };
@@ -88,6 +105,7 @@ export type GbnAgSpecifiedConsignment = {
   carrier?: GbnAgTradeParty;
   originCountry?: GbnAgTradeCountry;
   unloadingBaseportLocation?: GbnAgLogisticsLocation;
-  mainCarriageLogisticsTransportMovement?: unknown[];
+  mainCarriageLogisticsTransportMovement?: GbnAgLogisticsTransportMovement[];
+  transitTradeCountry?: GbnAgTradeCountry[] | null;
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };
