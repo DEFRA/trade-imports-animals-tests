@@ -11,11 +11,11 @@ export class AnimalIdentificationPage extends NotificationPage {
   }
 
   get earTag(): Locator {
-    return this.page.getByLabel('Ear tag number');
+    return this.page.getByLabel('Ear tag', { exact: true });
   }
 
   get passportNumber(): Locator {
-    return this.page.getByLabel('Passport number');
+    return this.page.getByLabel('Passport', { exact: true });
   }
 
   // A saved animal is one row of the card's table, keyed by its species and
