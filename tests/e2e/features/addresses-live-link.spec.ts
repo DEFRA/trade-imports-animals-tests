@@ -75,6 +75,65 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
     await expect(consignorValue).not.toContainText('CA1 1AA');
   });
 
+  test('editing a linked place of origin in the address book changes what the draft notification shows', async ({
+    journey,
+    pages,
+    addressBookApi,
+  }) => {
+    const stamp = Date.now();
+    const originalName = `Linked Origin ${stamp}`;
+    const renamed = `Renamed Origin ${stamp}`;
+    const address = await addressBookApi.createAddress({
+      name: originalName,
+      addressLine1: '4 Origin Lane',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 1AA',
+      countryCode: 'United Kingdom',
+      phone: '01228 555 0105',
+      email: 'origin-link@example.co.uk',
+    });
+
+    await journey.startNotification();
+    await journey.unlockSections();
+
+    await pages.overview.task('Roles and addresses').click();
+    const originRow = pages.addresses.partyRow('Place of origin');
+    await pages.addresses.addParty('Place of origin').click();
+    await pages.placeOfOriginSelection.search.fill(originalName);
+    await pages.placeOfOriginSelection.searchButton.click();
+    await pages.placeOfOriginSelection.party(originalName).check();
+    await pages.placeOfOriginSelection.saveAndContinue.click();
+
+    await expect(pages.addresses.heading).toBeVisible();
+    await expect(originRow).toContainText(originalName);
+
+    await addressBookApi.updateAddress(address.id, {
+      name: renamed,
+      addressLine1: '4 Origin Lane',
+      townOrCity: 'Penrith',
+      postcode: 'CA11 7AA',
+      countryCode: 'United Kingdom',
+      phone: '01228 555 0105',
+      email: 'origin-link@example.co.uk',
+    });
+
+    await pages.page.reload();
+    await expect(originRow).toContainText(renamed);
+    await expect(originRow).not.toContainText(originalName);
+
+    const journeyId = pages.addresses.journeyIdFromUrl();
+    await pages.notificationView.open(journeyId);
+    const rolesAndAddresses = pages.notificationView.summaryCard('Roles and addresses');
+    const originValue = rolesAndAddresses
+      .locator('.govuk-summary-list__row', { has: pages.page.getByText('Place of origin', { exact: true }) })
+      .locator('.govuk-summary-list__value');
+    await expect(originValue).toContainText(renamed);
+    await expect(originValue).toContainText('Penrith');
+    await expect(originValue).toContainText('CA11 7AA');
+    await expect(originValue).not.toContainText('Carlisle');
+    await expect(originValue).not.toContainText('CA1 1AA');
+  });
+
   test('deleting a linked address treats it as never entered and hides it from the picker', async ({ journey, pages, addressBookApi }) => {
     // Own record so parallel specs do not race on a shared fixture when this one
     // soft-deletes behind the journey's back.
