@@ -16,8 +16,10 @@ export const test = base.extend<SecurityFixtures>({
     await use(new NotificationApiClient(context));
     await context.dispose();
   },
-  proxiedApiJourney: async ({ pages, proxiedNotificationApi, journeyContext }, use) => {
-    await use(new ApiJourney(pages, proxiedNotificationApi, journeyContext));
+  // Only the notification API is proxied — the address-book reads are seeding
+  // lookups, not part of what this suite scans.
+  proxiedApiJourney: async ({ pages, proxiedNotificationApi, addressBookApi, journeyContext }, use) => {
+    await use(new ApiJourney(pages, proxiedNotificationApi, addressBookApi, journeyContext));
   },
 });
 

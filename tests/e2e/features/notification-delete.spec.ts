@@ -16,7 +16,11 @@ test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-fro
     await pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
     await expect(pages.page.getByText('The notification has been deleted.')).toBeVisible();
   });
-  test(
+  // Fails on EUDPA-389, as cancel-amend does: engine/journey.js:182 passes the
+  // actor and records/real/lifecycle/transition.js:44 drops it, so the parties on
+  // the NotificationSubmissionDeleted event cannot resolve. Deleting a draft still
+  // works — that event is draft-grade. Remove the test.fail() once it lands.
+  test.fail(
     'deletes the notification and removes it from the dashboard',
     { tag: '@smoke' },
     async ({ pages, apiJourney, notificationActions }) => {

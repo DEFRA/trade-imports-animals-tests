@@ -1,6 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { test, expect } from '@fixtures';
-import { ARRIVAL_DATE } from '@flows/journey';
+import { ARRIVAL_DATE } from '@domain/constants/journey-options';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('the hub groups its tasks under the six numbered group headings', async ({ journey, pages }) => {

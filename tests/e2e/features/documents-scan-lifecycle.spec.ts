@@ -7,8 +7,9 @@ import { writeEicarPdfFile } from '@utils/eicar-file-writer';
 const issueDate = '03/01/2026';
 
 test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAccompanyingDocuments();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('additionalDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.accompanyingDocuments);
   });
 
   test('infected upload: accepted with Checking, then Virus found with error summary and no view link', async ({ pages }, testInfo) => {

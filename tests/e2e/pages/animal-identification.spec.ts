@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Animal identification page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toAnimalIdentification();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('consignmentDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.animalIdentification);
   });
 
   test('renders the page controls', async ({ pages }) => {

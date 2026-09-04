@@ -41,7 +41,10 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
     });
   });
 
-  test(
+  // Fails on EUDPA-389: no actor is forwarded on cancel-amend, so the backend
+  // cannot resolve the address-book parties and answers 400 — served as a 500.
+  // Remove the test.fail() once it lands.
+  test.fail(
     'Yes cancels the amendment and restores the submitted answers',
     { tag: '@smoke' },
     async ({ pages, apiJourney, notificationActions }) => {

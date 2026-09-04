@@ -18,9 +18,10 @@ const paddedPdf = async (destination: string, bytes: number): Promise<string> =>
 };
 
 test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('accepts a tenth document and rejects an eleventh with the maximum-documents error', async ({ journey, pages }) => {
+  test('accepts a tenth document and rejects an eleventh with the maximum-documents error', async ({ apiJourney, pages }) => {
     test.slow();
-    await journey.toAccompanyingDocuments();
+    const { referenceNumber } = await apiJourney.createUpToPage('additionalDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.accompanyingDocuments);
 
     for (let index = 1; index <= maximumDocuments; index += 1) {
       const reference = `PWCAP${Date.now()}${index}`;
@@ -46,11 +47,12 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
     await expect(pages.accompanyingDocuments.documentRow(eleventhReference)).toHaveCount(0);
   });
 
-  test('accepts a 10 MB PDF and rejects the same real file at one byte over', async ({ journey, pages }, testInfo) => {
+  test('accepts a 10 MB PDF and rejects the same real file at one byte over', async ({ apiJourney, pages }, testInfo) => {
     test.slow();
     const exact = await paddedPdf(testInfo.outputPath('boundary-exact.pdf'), TEN_MB_BYTES);
     const over = await paddedPdf(testInfo.outputPath('boundary-over.pdf'), TEN_MB_BYTES + 1);
-    await journey.toAccompanyingDocuments();
+    const { referenceNumber } = await apiJourney.createUpToPage('additionalDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.accompanyingDocuments);
 
     const exactReference = `PWEXACT${Date.now()}`;
     await pages.accompanyingDocuments.fillDocument(exactReference, issueDate, exact);

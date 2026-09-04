@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transporter selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toTransporterSelection();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('transporter');
+    await apiJourney.resumeInUi(referenceNumber, pages.transporterSelection);
   });
 
   test('renders the page controls', async ({ pages }) => {

@@ -28,6 +28,8 @@
     "test:a11y": "npm run _clean_and_test -- --grep '@a11y'",
     "test:security": "npm run _zap_clean && npm run _zap_prime_context && npm run _clean_and_test -- --grep-invert '@compose|@a11y|@visual|@active' --timeout=60000",
     "test:security:active": "npm run _zap_clean && npm run _zap_prime_context && npm run _clean_and_test -- --grep '@active' --timeout=60000",
+    "contributions:check": "playwright test utils/seeds/check-journey-contributions.ts --config=playwright.contributions.config.ts --project=e2e",
+    "contributions:update": "playwright test utils/seeds/update-journey-contributions.ts --config=playwright.contributions.config.ts --project=e2e && prettier --write domain/seeds/journey-contributions.ts",
     "probe:cdp-session-reuse": "tsx bin/cdp-session-probe.ts",
     "test:browserstack": "echo 'BrowserStack Playwright tests not implemented yet'",
     "test:docker-compose": "npm run _clean_and_test_docker_compose -- --grep-invert '@a11y|@active'",

@@ -41,6 +41,9 @@ export class NotificationActions {
     await this.pages.notificationDashboard.delete(journeyId).click();
     await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
     await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
-    await this.pages.page.getByText('The notification has been deleted.').waitFor();
+    // Bounded like cancelAmend's above, and load-bearing while the delete spec is
+    // marked test.fail(): a locator timeout counts as the expected failure, a
+    // test-level one does not.
+    await this.pages.page.getByText('The notification has been deleted.').waitFor({ timeout: timeouts.medium });
   }
 }

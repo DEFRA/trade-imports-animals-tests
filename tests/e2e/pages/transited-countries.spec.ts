@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Transited countries page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toTransitedCountries();
+  test.beforeEach(async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('arrivalDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.transitedCountries);
   });
 
   test('renders one 31-country checkbox group', async ({ pages }) => {

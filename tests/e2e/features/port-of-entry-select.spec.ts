@@ -5,8 +5,9 @@ const PORT_OPTION = 'Aberdeen Harbour (GB ABD)';
 const PORT_CODE = 'GB ABD';
 
 test.describe('Port of entry type-ahead', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('enhances the select, filters by name or code, submits and persists the code', async ({ journey, pages }) => {
-    await journey.toArrivalDetails();
+  test('enhances the select, filters by name or code, submits and persists the code', async ({ apiJourney, pages }) => {
+    const { referenceNumber } = await apiJourney.createUpToPage('cphNumber');
+    await apiJourney.resumeInUi(referenceNumber, pages.arrivalDetails);
     const journeyId = pages.arrivalDetails.journeyIdFromUrl();
 
     const combobox = pages.arrivalDetails.portOfEntry;

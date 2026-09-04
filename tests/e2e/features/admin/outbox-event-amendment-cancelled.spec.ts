@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { defaultActor } from '@domain/models/api/actor';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -20,7 +21,9 @@ test.describe('Notification amendment cancelled outbox event', { tag: ['@integra
     test.slow();
     await apiJourney.createAmendNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.cancelAmendNotification(referenceNumber);
+    // Driven straight at the API, so the actor the frontend would send has to be
+    // passed here — the seeded notification carries address-book party references.
+    await notificationApi.cancelAmendNotification(referenceNumber, defaultActor);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

@@ -5,9 +5,10 @@ import { ABOVE_PAYLOAD_CAP_BYTES, OVERSIZE_FILE_MESSAGE } from '@resources/file-
 const issueDate = '03/01/2026';
 
 test.describe('Documents reject flows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('refuses an oversize file pick without adding a document', async ({ journey, pages }, testInfo) => {
+  test('refuses an oversize file pick without adding a document', async ({ apiJourney, pages }, testInfo) => {
     test.slow();
-    await journey.toAccompanyingDocuments();
+    const { referenceNumber } = await apiJourney.createUpToPage('additionalDetails');
+    await apiJourney.resumeInUi(referenceNumber, pages.accompanyingDocuments);
 
     const oversize = await writeSyntheticFile(testInfo.outputPath('oversize'), 'oversize.pdf', {
       bytes: ABOVE_PAYLOAD_CAP_BYTES,

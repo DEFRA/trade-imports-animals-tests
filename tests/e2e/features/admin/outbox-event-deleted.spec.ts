@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
+import { defaultActor } from '@domain/models/api/actor';
 import { type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
@@ -55,7 +56,9 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
     test.slow();
     await apiJourney.createSubmittedNotification();
     const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.softDeleteNotification(referenceNumber);
+    // Driven straight at the API, so the actor the frontend would send has to be
+    // passed here — the seeded notification carries address-book party references.
+    await notificationApi.softDeleteNotification(referenceNumber, defaultActor);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

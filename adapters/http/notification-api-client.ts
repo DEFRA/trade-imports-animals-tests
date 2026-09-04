@@ -1,6 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 import { RestClient, RestClientError } from '@adapters/http/rest-client';
 import { getBackendBaseUrl, getDeveloperApiKey } from '@config/service-base-urls';
+import type { NotificationActor } from '@domain/models/api/actor';
 import type { NotificationFulfilments } from '@domain/models/api/notification-fulfilments';
 import type { Notification } from '@domain/models/api/notification';
 
@@ -30,7 +31,7 @@ export class NotificationApiClient {
    * reference number via ReferenceNumberGenerator and returns it in the response.
    * Body shape is {@code SaveNotificationDto}: `{ notification, actor? }`.
    */
-  async createNotification(notification: Record<string, unknown> = {}, actor?: Record<string, unknown>): Promise<Notification> {
+  async createNotification(notification: Record<string, unknown> = {}, actor?: NotificationActor): Promise<Notification> {
     return this.rest.post<Notification>('/notifications', {
       notification,
       ...(actor ? { actor } : {}),
@@ -47,7 +48,7 @@ export class NotificationApiClient {
     id: string,
     concurrencyToken: number,
     notification: Record<string, unknown> = {},
-    actor?: Record<string, unknown>,
+    actor?: NotificationActor,
   ): Promise<Notification> {
     return this.rest.put<Notification>(`/notifications/${id}`, {
       notification: { referenceNumber: id, concurrencyToken, ...notification },
@@ -55,24 +56,29 @@ export class NotificationApiClient {
     });
   }
 
-  async submitNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`));
+  /**
+   * The transitions take the acting user as an optional body, as the frontend
+   * sends it. Without its organisationId the backend cannot resolve a
+   * notification's address-book parties, and answers 400.
+   */
+  async submitNotification(id: string, actor?: NotificationActor): Promise<Notification> {
+    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/submit`, actor));
   }
 
-  async amendNotification(id: string): Promise<Notification> {
-    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`));
+  async amendNotification(id: string, actor?: NotificationActor): Promise<Notification> {
+    return this.retryOnTransientOutboxLock(() => this.rest.post<Notification>(`/notifications/${id}/amend`, actor));
   }
 
-  async cancelAmendNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`);
+  async cancelAmendNotification(id: string, actor?: NotificationActor): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/cancel-amend`, actor);
   }
 
-  async copyNotification(id: string, concurrencyToken: number): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`);
+  async copyNotification(id: string, concurrencyToken: number, actor?: NotificationActor): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/copy?concurrencyToken=${concurrencyToken}`, actor);
   }
 
-  async softDeleteNotification(id: string): Promise<Notification> {
-    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`);
+  async softDeleteNotification(id: string, actor?: NotificationActor): Promise<Notification> {
+    return this.rest.post<Notification>(`/notifications/${id}/soft-delete`, actor);
   }
 
   private async retryOnTransientOutboxLock<T>(action: () => Promise<T>): Promise<T> {
