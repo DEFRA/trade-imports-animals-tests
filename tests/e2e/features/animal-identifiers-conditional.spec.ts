@@ -50,8 +50,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     // { name, address } permanent address and keeps the surface open.
     await pages.page.getByLabel('Address line 1').fill('1 Farm Lane');
     await pages.page.getByLabel('Town or city').fill('Skipton');
-    await pages.page.getByLabel('Postal or zip code').fill('BD23 1UD');
-    await pages.page.getByLabel('Telephone number').fill('+44 1756 555 0192');
+    await pages.page.getByLabel('Postcode or Zip code').fill('BD23 1UD');
+    await pages.page.getByLabel('Phone number').fill('+44 1756 555 0192');
     await pages.page.getByLabel('Email address').fill('owner@example.co.uk');
     await pages.animalIdentification.saveAndAddAnother.click();
 
