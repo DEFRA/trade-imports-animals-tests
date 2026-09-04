@@ -123,15 +123,12 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
 
     const journeyId = pages.addresses.journeyIdFromUrl();
     await pages.notificationView.open(journeyId);
-    const rolesAndAddresses = pages.notificationView.summaryCard('Roles and addresses');
-    const originValue = rolesAndAddresses
-      .locator('.govuk-summary-list__row', { has: pages.page.getByText('Place of origin', { exact: true }) })
-      .locator('.govuk-summary-list__value');
-    await expect(originValue).toContainText(renamed);
-    await expect(originValue).toContainText('Penrith');
-    await expect(originValue).toContainText('CA11 7AA');
-    await expect(originValue).not.toContainText('Carlisle');
-    await expect(originValue).not.toContainText('CA1 1AA');
+    const originRow = pages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+    await expect(originRow).toContainText(renamed);
+    await expect(originRow).toContainText('Penrith');
+    await expect(originRow).toContainText('CA11 7AA');
+    await expect(originRow).not.toContainText('Carlisle');
+    await expect(originRow).not.toContainText('CA1 1AA');
   });
 
   test('deleting a linked address treats it as never entered and hides it from the picker', async ({ journey, pages, addressBookApi }) => {
