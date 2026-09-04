@@ -86,16 +86,19 @@ test.describe('Addresses picker', { tag: ['@integration', '@duplicated-in-fronte
     // Target was pushed off page one by the five newer creates — step Next
     // until it appears, then select it (cross-page selection without JS).
     await expect(pages.consignorSelection.party(targetName)).toHaveCount(0);
-    const showingText = (await page.getByText(showingFive).textContent()) ?? '';
-    const total = Number(showingText.match(/of (\d+)/)?.[1] ?? 0);
-    const lastPage = Math.ceil(total / 5);
-    for (let step = 1; step < lastPage; step += 1) {
-      await page.getByRole('link', { name: /Next/ }).click();
-      if ((await pages.consignorSelection.party(targetName).count()) > 0) {
+    const target = pages.consignorSelection.party(targetName);
+    const nextLink = page.getByRole('link', { name: /Next/ });
+    const currentPageNumber = page.locator('[aria-current="page"]');
+    // Other workers add to the shared book mid-walk, so follow Next until it runs out
+    // rather than to a last page computed before the walk started.
+    for (let landedOn = 1; (await target.count()) === 0; landedOn += 1) {
+      if ((await nextLink.count()) === 0) {
         break;
       }
+      await nextLink.click();
+      await expect(currentPageNumber).toHaveText(String(landedOn + 1));
     }
-    await expect(pages.consignorSelection.party(targetName)).toBeVisible();
+    await expect(target).toBeVisible();
 
     await pages.consignorSelection.party(targetName).check();
     await pages.consignorSelection.saveAndContinue.click();

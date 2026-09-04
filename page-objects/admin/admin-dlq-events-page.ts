@@ -34,6 +34,10 @@ export class AdminDlqEventsPage extends BasePage {
     return this.page.getByRole('button', { name: 'Confirm delete all', exact: true });
   }
 
+  get deleteAllDialog(): Locator {
+    return this.page.getByRole('dialog', { name: /delete all messages/i });
+  }
+
   get bannerSuccess(): Locator {
     return this.page.getByRole('alert').filter({ has: this.page.getByRole('heading', { name: 'Success' }) });
   }

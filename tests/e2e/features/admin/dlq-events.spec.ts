@@ -4,15 +4,10 @@ import { SqsClient } from '@adapters/queue/sqs-client';
 import { seedDlqMessage } from '@domain/fixtures/dlq-event';
 import { timeouts } from '@config/timeouts';
 
-/**
- * Confirm the seeded message is listed on the DLQ page. The list is fetched on page load, so if the
- * just-seeded message hasn't propagated yet, reload and re-check rather than waiting on stale content.
- */
+/** The list is server-rendered on page load, so a message that arrived after the render needs a fresh page. */
 async function expectSeededRowListed(pages: PageObjects, eventId: string): Promise<void> {
   await expect(async () => {
-    if (!(await pages.adminDlqEvents.rowById(eventId).isVisible())) {
-      await pages.page.reload();
-    }
+    await pages.page.reload();
     await expect(pages.adminDlqEvents.rowById(eventId)).toBeVisible({ timeout: timeouts.short });
   }).toPass({ timeout: timeouts.medium });
 }
@@ -52,6 +47,7 @@ test.describe('DLQ operator actions', { tag: '@compose' }, () => {
     await expectSeededRowListed(pages, eventId);
 
     await pages.adminDlqEvents.btnDeleteAll.click();
+    await expect(pages.adminDlqEvents.deleteAllDialog).toBeVisible();
     await pages.adminDlqEvents.btnConfirmDeleteAll.click();
 
     // As above: the banner is proof the real gateway delete-all call succeeded.
