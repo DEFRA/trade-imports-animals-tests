@@ -33,6 +33,10 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await expect(pages.page.getByLabel('Identification details')).toBeHidden();
     await expect(pages.page.getByLabel('Animal description')).toBeHidden();
     await expect(pages.page.getByLabel('Name or organisation name')).toBeVisible();
+    // The permanent address block asks for eight fields and no country — an
+    // address APHA can inspect is a Great Britain address, so there is nothing
+    // to choose.
+    await expect(pages.page.getByLabel('Country')).toHaveCount(0);
 
     // A partial permanent address blocks the add — the fieldGroup mandates apply
     // once any part of the record is provided.
@@ -47,7 +51,6 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.page.getByLabel('Address line 1').fill('1 Farm Lane');
     await pages.page.getByLabel('Town or city').fill('Skipton');
     await pages.page.getByLabel('Postal or zip code').fill('BD23 1UD');
-    await pages.page.getByLabel('Country').selectOption('United Kingdom');
     await pages.page.getByLabel('Telephone number').fill('+44 1756 555 0192');
     await pages.page.getByLabel('Email address').fill('owner@example.co.uk');
     await pages.animalIdentification.saveAndAddAnother.click();
