@@ -18,6 +18,16 @@ export class AnimalIdentificationPage extends NotificationPage {
     return this.page.getByLabel('Passport number');
   }
 
+  // A saved animal is one row of the card's table, keyed by its species and
+  // number — "Bos taurus 1".
+  savedAnimalRow(species: string, number: number): Locator {
+    return this.page.getByRole('row').filter({ hasText: `${species} ${number}` });
+  }
+
+  identifierColumn(name: string): Locator {
+    return this.page.getByRole('columnheader', { name, exact: true });
+  }
+
   get saveAndAddAnother(): Locator {
     return this.page.getByRole('button', { name: 'Save and add another' });
   }
