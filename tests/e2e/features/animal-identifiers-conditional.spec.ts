@@ -53,9 +53,10 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.animalIdentification.saveAndAddAnother.click();
 
     await expect(pages.animalIdentification.heading).toBeVisible();
-    const unitRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Animal 1' });
-    await expect(unitRow).toContainText('Passport: UK123456789');
-    await expect(unitRow).toContainText('Permanent address: Pet Owner');
+    const unitRow = pages.animalIdentification.savedAnimalRow('Felis catus', 1);
+    await expect(pages.animalIdentification.identifierColumn('Permanent address')).toBeVisible();
+    await expect(unitRow.getByRole('cell', { name: 'UK123456789', exact: true })).toBeVisible();
+    await expect(unitRow.getByRole('cell', { name: 'Pet Owner', exact: true })).toBeVisible();
   });
 
   test('a commodity with no typed identifier shows only the free-text fallbacks, and one satisfies the group', async ({
@@ -90,8 +91,8 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.page.getByLabel('Identification details').fill('Tank mark TM-77');
     await pages.animalIdentification.saveAndAddAnother.click();
     await expect(pages.animalIdentification.heading).toBeVisible();
-    await expect(pages.page.locator('.govuk-summary-list__row', { hasText: 'Animal 1' })).toContainText(
-      'Identification details: Tank mark TM-77',
-    );
+    await expect(
+      pages.animalIdentification.savedAnimalRow('Salmo salar', 1).getByRole('cell', { name: 'Tank mark TM-77', exact: true }),
+    ).toBeVisible();
   });
 });

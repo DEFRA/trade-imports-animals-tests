@@ -24,7 +24,12 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.saveAndAddAnother.click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
-    await expect(pages.page.locator('.govuk-summary-list__row', { hasText: 'Animal 1' })).toContainText('Ear tag: UK000000000001');
+    await expect(pages.animalIdentification.identifierColumn('Animal')).toBeVisible();
+    await expect(pages.animalIdentification.identifierColumn('Ear tag')).toBeVisible();
+    await expect(pages.animalIdentification.identifierColumn('Passport')).toBeVisible();
+    await expect(
+      pages.animalIdentification.savedAnimalRow('Bos taurus', 1).getByRole('cell', { name: 'UK000000000001', exact: true }),
+    ).toBeVisible();
 
     // At N = M the maximum-reached state replaces the entry form; the saved
     // records stay removable.
@@ -56,10 +61,10 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     await expect(dropError).toBeVisible();
     await dropError.click();
     await expect(pages.animalIdentification.heading).toBeVisible();
-    await expect(pages.page.locator('.govuk-summary-list__row', { hasText: 'Animal 2' })).toBeVisible();
+    await expect(pages.animalIdentification.savedAnimalRow('Bos taurus', 2)).toBeVisible();
 
     // Remove frees a slot: the entry form reopens at 2 of 2.
-    await pages.page.locator('.govuk-summary-list__row', { hasText: 'Animal 2' }).getByRole('button', { name: 'Remove' }).click();
+    await pages.animalIdentification.savedAnimalRow('Bos taurus', 2).getByRole('button', { name: 'Remove' }).click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
 
     // With one record left the drop no longer applies — a count of 1 saves.
