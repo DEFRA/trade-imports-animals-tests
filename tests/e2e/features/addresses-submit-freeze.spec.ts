@@ -78,4 +78,53 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       await addressBookApi.deleteAddress(address.id);
     }
   });
+
+  test('deleting the book record after submit does not change the submitted view or error', async ({
+    journey,
+    journeyContext,
+    pages,
+    addressBookApi,
+    notificationActions,
+  }) => {
+    test.slow();
+
+    const stamp = Date.now();
+    const originalName = `Frozen Then Deleted ${stamp}`;
+    const address = await addressBookApi.createAddress({
+      name: originalName,
+      addressLine1: '9 Delete Street',
+      townOrCity: 'Carlisle',
+      postcode: 'CA1 4DE',
+      countryCode: 'United Kingdom',
+      phone: '01228 555 0107',
+      email: 'delete-freeze@example.co.uk',
+    });
+
+    try {
+      await journey.toReview();
+      await pages.notificationView.changeLink('Change place of origin').click();
+      await pages.addresses.changeParty('Place of origin').click();
+      await pages.placeOfOriginSelection.select(originalName);
+      await pages.placeOfOriginSelection.saveAndContinue.click();
+      await pages.addresses.continueButton.click();
+
+      const originRow = pages.notificationView.partyRow('Roles and addresses', 'Place of origin');
+      await expect(originRow).toContainText(originalName);
+
+      await pages.notificationView.continueButton.click();
+      await pages.declaration.confirmation.check();
+      await pages.declaration.continueButton.click();
+      await expect(pages.page.getByRole('heading', { name: 'Import notification submitted' })).toBeVisible();
+
+      await addressBookApi.deleteAddress(address.id);
+
+      await notificationActions.toNotificationView(journeyContext.journeyId);
+      await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
+      await expect(originRow).toContainText(originalName);
+      await expect(originRow).toContainText('Carlisle');
+      await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
+    } finally {
+      await addressBookApi.deleteAddress(address.id).catch(() => undefined);
+    }
+  });
 });
