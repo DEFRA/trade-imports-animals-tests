@@ -1,15 +1,9 @@
 name: Scheduled Security Scan
 
 on:
-  # TEMPORARY — disabled until a manual dispatch confirms this end-to-end;
-  # re-enable via a follow-up commit once verified. Risks a nightly
-  # failure otherwise if this merges before the workspace repo's
-  # security-active-scan.yml does.
-  # schedule:
-  #   # Provisional: tbd exact time once a real active-scan run's duration
-  #   # is known. An hour ahead of cleanup-e2e-reports.yml's own 03:00
-  #   # schedule.
-  #   - cron: '0 2 * * *'
+  schedule:
+    # 01:00 UTC, weekdays only.
+    - cron: '0 1 * * 1-5'
   workflow_dispatch:
 
 jobs:
