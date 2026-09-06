@@ -5,6 +5,10 @@ import { test, WCAG_STANDARD } from '@fixtures/a11y';
 // disagreement, not a service defect. Exclude just that input from origin scans.
 const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
+// The same upstream disagreement on the reason page, where four of the five
+// reasons open a conditional reveal, so four radios carry aria-expanded.
+const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
+
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ journey }) => {
     await journey.toNotificationDashboard();
@@ -61,16 +65,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Import reason', async () => {
       await pages.overview.task('Main reason for importing').click();
       await pages.importReason.heading.waitFor();
-      await runA11yScan();
+      await runA11yScan({ exclude: conditionalReasonRadios });
       await pages.importReason.reason('Internal market').check();
+      await pages.importReason.purpose('Breeding').check();
       await pages.importReason.saveAndContinue.click();
-    });
-
-    await test.step('Import purpose', async () => {
-      await pages.importPurpose.heading.waitFor();
-      await runA11yScan();
-      await pages.importPurpose.purpose('Breeding').check();
-      await pages.importPurpose.saveAndContinue.click();
     });
 
     await test.step('Additional details', async () => {
