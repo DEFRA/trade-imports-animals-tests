@@ -9,16 +9,12 @@ import { ConsignmentDetailsPage } from './notification/consignment-details-page'
 import { ContactAddressPage } from './notification/contact-address-page';
 import { CphNumberPage } from './notification/cph-number-page';
 import { DeclarationPage } from './notification/declaration-page';
-import { DestinationCountryPage } from './notification/destination-country-page';
-import { ExitDatePage } from './notification/exit-date-page';
-import { ImportPurposePage } from './notification/import-purpose-page';
 import { ImportReasonPage } from './notification/import-reason-page';
 import { NotificationCancelAmendPage } from './notification/notification-cancel-amend-page';
 import { NotificationDashboardPage } from './notification/notification-dashboard-page';
 import { NotificationViewPage } from './notification/notification-view-page';
 import { OriginOfImportPage } from './notification/origin-of-import-page';
 import { OverviewPage } from './notification/overview-page';
-import { PortOfExitPage } from './notification/port-of-exit-page';
 import { PrivateTransporterPage } from './notification/private-transporter-page';
 import { PartyPickerPage } from './notification/party-picker-page';
 import { TransitedCountriesPage } from './notification/transited-countries-page';
@@ -47,11 +43,7 @@ export function createPageObjects(page: Page) {
     consignmentDetails: new ConsignmentDetailsPage(page),
     animalIdentification: new AnimalIdentificationPage(page),
     importReason: new ImportReasonPage(page),
-    importPurpose: new ImportPurposePage(page),
     additionalDetails: new AdditionalDetailsPage(page),
-    destinationCountry: new DestinationCountryPage(page),
-    portOfExit: new PortOfExitPage(page),
-    exitDate: new ExitDatePage(page),
     accompanyingDocuments: new AccompanyingDocumentsPage(page),
     addresses: new AddressesPage(page),
     consignorSelection: new PartyPickerPage(page, 'consignors/select', 'Consignor or exporter'),

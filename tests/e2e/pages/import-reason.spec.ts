@@ -21,4 +21,16 @@ test.describe('Import reason page', { tag: ['@integration', '@duplicated-in-fron
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
   });
+
+  test('reveals the import purpose under the internal market reason and accepts it', async ({ pages }) => {
+    await pages.importReason.reason('Internal market').check();
+
+    await expect(pages.importReason.purpose('Breeding')).toBeVisible();
+    await expect(pages.importReason.purpose('Breeding')).not.toBeChecked();
+
+    await pages.importReason.purpose('Breeding').check();
+    await pages.importReason.saveAndContinue.click();
+
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+  });
 });
