@@ -1,0 +1,171 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e/features/addresses-frozen-on-submit.spec.ts >> Addresses are frozen once submitted >> amending resolves the address live again, and cancelling restores the frozen details
+- Location: tests/e2e/features/addresses-frozen-on-submit.spec.ts:91:3
+
+# Error details
+
+```
+Error: expect(locator).toContainText(expected) failed
+
+Locator: locator('.govuk-summary-card').filter({ hasText: 'Roles and addresses' }).locator('.govuk-summary-list__row').filter({ has: getByText('Consignor', { exact: true }) }).locator('.govuk-summary-list__value')
+Timeout: 5000ms
+- Expected substring  - 1
++ Received string     + 3
+
+- Frozen Farm B 1787845017708
++
++           Moved Holding B 17878450177089 Freeze LanePenrithCA11 9ZZUnited Kingdom
++         
+
+Call log:
+  - Expect "toContainText" with timeout 5000ms
+  - waiting for locator('.govuk-summary-card').filter({ hasText: 'Roles and addresses' }).locator('.govuk-summary-list__row').filter({ has: getByText('Consignor', { exact: true }) }).locator('.govuk-summary-list__value')
+    14 × locator resolved to <dd class="govuk-summary-list__value">…</dd>
+       - unexpected value "
+          Moved Holding B 17878450177089 Freeze LanePenrithCA11 9ZZUnited Kingdom
+        "
+
+```
+
+```yaml
+- definition:
+  - strong: Moved Holding B 1787845017708
+  - text: 9 Freeze Lane Penrith CA11 9ZZ United Kingdom
+```
+
+# Test source
+
+```ts
+  17  |    * the address they pick, and the fixtures are shared with every spec running
+  18  |    * alongside them. Distinct names, not one derived from the other, so "the old
+  19  |    * name is gone" is a real assertion rather than a substring match. */
+  20  |   const ownAddress = async (addressBookApi: AddressBookApiClient, label: string) => {
+  21  |     const stamp = Date.now();
+  22  |     const originalName = `Frozen Farm ${label} ${stamp}`;
+  23  |     const address = await addressBookApi.createAddress({
+  24  |       name: originalName,
+  25  |       addressLine1: '9 Freeze Lane',
+  26  |       townOrCity: 'Carlisle',
+  27  |       postcode: 'CA1 3CC',
+  28  |       countryCode: 'United Kingdom',
+  29  |       phone: '01228 555 0104',
+  30  |       email: 'frozen@example.co.uk',
+  31  |     });
+  32  |     return { address, originalName, stamp };
+  33  |   };
+  34  | 
+  35  |   const consignorValue = (pages: PageObjects): Locator =>
+  36  |     pages.notificationView
+  37  |       .summaryCard('Roles and addresses')
+  38  |       .locator('.govuk-summary-list__row', { has: pages.page.getByText('Consignor', { exact: true }) })
+  39  |       .locator('.govuk-summary-list__value');
+  40  | 
+  41  |   test('editing or deleting the address after submit changes nothing the notification shows', async ({
+  42  |     journey,
+  43  |     journeyContext,
+  44  |     pages,
+  45  |     addressBookApi,
+  46  |   }) => {
+  47  |     test.slow();
+  48  |     const { address, originalName, stamp } = await ownAddress(addressBookApi, 'A');
+  49  |     const renamed = `Moved Holding A ${stamp}`;
+  50  | 
+  51  |     await journey.submitNotification({ consignor: originalName });
+  52  |     const journeyId = journeyContext.journeyId;
+  53  | 
+  54  |     // Rename and relocate the record behind the notification's back. A draft
+  55  |     // would pick all of this up on the next render.
+  56  |     await addressBookApi.updateAddress(address.id, {
+  57  |       name: renamed,
+  58  |       addressLine1: '9 Freeze Lane',
+  59  |       townOrCity: 'Penrith',
+  60  |       postcode: 'CA11 9ZZ',
+  61  |       countryCode: 'United Kingdom',
+  62  |       phone: '01228 555 0104',
+  63  |       email: 'frozen@example.co.uk',
+  64  |     });
+  65  | 
+  66  |     // The read-only check your answers view still reads the submission.
+  67  |     await pages.notificationView.open(journeyId);
+  68  |     await expect(consignorValue(pages)).toContainText(originalName);
+  69  |     await expect(consignorValue(pages)).toContainText('Carlisle');
+  70  |     await expect(consignorValue(pages)).toContainText('CA1 3CC');
+  71  |     await expect(consignorValue(pages)).not.toContainText(renamed);
+  72  |     await expect(consignorValue(pages)).not.toContainText('Penrith');
+  73  | 
+  74  |     // And so does the dashboard row, which resolves its own names.
+  75  |     await pages.notificationDashboard.open();
+  76  |     await pages.notificationDashboard.searchForReference(journeyId);
+  77  |     await expect(pages.notificationDashboard.notificationCardDetails(0).consignor).toContainText(originalName);
+  78  | 
+  79  |     // Deleting it outright changes nothing either, and must not error. This is
+  80  |     // the opposite of the draft rule, where a deleted address renders as "Not
+  81  |     // added yet" — the address book has no say over a notification already sent.
+  82  |     await addressBookApi.deleteAddress(address.id);
+  83  |     expect((await addressBookApi.getAddress(address.id)).deleted).toBe(true);
+  84  | 
+  85  |     await pages.notificationView.open(journeyId);
+  86  |     await expect(consignorValue(pages)).toContainText(originalName);
+  87  |     await expect(consignorValue(pages)).toContainText('Carlisle');
+  88  |     await expect(consignorValue(pages)).not.toContainText('Not added yet');
+  89  |   });
+  90  | 
+  91  |   test('amending resolves the address live again, and cancelling restores the frozen details', async ({
+  92  |     journey,
+  93  |     journeyContext,
+  94  |     pages,
+  95  |     addressBookApi,
+  96  |     notificationActions,
+  97  |   }) => {
+  98  |     test.slow();
+  99  |     const { address, originalName, stamp } = await ownAddress(addressBookApi, 'B');
+  100 |     const renamed = `Moved Holding B ${stamp}`;
+  101 | 
+  102 |     await journey.submitNotification({ consignor: originalName });
+  103 |     const journeyId = journeyContext.journeyId;
+  104 | 
+  105 |     await addressBookApi.updateAddress(address.id, {
+  106 |       name: renamed,
+  107 |       addressLine1: '9 Freeze Lane',
+  108 |       townOrCity: 'Penrith',
+  109 |       postcode: 'CA11 9ZZ',
+  110 |       countryCode: 'United Kingdom',
+  111 |       phone: '01228 555 0104',
+  112 |       email: 'frozen@example.co.uk',
+  113 |     });
+  114 | 
+  115 |     // Submitted: frozen.
+  116 |     await pages.notificationView.open(journeyId);
+> 117 |     await expect(consignorValue(pages)).toContainText(originalName);
+      |                                         ^ Error: expect(locator).toContainText(expected) failed
+  118 | 
+  119 |     // Amending: the retained reference resolves live again, so the amendment is
+  120 |     // made against the address as it stands now, not as it was.
+  121 |     await notificationActions.amendNotification(journeyId);
+  122 |     await pages.overview.task('Check and submit').click();
+  123 |     await expect(pages.notificationView.heading).toBeVisible();
+  124 |     await expect(consignorValue(pages)).toContainText(renamed);
+  125 |     await expect(consignorValue(pages)).toContainText('Penrith');
+  126 |     await expect(consignorValue(pages)).not.toContainText(originalName);
+  127 | 
+  128 |     // Cancelling the amendment puts back what was submitted — the frozen copy,
+  129 |     // not a re-resolve of today's address book.
+  130 |     await pages.notificationView.cancelAmendment.click();
+  131 |     await expect(pages.notificationCancelAmend.heading).toBeVisible();
+  132 |     await pages.notificationCancelAmend.confirm.click();
+  133 | 
+  134 |     await expect(pages.notificationView.journeyStrip).not.toContainText('Amending');
+  135 |     await expect(consignorValue(pages)).toContainText(originalName);
+  136 |     await expect(consignorValue(pages)).toContainText('Carlisle');
+  137 |     await expect(consignorValue(pages)).not.toContainText(renamed);
+  138 |   });
+  139 | });
+  140 | 
+```
