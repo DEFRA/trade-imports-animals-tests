@@ -38,12 +38,20 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await pages.importReason.reason('Internal market').check();
     await expect(pages.page.locator('input[name="purposeInInternalMarket"]:checked')).toHaveCount(0);
 
-    // A blank purpose save is not an error (enforcedAt=submit); it walks on to the
-    // tail page and leaves the task open.
+    // The purpose is owed again, and it is now enforced where it is asked: a
+    // blank save returns the page with the error rather than walking on.
+    await pages.importReason.saveAndContinue.click();
+    await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+    await expect(pages.page.getByRole('link', { name: 'Select a purpose in the internal market' })).toBeVisible();
+    await expect(pages.additionalDetails.heading).toHaveCount(0);
+
+    // Answering the newly owed purpose completes the row again.
+    await pages.importReason.reason('Internal market').check();
+    await pages.importReason.purpose('Breeding').check();
     await pages.importReason.saveAndContinue.click();
     await expect(pages.additionalDetails.heading).toBeVisible();
     await pages.additionalDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await expect(reasonRow).not.toContainText('Completed');
+    await expect(reasonRow).toContainText('Completed');
   });
 });
