@@ -9,6 +9,7 @@ const projectBaseUrls: Record<string, string> = {
   e2e: 'http://localhost:3000',
   admin: 'http://localhost:3001',
   ins: 'http://localhost:3002',
+  plants: 'http://localhost:3003',
 };
 
 const dockerComposeConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectBaseUrls, 'docker-compose'), {

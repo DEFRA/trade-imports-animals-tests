@@ -32,6 +32,7 @@ export default defineConfig({
         '**/tests/e2e/pages/admin/**/*.spec.ts',
         '**/tests/a11y/admin/**/*.spec.ts',
         '**/tests/e2e/features/ins/**/*.spec.ts',
+        '**/tests/e2e/features/plants/**/*.spec.ts',
         '**/tests/security/admin/**/*.spec.ts',
         '**/tests/security/ins/**/*.spec.ts',
       ],
@@ -56,6 +57,14 @@ export default defineConfig({
     {
       name: 'ins',
       testMatch: ['**/tests/e2e/features/ins/**/*.spec.ts', '**/tests/security/ins/**/*.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 1000 },
+      },
+    },
+    {
+      name: 'plants',
+      testMatch: ['**/tests/e2e/features/plants/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 1000 },
