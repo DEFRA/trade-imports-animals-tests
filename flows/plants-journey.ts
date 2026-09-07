@@ -13,18 +13,30 @@ export class PlantsJourney {
   }
 
   /**
-   * Creates a notification and lands on its Overview. The create POST mints the
-   * reference, so the journey id in the landing URL is the reference number —
-   * the records adapter marshals `referenceNumber` straight onto `journeyId`.
+   * Creates a notification and lands on commodity-type, the opening run's first
+   * step: the create POST begins the run and redirects there, not to the
+   * Overview. The POST mints the reference, so the journey id in the landing URL
+   * is the reference number — the records adapter marshals `referenceNumber`
+   * straight onto `journeyId`.
    */
   async startNotification(): Promise<string> {
     await this.toDashboard();
     await this.pages.plantsDashboard.btnStartNewNotification.click();
-    await this.pages.plantsOverview.heading.waitFor();
-    const journeyId = this.pages.plantsOverview.journeyIdFromUrl();
+    await this.pages.plantsCommodityType.heading.waitFor();
+    const journeyId = this.pages.plantsCommodityType.journeyIdFromUrl();
     this.context.journeyId = journeyId;
     this.context.referenceNumber = journeyId;
     return journeyId;
+  }
+
+  /**
+   * Leaves the entry page for the Overview by its Cancel control, which saves
+   * nothing — so a spec that wants the hub reaches it with the notification
+   * exactly as the create POST left it.
+   */
+  async toOverview(): Promise<void> {
+    await this.pages.plantsCommodityType.linkCancel.click();
+    await this.pages.plantsOverview.heading.waitFor();
   }
 
   async returnToDashboard(): Promise<void> {

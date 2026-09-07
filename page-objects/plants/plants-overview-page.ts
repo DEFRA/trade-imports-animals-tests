@@ -38,4 +38,14 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
   get groupHeadings(): Locator {
     return this.page.getByRole('heading', { level: 2, name: /^[1-4]\. / });
   }
+
+  /** A row is addressed through its link, which is the only text govukTaskList
+   * gives it when the row carries no hint. */
+  taskRowLink(title: string): Locator {
+    return this.page.getByRole('link', { name: title, exact: true });
+  }
+
+  taskRow(title: string): Locator {
+    return this.page.getByRole('listitem').filter({ has: this.taskRowLink(title) });
+  }
 }

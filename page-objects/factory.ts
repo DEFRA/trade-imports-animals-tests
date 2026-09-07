@@ -32,6 +32,7 @@ import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
 import { InsAddressBookViewPage } from './ins/ins-address-book-view-page';
 import { InsAddressBookEditPage } from './ins/ins-address-book-edit-page';
 import { InsAddressBookDeletePage } from './ins/ins-address-book-delete-page';
+import { PlantsCommodityTypePage } from './plants/plants-commodity-type-page';
 import { PlantsDashboardPage } from './plants/plants-dashboard-page';
 import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
 import { PlantsOverviewPage } from './plants/plants-overview-page';
@@ -78,6 +79,7 @@ export function createPageObjects(page: Page) {
     insAddressBookDelete: new InsAddressBookDeletePage(page),
     plantsDashboard: new PlantsDashboardPage(page),
     plantsOverview: new PlantsOverviewPage(page),
+    plantsCommodityType: new PlantsCommodityTypePage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }
