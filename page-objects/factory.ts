@@ -33,6 +33,8 @@ import { InsAddressBookViewPage } from './ins/ins-address-book-view-page';
 import { InsAddressBookEditPage } from './ins/ins-address-book-edit-page';
 import { InsAddressBookDeletePage } from './ins/ins-address-book-delete-page';
 import { PlantsDashboardPage } from './plants/plants-dashboard-page';
+import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
+import { PlantsOverviewPage } from './plants/plants-overview-page';
 
 export function createPageObjects(page: Page) {
   return {
@@ -75,6 +77,8 @@ export function createPageObjects(page: Page) {
     insAddressBookEdit: new InsAddressBookEditPage(page),
     insAddressBookDelete: new InsAddressBookDeletePage(page),
     plantsDashboard: new PlantsDashboardPage(page),
+    plantsOverview: new PlantsOverviewPage(page),
+    plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }
 
