@@ -150,8 +150,17 @@ export class NotificationPage extends BasePage {
     return `/notifications/${this.journeyIdFromUrl()}${suffix}`;
   }
 
+  /**
+   * The service this notification's pages live on. Overridden by a subclass whose
+   * journey runs against another frontend, so the journey-URL helpers above and
+   * `open` below are reused rather than copied per service.
+   */
+  protected async navigateToService(path: string): Promise<void> {
+    await this.navigateToFrontend(path);
+  }
+
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
-    await this.navigateToFrontend(this.expectedUrl(journeyId));
+    await this.navigateToService(this.expectedUrl(journeyId));
     await this.signInWhenRequested(attemptSignIn);
   }
 }
