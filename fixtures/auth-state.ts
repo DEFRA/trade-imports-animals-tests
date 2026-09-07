@@ -13,10 +13,11 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { NotificationDashboardPage } from '@page-objects/notification/notification-dashboard-page';
 import { AdminDashboardPage } from '@page-objects/admin/admin-dashboard-page';
 import { InsAddressBookListPage } from '@page-objects/ins/ins-address-book-list-page';
+import { PlantsDashboardPage } from '@page-objects/plants/plants-dashboard-page';
 
 const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
-/** All three services use @hapi/cookie's default name; the cookie carries only a sessionId resolved against each service's own session store. */
+/** All four services use @hapi/cookie's default name; the cookie carries only a sessionId resolved against each service's own session store. */
 export const AUTH_COOKIE_NAME = 'sid';
 
 export const LANDING_TIMEOUT_MS = 20_000;
@@ -42,6 +43,7 @@ export const AUTH_TARGETS: Record<string, AuthTarget> = {
   e2e: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
   admin: { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
   ins: { landingPath: '/address-book', landingHeading: (page) => new InsAddressBookListPage(page).heading },
+  plants: { landingPath: '/', landingHeading: (page) => new PlantsDashboardPage(page).heading },
 };
 
 const slug = (baseUrl: string): string => baseUrl.replace(/^https?:\/\//, '').replace(/[^a-z0-9]+/gi, '-');

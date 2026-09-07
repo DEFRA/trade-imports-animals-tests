@@ -4,7 +4,11 @@ import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/auth/organisation-picker-page';
 
 function requireBaseUrl(
-  envVar: 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL' | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL' | 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL',
+  envVar:
+    | 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'
+    | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL'
+    | 'TRADE_IMPORTS_INS_FRONTEND_BASE_URL'
+    | 'TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL',
 ): string {
   const baseUrl = process.env[envVar];
   if (!baseUrl) {
@@ -56,6 +60,11 @@ export class BasePage {
 
   async navigateToInsFrontend(path: string = '/'): Promise<void> {
     const baseUrl = requireBaseUrl('TRADE_IMPORTS_INS_FRONTEND_BASE_URL');
+    await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  async navigateToPlantsFrontend(path: string = '/'): Promise<void> {
+    const baseUrl = requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL');
     await this.page.goto(`${baseUrl}${path}`);
   }
 

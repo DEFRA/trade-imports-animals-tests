@@ -132,18 +132,21 @@ the target environment — the probe signs in once per service and proves
 load-balanced replicas honour a session minted against another — after which a
 lane opts in with `E2E_SESSION_REUSE=on`.
 
-The `docker-compose` config targets `localhost:3000` / `localhost:3001`, so
-start the workspace stack first. CI runs `npm run test:docker-compose:ci`
-against that stack via the workspace reusable workflow.
+The `docker-compose` config targets `localhost:3000` / `localhost:3001` /
+`localhost:3002` / `localhost:3003`, so start the workspace stack first. CI
+runs `npm run test:docker-compose:ci` against that stack via the workspace
+reusable workflow.
 
 ### Test Projects
 
-Both configs split tests across the same two Playwright projects:
+Both configs split tests across the same four Playwright projects:
 
-| Project | Test scope                      |
-| ------- | ------------------------------- |
-| `e2e`   | All tests excluding admin pages |
-| `admin` | Admin pages only                |
+| Project  | Test scope                                  |
+| -------- | ------------------------------------------- |
+| `e2e`    | All tests excluding admin, ins and plants   |
+| `admin`  | Admin portal only                           |
+| `ins`    | Import notification service front door only |
+| `plants` | High-risk plants frontend only              |
 
 ## Local Testing
 
@@ -156,10 +159,12 @@ Both configs split tests across the same two Playwright projects:
    ./scripts/stack/run-stack.sh -d
    ```
 
-2. Run the E2E and admin projects with `npm run test:docker-compose`.
+2. Run the projects with `npm run test:docker-compose`, narrowing to one with
+   `-- --project=<name>`.
 
-`npm run test:docker-compose` targets the stack frontend on :3000 and the
-admin service on :3001.
+`npm run test:docker-compose` targets the stack animals frontend on :3000, the
+admin service on :3001, the ins frontend on :3002 and the high-risk plants
+frontend on :3003.
 
 To debug, append Playwright flags, e.g.
 `npm run test:docker-compose -- --headed --workers=1`.
