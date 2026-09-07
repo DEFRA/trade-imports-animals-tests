@@ -59,7 +59,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       expect(draftDoc.referenceNumber).toBe(referenceNumber);
       expect(draftDoc.status).toBe('DRAFT');
       expect(draftDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      // commodity omitted: see EUDPA-348 — Commodity.name not included in outbox event
+      expect(draftDoc.commodity).toBe(defaultJourneyOptions.commodityCode);
       expect(draftDoc.arrivalDate).toBeInstanceOf(Date);
       expect(draftDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(draftDoc.lastUpdated).toBeInstanceOf(Date);
@@ -82,7 +82,7 @@ test.describe('Aggregated notification store', { tag: ['@compose', '@integration
       expect(submittedDoc.referenceNumber).toBe(referenceNumber);
       expect(submittedDoc.status).toBe('SUBMITTED');
       expect(submittedDoc.originCountry).toBe(defaultJourneyOptions.countryCode.value);
-      // commodity omitted: see EUDPA-348 — Commodity.name not included in outbox event
+      expect(submittedDoc.commodity).toBe(defaultJourneyOptions.commodityCode);
       expect(submittedDoc.arrivalDate).toBeInstanceOf(Date);
       expect(submittedDoc.arrivalDate.getTime()).toBeGreaterThan(Date.now());
       expect(submittedDoc.lastUpdated).toBeInstanceOf(Date);
