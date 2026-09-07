@@ -18,11 +18,24 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsDashboard.errorSummary).not.toBeVisible();
   });
 
-  test('starting a notification lands on the Overview with the journey strip', async ({ pages, plantsJourney, journeyContext }) => {
+  test('starting a notification opens the run on the commodity-type page', async ({ pages, plantsJourney, journeyContext }) => {
     const reference = await plantsJourney.startNotification();
 
     expect(reference).toMatch(PLANTS_REFERENCE);
     expect(journeyContext.referenceNumber).toBe(reference);
+    await expect(pages.page).toHaveURL(pages.plantsCommodityType.expectedUrl(reference));
+    await expect(pages.plantsCommodityType.heading).toBeVisible();
+    await expect(pages.plantsCommodityType.commodityType('Potatoes (seed or ware)')).toBeVisible();
+
+    // The entry page's back link is the one in the journey that depends on
+    // state: nothing is committed yet, so it points at the dashboard.
+    await expect(pages.plantsCommodityType.linkBack).toHaveAttribute('href', '/');
+  });
+
+  test('the Overview carries the journey strip and the commodities task row', async ({ pages, plantsJourney }) => {
+    const reference = await plantsJourney.startNotification();
+    await plantsJourney.toOverview();
+
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.heading).toBeVisible();
 
@@ -30,10 +43,15 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.statusTag).toHaveText('Draft');
     await expect(pages.plantsOverview.reference).toHaveText(reference);
 
-    // The hub landed with every group empty, and a group with no rows is not
+    // Only the first group has landed a row, and a group with no rows is not
     // rendered — each section's own spec asserts its row as that page lands.
-    await expect(pages.plantsOverview.taskLists).toHaveCount(0);
-    await expect(pages.plantsOverview.groupHeadings).toHaveCount(0);
+    await expect(pages.plantsOverview.taskLists).toHaveCount(1);
+    await expect(pages.plantsOverview.groupHeadings).toHaveText(['1. About the consignment']);
+    await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
+      'href',
+      `/notifications/${reference}/commodity-type`,
+    );
+    await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Not yet started');
 
     await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', '/');
     await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', '/');
@@ -41,6 +59,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
+    await plantsJourney.toOverview();
     await plantsJourney.returnToDashboard();
     await pages.plantsDashboard.searchForReference(reference);
 
@@ -55,6 +74,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
 
   test('No, return to dashboard leaves the notification untouched', async ({ pages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
+    await plantsJourney.toOverview();
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
@@ -75,6 +95,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
 
   test('Yes, delete notification soft-deletes it and drops it from the listing', async ({ pages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
+    await plantsJourney.toOverview();
     await plantsJourney.returnToDashboard();
     await plantsJourney.deleteFromDashboard(reference);
 
