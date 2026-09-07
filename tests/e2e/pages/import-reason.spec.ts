@@ -7,6 +7,10 @@ test.describe('Import reason page', { tag: ['@integration', '@duplicated-in-fron
 
   test('renders the page controls', async ({ pages }) => {
     await expect(pages.importReason.heading).toBeVisible();
+    await expect(pages.importReason.questionGroup).toBeVisible();
+    // The question is the radio group's legend, not the page heading — if it is
+    // ever promoted back to an h1 this fails, mirroring the frontend fit spec.
+    await expect(pages.page.getByRole('heading', { name: 'What is the main reason for importing the animals?' })).toHaveCount(0);
     await expect(pages.importReason.reason('Internal market')).toBeVisible();
     await expect(pages.importReason.saveAndContinue).toBeVisible();
   });

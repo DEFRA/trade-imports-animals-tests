@@ -6,8 +6,14 @@ export class ImportReasonPage extends NotificationPage {
     super(page, 'import-reason');
   }
 
+  // The page is headed with its name; the question it asks stays as the radio
+  // group's visually hidden legend, so it is a group name, not a heading.
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'What is the main reason for importing the animals?' });
+    return this.page.getByRole('heading', { level: 1, name: 'Main reason for import', exact: true });
+  }
+
+  get questionGroup(): Locator {
+    return this.page.getByRole('group', { name: 'What is the main reason for importing the animals?' });
   }
 
   reason(name: string): Locator {
