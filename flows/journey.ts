@@ -114,10 +114,10 @@ export class Journey {
   async answerReasonAndAdditionalDetails(): Promise<void> {
     await this.pages.overview.task('Main reason for importing').click();
     await this.pages.importReason.reason('Internal market').check();
+    // The purpose is a conditional reveal under the reason, so both answers go
+    // in on the one submit.
+    await this.pages.importReason.purpose('Breeding').check();
     await this.pages.importReason.saveAndContinue.click();
-    await this.pages.importPurpose.heading.waitFor();
-    await this.pages.importPurpose.purpose('Breeding').check();
-    await this.pages.importPurpose.saveAndContinue.click();
     await this.pages.additionalDetails.heading.waitFor();
     await this.pages.additionalDetails.certifiedFor('Slaughter').check();
     await this.pages.additionalDetails.containsUnweanedAnimals('No').check();
@@ -251,17 +251,11 @@ export class Journey {
     await this.pages.importReason.heading.waitFor();
   }
 
-  async toImportPurpose(): Promise<void> {
+  async toAdditionalDetails(): Promise<void> {
     await this.toImportReason();
     await this.pages.importReason.reason('Internal market').check();
+    await this.pages.importReason.purpose('Breeding').check();
     await this.pages.importReason.saveAndContinue.click();
-    await this.pages.importPurpose.heading.waitFor();
-  }
-
-  async toAdditionalDetails(): Promise<void> {
-    await this.toImportPurpose();
-    await this.pages.importPurpose.purpose('Breeding').check();
-    await this.pages.importPurpose.saveAndContinue.click();
     await this.pages.additionalDetails.heading.waitFor();
   }
 
