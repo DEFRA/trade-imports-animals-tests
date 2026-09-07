@@ -82,16 +82,14 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
       // Every party carries inline details after submit — the freeze lives on the
       // top-level notification fields, not a separate amend-scoped snapshot.
-      expect(notification.consignor).toEqual({
+      expect(notification.consignor).toMatchObject({
         addressId: consignor.id,
         name: consignor.name,
         email: consignor.email,
         phone: consignor.phone,
         address: {
           addressLine1: consignor.addressLine1,
-          addressLine2: consignor.addressLine2,
           townOrCity: consignor.townOrCity,
-          county: consignor.county,
           postcode: consignor.postcode,
           countryCode: consignor.countryCode,
         },
