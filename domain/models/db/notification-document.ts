@@ -92,8 +92,8 @@ export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
   notification: NotificationContent;
-  /** Parties and content as they stood at submit. Present once the notification has been submitted. */
-  submittedNotificationBaseline?: NotificationContent;
+  /** Pre-amend snapshot of notification content. Present only during an in-flight amendment. */
+  preAmendNotification?: NotificationContent;
   status: string;
   created: Date;
   updated: Date;

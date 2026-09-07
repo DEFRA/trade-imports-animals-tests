@@ -80,17 +80,28 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.reasonForImport).toBe('internalMarket');
       expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
-      // Every party is a reference — the id alone, with no copy of the address
-      // beside it, so a later edit in the address book shows through on a draft
-      // or amendment. The submitted freeze holds the details separately.
-      expect(notification.consignor).toEqual({ addressId: consignor.id });
-      expect(notification.destination).toEqual({ addressId: destination.id });
-      expect(notification.consignee).toEqual({ addressId: consignee.id });
-      expect(notification.importer).toEqual({ addressId: importer.id });
-      expect(notification.placeOfOrigin).toEqual({ addressId: placeOfOrigin.id });
-      expect(notification.consignment).toEqual({ addressId: contact.id });
-      expect(doc.submittedNotificationBaseline?.placeOfOrigin?.name).toBe(placeOfOrigin.name);
-      expect(doc.submittedNotificationBaseline?.consignment?.name).toBe(contact.name);
+      // Every party carries inline details after submit — the freeze lives on the
+      // top-level notification fields, not a separate amend-scoped snapshot.
+      expect(notification.consignor).toEqual({
+        addressId: consignor.id,
+        name: consignor.name,
+        email: consignor.email,
+        phone: consignor.phone,
+        address: {
+          addressLine1: consignor.addressLine1,
+          addressLine2: consignor.addressLine2,
+          townOrCity: consignor.townOrCity,
+          county: consignor.county,
+          postcode: consignor.postcode,
+          countryCode: consignor.countryCode,
+        },
+      });
+      expect(notification.destination).toMatchObject({ addressId: destination.id, name: destination.name });
+      expect(notification.consignee).toMatchObject({ addressId: consignee.id, name: consignee.name });
+      expect(notification.importer).toMatchObject({ addressId: importer.id, name: importer.name });
+      expect(notification.placeOfOrigin).toMatchObject({ addressId: placeOfOrigin.id, name: placeOfOrigin.name });
+      expect(notification.consignment).toMatchObject({ addressId: contact.id, name: contact.name });
+      expect(doc.preAmendNotification).toBeUndefined();
       expect(notification.cphNumber).toBe('123456789');
       expect(notification.transport.portOfEntry).toBe('GB ABD');
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
