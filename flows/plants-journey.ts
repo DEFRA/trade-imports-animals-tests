@@ -93,6 +93,18 @@ export class PlantsJourney {
     await this.addCommodityLine(category, values);
   }
 
+  /**
+   * Leaves the commodities list for origin, which the list's Continue reaches
+   * only while the opening run is still open. Once the run has ended,
+   * commodities is the last page of its section and Continue returns to the
+   * Overview instead — so a notification past its opening run reaches origin
+   * with `pages.plantsOrigin.open(reference)`, not with this helper.
+   */
+  async toOrigin(): Promise<void> {
+    await this.pages.plantsCommodities.btnSaveAndContinue.click();
+    await this.pages.plantsOrigin.heading.waitFor();
+  }
+
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
     for (const [label, value] of Object.entries(values)) {
       if (label === GENUS) {
