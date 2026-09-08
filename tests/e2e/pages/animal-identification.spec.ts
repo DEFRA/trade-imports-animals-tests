@@ -9,7 +9,9 @@ test.describe('Animal identification page', { tag: ['@integration', '@duplicated
     await expect(pages.animalIdentification.heading).toBeVisible();
     await expect(pages.animalIdentification.earTag).toBeVisible();
     await expect(pages.animalIdentification.passportNumber).toBeVisible();
-    await expect(pages.animalIdentification.saveAndAddAnother).toBeVisible();
+    // A line of one animal has nothing to add after this record, so the card
+    // offers no button of its own — the page's Save and continue captures it.
+    await expect(pages.animalIdentification.saveAndAddAnother).toHaveCount(0);
     await expect(pages.animalIdentification.saveAndContinue).toBeVisible();
   });
 

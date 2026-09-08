@@ -32,6 +32,12 @@ export class AnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another' });
   }
 
+  // The in-card button names what is left on the line: it finishes the line on
+  // the last outstanding animal rather than inviting another.
+  get saveAndFinish(): Locator {
+    return this.page.getByRole('button', { name: 'Save and finish' });
+  }
+
   get saveAndContinue(): Locator {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
