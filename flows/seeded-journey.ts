@@ -51,7 +51,11 @@ export class SeededJourney {
 
   async createSubmittedNotification(): Promise<string> {
     const journeyId = await this.createDraftNotification('readyToSubmit');
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${declarationStep.slug}`, declarationStep.form);
+    // A submission the obligations refuse goes back to check-your-answers
+    // rather than on to the confirmation, so the target is the assertion.
+    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${declarationStep.slug}`, declarationStep.form, {
+      redirectsTo: /\/confirmation$/,
+    });
     return journeyId;
   }
 
@@ -61,16 +65,19 @@ export class SeededJourney {
     return journeyId;
   }
 
+  /** Reopens a submitted notification for amendment; lands on its task list. */
   async amend(journeyId: string): Promise<void> {
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/amend`);
+    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/amend`, {}, { redirectsTo: new RegExp(`/notifications/${journeyId}$`) });
   }
 
+  /** Restores the submitted baseline; lands back on check-your-answers. */
   async cancelAmend(journeyId: string): Promise<void> {
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/cancel-amend`);
+    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/cancel-amend`, {}, { redirectsTo: /\/notification-view\?cancelled=1$/ });
   }
 
+  /** Soft-deletes; lands on the dashboard, which says so in the query. */
   async softDelete(journeyId: string): Promise<void> {
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/delete`);
+    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/delete`, {}, { redirectsTo: /\?deleted=1$/ });
   }
 
   /** Open a seeded notification in the browser, on the page a spec came to drive. */

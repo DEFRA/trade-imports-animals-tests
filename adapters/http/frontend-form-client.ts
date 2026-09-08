@@ -81,8 +81,16 @@ export class FrontendFormClient {
     return minted;
   }
 
-  /** Posts the form and returns the Location it redirects to. */
-  async postForm(path: string, fields: FormFields = {}): Promise<string> {
+  /**
+   * Posts the form and returns the Location it redirects to.
+   *
+   * `redirectsTo` is how a caller says which redirect counts. An answer page
+   * has only one — it saves, or it does not redirect at all. A transition has
+   * two: a refused amend, cancel or delete redirects away just as a successful
+   * one does, only somewhere else, so the status code alone would read a
+   * refusal as success.
+   */
+  async postForm(path: string, fields: FormFields = {}, { redirectsTo }: { redirectsTo?: RegExp } = {}): Promise<string> {
     const response = await this.request.post(path, {
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       data: encode({ ...fields, crumb: await this.crumbToken() }),
@@ -96,6 +104,9 @@ export class FrontendFormClient {
     const location = response.headers()['location'];
     if (!location) {
       throw new Error(`POST ${path} redirected with no Location header, so there is no next page to follow.`);
+    }
+    if (redirectsTo && !redirectsTo.test(location)) {
+      throw new Error(`POST ${path} redirected to "${location}", not to ${redirectsTo}. The frontend refused what was asked of it.`);
     }
     return location;
   }
