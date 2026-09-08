@@ -1,11 +1,11 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Security scan (admin)', { tag: '@active' }, () => {
-  test('routes admin navigation through the ZAP proxy', async ({ apiJourney, adminNavigation, pages }) => {
+  test('routes admin navigation through the ZAP proxy', async ({ seededJourney, adminNavigation, pages }) => {
     test.slow();
-    // Seeded via API, bypassing the ZAP proxy on purpose — the frontend
-    // submission journey is already scanned elsewhere.
-    const notification = await apiJourney.createSubmittedNotification();
+    // Seeded through the frontend. The seed context carries this project's
+    // proxy, so the seeding traffic reaches ZAP like everything else here.
+    const referenceNumber = await seededJourney.createSubmittedNotification();
 
     await adminNavigation.toAdminDashboard();
     await expect(pages.adminDashboard.heading).toBeVisible();
@@ -13,7 +13,7 @@ test.describe('Security scan (admin)', { tag: '@active' }, () => {
     await adminNavigation.toNotifications();
     await expect(pages.adminNotifications.heading).toBeVisible();
 
-    await adminNavigation.toOutboxEvents(notification.referenceNumber);
+    await adminNavigation.toOutboxEvents(referenceNumber);
     await expect(pages.adminOutboxEvents.heading).toBeVisible();
   });
 });

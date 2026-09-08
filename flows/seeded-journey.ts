@@ -43,7 +43,7 @@ export class SeededJourney {
   /** A draft answered as far as `depth` takes it. */
   async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
     const journeyId = await this.createEmptyNotification();
-    for (const { slug, form } of seedSteps(await this.partyIds(), depth)) {
+    for (const { slug, form } of await seedSteps(() => this.partyIds(), depth)) {
       await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${slug}`, form);
     }
     return journeyId;

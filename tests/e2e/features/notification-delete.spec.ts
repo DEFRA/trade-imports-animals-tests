@@ -19,9 +19,8 @@ test.describe('Notification delete', { tag: ['@integration', '@duplicated-in-fro
   test(
     'deletes the notification and removes it from the dashboard',
     { tag: '@smoke' },
-    async ({ pages, apiJourney, notificationActions }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber;
+    async ({ pages, seededJourney, notificationActions }) => {
+      const referenceNumber = await seededJourney.createSubmittedNotification();
 
       await notificationActions.deleteNotification(referenceNumber);
       await pages.notificationDashboard.open();

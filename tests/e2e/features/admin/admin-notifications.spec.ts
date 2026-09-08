@@ -34,9 +34,9 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     },
   );
 
-  test('cancelling checkbox deletion keeps the notification visible', async ({ apiJourney, adminNavigation, pages }) => {
+  test('cancelling checkbox deletion keeps the notification visible', async ({ seededJourney, adminNavigation, pages }) => {
     test.slow();
-    const { referenceNumber } = await apiJourney.createSubmittedNotification();
+    const referenceNumber = await seededJourney.createSubmittedNotification();
 
     await adminNavigation.toNotifications();
     await pages.adminNotifications.findRowByReference(referenceNumber);
@@ -46,9 +46,9 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     await expect(pages.adminNotifications.tableRowByReference(referenceNumber)).toBeVisible();
   });
 
-  test('deletes a notification by checkbox', async ({ apiJourney, adminNavigation, pages }) => {
+  test('deletes a notification by checkbox', async ({ seededJourney, adminNavigation, pages }) => {
     test.slow();
-    const { referenceNumber } = await apiJourney.createSubmittedNotification();
+    const referenceNumber = await seededJourney.createSubmittedNotification();
 
     await adminNavigation.toNotifications();
 
@@ -90,54 +90,60 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     });
   });
 
-  test.skip('deletes all current-page notifications by select all', { tag: '@compose' }, async ({ apiJourney, adminNavigation, pages }) => {
-    skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications).');
-    test.slow();
+  test.skip(
+    'deletes all current-page notifications by select all',
+    { tag: '@compose' },
+    async ({ seededJourney, adminNavigation, pages }) => {
+      skipIfCdpEnvironment('Compose/local only: destructive (deletes the current page of notifications).');
+      test.slow();
 
-    await apiJourney.createFullNotification();
-    await apiJourney.createFullNotification();
-    await apiJourney.createFullNotification();
-    await apiJourney.createFullNotification();
+      await seededJourney.createDraftNotification('unlocked');
+      await seededJourney.createDraftNotification('unlocked');
+      await seededJourney.createDraftNotification('unlocked');
+      await seededJourney.createDraftNotification('unlocked');
 
-    await adminNavigation.toNotifications();
-    await expect(pages.adminNotifications.heading).toBeVisible();
+      await adminNavigation.toNotifications();
+      await expect(pages.adminNotifications.heading).toBeVisible();
 
-    const currentPageRefs = await pages.adminNotifications.currentPageReferences();
-    const expectedDeletes = currentPageRefs.length;
-    expect(currentPageRefs.length).toBeGreaterThan(0);
-    const pageOneReference = currentPageRefs[0];
+      const currentPageRefs = await pages.adminNotifications.currentPageReferences();
+      const expectedDeletes = currentPageRefs.length;
+      expect(currentPageRefs.length).toBeGreaterThan(0);
+      const pageOneReference = currentPageRefs[0];
 
-    await test.step('select all deletes only the current page', async () => {
-      await pages.adminNotifications.checkBoxSelectAll.check();
-      await pages.adminNotifications.btnDelete.click();
-      await pages.adminNotifications.btnConfirm.click();
-      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
-    });
+      await test.step('select all deletes only the current page', async () => {
+        await pages.adminNotifications.checkBoxSelectAll.check();
+        await pages.adminNotifications.btnDelete.click();
+        await pages.adminNotifications.btnConfirm.click();
+        await expect(pages.adminNotifications.alertSuccess).toContainText(
+          'Notifications deleted successfully. Redirecting in 3 seconds...',
+        );
+      });
 
-    await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
-      const client = new MongoDbClient();
+      await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
+        const client = new MongoDbClient();
 
-      try {
-        await client.connect();
-        const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
-        const docs = await auditCollection
-          .find({ action: 'DELETE_NOTIFICATIONS', notificationReferenceNumbers: pageOneReference })
-          .toArray();
+        try {
+          await client.connect();
+          const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
+          const docs = await auditCollection
+            .find({ action: 'DELETE_NOTIFICATIONS', notificationReferenceNumbers: pageOneReference })
+            .toArray();
 
-        expect(docs).toHaveLength(1);
-        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(docs[0].result).toBe('SUCCESS');
-        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
-        expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
-        expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe(defaultUser.crn);
-      } finally {
-        await client.close();
-      }
-    });
-  });
+          expect(docs).toHaveLength(1);
+          expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
+          expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
+          expect(docs[0].result).toBe('SUCCESS');
+          expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
+          expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
+          expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
+          expect(docs[0].traceId).toBe('test-trace-id');
+          expect(docs[0].userId).toBe(defaultUser.crn);
+        } finally {
+          await client.close();
+        }
+      });
+    },
+  );
 
   test('does not allow deleting a notification by invalid reference number', async ({ adminNavigation, pages }) => {
     test.slow();

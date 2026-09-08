@@ -18,19 +18,19 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     sqs.destroy();
   });
 
-  test('routes the admin write actions through the ZAP proxy', async ({ apiJourney, adminNavigation, pages }) => {
+  test('routes the admin write actions through the ZAP proxy', async ({ seededJourney, adminNavigation, pages }) => {
     test.slow();
-    const notification = await apiJourney.createAmendNotification();
+    const referenceNumber = await seededJourney.createAmendNotification();
 
     // The admin service's one POST that is not a delete, on its own route.
-    await adminNavigation.toOutboxEvents(notification.referenceNumber);
+    await adminNavigation.toOutboxEvents(referenceNumber);
     await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
     await pages.adminOutboxEvents.btnReplay.click();
     await expect(pages.adminOutboxEvents.bannerSuccess).toBeVisible();
 
     // DELETE /notifications, scoped to this reference — never the whole table.
     await pages.adminNotifications.open();
-    await pages.adminNotifications.inputReferenceNumber.fill(notification.referenceNumber);
+    await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     // deleteByReferenceNumber only opens the confirmation dialog; the DELETE
     // itself fires from the dialog's own confirm button.
     await pages.adminNotifications.deleteByReferenceNumber();

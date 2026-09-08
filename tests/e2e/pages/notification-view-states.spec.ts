@@ -2,8 +2,8 @@ import { test, expect } from '@fixtures';
 
 test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.describe('DRAFT', () => {
-    test.beforeEach(async ({ apiJourney, notificationActions, journeyContext }) => {
-      await apiJourney.createFullNotification();
+    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
+      await seededJourney.createDraftNotification('unlocked');
       await notificationActions.toNotificationView(journeyContext.journeyId);
     });
 
@@ -43,8 +43,8 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
   });
 
   test.describe('SUBMITTED', () => {
-    test.beforeEach(async ({ apiJourney, notificationActions, journeyContext }) => {
-      await apiJourney.createSubmittedNotification();
+    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
+      await seededJourney.createSubmittedNotification();
       await notificationActions.toNotificationView(journeyContext.journeyId);
     });
 

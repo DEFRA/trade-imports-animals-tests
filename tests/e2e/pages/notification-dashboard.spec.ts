@@ -32,10 +32,10 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.originOfImport.heading).toBeVisible();
     });
 
-    test('displays the notification list and result count', async ({ apiJourney, pages }) => {
-      const created = await apiJourney.createFullNotification();
+    test('displays the notification list and result count', async ({ seededJourney, pages }) => {
+      const referenceNumber = await seededJourney.createDraftNotification('unlocked');
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(created.referenceNumber);
+      await pages.notificationDashboard.searchForReference(referenceNumber);
 
       await expect(pages.notificationDashboard.heading).toBeVisible();
       await expect(pages.notificationDashboard.totalResults).toBeVisible();
@@ -59,9 +59,8 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   });
 
   test.describe('notification card actions by status', () => {
-    test('shows resume, copy and delete actions for a draft notification', async ({ pages, apiJourney }) => {
-      const created = await apiJourney.createFullNotification();
-      const referenceNumber = created.referenceNumber;
+    test('shows resume, copy and delete actions for a draft notification', async ({ pages, seededJourney }) => {
+      const referenceNumber = await seededJourney.createDraftNotification('unlocked');
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.searchForReference(referenceNumber);
@@ -72,9 +71,8 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.amend(referenceNumber)).not.toBeVisible();
     });
 
-    test('shows view, copy and amend actions for a submitted notification', async ({ pages, apiJourney }) => {
-      const created = await apiJourney.createSubmittedNotification();
-      const referenceNumber = created.referenceNumber;
+    test('shows view, copy and amend actions for a submitted notification', async ({ pages, seededJourney }) => {
+      const referenceNumber = await seededJourney.createSubmittedNotification();
 
       await pages.notificationDashboard.open();
       await pages.notificationDashboard.searchForReference(referenceNumber);

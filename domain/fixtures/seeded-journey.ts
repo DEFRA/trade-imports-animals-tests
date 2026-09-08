@@ -36,13 +36,18 @@ export type SeedStep = {
 };
 
 /**
- * Where to stop. Most specs want a notification that exists and shows a filled
- * dashboard card; only the ones that submit need every page.
+ * Where to stop.
+ *
+ * - `unlocked` — origin and a commodity line, which is what opens the rest of
+ *   the task list and gives a dashboard card something to say.
+ * - `draft` — on to the arrival details, so a card and an admin list row are
+ *   filled in.
+ * - `readyToSubmit` — every answer page, for the specs that submit.
  *
  * The lever on seeding cost is pages per seed, not posts per page: a page
  * accepts only its own fields, so there is no shorter way to answer one.
  */
-export type SeedDepth = 'draft' | 'readyToSubmit';
+export type SeedDepth = 'unlocked' | 'draft' | 'readyToSubmit';
 
 // The commodity picker's checkbox value: one commodity paired with one species,
 // which together identify a line. 'Bos taurus' as the trader sees it.
@@ -122,8 +127,17 @@ const contactStep = (parties: PartyIds): SeedStep => ({
   form: { contactAddress: parties.contact },
 });
 
-export const seedSteps = (parties: PartyIds, depth: SeedDepth): SeedStep[] => {
-  const throughArrival = [originStep, ...commoditySteps, ...consignmentSteps, ...addressSteps(parties), arrivalStep];
+/**
+ * The parties are resolved rather than passed in, so an `unlocked` seed — which
+ * answers no party page — never pays for the address-book lookups.
+ */
+export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: SeedDepth): Promise<SeedStep[]> => {
+  const unlocked = [originStep, ...commoditySteps];
+  if (depth === 'unlocked') {
+    return unlocked;
+  }
+  const parties = await resolveParties();
+  const throughArrival = [...unlocked, ...consignmentSteps, ...addressSteps(parties), arrivalStep];
   return depth === 'draft' ? throughArrival : [...throughArrival, ...transportSteps, contactStep(parties)];
 };
 

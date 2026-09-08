@@ -12,15 +12,13 @@ test.describe('Notification amendment cancelled outbox event', { tag: ['@integra
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
   });
 
-  test('writes a NotificationAmendmentCancelled event when an amendment is cancelled', async ({
-    apiJourney,
-    journeyContext,
-    notificationApi,
-  }) => {
+  test('writes a NotificationAmendmentCancelled event when an amendment is cancelled', async ({ seededJourney }) => {
     test.slow();
-    await apiJourney.createAmendNotification();
-    const referenceNumber = journeyContext.referenceNumber;
-    await notificationApi.cancelAmendNotification(referenceNumber);
+    const referenceNumber = await seededJourney.createAmendNotification();
+    // Through the frontend, which builds the actor from the session. The raw
+    // API call this replaced sent none, and a notification that references
+    // address-book parties cannot be transmitted without an organisation id.
+    await seededJourney.cancelAmend(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
     const client = new MongoDbClient();

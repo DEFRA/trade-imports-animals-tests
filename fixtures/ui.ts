@@ -4,7 +4,6 @@ import { Journey, type JourneyContext } from '@flows/journey';
 import { PlantsJourney } from '@flows/plants-journey';
 import { AdminNavigation } from '@flows/admin-navigation';
 import { NotificationActions } from '@flows/notification-actions';
-import { ApiJourney } from '@flows/api-journey';
 import { SeededJourney } from '@flows/seeded-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
@@ -27,7 +26,6 @@ export interface PageFixtures {
   notificationActions: NotificationActions;
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
-  apiJourney: ApiJourney;
   frontendForms: FrontendFormClient;
   seededJourney: SeededJourney;
 }
@@ -82,9 +80,6 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   addressBookApi: async ({ request }, use) => {
     await use(new AddressBookApiClient(request));
-  },
-  apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
-    await use(new ApiJourney(pages, notificationApi, journeyContext));
   },
   frontendForms: async ({ frontendSeedContext }, use) => {
     await use(new FrontendFormClient(frontendSeedContext));

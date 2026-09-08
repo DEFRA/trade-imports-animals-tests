@@ -15,21 +15,20 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.btnSearch).toBeVisible();
   });
 
-  test('returns matching notification when searching by complete reference number', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
+  test('returns matching notification when searching by complete reference number', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.referenceNumber);
+    await pages.notificationDashboard.searchForReference(referenceNumber);
 
-    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}(?:&|$)`));
+    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${referenceNumber.replace(/-/g, '\\-')}(?:&|$)`));
     await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
-    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(created.referenceNumber);
+    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(referenceNumber);
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Result');
   });
 
-  test('opens notification view when clicking View after searching by reference number', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
-    const referenceNumber = created.referenceNumber;
+  test('opens notification view when clicking View after searching by reference number', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
     await pages.notificationDashboard.searchForReference(referenceNumber);
@@ -59,16 +58,16 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.errorSummary).not.toBeVisible();
   });
 
-  test('preserves referenceNumber when updating sort after search', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
+  test('preserves referenceNumber when updating sort after search', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.referenceNumber);
+    await pages.notificationDashboard.searchForReference(referenceNumber);
     await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
 
-    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}`));
+    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${referenceNumber.replace(/-/g, '\\-')}`));
     await expect(pages.page).toHaveURL(/sort=createdAt%2Cdesc/);
-    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(created.referenceNumber);
+    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(referenceNumber);
   });
 
   test('preserves referenceNumber in the URL when a page param is present', async ({ pages }) => {

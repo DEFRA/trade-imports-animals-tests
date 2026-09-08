@@ -8,9 +8,9 @@ import { test, expect } from '@fixtures';
  */
 test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () => {
   test.describe('from an amending notification', () => {
-    test.beforeEach(async ({ apiJourney, notificationActions }) => {
-      const created = await apiJourney.createAmendNotification();
-      await notificationActions.toNotificationView(created.referenceNumber);
+    test.beforeEach(async ({ seededJourney, notificationActions }) => {
+      const referenceNumber = await seededJourney.createAmendNotification();
+      await notificationActions.toNotificationView(referenceNumber);
     });
 
     test('shows the Cancel amendment link while the notification is amending', async ({ pages }) => {
@@ -44,9 +44,9 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
   test(
     'Yes cancels the amendment and restores the submitted answers',
     { tag: '@smoke' },
-    async ({ pages, apiJourney, notificationActions }) => {
-      const created = await apiJourney.createAmendNotification();
-      await notificationActions.toNotificationView(created.referenceNumber);
+    async ({ pages, seededJourney, notificationActions }) => {
+      const referenceNumber = await seededJourney.createAmendNotification();
+      await notificationActions.toNotificationView(referenceNumber);
 
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');
