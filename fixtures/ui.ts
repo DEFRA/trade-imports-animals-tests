@@ -12,6 +12,9 @@ import { createWorkerAuthState } from '@fixtures/auth-state';
 import { createFrontendSeedContext } from '@fixtures/seed-context';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
 
+// frontendSeedContext mints its own session when session reuse is off or the project's baseURL is not the frontend, so both worker fixtures need their own budget rather than the test timeout.
+const SESSION_MINT_TIMEOUT_MS = 120_000;
+
 export interface AuthWorkerFixtures {
   workerAuthState: string | undefined;
   frontendSeedContext: APIRequestContext;
@@ -39,9 +42,7 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
       }
       await use(await createWorkerAuthState(browser, workerInfo));
     },
-    // Its own timeout, so a slow mint is reported as a mint failure instead of
-    // eating the first test's budget.
-    { scope: 'worker', timeout: 120_000 },
+    { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
   ],
   frontendSeedContext: [
     async ({ browser, workerAuthState }, use, workerInfo) => {
@@ -49,9 +50,7 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
       await use(context);
       await context.dispose();
     },
-    // Shares workerAuthState's budget: on a non-e2e project this mints a second
-    // session, and a slow mint should read as a mint failure, not a test timeout.
-    { scope: 'worker', timeout: 120_000 },
+    { scope: 'worker', timeout: SESSION_MINT_TIMEOUT_MS },
   ],
   storageState: async ({ workerAuthState }, use) => {
     await use(workerAuthState);

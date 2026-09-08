@@ -49,9 +49,7 @@ test.describe('Notification deleted outbox events', { tag: ['@integration', '@mo
   test('writes a NotificationSubmissionDeleted event when a submitted notification is soft-deleted', async ({ seededJourney }) => {
     test.slow();
     const referenceNumber = await seededJourney.createSubmittedNotification();
-    // Through the frontend, so the deletion carries an actor: a submitted
-    // notification now references address-book parties, and transmitting one
-    // without an organisation id fails.
+    // Not notificationApi.softDeleteNotification: it sends no actor, and a submitted notification's address-book parties need an organisation id.
     await seededJourney.softDelete(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);

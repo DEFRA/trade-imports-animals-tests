@@ -16,8 +16,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Check your answers (submitted, read-only)', async () => {
       await seededJourney.resumeInUi(submittedReference, pages.notificationView);
-      // The Delete action renders only in the read-only SUBMITTED state, so its
-      // presence proves the scan sees the submitted view rather than the draft.
       await pages.page.getByRole('button', { name: 'Delete' }).waitFor();
       await runA11yScan();
     });

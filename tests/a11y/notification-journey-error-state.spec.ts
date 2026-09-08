@@ -1,17 +1,11 @@
 import { test, expect, WCAG_STANDARD } from '@fixtures/a11y';
 
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input
-// (radios.mjs), which axe's aria-allowed-attr rule rejects — an upstream
-// disagreement, not a service defect. Exclude just that input from origin scans.
+// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input,
+// which axe's aria-allowed-attr rule rejects.
 const conditionalRadioInput = '#regionOfOriginCodeRequirement';
 
-// Only pages with server-side validation are scanned in the error state; the
-// invalid submits mirror the error-summary tests in tests/e2e/pages/. The
-// other sections are answered with valid input to unlock the next one.
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   test.beforeEach(async ({ journey }) => {
-    // Origin must stay unanswered — the first step exercises its own
-    // validation-error state, so startNotification() (which answers it) won't do.
     await journey.startNotificationAtOrigin();
   });
 
@@ -25,11 +19,6 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('Origin of import with validation errors', async () => {
       await pages.overview.task('Where is this consignment coming from?').click();
       await pages.originOfImport.heading.waitFor();
-      // The country no longer blocks the save — a trader still waiting on the
-      // health certificate can record what they have and come back (frontend
-      // #259) — so an empty page is a valid submit and shows no errors. Saying
-      // the consignment has a region code and then not giving one is the
-      // invalid submit origin still refuses.
       await expect(pages.originOfImport.countryOfOrigin).toHaveValue('');
       await pages.originOfImport.radioRequiresOriginCode('Yes').check();
       await pages.originOfImport.saveAndContinue.click();

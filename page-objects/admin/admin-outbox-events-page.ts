@@ -32,7 +32,6 @@ export class AdminOutboxEventsPage extends BasePage {
     return this.tableRows.nth(rowIndex).locator('td').nth(1);
   }
 
-  /** Every row's event type, in the order the table lists them. */
   get eventTypeCells(): Locator {
     return this.tableRows.locator('td:nth-child(2)');
   }

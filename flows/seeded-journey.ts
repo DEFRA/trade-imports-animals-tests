@@ -8,18 +8,9 @@ const CREATE_PATH = '/notifications';
 const CREATED_AT_ORIGIN = /^\/notifications\/(?<journeyId>[^/]+)\/origin$/;
 
 /**
- * Seeds notifications by posting to the frontend's own save-and-continue
- * routes, one page at a time, so the frontend runs the obligation model and
- * writes both the notification document and the fulfilments blob.
- *
- * Seeding straight to the backend wrote only the blob, leaving every seeded
- * notification with an empty document and no actor: the dashboard card was
- * blank, the outbox event hollow and cancel-amend restored an empty baseline.
- * Nothing caught it, because a fulfilments-backed view renders fine.
- *
- * One post per page, because a save is a whole-record replace but a route
- * accepts only its own page's fields: a page can rebuild the whole document
- * from what is stored, but can only supply one page of new answers.
+ * Seeds through the frontend's save-and-continue routes, never the backend: only the frontend
+ * writes the notification document alongside the fulfilments blob. One post per page, because a
+ * save replaces the whole record but a route accepts only its own page's fields.
  */
 export class SeededJourney {
   private parties: PartyIds | undefined;
@@ -30,7 +21,6 @@ export class SeededJourney {
     private readonly context: JourneyContext,
   ) {}
 
-  /** A notification that exists and nothing more — no answers, no obligations met. */
   async createEmptyNotification(): Promise<string> {
     const location = await this.forms.postForm(CREATE_PATH);
     const journeyId = CREATED_AT_ORIGIN.exec(location)?.groups?.journeyId;
@@ -40,7 +30,6 @@ export class SeededJourney {
     return this.remember(journeyId);
   }
 
-  /** A draft answered as far as `depth` takes it. */
   async createDraftNotification(depth: SeedDepth = 'readyToSubmit'): Promise<string> {
     const journeyId = await this.createEmptyNotification();
     for (const { slug, form } of await seedSteps(() => this.partyIds(), depth)) {
@@ -51,8 +40,7 @@ export class SeededJourney {
 
   async createSubmittedNotification(): Promise<string> {
     const journeyId = await this.createDraftNotification('readyToSubmit');
-    // A submission the obligations refuse goes back to check-your-answers
-    // rather than on to the confirmation, so the target is the assertion.
+    // redirectsTo is the assertion: a refused submission lands back on check-your-answers, not the confirmation.
     await this.forms.postForm(`${CREATE_PATH}/${journeyId}/${declarationStep.slug}`, declarationStep.form, {
       redirectsTo: /\/confirmation$/,
     });
@@ -65,38 +53,29 @@ export class SeededJourney {
     return journeyId;
   }
 
-  /** Reopens a submitted notification for amendment; lands on its task list. */
   async amend(journeyId: string): Promise<void> {
     await this.forms.postForm(`${CREATE_PATH}/${journeyId}/amend`, {}, { redirectsTo: new RegExp(`/notifications/${journeyId}$`) });
   }
 
-  /** Restores the submitted baseline; lands back on check-your-answers. */
   async cancelAmend(journeyId: string): Promise<void> {
     await this.forms.postForm(`${CREATE_PATH}/${journeyId}/cancel-amend`, {}, { redirectsTo: /\/notification-view\?cancelled=1$/ });
   }
 
-  /** Soft-deletes; lands on the dashboard, which says so in the query. */
   async softDelete(journeyId: string): Promise<void> {
     await this.forms.postForm(`${CREATE_PATH}/${journeyId}/delete`, {}, { redirectsTo: /\?deleted=1$/ });
   }
 
-  /** Open a seeded notification in the browser, on the page a spec came to drive. */
   async resumeInUi<T extends { open(journeyId: string): Promise<void>; heading: Locator }>(journeyId: string, targetPage: T): Promise<T> {
     await targetPage.open(journeyId);
     await targetPage.heading.waitFor();
     return targetPage;
   }
 
-  /**
-   * Resolved by name through the address book, once per journey, the way
-   * globalSetup already does — so no address-book id is written down here.
-   */
   private async partyIds(): Promise<PartyIds> {
-    if (!this.parties) {
-      const roles = Object.keys(PARTY_NAMES) as PartyRole[];
-      const found = await Promise.all(roles.map((role) => this.addressBook.findByName(PARTY_NAMES[role])));
-      this.parties = Object.fromEntries(roles.map((role, index) => [role, found[index].id])) as PartyIds;
-    }
+    if (this.parties) return this.parties;
+    const roles = Object.keys(PARTY_NAMES) as PartyRole[];
+    const found = await Promise.all(roles.map((role) => this.addressBook.findByName(PARTY_NAMES[role])));
+    this.parties = Object.fromEntries(roles.map((role, index) => [role, found[index].id])) as PartyIds;
     return this.parties;
   }
 

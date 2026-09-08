@@ -18,46 +18,24 @@ const HTTP_STATUS_OK = 200;
 const HTTP_STATUS_MULTIPLE_CHOICES = 300;
 const HTTP_STATUS_BAD_REQUEST = 400;
 
-/** Enough of a re-render to read the error summary out of, without dumping a whole page. */
 const BODY_EXCERPT_LENGTH = 2000;
 
 const isRedirect = (response: APIResponse): boolean =>
   response.status() >= HTTP_STATUS_MULTIPLE_CHOICES && response.status() < HTTP_STATUS_BAD_REQUEST;
 
-const encode = (fields: FormFields): string => {
-  const params = new URLSearchParams();
-  for (const [name, value] of Object.entries(fields)) {
-    for (const one of Array.isArray(value) ? value : [value]) {
-      params.append(name, one);
-    }
-  }
-  return params.toString();
+const toValueList = (values: string | string[]): string[] => (Array.isArray(values) ? values : [values]);
+
+const encodeFormBody = (fields: FormFields): string => {
+  const pairs = Object.entries(fields).flatMap(([name, values]) => toValueList(values).map((value) => [name, value]));
+  return new URLSearchParams(pairs).toString();
 };
 
-/**
- * Posts a frontend page's form the way the browser does — url-encoded, with the
- * CSRF crumb, following no redirects.
- *
- * A page that rejects its payload answers 400, or re-renders 200 with an error
- * summary; only a save answers 3xx. So the redirect is the assertion: a step
- * that quietly failed validation would otherwise leave a half-filled
- * notification behind, which is the bug class this seeding exists to remove.
- */
 export class FrontendFormClient {
   private crumb: string | undefined;
 
   constructor(private readonly request: APIRequestContext) {}
 
-  /**
-   * @hapi/crumb in its default (non-restful) mode compares `payload.crumb` to
-   * the `crumb` cookie, and mints the cookie on any GET it does not skip. One
-   * GET per context is enough — the cookie is reused for the context's life.
-   *
-   * The same GET proves the session. An unauthenticated dashboard answers 302
-   * to /auth/sign-in, and every later post would answer 302 as well — passing
-   * the redirect assertion while seeding nothing. Refusing anything but a 200
-   * here is what stops a signed-out context looking like a successful seed.
-   */
+  // @hapi/crumb (non-restful mode) matches the posted "crumb" field against the "crumb" cookie — the two names below must stay identical.
   private async crumbToken(): Promise<string> {
     if (this.crumb) {
       return this.crumb;
@@ -66,7 +44,7 @@ export class FrontendFormClient {
     const landing = await this.request.get('/', { maxRedirects: 0 });
     if (landing.status() !== HTTP_STATUS_OK) {
       throw new Error(
-        `GET / answered ${landing.status()} (${landing.headers()['location'] ?? 'no Location'}) instead of the dashboard. ` +
+        `GET / answered ${landing.status()} (${landing.headers().location ?? 'no Location'}) instead of the dashboard. ` +
           'The seed context is not signed in to the frontend, so no post would reach a page.',
       );
     }
@@ -81,27 +59,20 @@ export class FrontendFormClient {
     return minted;
   }
 
-  /**
-   * Posts the form and returns the Location it redirects to.
-   *
-   * `redirectsTo` is how a caller says which redirect counts. An answer page
-   * has only one — it saves, or it does not redirect at all. A transition has
-   * two: a refused amend, cancel or delete redirects away just as a successful
-   * one does, only somewhere else, so the status code alone would read a
-   * refusal as success.
-   */
+  // Pass redirectsTo for any transition (amend, cancel, delete): a refusal redirects too, just elsewhere, so 3xx alone reads it as success.
   async postForm(path: string, fields: FormFields = {}, { redirectsTo }: { redirectsTo?: RegExp } = {}): Promise<string> {
     const response = await this.request.post(path, {
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      data: encode({ ...fields, crumb: await this.crumbToken() }),
+      data: encodeFormBody({ ...fields, crumb: await this.crumbToken() }),
       maxRedirects: 0,
     });
 
+    // A page that rejects its payload can re-render 200 with an error summary, so a non-redirect is a failed post.
     if (!isRedirect(response)) {
       throw new FrontendFormError(response.status(), path, (await response.text()).slice(0, BODY_EXCERPT_LENGTH));
     }
 
-    const location = response.headers()['location'];
+    const location = response.headers().location;
     if (!location) {
       throw new Error(`POST ${path} redirected with no Location header, so there is no next page to follow.`);
     }

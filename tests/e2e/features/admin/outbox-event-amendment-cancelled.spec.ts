@@ -15,35 +15,29 @@ test.describe('Notification amendment cancelled outbox event', { tag: ['@integra
   test('writes a NotificationAmendmentCancelled event when an amendment is cancelled', async ({ seededJourney }) => {
     test.slow();
     const referenceNumber = await seededJourney.createAmendNotification();
-    // Through the frontend, which builds the actor from the session. The raw
-    // API call this replaced sent none, and a notification that references
-    // address-book parties cannot be transmitted without an organisation id.
     await seededJourney.cancelAmend(referenceNumber);
 
     const aggregateId = aggregateIdFor(referenceNumber);
+    const amendmentCancelledFilter = { aggregateId, eventType: NOTIFICATION_AMENDMENT_CANCELLED };
     const client = new MongoDbClient();
 
     try {
       await client.connect();
       const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
 
-      await expect
-        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_AMENDMENT_CANCELLED }), {
-          timeout: timeouts.long,
-        })
-        .toBe(1);
+      await expect.poll(() => collection.countDocuments(amendmentCancelledFilter), { timeout: timeouts.long }).toBe(1);
 
-      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_AMENDMENT_CANCELLED }).toArray();
+      const [outboxEvent] = await collection.find(amendmentCancelledFilter).toArray();
 
-      expect(doc.aggregateVersion).toBeGreaterThan(1);
-      expect(doc.eventType).toBe(NOTIFICATION_AMENDMENT_CANCELLED);
-      expect(doc.aggregateType).toBe('Notification');
-      expect(doc.subType).toBe('GBN-AG');
-      expect(doc.timestamp).toBeInstanceOf(Date);
-      expect(doc.metadata.correlationId).toBeDefined();
-      expect(doc.data.exchangedDocument.identifier).toBe(referenceNumber);
-      expect(doc.data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
-      expect(doc.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'AMEND', 'SUBMITTED']);
+      expect(outboxEvent.aggregateVersion).toBeGreaterThan(1);
+      expect(outboxEvent.eventType).toBe(NOTIFICATION_AMENDMENT_CANCELLED);
+      expect(outboxEvent.aggregateType).toBe('Notification');
+      expect(outboxEvent.subType).toBe('GBN-AG');
+      expect(outboxEvent.timestamp).toBeInstanceOf(Date);
+      expect(outboxEvent.metadata.correlationId).toBeDefined();
+      expect(outboxEvent.data.exchangedDocument.identifier).toBe(referenceNumber);
+      expect(outboxEvent.data.exchangedDocument.notificationStatusCode).toBe('SUBMITTED');
+      expect(outboxEvent.statusChanges?.map(({ status }) => status)).toEqual(['DRAFT', 'SUBMITTED', 'AMEND', 'SUBMITTED']);
     } finally {
       await client.close();
     }

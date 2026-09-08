@@ -5,7 +5,14 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { ObjectId } from 'mongodb';
 import { skipIfCdpEnvironment, isComposeEnvironment } from '@utils/playwright/environment';
 
-/** Integration seam: the admin operator UI over real notifications and audit records. */
+const DELETE_SUCCESS_MESSAGE = 'Notifications deleted successfully. Redirecting in 3 seconds...';
+const DELETE_FAILURE_MESSAGE = 'There was a problem deleting the notifications. Please try again.';
+const AUDIT_DATABASE = 'trade-imports-animals-backend';
+const AUDIT_COLLECTION = 'audit';
+const COMPOSE_ONLY_SKIP_REASON = 'persistence checked only in the docker compose stack';
+const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
+const AUDIT_TIMESTAMP_PATTERN = /\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/;
+
 test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, () => {
   test.describe.configure({ mode: 'default' });
 
@@ -24,7 +31,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
       await pages.adminNotifications.deleteByReferenceNumber();
       await pages.adminNotifications.btnConfirm.click();
-      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
+      await expect(pages.adminNotifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
 
       await expect
         .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), {
@@ -57,7 +64,7 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       await pages.adminNotifications.checkboxNotificationByReference(referenceNumber).check();
       await pages.adminNotifications.btnDelete.click();
       await pages.adminNotifications.btnConfirm.click();
-      await expect(pages.adminNotifications.alertSuccess).toContainText('Notifications deleted successfully. Redirecting in 3 seconds...');
+      await expect(pages.adminNotifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
       await expect
         .poll(async () => pages.adminNotifications.tableRowByReference(referenceNumber).isVisible(), {
           timeout: timeouts.medium,
@@ -66,24 +73,25 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
     });
 
     await test.step('writes a successful delete audit record for one notification delete', async (step) => {
-      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+      step.skip(!isComposeEnvironment(), COMPOSE_ONLY_SKIP_REASON);
 
       const client = new MongoDbClient();
 
       try {
         await client.connect();
-        const collection = client.collection('trade-imports-animals-backend', 'audit');
-        const docs = await collection.find({ notificationReferenceNumbers: referenceNumber }).toArray();
+        const auditCollection = client.collection(AUDIT_DATABASE, AUDIT_COLLECTION);
+        const auditRecords = await auditCollection.find({ notificationReferenceNumbers: referenceNumber }).toArray();
 
-        expect(docs).toHaveLength(1);
-        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(docs[0].result).toBe('SUCCESS');
-        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(docs[0].numberOfNotifications).toBe(1);
-        expect(docs[0].notificationReferenceNumbers).toEqual([referenceNumber]);
-        expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe(defaultUser.crn);
+        expect(auditRecords).toHaveLength(1);
+        const [auditRecord] = auditRecords;
+        expect(String(auditRecord._id)).toMatch(OBJECT_ID_PATTERN);
+        expect(auditRecord.action).toBe('DELETE_NOTIFICATIONS');
+        expect(auditRecord.result).toBe('SUCCESS');
+        expect(String(auditRecord.timestamp)).toMatch(AUDIT_TIMESTAMP_PATTERN);
+        expect(auditRecord.numberOfNotifications).toBe(1);
+        expect(auditRecord.notificationReferenceNumbers).toEqual([referenceNumber]);
+        expect(auditRecord.traceId).toBe('test-trace-id');
+        expect(auditRecord.userId).toBe(defaultUser.crn);
       } finally {
         await client.close();
       }
@@ -105,18 +113,16 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       await adminNavigation.toNotifications();
       await expect(pages.adminNotifications.heading).toBeVisible();
 
-      const currentPageRefs = await pages.adminNotifications.currentPageReferences();
-      const expectedDeletes = currentPageRefs.length;
-      expect(currentPageRefs.length).toBeGreaterThan(0);
-      const pageOneReference = currentPageRefs[0];
+      const currentPageReferences = await pages.adminNotifications.currentPageReferences();
+      const expectedDeleteCount = currentPageReferences.length;
+      expect(currentPageReferences.length).toBeGreaterThan(0);
+      const pageOneReference = currentPageReferences[0];
 
       await test.step('select all deletes only the current page', async () => {
         await pages.adminNotifications.checkBoxSelectAll.check();
         await pages.adminNotifications.btnDelete.click();
         await pages.adminNotifications.btnConfirm.click();
-        await expect(pages.adminNotifications.alertSuccess).toContainText(
-          'Notifications deleted successfully. Redirecting in 3 seconds...',
-        );
+        await expect(pages.adminNotifications.alertSuccess).toContainText(DELETE_SUCCESS_MESSAGE);
       });
 
       await test.step('writes a successful delete audit record covering a page-1 reference', async () => {
@@ -124,20 +130,21 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
 
         try {
           await client.connect();
-          const auditCollection = client.collection('trade-imports-animals-backend', 'audit');
-          const docs = await auditCollection
+          const auditCollection = client.collection(AUDIT_DATABASE, AUDIT_COLLECTION);
+          const auditRecords = await auditCollection
             .find({ action: 'DELETE_NOTIFICATIONS', notificationReferenceNumbers: pageOneReference })
             .toArray();
 
-          expect(docs).toHaveLength(1);
-          expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-          expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-          expect(docs[0].result).toBe('SUCCESS');
-          expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-          expect(docs[0].numberOfNotifications).toBe(expectedDeletes);
-          expect(docs[0].notificationReferenceNumbers).toContain(pageOneReference);
-          expect(docs[0].traceId).toBe('test-trace-id');
-          expect(docs[0].userId).toBe(defaultUser.crn);
+          expect(auditRecords).toHaveLength(1);
+          const [auditRecord] = auditRecords;
+          expect(String(auditRecord._id)).toMatch(OBJECT_ID_PATTERN);
+          expect(auditRecord.action).toBe('DELETE_NOTIFICATIONS');
+          expect(auditRecord.result).toBe('SUCCESS');
+          expect(String(auditRecord.timestamp)).toMatch(AUDIT_TIMESTAMP_PATTERN);
+          expect(auditRecord.numberOfNotifications).toBe(expectedDeleteCount);
+          expect(auditRecord.notificationReferenceNumbers).toContain(pageOneReference);
+          expect(auditRecord.traceId).toBe('test-trace-id');
+          expect(auditRecord.userId).toBe(defaultUser.crn);
         } finally {
           await client.close();
         }
@@ -156,30 +163,29 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
       await pages.adminNotifications.inputReferenceNumber.fill(invalidReference);
       await pages.adminNotifications.deleteByReferenceNumber();
       await pages.adminNotifications.btnConfirm.click();
-      await expect(pages.adminNotifications.alertImportant).toContainText(
-        'There was a problem deleting the notifications. Please try again.',
-      );
+      await expect(pages.adminNotifications.alertImportant).toContainText(DELETE_FAILURE_MESSAGE);
     });
 
     await test.step('writes a failed delete audit record for one notification delete', async (step) => {
-      step.skip(!isComposeEnvironment(), 'persistence checked only in the docker compose stack');
+      step.skip(!isComposeEnvironment(), COMPOSE_ONLY_SKIP_REASON);
 
       const client = new MongoDbClient();
 
       try {
         await client.connect();
-        const collection = client.collection('trade-imports-animals-backend', 'audit');
-        const docs = await collection.find({ notificationReferenceNumbers: invalidReference }).toArray();
+        const auditCollection = client.collection(AUDIT_DATABASE, AUDIT_COLLECTION);
+        const auditRecords = await auditCollection.find({ notificationReferenceNumbers: invalidReference }).toArray();
 
-        expect(docs).toHaveLength(1);
-        expect(String(docs[0]._id)).toMatch(/^[a-f0-9]{24}$/i);
-        expect(docs[0].action).toBe('DELETE_NOTIFICATIONS');
-        expect(docs[0].result).toBe('FAILURE');
-        expect(String(docs[0].timestamp)).toMatch(/\b\d{2}\s\d{4}\s\d{2}:\d{2}:\d{2}\b/);
-        expect(docs[0].numberOfNotifications).toBe(1);
-        expect(docs[0].notificationReferenceNumbers).toEqual([invalidReference]);
-        expect(docs[0].traceId).toBe('test-trace-id');
-        expect(docs[0].userId).toBe(defaultUser.crn);
+        expect(auditRecords).toHaveLength(1);
+        const [auditRecord] = auditRecords;
+        expect(String(auditRecord._id)).toMatch(OBJECT_ID_PATTERN);
+        expect(auditRecord.action).toBe('DELETE_NOTIFICATIONS');
+        expect(auditRecord.result).toBe('FAILURE');
+        expect(String(auditRecord.timestamp)).toMatch(AUDIT_TIMESTAMP_PATTERN);
+        expect(auditRecord.numberOfNotifications).toBe(1);
+        expect(auditRecord.notificationReferenceNumbers).toEqual([invalidReference]);
+        expect(auditRecord.traceId).toBe('test-trace-id');
+        expect(auditRecord.userId).toBe(defaultUser.crn);
       } finally {
         await client.close();
       }

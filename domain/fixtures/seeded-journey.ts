@@ -1,20 +1,9 @@
 import type { FormFields } from '@adapters/http/frontend-form-client';
 import { getRelativeAppDateText } from '@utils/date-utils';
 
-/**
- * One complete journey, as pages and the values a trader types into them.
- *
- * This is the whole of what the tests repo knows about seeding: page slugs,
- * form field names and valid answers — the same knowledge the page objects
- * already carry. It holds no obligation ids, no fulfilment shapes and no
- * notification-document shape, because the frontend derives all three from
- * these answers when it saves the page.
- *
- * Keep the answers in step with `flows/journey.ts`, which drives the same pages
- * through the browser. `api-seed-parity.spec.ts` compares the two.
- */
+// Answers must stay in step with `flows/journey.ts`; `api-seed-parity.spec.ts` compares the two.
 
-/** Address-book records the shared journey fixtures create in globalSetup. */
+/** Names must match the records seeded by `e2e-address-book.ts`. */
 export const PARTY_NAMES = {
   placeOfOrigin: 'Origin Farm',
   consignor: 'Astra Rosales',
@@ -26,56 +15,40 @@ export const PARTY_NAMES = {
 
 export type PartyRole = keyof typeof PARTY_NAMES;
 
-/** The address book id resolved for each party, by role. */
 export type PartyIds = Record<PartyRole, string>;
 
 export type SeedStep = {
-  /** Path under /notifications/{journeyId}/ — the page's own slug. */
   slug: string;
   form: FormFields;
 };
 
-/**
- * Where to stop.
- *
- * - `unlocked` — origin and a commodity line, which is what opens the rest of
- *   the task list and gives a dashboard card something to say.
- * - `draft` — on to the arrival details, so a card and an admin list row are
- *   filled in.
- * - `readyToSubmit` — every answer page, for the specs that submit.
- *
- * The lever on seeding cost is pages per seed, not posts per page: a page
- * accepts only its own fields, so there is no shorter way to answer one.
- */
 export type SeedDepth = 'unlocked' | 'draft' | 'readyToSubmit';
 
-// The commodity picker's checkbox value: one commodity paired with one species,
-// which together identify a line. 'Bos taurus' as the trader sees it.
-const CATTLE_LINE = 'Cow|1148346';
+// The commodity picker's checkbox value is commodity|speciesId — 'Cow' is the commodity, 1148346 the species (Bos taurus).
+const COW_COMMODITY_LINE = 'Cow|1148346';
 
-// The first (and only) commodity line. Quantity and identifier fields are
-// suffixed with their line index, so a second line would be -1.
-const LINE = 0;
+const FIRST_LINE_INDEX = 0;
+
+const MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW = 1;
 
 const originStep: SeedStep = {
   slug: 'origin',
   form: {
     countryOfOrigin: 'FR',
     regionOfOriginCodeRequirement: 'yes',
-    // The country prefix is filled in for the trader, so the box asks only for
-    // what follows it; the stored code is the two joined.
+    // The country prefix is filled in for the trader, so the box takes only what follows it.
     regionOfOriginCodeSuffix: '75',
     internalReferenceNumber: 'Imports456GB',
   },
 };
 
 const commoditySteps: SeedStep[] = [
-  { slug: 'commodities', form: { species: CATTLE_LINE } },
+  { slug: 'commodities', form: { species: COW_COMMODITY_LINE } },
   {
     slug: 'consignment-details',
-    form: { [`numberOfAnimalsQuantity-${LINE}`]: '1', [`numberOfPackages-${LINE}`]: '5' },
+    form: { [`numberOfAnimalsQuantity-${FIRST_LINE_INDEX}`]: '1', [`numberOfPackages-${FIRST_LINE_INDEX}`]: '5' },
   },
-  { slug: 'commodities/identification', form: { [`animalIdentifierEarTag-${LINE}`]: 'UK123456789012' } },
+  { slug: 'commodities/identification', form: { [`animalIdentifierEarTag-${FIRST_LINE_INDEX}`]: 'UK123456789012' } },
 ];
 
 const consignmentSteps: SeedStep[] = [
@@ -83,19 +56,13 @@ const consignmentSteps: SeedStep[] = [
   { slug: 'additional-details', form: { animalsCertifiedFor: 'slaughter', containsUnweanedAnimals: 'no' } },
 ];
 
-/**
- * Each picker takes an address book id and nothing else. The frontend resolves
- * the record and shapes it — which is why no address fields appear here, and
- * why the inline parties need no field renaming on the way in.
- */
 const addressSteps = (parties: PartyIds): SeedStep[] => [
   { slug: 'consignors/select', form: { party: parties.consignor } },
   { slug: 'destinations/select', form: { party: parties.placeOfDestination } },
   { slug: 'place-of-origin/select', form: { party: parties.placeOfOrigin } },
   { slug: 'consignees/select', form: { party: parties.consignee } },
   { slug: 'importers/select', form: { party: parties.importer } },
-  // The pickers each hand the trader back to the hub, so the hub's own
-  // Continue is what carries them on to the CPH number.
+  // The empty hub post is what advances past the pickers; without it the seed stalls.
   { slug: 'addresses', form: {} },
   { slug: 'cph-number', form: { countyParishHoldingCph: '12/345/6789' } },
 ];
@@ -103,9 +70,7 @@ const addressSteps = (parties: PartyIds): SeedStep[] => [
 const arrivalStep: SeedStep = {
   slug: 'port-of-entry',
   form: {
-    // The picker's own d/m/yyyy text, inside the arrival window wherever the
-    // wall clock is. The frontend derives every other representation.
-    arrivalDateAtPort: getRelativeAppDateText({ monthOffset: 1 }),
+    arrivalDateAtPort: getRelativeAppDateText({ monthOffset: MONTHS_AHEAD_INSIDE_ARRIVAL_WINDOW }),
     portOfEntry: 'GB ABD',
     meansOfTransport: 'ROAD_VEHICLE',
     transportIdentification: 'FR-892-LK',
@@ -113,10 +78,9 @@ const arrivalStep: SeedStep = {
   },
 };
 
-// Transited countries stay in scope because the consignment arrives by road.
-// A checkbox group posts in the order the page lists its boxes, not the order
-// the trader ticked them, so Belgium leads France however the journey reads.
+// Only in scope because arrivalStep posts ROAD_VEHICLE — transitedCountries applies to land transport only.
 const transportSteps: SeedStep[] = [
+  // A checkbox group posts in the order the page lists its boxes, not the order they were ticked.
   { slug: 'transit-countries', form: { transitedCountries: ['BE', 'FR'] } },
   { slug: 'transporters', form: { transporterType: 'Commercial' } },
   { slug: 'transporters/select', form: { commercialTransporter: 'garcia-livestock-transport' } },
@@ -127,10 +91,6 @@ const contactStep = (parties: PartyIds): SeedStep => ({
   form: { contactAddress: parties.contact },
 });
 
-/**
- * The parties are resolved rather than passed in, so an `unlocked` seed — which
- * answers no party page — never pays for the address-book lookups.
- */
 export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: SeedDepth): Promise<SeedStep[]> => {
   const unlocked = [originStep, ...commoditySteps];
   if (depth === 'unlocked') {
@@ -141,5 +101,4 @@ export const seedSteps = async (resolveParties: () => Promise<PartyIds>, depth: 
   return depth === 'draft' ? throughArrival : [...throughArrival, ...transportSteps, contactStep(parties)];
 };
 
-/** The declaration is a transition, not an answer section, so it stands apart. */
 export const declarationStep: SeedStep = { slug: 'declaration', form: { declaration: 'confirmed' } };

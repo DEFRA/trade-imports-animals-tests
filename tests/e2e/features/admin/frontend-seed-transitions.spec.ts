@@ -5,19 +5,11 @@ import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const NOTIFICATION_SUBMISSION_DELETED = 'uk.gov.defra.imports.notification.NotificationSubmissionDeleted';
+const BACKEND_DATABASE = 'trade-imports-animals-backend';
+const OUTBOX_COLLECTION = 'outbox';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
 const shortType = (eventType: string): string => eventType.split('.').pop() ?? eventType;
 
-/**
- * Transitions go through the frontend too, so a seeded notification carries a
- * real actor and the real event sequence rather than a stand-in.
- *
- * Seeding straight to the backend sent no actor at all, and the seeded
- * notifications had no parties for the missing actor to matter to. As soon as
- * seeding produces realistic parties, cancel-amend and soft-delete fail without
- * one: "Cannot resolve address-book parties for outbox transmission:
- * organisation id is required".
- */
 test.describe('Seeded notification transitions', { tag: ['@integration', '@mongodb'] }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('outbox assertions read Mongo directly, which only the compose stack exposes');
@@ -34,7 +26,7 @@ test.describe('Seeded notification transitions', { tag: ['@integration', '@mongo
 
     try {
       await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
       const events = (): Promise<OutboxEventDocument[]> => collection.find({ aggregateId }).sort({ aggregateVersion: 1 }).toArray();
 
       await expect
@@ -43,17 +35,12 @@ test.describe('Seeded notification transitions', { tag: ['@integration', '@mongo
         })
         .toEqual(['NotificationCreated', 'NotificationSubmitted', 'NotificationAmendmentRequested', 'NotificationAmendmentCancelled']);
 
-      const written = await events();
-      // Every transition, not just the first: the actor is built from the
-      // session on each one, and cancel-amend was the call that lacked it.
-      for (const event of written) {
+      const writtenEvents = await events();
+      for (const event of writtenEvents) {
         expect(event.actor?.organisationId, `${shortType(event.eventType)} carries no actor`).toBeTruthy();
       }
 
-      // The submitted event, populated. Seeding to the backend left every one
-      // of these null, and nothing noticed because the notification view reads
-      // the fulfilments blob rather than the document.
-      const submitted = written.find((event) => shortType(event.eventType) === 'NotificationSubmitted');
+      const submitted = writtenEvents.find((event) => shortType(event.eventType) === 'NotificationSubmitted');
       const consignment = submitted?.data.specifiedConsignment;
       expect(consignment?.consignorParty).toBeTruthy();
       expect(consignment?.consigneeParty).toBeTruthy();
@@ -75,7 +62,7 @@ test.describe('Seeded notification transitions', { tag: ['@integration', '@mongo
 
     try {
       await client.connect();
-      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+      const collection = client.collection<OutboxEventDocument>(BACKEND_DATABASE, OUTBOX_COLLECTION);
 
       await expect
         .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_SUBMISSION_DELETED }), { timeout: timeouts.long })

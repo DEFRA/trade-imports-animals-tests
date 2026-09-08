@@ -1,75 +1,31 @@
 import { isCdpLocal } from '@utils/playwright/environment';
 
-function getServiceBaseUrl(envVar: string): string {
+const getServiceBaseUrl = (envVar: string): string => {
   const baseUrl = process.env[envVar];
   if (!baseUrl) {
     throw new Error(`${envVar} is not set. Ensure Playwright config applies it before running tests.`);
   }
   return baseUrl;
-}
+};
 
-/**
- * Base URL for the trade-imports-animals frontend, resolved explicitly rather
- * than taken from the ambient project baseURL, so seeding reaches the frontend
- * from an admin-, ins- or plants-project spec too. withProjectBaseUrls sets it
- * for every environment — it is the same URL the e2e project's browser uses,
- * which is what keeps it right on CDP without a gateway or an api key.
- */
-export function getAnimalsFrontendBaseUrl(): string {
-  return getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
-}
+export const getAnimalsFrontendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
 
-/**
- * Base URL for the trade-imports-animals-backend API, reachable directly
- * (bypassing the frontend) for seeding notification state ahead of a test.
- */
-export function getBackendBaseUrl(): string {
-  return getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_BACKEND_URL');
-}
+export const getBackendBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_BACKEND_URL');
 
-/**
- * Base URL for the address book, reachable directly so a spec can edit or
- * delete an address behind the journey's back and then check what the
- * notification shows.
- */
-export function getAddressBookBaseUrl(): string {
-  return getServiceBaseUrl('TRADE_IMPORTS_ADDRESS_BOOK_URL');
-}
+export const getAddressBookBaseUrl = (): string => getServiceBaseUrl('TRADE_IMPORTS_ADDRESS_BOOK_URL');
 
-/**
- * Connection URI for the animals-backend MongoDB, reachable directly by specs asserting on
- * persisted state.
- */
-export function getMongoDbUri(): string {
-  return getServiceBaseUrl('MONGODB_URI');
-}
+export const getMongoDbUri = (): string => getServiceBaseUrl('MONGODB_URI');
 
-/**
- * Endpoint for the local SQS emulator (Floci in the compose stack), used to seed
- * messages directly onto a queue ahead of a test.
- */
-export function getSqsEndpoint(): string {
-  return getServiceBaseUrl('AWS_SQS_ENDPOINT');
-}
+export const getSqsEndpoint = (): string => getServiceBaseUrl('AWS_SQS_ENDPOINT');
 
-/**
- * URL of the notification-gateway dead-letter queue, seeded directly by the DLQ
- * operator-UI specs.
- */
-export function getDlqUrl(): string {
-  return getServiceBaseUrl('NOTIFICATION_SQS_DLQ_URL');
-}
+export const getDlqUrl = (): string => getServiceBaseUrl('NOTIFICATION_SQS_DLQ_URL');
 
-/**
- * x-api-key for the CDP ephemeral gateway, shared by every service reached
- * through it (not just the backend). Required when CDP_LOCAL=true; unset
- * (undefined) otherwise — CI and docker-compose reach services directly and
- * don't need one.
- */
-export function getDeveloperApiKey(): string | undefined {
+// The CDP ephemeral gateway authenticates every service behind it with this one
+// x-api-key, so it is not the backend's alone.
+export const getDeveloperApiKey = (): string | undefined => {
   const apiKey = process.env.DEVELOPER_API_KEY;
   if (isCdpLocal() && !apiKey) {
     throw new Error('DEVELOPER_API_KEY is not set. Required when CDP_LOCAL=true.');
   }
   return apiKey || undefined;
-}
+};

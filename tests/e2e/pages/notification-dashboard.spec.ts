@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
 
+const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
+const WHOLE_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
+const DISPLAYED_DATE_PATTERN = /\d{1,2} \w+ \d{4}/;
+
 test.describe('Import notification service dashboard', { tag: '@integration' }, () => {
   test('starts a journey at the origin page and lists the draft', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
@@ -52,9 +56,9 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(details.heading).toContainText(journeyContext.journeyId);
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
-      await expect(details.arrivalAtDestination).toContainText(/\d{1,2} \w+ \d{4}/);
+      await expect(details.arrivalAtDestination).toContainText(DISPLAYED_DATE_PATTERN);
       await expect(details.status).toContainText('Submitted');
-      await expect(details.dateCreated).toHaveText(/\d{1,2} \w+ \d{4}/);
+      await expect(details.dateCreated).toHaveText(DISPLAYED_DATE_PATTERN);
     });
   });
 
@@ -96,9 +100,9 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
 
         await pages.overview.heading.waitFor();
         const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
-          /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+          REFERENCE_NUMBER_PATTERN,
         )?.[0];
-        expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+        expect(copiedReferenceNumber).toMatch(WHOLE_REFERENCE_NUMBER_PATTERN);
         expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
       },
     );

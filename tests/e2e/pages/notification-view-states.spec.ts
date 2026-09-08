@@ -1,5 +1,8 @@
 import { test, expect } from '@fixtures';
 
+const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
+const EXACT_REFERENCE_NUMBER_PATTERN = /^GBN-AG-\d{2}-[0-9A-Z]{6}$/;
+
 test.describe('Notification view states', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.describe('DRAFT', () => {
     test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
@@ -66,9 +69,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
 
       await pages.overview.heading.waitFor();
       const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(
-        /GBN-AG-\d{2}-[0-9A-Z]{6}/,
+        REFERENCE_NUMBER_PATTERN,
       )?.[0];
-      expect(copiedReferenceNumber).toMatch(/^GBN-AG-\d{2}-[0-9A-Z]{6}$/);
+      expect(copiedReferenceNumber).toMatch(EXACT_REFERENCE_NUMBER_PATTERN);
       expect(copiedReferenceNumber).not.toEqual(originalReferenceNumber);
     });
 
