@@ -31,6 +31,12 @@ const POTATO_DATE_LABEL = 'Expected date of arrival';
 const PRE_ARRIVAL_DATE_LABEL = 'Expected date of landing in Great Britain';
 const POST_ARRIVAL_DATE_LABEL = 'Date the consignment first arrived in Great Britain';
 
+// Arrival details now runs on into the destination section. That page asks its
+// question in the state the arrival answer puts the notification in, and the
+// heading is the only thing that says which — so it is matched in full.
+const INTENDED_DESTINATION_HEADING = 'Intended destination';
+const POST_ARRIVAL_DESTINATION_HEADING = 'Where is the consignment now?';
+
 // Far enough past the four-day window (reg 26(1)) that the notification is
 // unmistakably late.
 const DAYS_LATE = 30;
@@ -155,9 +161,13 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     // Reg 26(1) gives the notifier four days, but a notification made after
     // them is late rather than void: nothing lower-bounds the date, so the
     // service takes it and completes the row instead of refusing the save.
-    // Arrival-details is the last page of the journey built so far, so Continue
-    // leaves for the Overview rather than another question.
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // Arrival-details is followed by the destination section, so Continue asks
+    // the next question — and this notification has already arrived, so it is
+    // asked where the consignment is being kept now.
+    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
+    await expect(pages.plantsPlaceOfDestination.headingNamed(POST_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
 
     await pages.plantsArrivalDetails.open(reference);
@@ -169,7 +179,7 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
     await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await pages.plantsArrivalDetails.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
 
     await pages.plantsArrivalStatus.open(reference);
     await pages.plantsArrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
@@ -239,7 +249,12 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await pages.plantsArrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
     await pages.plantsArrivalDetails.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // Reg 24A gives potatoes no post-arrival branch, so the destination
+    // question is asked in its own state: the intended destination.
+    await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
+    await expect(pages.plantsPlaceOfDestination.headingNamed(INTENDED_DESTINATION_HEADING)).toBeVisible();
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
 
     await pages.plantsArrivalDetails.open(reference);

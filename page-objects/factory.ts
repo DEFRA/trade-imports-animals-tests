@@ -41,6 +41,7 @@ import { PlantsDashboardPage } from './plants/plants-dashboard-page';
 import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
 import { PlantsOriginPage } from './plants/plants-origin-page';
 import { PlantsOverviewPage } from './plants/plants-overview-page';
+import { PlantsPlaceOfDestinationPage } from './plants/plants-place-of-destination-page';
 
 export function createPageObjects(page: Page) {
   return {
@@ -90,6 +91,7 @@ export function createPageObjects(page: Page) {
     plantsOrigin: new PlantsOriginPage(page),
     plantsArrivalStatus: new PlantsArrivalStatusPage(page),
     plantsArrivalDetails: new PlantsArrivalDetailsPage(page),
+    plantsPlaceOfDestination: new PlantsPlaceOfDestinationPage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }
