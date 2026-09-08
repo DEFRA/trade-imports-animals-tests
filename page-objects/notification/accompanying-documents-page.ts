@@ -14,6 +14,10 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByLabel('Document reference');
   }
 
+  get documentType(): Locator {
+    return this.page.getByLabel('Document type');
+  }
+
   get fileUpload(): Locator {
     return this.page.getByLabel('Upload a file');
   }
@@ -42,8 +46,9 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: /Refresh/ });
   }
 
-  async fillDocument(reference: string, issueDate: string, filePath: string): Promise<void> {
+  async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {
     await this.documentReference.fill(reference);
+    await this.documentType.selectOption(documentType);
     await this.page.locator('input[name="accompanyingDocumentDateOfIssue"]').fill(issueDate);
     await this.fileUpload.setInputFiles(filePath);
   }
