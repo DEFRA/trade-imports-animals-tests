@@ -32,7 +32,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsCommodityType.linkBack).toHaveAttribute('href', '/');
   });
 
-  test('the Overview carries the journey strip and the commodities task row', async ({ pages, plantsJourney }) => {
+  test('the Overview carries the journey strip and the task rows landed so far', async ({ pages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.toOverview();
 
@@ -43,15 +43,21 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.statusTag).toHaveText('Draft');
     await expect(pages.plantsOverview.reference).toHaveText(reference);
 
-    // Only the first group has landed a row, and a group with no rows is not
+    // The first two groups have landed a row, and a group with no rows is not
     // rendered — each section's own spec asserts its row as that page lands.
-    await expect(pages.plantsOverview.taskLists).toHaveCount(1);
-    await expect(pages.plantsOverview.groupHeadings).toHaveText(['1. About the consignment']);
+    await expect(pages.plantsOverview.taskLists).toHaveCount(2);
+    await expect(pages.plantsOverview.groupHeadings).toHaveText(['1. About the consignment', '2. Arrival and destination']);
     await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
       `/notifications/${reference}/commodity-type`,
     );
     await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Not yet started');
+
+    // Arrival holds only the arrival-status question so far, and that question
+    // is out of scope until a commodity type that is asked it is chosen — so on
+    // a notification with nothing answered the row is blocked and has no link.
+    await expect(pages.plantsOverview.taskRowByTitle('Arrival details')).toContainText('Cannot start yet');
+    await expect(pages.plantsOverview.taskRowLink('Arrival details')).toHaveCount(0);
 
     await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', '/');
     await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', '/');

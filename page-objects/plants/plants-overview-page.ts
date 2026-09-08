@@ -48,4 +48,12 @@ export class PlantsOverviewPage extends PlantsNotificationPage {
   taskRow(title: string): Locator {
     return this.page.getByRole('listitem').filter({ has: this.taskRowLink(title) });
   }
+
+  /**
+   * A row addressed by its title text rather than by its link. A blocked row
+   * carries no link at all, so it is only reachable this way.
+   */
+  taskRowByTitle(title: string): Locator {
+    return this.page.locator('.govuk-task-list__item').filter({ hasText: title });
+  }
 }

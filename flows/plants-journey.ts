@@ -105,6 +105,17 @@ export class PlantsJourney {
     await this.pages.plantsOrigin.heading.waitFor();
   }
 
+  /**
+   * Names the country and carries on into the arrival section, which only the
+   * commodity types asked the arrival-status question reach — a potato
+   * notification's Continue returns to the Overview from origin instead.
+   */
+  async toArrivalStatus(country: string): Promise<void> {
+    await this.pages.plantsOrigin.selectCountry(country);
+    await this.pages.plantsOrigin.btnSaveAndContinue.click();
+    await this.pages.plantsArrivalStatus.heading.waitFor();
+  }
+
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
     for (const [label, value] of Object.entries(values)) {
       if (label === GENUS) {
