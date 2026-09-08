@@ -18,8 +18,11 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByLabel('Document type');
   }
 
+  // The JavaScript-enhanced file upload hides the input inside a drop zone and
+  // puts a button in front of it carrying the field's id, so the label now
+  // names the button. The file still goes to the input behind it.
   get fileUpload(): Locator {
-    return this.page.getByLabel('Upload a file');
+    return this.page.locator('input[type="file"]');
   }
 
   get saveAndAddAnother(): Locator {
