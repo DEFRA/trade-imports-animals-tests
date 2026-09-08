@@ -32,7 +32,14 @@ import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
 import { InsAddressBookViewPage } from './ins/ins-address-book-view-page';
 import { InsAddressBookEditPage } from './ins/ins-address-book-edit-page';
 import { InsAddressBookDeletePage } from './ins/ins-address-book-delete-page';
+import { PlantsArrivalStatusPage } from './plants/plants-arrival-status-page';
+import { PlantsCommoditiesPage } from './plants/plants-commodities-page';
+import { PlantsCommodityDetailsPage } from './plants/plants-commodity-details-page';
+import { PlantsCommodityTypePage } from './plants/plants-commodity-type-page';
 import { PlantsDashboardPage } from './plants/plants-dashboard-page';
+import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
+import { PlantsOriginPage } from './plants/plants-origin-page';
+import { PlantsOverviewPage } from './plants/plants-overview-page';
 
 export function createPageObjects(page: Page) {
   return {
@@ -75,6 +82,13 @@ export function createPageObjects(page: Page) {
     insAddressBookEdit: new InsAddressBookEditPage(page),
     insAddressBookDelete: new InsAddressBookDeletePage(page),
     plantsDashboard: new PlantsDashboardPage(page),
+    plantsOverview: new PlantsOverviewPage(page),
+    plantsCommodityType: new PlantsCommodityTypePage(page),
+    plantsCommodities: new PlantsCommoditiesPage(page),
+    plantsCommodityDetails: new PlantsCommodityDetailsPage(page),
+    plantsOrigin: new PlantsOriginPage(page),
+    plantsArrivalStatus: new PlantsArrivalStatusPage(page),
+    plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }
 

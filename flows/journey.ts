@@ -107,7 +107,7 @@ export class Journey {
   async answerAnimalIdentification(): Promise<void> {
     await this.pages.overview.task('Animal identification details').click();
     await this.pages.animalIdentification.earTag.fill('UK123456789012');
-    await this.pages.animalIdentification.saveAndFinish.click();
+    await this.pages.animalIdentification.saveAndContinue.click();
     await this.pages.overview.heading.waitFor();
   }
 

@@ -33,8 +33,10 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
 
     // At N = M the maximum-reached state replaces the entry form; the saved
     // records stay removable.
+    // The second record is the last outstanding animal, so the in-card button
+    // finishes the line instead of inviting another.
     await pages.animalIdentification.earTag.fill('UK000000000002');
-    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.saveAndFinish.click();
     await expect(
       pages.page.getByText('You have entered details for all 2 Bos taurus animals', {
         exact: false,
@@ -47,7 +49,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     // details-page save with an error NAMING the species whose summary link
     // goes straight to this species' identifier card — the records are never
     // silently trimmed.
-    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
     await pages.overview.task('What are you importing?').click();
     await pages.commoditySelection.saveAndContinue.click();
@@ -68,7 +70,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 2 of 2' })).toBeVisible();
 
     // With one record left the drop no longer applies — a count of 1 saves.
-    await pages.animalIdentification.saveAndFinish.click();
+    await pages.animalIdentification.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
     await pages.overview.task('What are you importing?').click();
     await pages.commoditySelection.saveAndContinue.click();
