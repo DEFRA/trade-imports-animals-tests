@@ -32,7 +32,7 @@ export class AnimalIdentificationPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and add another' });
   }
 
-  get saveAndFinish(): Locator {
-    return this.page.getByRole('button', { name: 'Save and finish' });
+  get saveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue' });
   }
 }

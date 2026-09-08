@@ -58,7 +58,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.animalIdentification.heading.waitFor();
       await runA11yScan();
       await pages.animalIdentification.earTag.fill('UK123456789012');
-      await pages.animalIdentification.saveAndFinish.click();
+      await pages.animalIdentification.saveAndContinue.click();
       await pages.overview.heading.waitFor();
     });
 
