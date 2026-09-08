@@ -161,6 +161,9 @@ test.describe('High-risk plants commodity section', { tag: '@integration' }, () 
 
     await pages.plantsCommodities.btnSaveAndContinue.click();
 
+    await expect(pages.page).toHaveURL(`/notifications/${reference}/origin`);
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Completed');
   });
