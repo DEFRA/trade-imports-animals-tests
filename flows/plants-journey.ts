@@ -106,14 +106,36 @@ export class PlantsJourney {
   }
 
   /**
-   * Names the country and carries on into the arrival section, which only the
-   * commodity types asked the arrival-status question reach — a potato
-   * notification's Continue returns to the Overview from origin instead.
+   * Names the country and carries on to the arrival-status question, which only
+   * plants for planting and wood and cut trees are asked. A potato
+   * notification's Continue passes the question over and lands on the arrival
+   * details instead, so it reaches the section through `toArrivalDetails`.
    */
   async toArrivalStatus(country: string): Promise<void> {
     await this.pages.plantsOrigin.selectCountry(country);
     await this.pages.plantsOrigin.btnSaveAndContinue.click();
     await this.pages.plantsArrivalStatus.heading.waitFor();
+  }
+
+  /**
+   * Names the country and carries a potato notification straight on to the
+   * arrival details. `arrivalStatus` is out of scope for potatoes, so the
+   * opening run skips that step rather than stopping at it.
+   */
+  async toArrivalDetails(country: string): Promise<void> {
+    await this.pages.plantsOrigin.selectCountry(country);
+    await this.pages.plantsOrigin.btnSaveAndContinue.click();
+    await this.pages.plantsArrivalDetails.heading.waitFor();
+  }
+
+  /**
+   * Answers the arrival-status question, whose Continue goes on to the arrival
+   * details — the next page of the same section, not the Overview.
+   */
+  async answerArrivalStatus(label: string): Promise<void> {
+    await this.pages.plantsArrivalStatus.arrivalStatus(label).check();
+    await this.pages.plantsArrivalStatus.btnSaveAndContinue.click();
+    await this.pages.plantsArrivalDetails.heading.waitFor();
   }
 
   private async fillCommodityLine(values: CommodityLine): Promise<void> {
