@@ -6,7 +6,7 @@ import { TEN_MB_BYTES } from '@resources/file-upload/constants';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 const issueDate = '03/01/2026';
-const maximumDocuments = 10;
+const maximumDocuments = 15;
 const maximumDocumentsMessage = `You can add a maximum of ${maximumDocuments} documents`;
 
 const paddedPdf = async (destination: string, bytes: number): Promise<string> => {
@@ -18,7 +18,7 @@ const paddedPdf = async (destination: string, bytes: number): Promise<string> =>
 };
 
 test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('accepts a tenth document and rejects an eleventh with the maximum-documents error', async ({ journey, pages }) => {
+  test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({ journey, pages }) => {
     test.slow();
     await journey.toAccompanyingDocuments();
 
@@ -35,15 +35,15 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
     await expect(pages.accompanyingDocuments.saveAndAddAnother).toBeVisible();
     await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
 
-    const eleventhReference = `PWCAP${Date.now()}11`;
-    await pages.accompanyingDocuments.fillDocument(eleventhReference, issueDate, fileUploadPaths.safeFile1kbPdf);
+    const sixteenthReference = `PWCAP${Date.now()}16`;
+    await pages.accompanyingDocuments.fillDocument(sixteenthReference, issueDate, fileUploadPaths.safeFile1kbPdf);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
     await expect(pages.page.getByRole('link', { name: maximumDocumentsMessage })).toBeVisible();
     await expect(pages.page.locator('.govuk-error-message')).toHaveCount(0);
     await expect(pages.page.locator('#documents-added tbody tr')).toHaveCount(maximumDocuments);
-    await expect(pages.accompanyingDocuments.documentRow(eleventhReference)).toHaveCount(0);
+    await expect(pages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
   test('accepts a 10 MB PDF and rejects the same real file at one byte over', async ({ journey, pages }, testInfo) => {
