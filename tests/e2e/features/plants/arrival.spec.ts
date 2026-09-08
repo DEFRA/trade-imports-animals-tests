@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import type { PlantsJourney } from '@flows/plants-journey';
+import { getRelativeAppDateText } from '@utils/date-utils';
 
 const POTATOES = 'Potatoes (seed or ware)';
 const PLANTS_FOR_PLANTING = 'Plants for planting';
@@ -17,8 +18,12 @@ const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 const ARRIVAL_STATUS_ERROR = 'Select whether the consignment has arrived';
 
 const ARRIVAL_DATE_ERROR = 'Enter the arrival date';
+const REAL_ARRIVAL_DATE_ERROR = 'Enter a real arrival date';
 const ARRIVAL_TIME_ERROR = 'Enter the expected time of arrival';
 const PLACE_OF_LANDING_ERROR = 'Select the proposed place of landing';
+
+// February has no 31st, so the text is a well-formed date that names no day.
+const NOT_A_REAL_DATE = '31/2/2026';
 
 // The one date field means three different things, and the label is the only
 // thing that says which — so each sentence is matched in full.
@@ -26,9 +31,15 @@ const POTATO_DATE_LABEL = 'Expected date of arrival';
 const PRE_ARRIVAL_DATE_LABEL = 'Expected date of landing in Great Britain';
 const POST_ARRIVAL_DATE_LABEL = 'Date the consignment first arrived in Great Britain';
 
+// Far enough past the four-day window (reg 26(1)) that the notification is
+// unmistakably late.
+const DAYS_LATE = 30;
+
 // A consignment that has already arrived cannot have arrived tomorrow, so the
-// post-arrival date is capped at today — this one stays in the past.
-const ARRIVED_ON = '27/3/2026';
+// post-arrival date is capped at today. Read off the service's own clock
+// rather than written down: the claim is that this date is long past *today*,
+// which a fixed date stops making as that upper bound moves with the calendar.
+const ARRIVED_ON = getRelativeAppDateText({ dayOffset: -DAYS_LATE });
 
 // Nothing bounds an expected date, so the pre-arrival one may sit ahead of the
 // clock without the test tracking it.
@@ -130,7 +141,10 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
   });
 
-  test('the date is saved, shown again on return, and completes the arrival task row', async ({ pages, plantsJourney }) => {
+  test('a date long past the four-day window is saved, shown again on return, and completes the arrival task row', async ({
+    pages,
+    plantsJourney,
+  }) => {
     const reference = await toArrivalStatus(plantsJourney);
     await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
 
@@ -138,6 +152,9 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
     await pages.plantsArrivalDetails.btnSaveAndContinue.click();
 
+    // Reg 26(1) gives the notifier four days, but a notification made after
+    // them is late rather than void: nothing lower-bounds the date, so the
+    // service takes it and completes the row instead of refusing the save.
     // Arrival-details is the last page of the journey built so far, so Continue
     // leaves for the Overview rather than another question.
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
@@ -145,6 +162,40 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
 
     await pages.plantsArrivalDetails.open(reference);
     await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
+  });
+
+  test('changing the answer from arrived to not arrived re-labels the question and keeps the date', async ({ pages, plantsJourney }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
+    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+
+    await pages.plantsArrivalStatus.open(reference);
+    await pages.plantsArrivalStatus.arrivalStatus(NOT_YET_ARRIVED).check();
+    await pages.plantsArrivalStatus.btnSaveAndContinue.click();
+
+    // Every notification owes a date and both branches of the question ask for
+    // one, so `arrivalDate` is ungated: the new answer changes the sentence it
+    // is asked under and leaves the answer itself alone. Nothing takes it out
+    // of scope, so the engine has nothing to purge.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
+  });
+
+  test('a date that names no day on the calendar is refused', async ({ pages, plantsJourney }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
+
+    await pages.plantsArrivalDetails.arrivalDate.fill(NOT_A_REAL_DATE);
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+
+    // A missing date and an impossible one are different mistakes, so the page
+    // says which one was made rather than repeating the required message.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(REAL_ARRIVAL_DATE_ERROR);
+    await expect(pages.plantsArrivalDetails.errorSummary).not.toContainText(ARRIVAL_DATE_ERROR);
   });
 
   test('a potato notification is never asked the question and opens the arrival row on the details', async ({ pages, plantsJourney }) => {
