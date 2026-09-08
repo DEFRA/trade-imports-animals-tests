@@ -37,6 +37,7 @@ import { PlantsCommodityDetailsPage } from './plants/plants-commodity-details-pa
 import { PlantsCommodityTypePage } from './plants/plants-commodity-type-page';
 import { PlantsDashboardPage } from './plants/plants-dashboard-page';
 import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
+import { PlantsOriginPage } from './plants/plants-origin-page';
 import { PlantsOverviewPage } from './plants/plants-overview-page';
 
 export function createPageObjects(page: Page) {
@@ -84,6 +85,7 @@ export function createPageObjects(page: Page) {
     plantsCommodityType: new PlantsCommodityTypePage(page),
     plantsCommodities: new PlantsCommoditiesPage(page),
     plantsCommodityDetails: new PlantsCommodityDetailsPage(page),
+    plantsOrigin: new PlantsOriginPage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }
