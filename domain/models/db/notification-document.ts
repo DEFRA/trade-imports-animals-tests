@@ -92,6 +92,8 @@ export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
   notification: NotificationContent;
+  /** Pre-amend snapshot of notification content. Present only during an in-flight amendment. */
+  preAmendNotification?: NotificationContent;
   status: string;
   created: Date;
   updated: Date;
