@@ -33,8 +33,10 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
 
     // At N = M the maximum-reached state replaces the entry form; the saved
     // records stay removable.
+    // The second record is the last outstanding animal, so the in-card button
+    // finishes the line instead of inviting another.
     await pages.animalIdentification.earTag.fill('UK000000000002');
-    await pages.animalIdentification.saveAndAddAnother.click();
+    await pages.animalIdentification.saveAndFinish.click();
     await expect(
       pages.page.getByText('You have entered details for all 2 Bos taurus animals', {
         exact: false,
