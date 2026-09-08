@@ -63,10 +63,10 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(FRANCE);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    // Origin is the last page a potato notification is asked, because the
-    // arrival-status question that follows it is out of scope for potatoes — so
-    // Continue leaves for the Overview rather than carrying on into arrival.
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // The arrival-status question that follows origin is out of scope for
+    // potatoes, so Continue passes it over and lands on the arrival details —
+    // the page every commodity type is asked.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
 
     await pages.plantsOrigin.open(reference);
     await expect(pages.plantsOrigin.countryOfOrigin).toHaveValue(FRANCE);
@@ -85,7 +85,7 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(NORWAY);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
   });
 
   test('a ware-potato consignment is narrowed to Poland, Portugal, Romania or Spain', async ({ pages, plantsJourney }) => {
@@ -105,7 +105,7 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(SPAIN);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
   });
 
   test('a conifer-wood-without-bark line is narrowed to Italy, France, Portugal or Spain', async ({ pages, plantsJourney }) => {
@@ -162,7 +162,7 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await plantsJourney.toOrigin();
     await pages.plantsOrigin.selectCountry(FRANCE);
     await pages.plantsOrigin.btnSaveAndContinue.click();
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
 
     await pages.plantsCommodities.open(reference);
     await plantsJourney.addAnotherCommodityLine(WARE_POTATOES, potatoLine('King Edward', 'Eating'));
@@ -201,7 +201,11 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(FRANCE);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // Continue carries a potato notification on to the arrival details, so the
+    // hub is reached by opening it rather than by being returned to it.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(ORIGIN_TASK_ROW)).toContainText('Completed');
   });
 });

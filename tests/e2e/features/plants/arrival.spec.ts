@@ -16,6 +16,28 @@ const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 const ARRIVAL_STATUS_ERROR = 'Select whether the consignment has arrived';
 
+const ARRIVAL_DATE_ERROR = 'Enter the arrival date';
+const ARRIVAL_TIME_ERROR = 'Enter the expected time of arrival';
+const PLACE_OF_LANDING_ERROR = 'Select the proposed place of landing';
+
+// The one date field means three different things, and the label is the only
+// thing that says which — so each sentence is matched in full.
+const POTATO_DATE_LABEL = 'Expected date of arrival';
+const PRE_ARRIVAL_DATE_LABEL = 'Expected date of landing in Great Britain';
+const POST_ARRIVAL_DATE_LABEL = 'Date the consignment first arrived in Great Britain';
+
+// A consignment that has already arrived cannot have arrived tomorrow, so the
+// post-arrival date is capped at today — this one stays in the past.
+const ARRIVED_ON = '27/3/2026';
+
+// Nothing bounds an expected date, so the pre-arrival one may sit ahead of the
+// clock without the test tracking it.
+const ARRIVING_ON = '27/3/2027';
+const ARRIVING_AT = '14:30';
+
+// A port the reference data has held throughout, offered as "{name} ({code})".
+const ABERDEEN_HARBOUR = 'Aberdeen Harbour (GB ABD)';
+
 // The window is four days (reg 26(1)), and the hint is the only place a trader
 // reads it — so it is matched in full rather than on the number alone.
 const POST_ARRIVAL_HINT =
@@ -70,22 +92,62 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await expect(pages.plantsArrivalStatus.errorSummary).toContainText(ARRIVAL_STATUS_ERROR);
   });
 
-  test('the answer is saved, shown again on return, and completes the arrival task row', async ({ pages, plantsJourney }) => {
+  test('the answer is saved, shown again on return, and carries on to the arrival details', async ({ pages, plantsJourney }) => {
     const reference = await toArrivalStatus(plantsJourney);
 
     await pages.plantsArrivalStatus.arrivalStatus(ALREADY_ARRIVED).check();
     await pages.plantsArrivalStatus.btnSaveAndContinue.click();
 
-    // Arrival-status is the last page of the journey built so far, so Continue
-    // leaves for the Overview rather than another question.
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
-    await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
+    // Arrival-details follows the question in the same section, so Continue
+    // goes on to it rather than back to the Overview.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
 
     await pages.plantsArrivalStatus.open(reference);
     await expect(pages.plantsArrivalStatus.arrivalStatus(ALREADY_ARRIVED)).toBeChecked();
   });
 
-  test('a potato notification is never asked the question and its arrival row stays blocked', async ({ pages, plantsJourney }) => {
+  test('the arrival date is asked under the sentence the arrival status chose', async ({ pages, plantsJourney }) => {
+    await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(NOT_YET_ARRIVED);
+
+    // The one date field means three different things, and the label is the
+    // only place a trader reads which of them is being asked for.
+    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(PRE_ARRIVAL_DATE_LABEL)).toBeVisible();
+
+    // Plants and wood are asked for a date alone: reg 24A(2)(a) and (aa) give
+    // the time and the place of landing to potatoes only.
+    await expect(pages.plantsArrivalDetails.arrivalTime).toHaveCount(0);
+    await expect(pages.plantsArrivalDetails.proposedPlaceOfLanding).toHaveCount(0);
+  });
+
+  test('the arrival date must be given before the notification moves on', async ({ pages, plantsJourney }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
+
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
+  });
+
+  test('the date is saved, shown again on return, and completes the arrival task row', async ({ pages, plantsJourney }) => {
+    const reference = await toArrivalStatus(plantsJourney);
+    await plantsJourney.answerArrivalStatus(ALREADY_ARRIVED);
+
+    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(POST_ARRIVAL_DATE_LABEL)).toBeVisible();
+    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVED_ON);
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+
+    // Arrival-details is the last page of the journey built so far, so Continue
+    // leaves for the Overview rather than another question.
+    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
+
+    await pages.plantsArrivalDetails.open(reference);
+    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVED_ON);
+  });
+
+  test('a potato notification is never asked the question and opens the arrival row on the details', async ({ pages, plantsJourney }) => {
     const reference = await plantsJourney.startNotification();
     await plantsJourney.chooseCommodityType(POTATOES);
     await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
@@ -95,10 +157,43 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
     // Reg 24A gives the potato notification no post-arrival branch, so
-    // `arrivalStatus` is out of scope: the opening run skips the step and the
-    // hub's arrival row has no page a trader can open.
+    // `arrivalStatus` is out of scope: the opening run passes the step over and
+    // lands on the details, the page every commodity type answers.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalDetails.expectedUrl(reference));
+    await expect(pages.plantsArrivalDetails.dateQuestionLabelled(POTATO_DATE_LABEL)).toBeVisible();
+
+    await pages.plantsOverview.open(reference);
+    await expect(pages.plantsOverview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveAttribute(
+      'href',
+      pages.plantsArrivalDetails.expectedUrl(reference),
+    );
+  });
+
+  test('a potato notification is asked the time and the place of landing as well as the date', async ({ pages, plantsJourney }) => {
+    const reference = await plantsJourney.startNotification();
+    await plantsJourney.chooseCommodityType(POTATOES);
+    await plantsJourney.addCommodityLine(SEED_POTATOES, potatoLine);
+    await plantsJourney.toOrigin();
+    await plantsJourney.toArrivalDetails(FRANCE);
+
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+
+    // All three are mandatory for potatoes, so an empty page names all three.
+    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_DATE_ERROR);
+    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(ARRIVAL_TIME_ERROR);
+    await expect(pages.plantsArrivalDetails.errorSummary).toContainText(PLACE_OF_LANDING_ERROR);
+
+    await pages.plantsArrivalDetails.arrivalDate.fill(ARRIVING_ON);
+    await pages.plantsArrivalDetails.arrivalTime.fill(ARRIVING_AT);
+    await pages.plantsArrivalDetails.selectPlaceOfLanding(ABERDEEN_HARBOUR);
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
-    await expect(pages.plantsOverview.taskRowByTitle(ARRIVAL_TASK_ROW)).toContainText('Cannot start yet');
-    await expect(pages.plantsOverview.taskRowLink(ARRIVAL_TASK_ROW)).toHaveCount(0);
+    await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
+
+    await pages.plantsArrivalDetails.open(reference);
+    await expect(pages.plantsArrivalDetails.arrivalDate).toHaveValue(ARRIVING_ON);
+    await expect(pages.plantsArrivalDetails.arrivalTime).toHaveValue(ARRIVING_AT);
+    await expect(pages.plantsArrivalDetails.proposedPlaceOfLanding).toHaveValue(ABERDEEN_HARBOUR);
   });
 });
