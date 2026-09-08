@@ -63,8 +63,9 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(FRANCE);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    // Origin is the last page of the journey built so far, so Continue leaves
-    // for the Overview rather than another question.
+    // Origin is the last page a potato notification is asked, because the
+    // arrival-status question that follows it is out of scope for potatoes — so
+    // Continue leaves for the Overview rather than carrying on into arrival.
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
 
     await pages.plantsOrigin.open(reference);
@@ -124,7 +125,10 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(ITALY);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // Wood is asked whether the consignment has arrived, so Continue carries on
+    // into the arrival section rather than returning to the Overview.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalStatus.expectedUrl(reference));
+    await expect(pages.plantsArrivalStatus.heading).toBeVisible();
   });
 
   test('a plants-for-planting line is narrowed to the EU member States', async ({ pages, plantsJourney }) => {
@@ -142,7 +146,10 @@ test.describe('High-risk plants origin section', { tag: '@integration' }, () => 
     await pages.plantsOrigin.selectCountry(GERMANY);
     await pages.plantsOrigin.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // Plants for planting are asked whether the consignment has arrived, so
+    // Continue carries on into the arrival section.
+    await expect(pages.page).toHaveURL(pages.plantsArrivalStatus.expectedUrl(reference));
+    await expect(pages.plantsArrivalStatus.heading).toBeVisible();
   });
 
   test('the narrowing is enforced at Continue, so a saved country is refused once a ware-potato line joins it', async ({
