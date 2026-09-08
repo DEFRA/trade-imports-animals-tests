@@ -24,14 +24,15 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus' })).toBeVisible();
 
     // Cats gate passport + tattoo + permanent address on; ear tag + horse name
-    // are hidden (they belong to other commodities), and the free-text fallbacks
-    // are hidden too — a typed commodity is in the notInUnionOf union.
+    // are hidden, because they belong to other commodities. Nothing offers a
+    // free-text identifier: the page asks for the commodity's own types or it
+    // asks for nothing.
     await expect(pages.animalIdentification.passportNumber).toBeVisible();
     await expect(pages.page.getByLabel('Tattoo')).toBeVisible();
     await expect(pages.animalIdentification.earTag).toBeHidden();
     await expect(pages.page.getByLabel('Horse name')).toBeHidden();
-    await expect(pages.page.getByLabel('Identification details')).toBeHidden();
-    await expect(pages.page.getByLabel('Animal description')).toBeHidden();
+    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
+    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
     await expect(pages.page.getByLabel('Name or organisation name')).toBeVisible();
     // The permanent address block asks for eight fields and no country — an
     // address APHA can inspect is a Great Britain address, so there is nothing
@@ -62,16 +63,40 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await expect(unitRow.getByRole('cell', { name: 'Pet Owner', exact: true })).toBeVisible();
   });
 
-  test('a commodity with no typed identifier shows only the free-text fallbacks, and one satisfies the group', async ({
+  test('a commodity with no identifier type of its own gets no panel, while the lines that have one keep theirs', async ({
     journey,
     pages,
   }) => {
     await journey.startNotification();
 
-    // Fish is in no typed-identifier list, so the notInUnionOf gate turns the
-    // free-text fallbacks ON and every typed input OFF. The animal count is
-    // save-blocking, and a count of 2 keeps the identifier form open after the
-    // first record is committed.
+    // Cow carries an ear tag; Fish is on none of the identifier allowlists, so
+    // it has nothing to be asked. One consignment holding both separates the
+    // two: the page still exists for the Cow line and says nothing at all
+    // about the Fish one.
+    await pages.overview.task('What are you importing?').click();
+    await pages.commoditySelection.selectSpecies(['Bos taurus', 'Salmo salar']);
+    await pages.commoditySelection.saveAndContinue.click();
+    await expect(pages.consignmentDetails.heading).toBeVisible();
+
+    // The count is save-blocking on every line the page shows, so both are filled.
+    await pages.consignmentDetails.fillEveryAnimalCount('1');
+    await pages.consignmentDetails.saveAndContinue.click();
+    await expect(pages.overview.heading).toBeVisible();
+    await pages.overview.task('Animal identification details').click();
+    await expect(pages.animalIdentification.heading).toBeVisible();
+
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus' })).toBeVisible();
+    await expect(pages.animalIdentification.earTag).toBeVisible();
+    // No panel for the Fish line, and no free-text stand-in for the identifier
+    // it does not have.
+    await expect(pages.page.getByRole('heading', { name: 'Enter details for Salmo salar' })).toHaveCount(0);
+    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
+    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
+  });
+
+  test('a consignment where no commodity has an identifier type never reaches the identification page', async ({ journey, pages }) => {
+    await journey.startNotification();
+
     await pages.overview.task('What are you importing?').click();
     await pages.commoditySelection.selectSpecies(['Salmo salar']);
     await pages.commoditySelection.saveAndContinue.click();
@@ -80,22 +105,17 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.consignmentDetails.numberOfAnimals.fill('2');
     await pages.consignmentDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await pages.overview.task('Animal identification details').click();
-    await expect(pages.animalIdentification.heading).toBeVisible();
 
-    await expect(pages.page.getByLabel('Identification details')).toBeVisible();
-    await expect(pages.page.getByLabel('Animal description')).toBeVisible();
-    await expect(pages.animalIdentification.passportNumber).toBeHidden();
-    await expect(pages.page.getByLabel('Tattoo')).toBeHidden();
-    await expect(pages.animalIdentification.earTag).toBeHidden();
-    await expect(pages.page.getByLabel('Horse name')).toBeHidden();
-
-    // A fallback alone satisfies the at-least-one identifier group.
-    await pages.page.getByLabel('Identification details').fill('Tank mark TM-77');
-    await pages.animalIdentification.saveAndAddAnother.click();
-    await expect(pages.animalIdentification.heading).toBeVisible();
-    await expect(
-      pages.animalIdentification.savedAnimalRow('Salmo salar', 1).getByRole('cell', { name: 'Tank mark TM-77', exact: true }),
-    ).toBeVisible();
+    // Nothing on this consignment carries an identifier, so the page does not
+    // exist for this person: the request carries on to the next step of the
+    // journey rather than rendering. Reached from the hub, that next step is
+    // the hub — the point being that the page itself is never shown, and no
+    // free-text stand-in is offered anywhere.
+    const journeyId = pages.overview.journeyIdFromUrl();
+    await pages.animalIdentification.open(journeyId);
+    await expect(pages.overview.heading).toBeVisible();
+    await expect(pages.animalIdentification.heading).toHaveCount(0);
+    await expect(pages.page.getByLabel('Identification details')).toHaveCount(0);
+    await expect(pages.page.getByLabel('Animal description')).toHaveCount(0);
   });
 });
