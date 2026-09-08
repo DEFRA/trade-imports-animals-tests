@@ -1,6 +1,17 @@
 import type { PageObjects } from '@page-objects';
 import type { JourneyContext } from '@flows/journey';
 
+/**
+ * One commodity line's answers, keyed by the label the trader reads. Which
+ * labels a line carries is decided by its category, so the shape is open: a
+ * caller writes exactly the fields that category asks for, and a missing or
+ * surplus one shows up as the page rejecting the line.
+ */
+export type CommodityLine = Record<string, string>;
+
+/** The one field on a line that is a type-ahead rather than a text input. */
+const GENUS = 'Genus';
+
 export class PlantsJourney {
   constructor(
     private readonly pages: PageObjects,
@@ -37,6 +48,59 @@ export class PlantsJourney {
   async toOverview(): Promise<void> {
     await this.pages.plantsCommodityType.linkCancel.click();
     await this.pages.plantsOverview.heading.waitFor();
+  }
+
+  /**
+   * Answers the entry question. Continue leaves for the commodities list, and a
+   * list with no lines sends the trader straight on to the entry sub-page — so
+   * this lands on the commodity-details page, not on the list.
+   */
+  async chooseCommodityType(label: string): Promise<void> {
+    await this.pages.plantsCommodityType.commodityType(label).check();
+    await this.pages.plantsCommodityType.btnSaveAndContinue.click();
+    await this.pages.plantsCommodityDetails.heading.waitFor();
+  }
+
+  /**
+   * Re-answers the entry question on a notification that is already under way.
+   * A change that no saved line survives lands on the list rather than the
+   * entry page, because the trader has to see what went.
+   */
+  async changeCommodityType(reference: string, label: string): Promise<void> {
+    await this.pages.plantsCommodityType.open(reference);
+    await this.pages.plantsCommodityType.commodityType(label).check();
+    await this.pages.plantsCommodityType.btnSaveAndContinue.click();
+  }
+
+  /**
+   * Adds one line from the entry page, which is where the commodity type left
+   * the trader. Choosing the category creates the line and brings back the
+   * fields that category asks for, so the two steps cannot be collapsed.
+   */
+  async addCommodityLine(category: string, values: CommodityLine): Promise<void> {
+    await this.pages.plantsCommodityDetails.category(category).check();
+    await this.pages.plantsCommodityDetails.btnContinue.click();
+    await this.pages.plantsCommodityDetails.btnSaveAndContinue.waitFor();
+    await this.fillCommodityLine(values);
+    await this.pages.plantsCommodityDetails.btnSaveAndContinue.click();
+    await this.pages.plantsCommodities.heading.waitFor();
+  }
+
+  /** Adds a further line from the list page the last one returned to. */
+  async addAnotherCommodityLine(category: string, values: CommodityLine): Promise<void> {
+    await this.pages.plantsCommodities.btnAddAnother.click();
+    await this.pages.plantsCommodityDetails.heading.waitFor();
+    await this.addCommodityLine(category, values);
+  }
+
+  private async fillCommodityLine(values: CommodityLine): Promise<void> {
+    for (const [label, value] of Object.entries(values)) {
+      if (label === GENUS) {
+        await this.pages.plantsCommodityDetails.selectGenus(value);
+        continue;
+      }
+      await this.pages.plantsCommodityDetails.field(label).fill(value);
+    }
   }
 
   async returnToDashboard(): Promise<void> {
