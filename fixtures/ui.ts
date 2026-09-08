@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type APIRequestContext } from '@playwright/test';
 import { createPageObjects, type PageObjects } from '@page-objects';
 import { Journey, type JourneyContext } from '@flows/journey';
 import { PlantsJourney } from '@flows/plants-journey';
@@ -7,11 +7,14 @@ import { NotificationActions } from '@flows/notification-actions';
 import { ApiJourney } from '@flows/api-journey';
 import { NotificationApiClient } from '@adapters/http/notification-api-client';
 import { AddressBookApiClient } from '@adapters/http/address-book-api-client';
+import { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import { createWorkerAuthState } from '@fixtures/auth-state';
+import { createFrontendSeedContext } from '@fixtures/seed-context';
 import { sessionReuseEnabled } from '@utils/playwright/session-reuse';
 
 export interface AuthWorkerFixtures {
   workerAuthState: string | undefined;
+  frontendSeedContext: APIRequestContext;
 }
 
 export interface PageFixtures {
@@ -24,6 +27,7 @@ export interface PageFixtures {
   notificationApi: NotificationApiClient;
   addressBookApi: AddressBookApiClient;
   apiJourney: ApiJourney;
+  frontendForms: FrontendFormClient;
 }
 
 export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
@@ -37,6 +41,16 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     },
     // Its own timeout, so a slow mint is reported as a mint failure instead of
     // eating the first test's budget.
+    { scope: 'worker', timeout: 120_000 },
+  ],
+  frontendSeedContext: [
+    async ({ browser, workerAuthState }, use, workerInfo) => {
+      const context = await createFrontendSeedContext(browser, workerInfo, workerAuthState);
+      await use(context);
+      await context.dispose();
+    },
+    // Shares workerAuthState's budget: on a non-e2e project this mints a second
+    // session, and a slow mint should read as a mint failure, not a test timeout.
     { scope: 'worker', timeout: 120_000 },
   ],
   storageState: async ({ workerAuthState }, use) => {
@@ -69,6 +83,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
   },
   apiJourney: async ({ pages, notificationApi, journeyContext }, use) => {
     await use(new ApiJourney(pages, notificationApi, journeyContext));
+  },
+  frontendForms: async ({ frontendSeedContext }, use) => {
+    await use(new FrontendFormClient(frontendSeedContext));
   },
 });
 

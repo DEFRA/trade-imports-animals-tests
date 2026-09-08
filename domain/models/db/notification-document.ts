@@ -78,9 +78,12 @@ type NotificationContent = {
     transitedCountries?: string[];
     // Not an address-book record: a transporter carries an approval number and
     // a type, which the address book has no room for, so it stays inline.
+    // The stored transporter address carries two address lines and nothing
+    // else — the form asks for no town, postcode or country — so the block is
+    // partial where an address-book party's is whole.
     transporter?: {
       name: string;
-      address: StoredAddress;
+      address: Partial<StoredAddress>;
       approvalNumber: string;
       type: string;
     };
@@ -92,6 +95,13 @@ export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
   notification: NotificationContent;
+  /**
+   * The frontend's own evaluator blob, which the UI reads back to redraw a
+   * journey. Opaque on purpose: it is the obligation model's private shape, and
+   * a test that knew its insides would be duplicating the frontend's model.
+   * Assert that it is populated, never what is in it.
+   */
+  fulfilments?: unknown[];
   status: string;
   created: Date;
   updated: Date;

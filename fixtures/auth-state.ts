@@ -50,21 +50,33 @@ const slug = (baseUrl: string): string => baseUrl.replace(/^https?:\/\//, '').re
 
 // The services share the `localhost` cookie domain but keep separate session-store
 // key prefixes, so a session minted against one is a cache miss against the others.
-function authStatePath(projectName: string, baseUrl: string, workerIndex: number): string {
-  return resolve(AUTH_STATE_DIR, `${projectName}-${slug(baseUrl)}-w${workerIndex}.json`);
+function authStatePath(targetName: string, baseUrl: string, workerIndex: number): string {
+  return resolve(AUTH_STATE_DIR, `${targetName}-${slug(baseUrl)}-w${workerIndex}.json`);
 }
 
-/** Temp-then-rename, so a failed or unverified mint never leaves a state file behind. */
-export async function createWorkerAuthState(browser: Browser, workerInfo: WorkerInfo): Promise<string> {
-  const { name } = workerInfo.project;
-  const target = AUTH_TARGETS[name];
-  if (!target) {
-    throw new Error(`No auth target for project "${name}" — add one to AUTH_TARGETS in fixtures/auth-state.ts.`);
-  }
+/**
+ * What to sign in to, named explicitly instead of read off the running project.
+ * A spec's project decides which service its browser points at; it does not
+ * decide which service a fixture needs a session for, and seeding needs the
+ * frontend whatever project it runs under.
+ */
+export type AuthMint = {
+  /** Key into AUTH_TARGETS — which service's landing page proves the session. */
+  targetName: string;
+  baseURL: string;
+  workerIndex: number;
+  /** Both carried from the project's context options: without them a
+   * security-profile mint bypasses ZAP and a CDP mint fails TLS. */
+  proxy?: BrowserContextOptions['proxy'];
+  ignoreHTTPSErrors?: boolean;
+};
 
-  const { baseURL, proxy, ignoreHTTPSErrors } = workerInfo.project.use;
-  if (!baseURL) {
-    throw new Error(`Project "${name}" has no baseURL, so no session can be minted for it.`);
+/** Temp-then-rename, so a failed or unverified mint never leaves a state file behind. */
+export async function createAuthState(browser: Browser, mint: AuthMint): Promise<string> {
+  const { targetName, baseURL, workerIndex, proxy, ignoreHTTPSErrors } = mint;
+  const target = AUTH_TARGETS[targetName];
+  if (!target) {
+    throw new Error(`No auth target named "${targetName}" — add one to AUTH_TARGETS in fixtures/auth-state.ts.`);
   }
 
   // browser.newContext() does not inherit project-level context options, and
@@ -72,7 +84,7 @@ export async function createWorkerAuthState(browser: Browser, workerInfo: Worker
   const contextOptions: BrowserContextOptions = { baseURL, proxy, ignoreHTTPSErrors };
 
   mkdirSync(AUTH_STATE_DIR, { recursive: true });
-  const statePath = authStatePath(name, baseURL, workerInfo.workerIndex);
+  const statePath = authStatePath(targetName, baseURL, workerIndex);
   const mintingPath = `${statePath}.minting`;
   let lastError: unknown;
 
@@ -96,8 +108,25 @@ export async function createWorkerAuthState(browser: Browser, workerInfo: Worker
     }
   }
 
-  throw new Error(`Worker ${workerInfo.workerIndex} could not sign in to ${baseURL} in ${SIGN_IN_ATTEMPTS} attempts`, {
+  throw new Error(`Worker ${workerIndex} could not sign in to ${baseURL} in ${SIGN_IN_ATTEMPTS} attempts`, {
     cause: lastError,
+  });
+}
+
+/** The per-project mint: the running project names both the target and the base URL. */
+export async function createWorkerAuthState(browser: Browser, workerInfo: WorkerInfo): Promise<string> {
+  const { name } = workerInfo.project;
+  const { baseURL, proxy, ignoreHTTPSErrors } = workerInfo.project.use;
+  if (!baseURL) {
+    throw new Error(`Project "${name}" has no baseURL, so no session can be minted for it.`);
+  }
+
+  return createAuthState(browser, {
+    targetName: name,
+    baseURL,
+    workerIndex: workerInfo.workerIndex,
+    proxy,
+    ignoreHTTPSErrors,
   });
 }
 

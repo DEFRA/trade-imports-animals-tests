@@ -9,6 +9,17 @@ function getServiceBaseUrl(envVar: string): string {
 }
 
 /**
+ * Base URL for the trade-imports-animals frontend, resolved explicitly rather
+ * than taken from the ambient project baseURL, so seeding reaches the frontend
+ * from an admin-, ins- or plants-project spec too. withProjectBaseUrls sets it
+ * for every environment — it is the same URL the e2e project's browser uses,
+ * which is what keeps it right on CDP without a gateway or an api key.
+ */
+export function getAnimalsFrontendBaseUrl(): string {
+  return getServiceBaseUrl('TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL');
+}
+
+/**
  * Base URL for the trade-imports-animals-backend API, reachable directly
  * (bypassing the frontend) for seeding notification state ahead of a test.
  */
