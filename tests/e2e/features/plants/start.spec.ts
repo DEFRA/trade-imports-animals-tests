@@ -43,10 +43,14 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.statusTag).toHaveText('Draft');
     await expect(pages.plantsOverview.reference).toHaveText(reference);
 
-    // The first two groups have landed a row, and a group with no rows is not
+    // The first three groups have landed a row, and a group with no rows is not
     // rendered — each section's own spec asserts its row as that page lands.
-    await expect(pages.plantsOverview.taskLists).toHaveCount(2);
-    await expect(pages.plantsOverview.groupHeadings).toHaveText(['1. About the consignment', '2. Arrival and destination']);
+    await expect(pages.plantsOverview.taskLists).toHaveCount(3);
+    await expect(pages.plantsOverview.groupHeadings).toHaveText([
+      '1. About the consignment',
+      '2. Arrival and destination',
+      '3. Consignment parties',
+    ]);
     await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
       `/notifications/${reference}/commodity-type`,
@@ -58,6 +62,14 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     // a notification with nothing answered the row is blocked and has no link.
     await expect(pages.plantsOverview.taskRowByTitle('Arrival details')).toContainText('Cannot start yet');
     await expect(pages.plantsOverview.taskRowLink('Arrival details')).toHaveCount(0);
+
+    // Consignment parties renders because identification numbers is an
+    // unconditional row. That row's own questions are out of scope until a
+    // commodity type is chosen, so it is blocked and carries no link; the
+    // consignor row is conditional and is hidden entirely while it is NA.
+    await expect(pages.plantsOverview.taskRowByTitle('Identification numbers')).toContainText('Cannot start yet');
+    await expect(pages.plantsOverview.taskRowLink('Identification numbers')).toHaveCount(0);
+    await expect(pages.plantsOverview.taskRowByTitle('Consignor or exporter')).toHaveCount(0);
 
     await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', '/');
     await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', '/');
