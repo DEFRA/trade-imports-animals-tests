@@ -37,6 +37,7 @@ import { PlantsArrivalStatusPage } from './plants/plants-arrival-status-page';
 import { PlantsCommoditiesPage } from './plants/plants-commodities-page';
 import { PlantsCommodityDetailsPage } from './plants/plants-commodity-details-page';
 import { PlantsCommodityTypePage } from './plants/plants-commodity-type-page';
+import { PlantsConsignorSelectPage } from './plants/plants-consignor-select-page';
 import { PlantsDashboardPage } from './plants/plants-dashboard-page';
 import { PlantsDeleteNotificationPage } from './plants/plants-delete-notification-page';
 import { PlantsOriginPage } from './plants/plants-origin-page';
@@ -92,6 +93,7 @@ export function createPageObjects(page: Page) {
     plantsArrivalStatus: new PlantsArrivalStatusPage(page),
     plantsArrivalDetails: new PlantsArrivalDetailsPage(page),
     plantsPlaceOfDestination: new PlantsPlaceOfDestinationPage(page),
+    plantsConsignorSelect: new PlantsConsignorSelectPage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
 }

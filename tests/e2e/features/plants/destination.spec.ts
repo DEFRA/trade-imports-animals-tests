@@ -68,9 +68,10 @@ const addressNamed = (name: string) => ({
 });
 
 /**
- * A plants-for-planting notification walked to the destination page, which is
- * the last step of the opening run. The arrival answer decides which of the
- * three questions the page asks, so the caller names it.
+ * A plants-for-planting notification walked to the destination page. The
+ * consignor page follows it in the opening run, so saving here continues there
+ * rather than to the Overview. The arrival answer decides which of the three
+ * questions the page asks, so the caller names it.
  */
 const plantsToDestination = async (pages: PageObjects, plantsJourney: PlantsJourney, arrivalStatus: string): Promise<string> => {
   const reference = await plantsJourney.startNotification();
@@ -104,8 +105,8 @@ const potatoesToDestination = async (pages: PageObjects, plantsJourney: PlantsJo
   return reference;
 };
 
-/** Picks the one address this test minted and saves it, which closes the
- * opening run and returns to the Overview. */
+/** Picks the one address this test minted and saves it, which carries the
+ * opening run on to the consignor page. */
 const chooseAddress = async (pages: PageObjects, token: string, name: string): Promise<void> => {
   await pages.plantsPlaceOfDestination.searchFor(token);
   await pages.plantsPlaceOfDestination.address(name).check();
@@ -211,8 +212,11 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await pages.plantsPlaceOfDestination.address(target).check();
     await pages.plantsPlaceOfDestination.btnSaveAndContinue.click();
 
-    // The destination closes the opening run, so Continue reaches the Overview.
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    // The consignor page follows the destination in the opening run, so
+    // Continue reaches that rather than the Overview.
+    await expect(pages.page).toHaveURL(pages.plantsConsignorSelect.expectedUrl(reference));
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
     // Re-entering opens on page one of the whole book, where the chosen record
@@ -231,7 +235,9 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     const reference = await plantsToDestination(pages, plantsJourney, NOT_YET_ARRIVED);
     await chooseAddress(pages, token, name);
 
-    await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
+    await expect(pages.page).toHaveURL(pages.plantsConsignorSelect.expectedUrl(reference));
+
+    await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
 
     // The notification holds the address-book id and nothing else, so the
