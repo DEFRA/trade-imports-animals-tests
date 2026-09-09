@@ -95,7 +95,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(value(rolesAndAddresses, 'Importer')).toContainText('Import Co UK');
     await expect(value(rolesAndAddresses, 'Place of destination')).toContainText('Tech Imports Ltd');
     // The CYA renders the CPH normalised (separators stripped), not as typed.
-    await expect(value(rolesAndAddresses, 'County Parish Holding number (CPH)')).toHaveText('123456789');
+    await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
     const contactAddress = pages.notificationView.summaryCard('Contact address for this consignment');
     await expect(value(contactAddress, 'Address')).toContainText('Animal and Plant Health Agency');

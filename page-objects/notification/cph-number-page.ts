@@ -7,11 +7,11 @@ export class CphNumberPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'County Parish Holding (CPH)' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add the county parish holding number (CPH)' });
   }
 
   get cphNumber(): Locator {
-    return this.page.getByLabel('County Parish Holding (CPH)');
+    return this.page.getByLabel('CPH number');
   }
 
   get saveAndContinue(): Locator {
