@@ -7,7 +7,7 @@ import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 
 const issueDate = '03/01/2026';
 const maximumDocuments = 15;
-const maximumDocumentsMessage = `You can add a maximum of ${maximumDocuments} documents`;
+const maximumDocumentsMessage = `You can upload a maximum of ${maximumDocuments} files`;
 
 const paddedPdf = async (destination: string, bytes: number): Promise<string> => {
   await mkdir(path.dirname(destination), { recursive: true });
