@@ -64,7 +64,7 @@ const addressSteps = (parties: PartyIds): SeedStep[] => [
   { slug: 'importers/select', form: { party: parties.importer } },
   // The empty hub post is what advances past the pickers; without it the seed stalls.
   { slug: 'addresses', form: {} },
-  { slug: 'cph-number', form: { countyParishHoldingCph: '12/345/6789' } },
+  { slug: 'cph-number', form: { cphCounty: '12', cphParish: '345', cphHolding: '6789' } },
 ];
 
 const arrivalStep: SeedStep = {

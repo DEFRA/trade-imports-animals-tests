@@ -38,7 +38,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.cphNumber.saveAndContinue.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await pages.cphNumber.cphNumber.fill('12/345/6789');
+      await pages.cphNumber.fillCphNumber();
       await pages.cphNumber.saveAndContinue.click();
       await pages.overview.heading.waitFor();
     });
