@@ -49,6 +49,10 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await contact.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.taskRow(CONTACT)).toContainText('Completed');
+    // Contact ends its own section; review is entered from Overview once every task is complete.
+    const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
+    await expect(review).toContainText('Cannot start yet');
+    await expect(review.getByRole('link')).toHaveCount(0);
     await contact.open(reference);
     await pages.page.reload();
     await expect(contact.address(records[0].name)).toBeChecked();
