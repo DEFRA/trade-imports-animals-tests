@@ -43,13 +43,14 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.statusTag).toHaveText('Draft');
     await expect(pages.plantsOverview.reference).toHaveText(reference);
 
-    // The first three groups have landed a row, and a group with no rows is not
+    // All four groups have landed a row, and a group with no rows is not
     // rendered — each section's own spec asserts its row as that page lands.
-    await expect(pages.plantsOverview.taskLists).toHaveCount(3);
+    await expect(pages.plantsOverview.taskLists).toHaveCount(4);
     await expect(pages.plantsOverview.groupHeadings).toHaveText([
       '1. About the consignment',
       '2. Arrival and destination',
       '3. Consignment parties',
+      '4. Check and submit',
     ]);
     await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
@@ -70,6 +71,11 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.taskRowByTitle('Identification numbers')).toContainText('Cannot start yet');
     await expect(pages.plantsOverview.taskRowLink('Identification numbers')).toHaveCount(0);
     await expect(pages.plantsOverview.taskRowByTitle('Consignor or exporter')).toHaveCount(0);
+
+    // Check and submit is blocked until every other row is complete, so on a
+    // notification with nothing answered it is blocked and carries no link.
+    await expect(pages.plantsOverview.taskRowByTitle('Check and submit')).toContainText('Cannot start yet');
+    await expect(pages.plantsOverview.taskRowLink('Check and submit')).toHaveCount(0);
 
     await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', '/');
     await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', '/');
