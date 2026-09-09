@@ -46,7 +46,7 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
     await expect(pages.accompanyingDocuments.documentRow(sixteenthReference)).toHaveCount(0);
   });
 
-  test('accepts a 50MB PDF and rejects the same real file at one byte over', async ({ journey, pages }, testInfo) => {
+  test('accepts a 10MB PDF and rejects the same real file at one byte over', async ({ journey, pages }, testInfo) => {
     test.slow();
     const exact = await paddedPdf(testInfo.outputPath('boundary-exact.pdf'), MAX_FILE_SIZE_BYTES);
     const over = await paddedPdf(testInfo.outputPath('boundary-over.pdf'), MAX_FILE_SIZE_BYTES + 1);
