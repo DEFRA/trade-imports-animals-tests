@@ -1,10 +1,5 @@
 import type { ObjectId } from 'mongodb';
 
-/**
- * A Standard Address Block as the backend stores it. Field names follow the
- * address book, which is the system of record (EUDPA-294 replaced an older
- * shape carrying `addressLine3`, `city` and a free-text `country`).
- */
 type StoredAddress = {
   addressLine1: string;
   addressLine2?: string;
@@ -15,13 +10,8 @@ type StoredAddress = {
 };
 
 /**
- * A party on a notification, held one of two ways (EUDPA-294 AC5).
- *
- * Picked from the address book, only `addressId` is stored — the details are
- * resolved on read, so an edit in the address book shows through without the
- * notification being rewritten. Entered inline, or created before the address
- * book existed, the details are on the notification and there is no
- * `addressId`. Every field is therefore optional.
+ * Held either as an `addressId` reference resolved on read, or with the details
+ * inline and no `addressId`, so every field is optional.
  */
 type StoredParty = {
   addressId?: string;
@@ -31,11 +21,6 @@ type StoredParty = {
   address?: StoredAddress;
 };
 
-/**
- * Notification content held under {@link NotificationDocument#notification}.
- * Aggregate metadata (referenceNumber, status, dates, fulfilments) lives at
- * the document root; only the well-structured content sits here (EUDPA-335).
- */
 type NotificationContent = {
   origin: {
     countryCode: string;
@@ -76,11 +61,9 @@ type NotificationContent = {
     transportIdentification?: string;
     transportDocumentReference?: string;
     transitedCountries?: string[];
-    // Not an address-book record: a transporter carries an approval number and
-    // a type, which the address book has no room for, so it stays inline.
     transporter?: {
       name: string;
-      address: StoredAddress;
+      address: Partial<StoredAddress>;
       approvalNumber: string;
       type: string;
     };
@@ -92,6 +75,7 @@ export type NotificationDocument = {
   _id: ObjectId;
   referenceNumber: string | null;
   notification: NotificationContent;
+  fulfilments?: unknown[];
   /** Pre-amend snapshot of notification content. Present only during an in-flight amendment. */
   preAmendNotification?: NotificationContent;
   status: string;

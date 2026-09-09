@@ -6,8 +6,7 @@ import type { Notification } from '@domain/models/api/notification';
 
 // Per-aggregate outbox lock (NotificationService.writeWithOutbox via ShedLock) fails a
 // second submit/amend that lands inside the first's lock window with a 500. Human clicks
-// never race like this; back-to-back API calls in a test do. Retry policy matches the
-// old amendNotificationWhenOutboxFree helper in ApiJourney (3 attempts, linear backoff).
+// never race like this; back-to-back API calls in a test do.
 const OUTBOX_LOCK_RETRY_ATTEMPTS = 3;
 const OUTBOX_LOCK_RETRY_BASE_MS = 500;
 

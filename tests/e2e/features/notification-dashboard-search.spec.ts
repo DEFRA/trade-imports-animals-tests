@@ -3,6 +3,12 @@ import { sortByValues } from '@domain/constants/sort-by-values';
 
 const NO_MATCH_REFERENCE_NUMBER = 'GBN-AG-26-ZZZZZZ';
 
+const escapeHyphens = (reference: string) => reference.replace(/-/g, '\\-');
+
+const wholeReferenceNumberParamPattern = (reference: string) => new RegExp(`[?&]referenceNumber=${escapeHyphens(reference)}(?:&|$)`);
+
+const referenceNumberAnywhereInUrlPattern = (reference: string) => new RegExp(`referenceNumber=${escapeHyphens(reference)}`);
+
 test.describe('Notification dashboard search', () => {
   test.beforeEach(async ({ journey }) => {
     await journey.toNotificationDashboard();
@@ -15,21 +21,20 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.btnSearch).toBeVisible();
   });
 
-  test('returns matching notification when searching by complete reference number', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
+  test('returns matching notification when searching by complete reference number', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.referenceNumber);
+    await pages.notificationDashboard.searchForReference(referenceNumber);
 
-    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}(?:&|$)`));
+    await expect(pages.page).toHaveURL(wholeReferenceNumberParamPattern(referenceNumber));
     await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
-    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(created.referenceNumber);
+    await expect(pages.notificationDashboard.notificationCardDetails(0).heading).toContainText(referenceNumber);
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('Showing 1 Result');
   });
 
-  test('opens notification view when clicking View after searching by reference number', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
-    const referenceNumber = created.referenceNumber;
+  test('opens notification view when clicking View after searching by reference number', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
     await pages.notificationDashboard.searchForReference(referenceNumber);
@@ -45,7 +50,7 @@ test.describe('Notification dashboard search', () => {
   test('shows no notifications found when search has no matches', async ({ pages }) => {
     await pages.notificationDashboard.searchForReference(NO_MATCH_REFERENCE_NUMBER);
 
-    await expect(pages.page).toHaveURL(new RegExp(`[?&]referenceNumber=${NO_MATCH_REFERENCE_NUMBER.replace(/-/g, '\\-')}(?:&|$)`));
+    await expect(pages.page).toHaveURL(wholeReferenceNumberParamPattern(NO_MATCH_REFERENCE_NUMBER));
     await expect(pages.notificationDashboard.notificationCards).toHaveCount(0);
     await expect(pages.notificationDashboard.resultsLabel).toHaveText('No notifications found');
   });
@@ -59,16 +64,16 @@ test.describe('Notification dashboard search', () => {
     await expect(pages.notificationDashboard.errorSummary).not.toBeVisible();
   });
 
-  test('preserves referenceNumber when updating sort after search', async ({ pages, apiJourney, journey }) => {
-    const created = await apiJourney.createSubmittedNotification();
+  test('preserves referenceNumber when updating sort after search', async ({ pages, seededJourney, journey }) => {
+    const referenceNumber = await seededJourney.createSubmittedNotification();
     await journey.toNotificationDashboard();
 
-    await pages.notificationDashboard.searchForReference(created.referenceNumber);
+    await pages.notificationDashboard.searchForReference(referenceNumber);
     await pages.notificationDashboard.sortBy(sortByValues.dateCreatedNewestToOldest);
 
-    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${created.referenceNumber.replace(/-/g, '\\-')}`));
+    await expect(pages.page).toHaveURL(referenceNumberAnywhereInUrlPattern(referenceNumber));
     await expect(pages.page).toHaveURL(/sort=createdAt%2Cdesc/);
-    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(created.referenceNumber);
+    await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(referenceNumber);
   });
 
   test('preserves referenceNumber in the URL when a page param is present', async ({ pages }) => {
@@ -78,7 +83,7 @@ test.describe('Notification dashboard search', () => {
     await pages.notificationDashboard.heading.waitFor();
     await pages.notificationDashboard.waitForNotificationList();
 
-    await expect(pages.page).toHaveURL(new RegExp(`referenceNumber=${NO_MATCH_REFERENCE_NUMBER.replace(/-/g, '\\-')}`));
+    await expect(pages.page).toHaveURL(referenceNumberAnywhereInUrlPattern(NO_MATCH_REFERENCE_NUMBER));
     await expect(pages.notificationDashboard.inputReferenceSearch).toHaveValue(NO_MATCH_REFERENCE_NUMBER);
   });
 });

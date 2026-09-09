@@ -14,7 +14,7 @@ import { getRelativeDateInput } from '@utils/date-utils';
 /**
  * The options schema and default test-notification content shared by every
  * way of driving a notification to a given state — the UI wizard (`Journey`)
- * and the backend-API seeder (`ApiJourney`) both build from these, so there
+ * and the frontend seeder (`SeededJourney`) both build from these, so there
  * is one source of truth for what a "default" test notification looks like.
  */
 export type JourneyOptions = {

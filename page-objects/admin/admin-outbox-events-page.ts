@@ -32,6 +32,10 @@ export class AdminOutboxEventsPage extends BasePage {
     return this.tableRows.nth(rowIndex).locator('td').nth(1);
   }
 
+  get eventTypeCells(): Locator {
+    return this.tableRows.locator('td:nth-child(2)');
+  }
+
   cellTimestamp(rowIndex: number): Locator {
     return this.tableRows.nth(rowIndex).locator('td').nth(2);
   }

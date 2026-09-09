@@ -1,9 +1,10 @@
 import { test, expect } from '@fixtures/security';
 
 test.describe('Security scan (backend)', { tag: '@active' }, () => {
-  test('routes a submitted notification through the ZAP proxy', async ({ proxiedApiJourney }) => {
-    const notification = await proxiedApiJourney.createSubmittedNotification();
+  test('routes a submitted notification through the ZAP proxy', async ({ proxiedNotificationApi }) => {
+    const draft = await proxiedNotificationApi.createNotification();
+    const submitted = await proxiedNotificationApi.submitNotification(draft.referenceNumber);
 
-    expect(notification.status).toBe('SUBMITTED');
+    expect(submitted.status).toBe('SUBMITTED');
   });
 });

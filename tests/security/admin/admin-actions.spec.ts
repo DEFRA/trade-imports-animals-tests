@@ -4,8 +4,6 @@ import { seedDlqMessage } from '@domain/fixtures/dlq-event';
 import { timeouts } from '@config/timeouts';
 
 test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () => {
-  // Serial: the DLQ delete-all acts on the whole queue. Every other destructive
-  // call here is scoped to ids this spec created, so stays safely parallel.
   test.describe.configure({ mode: 'serial' });
 
   let sqs: SqsClient;
@@ -18,40 +16,36 @@ test.describe('Security scan (admin, operator actions)', { tag: '@active' }, () 
     sqs.destroy();
   });
 
-  test('routes the admin write actions through the ZAP proxy', async ({ apiJourney, adminNavigation, pages }) => {
+  test('routes the admin write actions through the ZAP proxy', async ({ seededJourney, adminNavigation, pages }) => {
     test.slow();
-    const notification = await apiJourney.createAmendNotification();
+    const referenceNumber = await seededJourney.createAmendNotification();
 
-    // The admin service's one POST that is not a delete, on its own route.
-    await adminNavigation.toOutboxEvents(notification.referenceNumber);
+    await adminNavigation.toOutboxEvents(referenceNumber);
     await expect.poll(() => pages.adminOutboxEvents.tableRows.count(), { timeout: timeouts.short }).toBeGreaterThan(0);
     await pages.adminOutboxEvents.btnReplay.click();
     await expect(pages.adminOutboxEvents.bannerSuccess).toBeVisible();
 
-    // DELETE /notifications, scoped to this reference — never the whole table.
     await pages.adminNotifications.open();
-    await pages.adminNotifications.inputReferenceNumber.fill(notification.referenceNumber);
-    // deleteByReferenceNumber only opens the confirmation dialog; the DELETE
-    // itself fires from the dialog's own confirm button.
+    await pages.adminNotifications.inputReferenceNumber.fill(referenceNumber);
     await pages.adminNotifications.deleteByReferenceNumber();
     await pages.adminNotifications.btnConfirm.click();
     await expect(pages.adminNotifications.alertSuccess).toBeVisible();
 
-    // The DLQ buttons only render on a non-empty queue, so seed one first.
     const eventId = await seedDlqMessage(sqs);
     await adminNavigation.toDlqEvents();
+    const seededDlqRow = pages.adminDlqEvents.rowById(eventId);
     await expect(async () => {
-      if (!(await pages.adminDlqEvents.rowById(eventId).isVisible())) {
+      if (!(await seededDlqRow.isVisible())) {
         await pages.page.reload();
       }
-      await expect(pages.adminDlqEvents.rowById(eventId)).toBeVisible({ timeout: timeouts.short });
+      await expect(seededDlqRow).toBeVisible({ timeout: timeouts.short });
     }).toPass({ timeout: timeouts.medium });
 
     await pages.adminDlqEvents.btnDeleteAll.click();
     await pages.adminDlqEvents.btnConfirmDeleteAll.click();
     await expect(pages.adminDlqEvents.bannerSuccess).toBeVisible();
 
-    // The service's static page — nothing else in the suite reaches it.
+    // No assertion: this goto exists only to put the static /about page through the ZAP proxy.
     await pages.page.goto('/about');
   });
 });
