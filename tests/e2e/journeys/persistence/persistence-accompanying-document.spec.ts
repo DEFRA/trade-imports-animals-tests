@@ -11,7 +11,7 @@ import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 /**
  * Integration seam: real uploader -> backend/Mongo persistence -> reload.
  *
- * The document type is derived from the filename (the promoted model dropped the type select), so the seam
+ * The trader picks the document type from the select on the upload page, so the seam
  * uploads a real file through cdp-uploader, waits for the virus scan, and asserts the persisted
  * accompanying_documents projection + that the uploaded row survives a fresh page load.
  */
@@ -33,7 +33,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
 
     const row = pages.accompanyingDocuments.documentRow(documentReference);
     await expect(row).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
-    await expect(row).toContainText('Safe', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
 
     const client = new MongoDbClient();
     try {
@@ -54,7 +54,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
       expect(doc.uploadId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
       expect(doc.dateOfIssue.getTime()).toBe(toUtcDate(persistedIssueDate).getTime());
       await expect.poll(() => collection.findOne({ uploadId: doc.uploadId }).then((d) => d?.scanStatus)).toBe('COMPLETE');
-      expect(doc.documentType).toBe('OTHER');
+      expect(doc.documentType).toBe('ITAHC');
 
       expect(file.filename).toBe(fileUploadNames.safeFile1kbPdf);
       expect(file.contentType).toBe('application/pdf');

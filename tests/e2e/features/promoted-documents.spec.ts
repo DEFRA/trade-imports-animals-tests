@@ -14,7 +14,7 @@ test.describe('Promoted accompanying documents integration', { tag: ['@compose',
 
     const row = pages.accompanyingDocuments.documentRow(reference);
     await expect(row).toBeVisible();
-    await expect(row).toContainText('Safe', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
 
     const viewLink = pages.accompanyingDocuments.viewFile(1);
     const href = await viewLink.getAttribute('href');

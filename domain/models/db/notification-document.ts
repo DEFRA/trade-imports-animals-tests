@@ -76,6 +76,8 @@ export type NotificationDocument = {
   referenceNumber: string | null;
   notification: NotificationContent;
   fulfilments?: unknown[];
+  /** Pre-amend snapshot of notification content. Present only during an in-flight amendment. */
+  preAmendNotification?: NotificationContent;
   status: string;
   created: Date;
   updated: Date;

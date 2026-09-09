@@ -19,7 +19,7 @@ test.describe('Security scan (frontend, documents)', { tag: '@active' }, () => {
 
     // Waiting for the scan to clear is what puts the polled status route and
     // the file-download route in the site tree; a bare upload leaves both out.
-    await expect(row).toContainText('Safe', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
     await pages.accompanyingDocuments.viewFile(1).click();
   });
 });

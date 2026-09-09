@@ -14,8 +14,15 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByLabel('Document reference');
   }
 
+  get documentType(): Locator {
+    return this.page.getByLabel('Document type');
+  }
+
+  // The JavaScript-enhanced file upload hides the input inside a drop zone and
+  // puts a button in front of it carrying the field's id, so the label now
+  // names the button. The file still goes to the input behind it.
   get fileUpload(): Locator {
-    return this.page.getByLabel('Upload a file');
+    return this.page.locator('input[type="file"]');
   }
 
   get saveAndAddAnother(): Locator {
@@ -42,8 +49,9 @@ export class AccompanyingDocumentsPage extends NotificationPage {
     return this.page.getByRole('link', { name: /Refresh/ });
   }
 
-  async fillDocument(reference: string, issueDate: string, filePath: string): Promise<void> {
+  async fillDocument(reference: string, issueDate: string, filePath: string, documentType: string = 'ITAHC'): Promise<void> {
     await this.documentReference.fill(reference);
+    await this.documentType.selectOption(documentType);
     await this.page.locator('input[name="accompanyingDocumentDateOfIssue"]').fill(issueDate);
     await this.fileUpload.setInputFiles(filePath);
   }
