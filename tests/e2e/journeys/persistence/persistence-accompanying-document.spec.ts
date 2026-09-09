@@ -33,7 +33,7 @@ test.describe('Accompanying document persistence round-trip', { tag: ['@integrat
 
     const row = pages.accompanyingDocuments.documentRow(documentReference);
     await expect(row).toBeVisible({ timeout: fileUploadTimeouts.documentsListVisible });
-    await expect(row).toContainText('Safe', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
 
     const client = new MongoDbClient();
     try {

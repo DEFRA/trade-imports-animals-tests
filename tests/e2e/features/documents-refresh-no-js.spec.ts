@@ -26,7 +26,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: ['@integration
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = pages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toContainText('Checking');
+    await expect(row).toContainText('Scanning for virus');
     await expect(pages.accompanyingDocuments.refreshStatus).toBeVisible();
     await expect(pages.accompanyingDocuments.refreshStatus).toHaveAttribute('href', /attempt=1/);
 
@@ -38,7 +38,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: ['@integration
         },
         { timeout: fileUploadTimeouts.virusScanComplete },
       )
-      .toContain('Safe');
+      .toContain('Check completed');
 
     await expect(pages.accompanyingDocuments.refreshStatus).toHaveCount(0);
     await expect(pages.accompanyingDocuments.viewFile(1)).toBeVisible();
