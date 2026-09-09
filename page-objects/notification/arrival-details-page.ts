@@ -30,8 +30,9 @@ export class ArrivalDetailsPage extends NotificationPage {
     await this.page.getByRole('option', { name: label, exact: true }).click();
   }
 
+  // Means of transport is a <select> labelled by its visible question text.
   get meansOfTransport(): Locator {
-    return this.page.getByRole('group', { name: 'Means of transport' });
+    return this.page.getByLabel('Means of transport to the port of entry', { exact: true });
   }
 
   get transportIdentification(): Locator {

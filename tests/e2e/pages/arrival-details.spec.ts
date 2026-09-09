@@ -22,6 +22,7 @@ test.describe('Arrival details page', { tag: ['@integration', '@duplicated-in-fr
   test('leaves the arrival details unanswered on load', async ({ pages }) => {
     await expect(pages.arrivalDetails.portOfEntry).toBeVisible();
     await expect(pages.arrivalDetails.meansOfTransport).toBeVisible();
+    await expect(pages.arrivalDetails.meansOfTransport).toHaveValue('');
   });
 
   test('accepts valid arrival details', async ({ journey, pages }) => {

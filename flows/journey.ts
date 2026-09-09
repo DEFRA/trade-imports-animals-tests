@@ -165,7 +165,7 @@ export class Journey {
   async fillArrivalDetails(means: string = 'Road Vehicle'): Promise<void> {
     await this.pages.arrivalDetails.fillArrivalDate(ARRIVAL_DATE);
     await this.pages.arrivalDetails.selectPort(PORT);
-    await this.pages.page.getByRole('radio', { name: means, exact: true }).check();
+    await this.pages.arrivalDetails.meansOfTransport.selectOption({ label: means });
     await this.pages.arrivalDetails.transportIdentification.fill('FR-892-LK');
     await this.pages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
   }
