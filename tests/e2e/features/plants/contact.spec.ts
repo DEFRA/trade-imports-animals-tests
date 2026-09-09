@@ -58,6 +58,38 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await expect(contact.address(records[0].name)).toBeChecked();
   });
 
+  test('continues from completed check answers to declaration and returns to check answers', async ({
+    pages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const address = await addressBookApi.createAddress(addressNamed(`Review ${randomUUID()}`));
+    const reference = await openContact(pages, plantsJourney);
+    await pages.plantsConsignmentContactSelect.address(address.name).check();
+    await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
+    await pages.plantsArrivalDetails.open(reference);
+    await pages.plantsArrivalDetails.dateQuestionLabelled('Expected date of arrival').fill('27/3/2027');
+    await pages.plantsArrivalDetails.arrivalTime.fill('14:30');
+    await pages.plantsArrivalDetails.selectPlaceOfLanding('Aberdeen Harbour (GB ABD)');
+    await pages.plantsArrivalDetails.btnSaveAndContinue.click();
+    await pages.plantsPlaceOfDestination.open(reference);
+    await pages.plantsPlaceOfDestination.searchFor(address.name);
+    await pages.plantsPlaceOfDestination.address(address.name).check();
+    await pages.plantsPlaceOfDestination.btnSaveAndContinue.click();
+    await pages.plantsIdentificationNumbers.open(reference);
+    await pages.plantsIdentificationNumbers.producer.fill('P123');
+    await pages.plantsIdentificationNumbers.crop.fill('C123');
+    await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
+    await pages.plantsOverview.open(reference);
+    await pages.page.getByRole('link', { name: 'Check and submit', exact: true }).click();
+    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/notification-view$`));
+    await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/declaration$`));
+    await expect(pages.page.getByRole('heading', { name: 'Declaration', level: 1 })).toBeVisible();
+    await pages.page.getByRole('link', { name: 'Back', exact: true }).click();
+    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/notification-view$`));
+  });
+
   for (const action of ['continue', 'return'] as const) {
     test(`blank contact permits save and ${action} and leaves the row incomplete`, async ({ pages, plantsJourney }) => {
       const reference = await openContact(pages, plantsJourney);
