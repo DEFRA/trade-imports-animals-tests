@@ -58,11 +58,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await expect(contact.address(records[0].name)).toBeChecked();
   });
 
-  test('continues from completed check answers to declaration and returns to check answers', async ({
-    pages,
-    plantsJourney,
-    addressBookApi,
-  }) => {
+  test('continues through declaration to confirmation after checking Back navigation', async ({ pages, plantsJourney, addressBookApi }) => {
     const address = await addressBookApi.createAddress(addressNamed(`Review ${randomUUID()}`));
     const reference = await openContact(pages, plantsJourney);
     await pages.plantsConsignmentContactSelect.address(address.name).check();
@@ -88,6 +84,16 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await expect(pages.page.getByRole('heading', { name: 'Declaration', level: 1 })).toBeVisible();
     await pages.page.getByRole('link', { name: 'Back', exact: true }).click();
     await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/notification-view$`));
+    await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await pages.page
+      .getByRole('checkbox', {
+        name: 'I confirm that I have reviewed and comply with this declaration and that the information submitted in this notification is true and correct.',
+      })
+      .check();
+    await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/confirmation$`));
+    await expect(pages.page.getByRole('heading', { name: 'Notification submitted', level: 1 })).toBeVisible();
+    await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });
 
   for (const action of ['continue', 'return'] as const) {
