@@ -31,6 +31,6 @@ test.describe('All operator addresses', { tag: ['@integration', '@duplicated-in-
     await expect(operator('Place of destination')).toContainText('Tech Imports Ltd');
     await expect(operator('Place of destination')).toContainText('United Kingdom');
 
-    await expect(operator('County Parish Holding number (CPH)')).toContainText('123456789');
+    await expect(operator('County parish holding (CPH) number')).toContainText('123456789');
   });
 });

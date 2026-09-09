@@ -8,7 +8,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
 
     const page = pages.page;
     const cphRow = page.locator('.govuk-summary-list__row', {
-      has: page.getByText('County Parish Holding number (CPH)', { exact: true }),
+      has: page.getByText('County parish holding (CPH) number', { exact: true }),
     });
 
     // Add one commodity line for the given species, taking the fewest steps.
