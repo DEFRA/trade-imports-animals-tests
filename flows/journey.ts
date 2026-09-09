@@ -180,7 +180,7 @@ export class Journey {
     await this.fillArrivalDetails();
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
-    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.addCountry('France');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
@@ -190,8 +190,8 @@ export class Journey {
     await this.fillArrivalDetails();
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
-    await this.pages.transitedCountries.selectCountry('France');
-    await this.pages.transitedCountries.selectCountry('Belgium');
+    await this.pages.transitedCountries.addCountry('France');
+    await this.pages.transitedCountries.addCountry('Belgium');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
     await this.pages.transporter.transporterType('Commercial').check();
@@ -281,7 +281,7 @@ export class Journey {
 
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
-    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.addCountry('France');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
