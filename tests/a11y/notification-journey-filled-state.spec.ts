@@ -126,7 +126,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Transited countries with a country added', async () => {
       await pages.transitedCountries.heading.waitFor();
-      await pages.transitedCountries.selectCountry('France');
+      await pages.transitedCountries.addCountry('France');
       await runA11yScan();
       await pages.transitedCountries.saveAndContinue.click();
     });
