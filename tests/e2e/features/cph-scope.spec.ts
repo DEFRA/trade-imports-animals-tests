@@ -54,7 +54,7 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // slash-stripped value.
     await cphRow.getByRole('link', { name: 'Add' }).click();
     await expect(pages.cphNumber.heading).toBeVisible();
-    await pages.cphNumber.cphNumber.fill('12/345/6789');
+    await pages.cphNumber.fillCphNumber();
     await pages.cphNumber.saveAndContinue.click();
     await expect(pages.addresses.heading).toBeVisible();
     await expect(cphRow).toContainText('123456789');
@@ -62,7 +62,9 @@ test.describe('CPH scope', { tag: ['@integration', '@duplicated-in-frontend'] },
     // Filled state: the row's action reads Change, the page shows the stored
     // value, and the back link returns to the addresses hub.
     await cphRow.getByRole('link', { name: 'Change' }).click();
-    await expect(pages.cphNumber.cphNumber).toHaveValue('123456789');
+    await expect(pages.cphNumber.county).toHaveValue('12');
+    await expect(pages.cphNumber.parish).toHaveValue('345');
+    await expect(pages.cphNumber.holding).toHaveValue('6789');
     await pages.cphNumber.linkBack.click();
     await expect(pages.addresses.heading).toBeVisible();
 

@@ -10,8 +10,22 @@ export class CphNumberPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Add the county parish holding number (CPH)' });
   }
 
-  get cphNumber(): Locator {
-    return this.page.getByLabel('CPH number');
+  get county(): Locator {
+    return this.page.getByLabel('County', { exact: true });
+  }
+
+  get parish(): Locator {
+    return this.page.getByLabel('Parish', { exact: true });
+  }
+
+  get holding(): Locator {
+    return this.page.getByLabel('Holding number', { exact: true });
+  }
+
+  async fillCphNumber(county = '12', parish = '345', holding = '6789'): Promise<void> {
+    await this.county.fill(county);
+    await this.parish.fill(parish);
+    await this.holding.fill(holding);
   }
 
   get saveAndContinue(): Locator {

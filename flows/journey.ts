@@ -157,7 +157,7 @@ export class Journey {
 
   async answerAddresses(): Promise<void> {
     await this.fillAddressesToCph();
-    await this.pages.cphNumber.cphNumber.fill('12/345/6789');
+    await this.pages.cphNumber.fillCphNumber();
     await this.pages.cphNumber.saveAndContinue.click();
     await this.pages.overview.heading.waitFor();
   }

@@ -126,7 +126,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     await test.step('CPH number', async () => {
       await pages.cphNumber.heading.waitFor();
       await runA11yScan();
-      await pages.cphNumber.cphNumber.fill('12/345/6789');
+      await pages.cphNumber.fillCphNumber();
       await pages.cphNumber.saveAndContinue.click();
       await pages.overview.heading.waitFor();
     });
