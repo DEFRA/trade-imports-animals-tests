@@ -1,14 +1,33 @@
+import { type Locator } from '@playwright/test';
 import { PlantsNotificationPage } from '@page-objects/plants/plants-notification-page';
 
-/**
- * The consignor or exporter, picked from the organisation's address book.
- *
- * It is the last step of the opening run, so the destination page continues
- * here rather than to the Overview — which is all the destination spec needs of
- * it today. The locators the consignor's own spec will want come with that spec.
- */
 export class PlantsConsignorSelectPage extends PlantsNotificationPage {
   constructor(page: ConstructorParameters<typeof PlantsNotificationPage>[0]) {
     super(page, 'consignors/select');
+  }
+
+  get heading(): Locator {
+    return this.page.getByRole('heading', { level: 1, name: 'Consignor or exporter', exact: true });
+  }
+
+  address(name: string): Locator {
+    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
+  }
+
+  selectedAddress(name: string): Locator {
+    return this.page.getByText(`Selected address: ${name}`, { exact: true });
+  }
+
+  async searchFor(term: string): Promise<void> {
+    await this.page.getByLabel('Search', { exact: true }).fill(term);
+    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
+  }
+
+  get btnSaveAndContinue(): Locator {
+    return this.page.getByRole('button', { name: 'Save and continue', exact: true });
+  }
+
+  get errorSummary(): Locator {
+    return this.page.locator('.govuk-error-summary');
   }
 }
