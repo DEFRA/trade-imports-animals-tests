@@ -11,7 +11,7 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
     await journey.toAccompanyingDocuments();
   });
 
-  test('infected upload: accepted with Checking, then Virus found with error summary and no view link', async ({ pages }, testInfo) => {
+  test('infected upload: accepted while scanning, then Virus found with error summary and no view link', async ({ pages }, testInfo) => {
     test.slow();
     const eicar = await writeEicarPdfFile(path.join(testInfo.outputDir, 'file-upload'));
 
@@ -21,7 +21,7 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
 
     const row = pages.accompanyingDocuments.documentRow(reference);
     await expect(row).toBeVisible();
-    await expect(row).toContainText('Checking');
+    await expect(row).toContainText('Scanning for virus');
 
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -31,7 +31,7 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
     await expect(pages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
   });
 
-  test('clean upload: shows Checking with no view link, then Safe with a view link', async ({ pages }) => {
+  test('clean upload: shows Scanning for virus with no view link, then Check completed with a view link', async ({ pages }) => {
     test.slow();
     const reference = `PWSCAN${Date.now()}`;
     await pages.accompanyingDocuments.fillDocument(reference, issueDate, fileUploadPaths.safeFile1kbPdf);
@@ -39,11 +39,11 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
 
     const row = pages.accompanyingDocuments.documentRow(reference);
     await expect(row).toBeVisible();
-    await expect(row).toContainText('Checking');
+    await expect(row).toContainText('Scanning for virus');
     await expect(pages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
     await expect(pages.accompanyingDocuments.removeDocument(1)).toBeVisible();
 
-    await expect(row).toContainText('Safe', { timeout: fileUploadTimeouts.virusScanComplete });
+    await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.accompanyingDocuments.viewFile(1)).toBeVisible();
   });
 });

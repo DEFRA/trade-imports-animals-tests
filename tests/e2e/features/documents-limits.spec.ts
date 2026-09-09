@@ -26,7 +26,7 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
       const reference = `PWCAP${Date.now()}${index}`;
       await pages.accompanyingDocuments.fillDocument(reference, issueDate, fileUploadPaths.safeFile1kbPdf);
       await pages.accompanyingDocuments.saveAndAddAnother.click();
-      await expect(pages.accompanyingDocuments.documentRow(reference)).toContainText('Safe', {
+      await expect(pages.accompanyingDocuments.documentRow(reference)).toContainText('Check completed', {
         timeout: fileUploadTimeouts.virusScanComplete,
       });
     }
@@ -56,7 +56,7 @@ test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-fronte
     await pages.accompanyingDocuments.fillDocument(exactReference, issueDate, exact);
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
-    await expect(pages.accompanyingDocuments.documentRow(exactReference)).toContainText('Safe', {
+    await expect(pages.accompanyingDocuments.documentRow(exactReference)).toContainText('Check completed', {
       timeout: fileUploadTimeouts.virusScanComplete,
     });
     await expect(pages.page.locator('.govuk-error-summary')).toHaveCount(0);
