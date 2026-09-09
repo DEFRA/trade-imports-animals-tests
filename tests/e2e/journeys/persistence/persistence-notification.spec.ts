@@ -76,7 +76,10 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.commodity.name).toBe('Cow');
       expect(species.text).toBe('Bos taurus');
       expect(species.earTag).toBe('UK123456789012');
-      expect(species.animalIdentifiers).toEqual([{ earTag: 'UK123456789012' }]);
+      // animalIdentification only fills earTag on this journey; passport is submitted
+      // as an empty string rather than omitted, matching the legacy earTag/passport
+      // scalars' own behaviour on this same fixture.
+      expect(species.animalIdentifiers).toEqual([{ earTag: 'UK123456789012', passport: '' }]);
       expect(complement.totalNoOfAnimals).toBe(1);
       expect(complement.totalNoOfPackages).toBe(5);
       expect(notification.reasonForImport).toBe('internalMarket');
@@ -108,7 +111,8 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.transport.meansOfTransport).toBe('ROAD_VEHICLE');
       expect(notification.transport.transportIdentification).toBe('FR-892-LK');
       expect(notification.transport.transportDocumentReference).toBe('CMR-2026-884721');
-      expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
+      // The checkbox list submits in its own (alphabetical) DOM order, not click order.
+      expect(notification.transport.transitedCountries).toEqual(['BE', 'FR']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
     } finally {
