@@ -1,3 +1,4 @@
+import { PlantsConsignmentContactSelectPage } from './plants/plants-consignment-contact-select-page';
 import { type Page } from '@playwright/test';
 import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
@@ -95,6 +96,7 @@ export function createPageObjects(page: Page) {
     plantsArrivalDetails: new PlantsArrivalDetailsPage(page),
     plantsPlaceOfDestination: new PlantsPlaceOfDestinationPage(page),
     plantsConsignorSelect: new PlantsConsignorSelectPage(page),
+    plantsConsignmentContactSelect: new PlantsConsignmentContactSelectPage(page),
     plantsIdentificationNumbers: new PlantsIdentificationNumbersPage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };
