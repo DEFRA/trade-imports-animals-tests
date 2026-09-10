@@ -100,6 +100,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       }
       await pages.plantsIdentificationNumbers.consignment.fill('JOURNEY_123');
       await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
+      await pages.plantsConsignmentContactSelect.searchFor(address.name);
       await pages.plantsConsignmentContactSelect.address(address.name).check();
       await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));

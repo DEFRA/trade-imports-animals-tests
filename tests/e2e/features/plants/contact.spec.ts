@@ -5,6 +5,13 @@ import type { PageObjects } from '@page-objects';
 import type { PlantsJourney } from '@flows/plants-journey';
 
 const CONTACT = 'Contact address for consignment';
+
+// The picker shows five rows a page (design 05-03..06), whatever page size the
+// address-book API itself serves.
+const PICKER_PAGE_SIZE = 5;
+
+/** A record only this run can find: the address book is shared across workers
+ * and never wiped, so anything that counts rows has to search its own token. */
 const addressNamed = (name: string) => ({
   name,
   addressLine1: '4 Nursery Lane',
@@ -27,25 +34,34 @@ async function openContact(pages: PageObjects, journey: PlantsJourney): Promise<
 }
 
 test.describe('High-risk plants contact', { tag: '@integration' }, () => {
-  test('lists address records beyond one picker page with name and address hints and persists a selection', async ({
+  test('searches the address book, pages the matches five at a time and persists a row ticked on a later page', async ({
     pages,
     plantsJourney,
     addressBookApi,
   }) => {
     const token = randomUUID();
     const records: AddressBookRecord[] = [];
-    for (let index = 0; index < 6; index++) {
+    // The book lists newest first, so the five newer records fill page one of
+    // the search and push the first one minted onto page two.
+    for (let index = 0; index <= PICKER_PAGE_SIZE; index++) {
       records.push(await addressBookApi.createAddress(addressNamed(`Contact ${token} ${index}`)));
     }
+    const target = records[0];
+
     const reference = await openContact(pages, plantsJourney);
     const contact = pages.plantsConsignmentContactSelect;
     await expect(pages.page).toHaveURL(contact.expectedUrl(reference));
     await expect(contact.heading).toBeVisible();
-    for (const record of records) {
-      await expect(contact.address(record.name)).toBeVisible();
-      await expect(contact.address(record.name)).toHaveAccessibleDescription('4 Nursery Lane, Perth, PH1 5EX, United Kingdom');
-    }
-    await contact.address(records[0].name).check();
+
+    await contact.searchFor(token);
+    await expect(contact.resultsCaption).toHaveText('Showing 5 of 6 addresses');
+    await expect(contact.address(target.name)).toHaveCount(0);
+
+    // Paging is a link, not a submit, and it carries the search term with it.
+    await contact.pageLink(2).click();
+    await expect(contact.resultsCaption).toHaveText('Showing 1 of 6 addresses');
+
+    await contact.address(target.name).check();
     await contact.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.taskRow(CONTACT)).toContainText('Completed');
@@ -53,14 +69,18 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     const review = pages.page.getByRole('listitem').filter({ hasText: 'Check and submit' });
     await expect(review).toContainText('Cannot start yet');
     await expect(review.getByRole('link')).toHaveCount(0);
+
+    // Re-entering opens on page one of the whole book, where the chosen record
+    // is not rendered — the picker still knows it, and says so in the inset.
     await contact.open(reference);
-    await pages.page.reload();
-    await expect(contact.address(records[0].name)).toBeChecked();
+    await expect(contact.selectedAddress(target.name)).toBeVisible();
+    await expect(contact.address(target.name)).toHaveCount(0);
   });
 
   test('continues through declaration to confirmation after checking Back navigation', async ({ pages, plantsJourney, addressBookApi }) => {
     const address = await addressBookApi.createAddress(addressNamed(`Review ${randomUUID()}`));
     const reference = await openContact(pages, plantsJourney);
+    await pages.plantsConsignmentContactSelect.searchFor(address.name);
     await pages.plantsConsignmentContactSelect.address(address.name).check();
     await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
     await pages.plantsArrivalDetails.open(reference);
@@ -106,7 +126,9 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
       // The inherited status model has no visited-page state: a blank save remains Not yet started.
       await expect(pages.plantsOverview.taskRow(CONTACT)).toContainText('Not yet started');
       await contact.open(reference);
-      await expect(contact.addresses.and(pages.page.locator(':checked'))).toHaveCount(0);
+      await expect(contact.heading).toBeVisible();
+      await expect(contact.selectedAddressInset).toHaveCount(0);
+      await expect(pages.page.getByRole('radio', { checked: true })).toHaveCount(0);
     });
   }
 });
