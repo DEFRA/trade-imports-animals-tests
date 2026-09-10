@@ -14,11 +14,11 @@ export type PrivateTransporterDetails = {
 /** Keyed-in transporter details, owed only when the transporter type is Private. */
 export class PrivateTransporterPage extends NotificationPage {
   constructor(page: Page) {
-    super(page, 'transporters/private');
+    super(page, 'transporters/add/private');
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Private transporter details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add private transporter' });
   }
 
   get saveAndContinue(): Locator {

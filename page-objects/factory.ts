@@ -1,9 +1,14 @@
+import { PlantsConfirmationPage } from './plants/plants-confirmation-page';
+import { PlantsDeclarationPage } from './plants/plants-declaration-page';
+import { PlantsNotificationViewPage } from './plants/plants-notification-view-page';
+import { PlantsConsignmentContactSelectPage } from './plants/plants-consignment-contact-select-page';
 import { type Page } from '@playwright/test';
 import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
 import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AddressesPage } from './notification/addresses-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { ArrivalDetailsPage } from './notification/arrival-details-page';
+import { CommercialTransporterPage } from './notification/commercial-transporter-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { ConsignmentDetailsPage } from './notification/consignment-details-page';
 import { ContactAddressPage } from './notification/contact-address-page';
@@ -18,6 +23,7 @@ import { OverviewPage } from './notification/overview-page';
 import { PrivateTransporterPage } from './notification/private-transporter-page';
 import { PartyPickerPage } from './notification/party-picker-page';
 import { TransitedCountriesPage } from './notification/transited-countries-page';
+import { TransporterAddPage } from './notification/transporter-add-page';
 import { TransporterPage } from './notification/transporter-page';
 import { TransporterSelectionPage } from './notification/transporter-selection-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
@@ -67,7 +73,9 @@ export function createPageObjects(page: Page) {
     arrivalDetails: new ArrivalDetailsPage(page),
     transitedCountries: new TransitedCountriesPage(page),
     transporter: new TransporterPage(page),
+    transporterAdd: new TransporterAddPage(page),
     transporterSelection: new TransporterSelectionPage(page),
+    commercialTransporter: new CommercialTransporterPage(page),
     privateTransporter: new PrivateTransporterPage(page),
     contactAddress: new ContactAddressPage(page),
     notificationView: new NotificationViewPage(page),
@@ -85,6 +93,9 @@ export function createPageObjects(page: Page) {
     insAddressBookView: new InsAddressBookViewPage(page),
     insAddressBookEdit: new InsAddressBookEditPage(page),
     insAddressBookDelete: new InsAddressBookDeletePage(page),
+    plantsNotificationView: new PlantsNotificationViewPage(page),
+    plantsDeclaration: new PlantsDeclarationPage(page),
+    plantsConfirmation: new PlantsConfirmationPage(page),
     plantsDashboard: new PlantsDashboardPage(page),
     plantsOverview: new PlantsOverviewPage(page),
     plantsCommodityType: new PlantsCommodityTypePage(page),
@@ -95,6 +106,7 @@ export function createPageObjects(page: Page) {
     plantsArrivalDetails: new PlantsArrivalDetailsPage(page),
     plantsPlaceOfDestination: new PlantsPlaceOfDestinationPage(page),
     plantsConsignorSelect: new PlantsConsignorSelectPage(page),
+    plantsConsignmentContactSelect: new PlantsConsignmentContactSelectPage(page),
     plantsIdentificationNumbers: new PlantsIdentificationNumbersPage(page),
     plantsDeleteNotification: new PlantsDeleteNotificationPage(page),
   };

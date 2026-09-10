@@ -151,6 +151,19 @@ export function toDisplayDate(
 }
 
 /**
+ * Gets the service-zone civil date `dayOffset` days from today, formatted the
+ * way the app renders long dates (`10 September 2026`). The frontend builds
+ * this with `toLocaleDateString('en-GB', { day: 'numeric', month: 'long',
+ * year: 'numeric', timeZone: 'Europe/London' })`, so anchor on the
+ * Europe/London civil day and format the resulting UTC instant in UTC.
+ */
+export function getRelativeServiceDisplayDate(dayOffset = 0): string {
+  const { year, month, day } = todayInServiceZone();
+  const target = new Date(Date.UTC(year, month - 1, day + dayOffset));
+  return toDisplayDate(target, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+}
+
+/**
  * Converts a DateInput or DateTimeInput into a UTC Date.
  * Missing time parts default to 00:00.
  */

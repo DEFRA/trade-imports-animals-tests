@@ -170,7 +170,7 @@ export class Journey {
     await this.pages.arrivalDetails.transportDocumentReference.fill('CMR-2026-884721');
   }
 
-  // Re-navigate from the hub to the transporter-type page within an already
+  // Re-navigate from the hub to the transporter list page within an already
   // unlocked journey. The page itself saves through unfilled; it is filled
   // because a road vehicle keeps transited countries in scope, which is
   // answered on the way.
@@ -180,7 +180,7 @@ export class Journey {
     await this.fillArrivalDetails();
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
-    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.addCountry('France');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
@@ -190,15 +190,12 @@ export class Journey {
     await this.fillArrivalDetails();
     await this.pages.arrivalDetails.saveAndContinue.click();
     await this.pages.transitedCountries.heading.waitFor();
-    await this.pages.transitedCountries.selectCountry('France');
-    await this.pages.transitedCountries.selectCountry('Belgium');
+    await this.pages.transitedCountries.addCountry('France');
+    await this.pages.transitedCountries.addCountry('Belgium');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
-    await this.pages.transporter.transporterType('Commercial').check();
+    await this.pages.transporter.transporter('García Livestock Transport SL').check();
     await this.pages.transporter.saveAndContinue.click();
-    await this.pages.transporterSelection.heading.waitFor();
-    await this.pages.transporterSelection.transporter('García Livestock Transport SL').check();
-    await this.pages.transporterSelection.saveAndContinue.click();
     await this.pages.overview.heading.waitFor();
   }
 
@@ -281,15 +278,30 @@ export class Journey {
 
   async toTransporter(): Promise<void> {
     await this.toTransitedCountries();
-    await this.pages.transitedCountries.selectCountry('France');
+    await this.pages.transitedCountries.addCountry('France');
     await this.pages.transitedCountries.saveAndContinue.click();
     await this.pages.transporter.heading.waitFor();
   }
 
-  async toTransporterSelection(): Promise<void> {
+  // The commercial arm of the add route: the list first, then the type
+  // question, and then the form for a commercial transporter that is not on
+  // the list.
+  async toCommercialTransporter(): Promise<void> {
     await this.toTransporter();
-    await this.pages.transporter.transporterType('Commercial').check();
-    await this.pages.transporter.saveAndContinue.click();
+    await this.pages.transporter.addTransporter.click();
+    await this.pages.transporterAdd.heading.waitFor();
+    await this.pages.transporterAdd.transporterType('Commercial').check();
+    await this.pages.transporterAdd.saveAndContinue.click();
+    await this.pages.commercialTransporter.heading.waitFor();
+  }
+
+  // The approved commercial register, which nothing links to now that the add
+  // route's commercial arm is the add-commercial form. It is reached by its own
+  // URL, through that arm so the transporter type is answered — which is what
+  // puts the commercial answer the register writes in scope.
+  async toTransporterSelection(): Promise<void> {
+    await this.toCommercialTransporter();
+    await this.pages.transporterSelection.open(this.pages.commercialTransporter.journeyIdFromUrl());
     await this.pages.transporterSelection.heading.waitFor();
   }
 

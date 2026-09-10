@@ -55,20 +55,30 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Transited countries with validation errors', async () => {
       await pages.transitedCountries.heading.waitFor();
-      await pages.transitedCountries.saveAndContinue.click();
+      await pages.transitedCountries.addCountryButton.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
-      await pages.transitedCountries.selectCountry('France');
+      await pages.transitedCountries.addCountry('France');
       await pages.transitedCountries.saveAndContinue.click();
     });
 
     await test.step('Continue to declaration', async () => {
       await pages.transporter.heading.waitFor();
-      await pages.transporter.transporterType('Commercial').check();
-      await pages.transporter.saveAndContinue.click();
-      await pages.transporterSelection.heading.waitFor();
-      await pages.transporterSelection.transporter('García Livestock Transport SL').check();
-      await pages.transporterSelection.saveAndContinue.click();
+      await pages.transporter.addTransporter.click();
+      await pages.transporterAdd.heading.waitFor();
+      await pages.transporterAdd.transporterType('Commercial').check();
+      await pages.transporterAdd.saveAndContinue.click();
+      await pages.commercialTransporter.heading.waitFor();
+      await pages.commercialTransporter.fill({
+        approvalNumber: 'NI/TA/2026/0041',
+        name: 'Lough Neagh Livestock Haulage Ltd',
+        addressLine1: '4 Shore Road',
+        townOrCity: 'Antrim',
+        postalOrZipCode: 'BT41 4LB',
+        emailAddress: 'ops@loughneagh.example',
+        telephoneNumber: '+44 28 9446 1200',
+      });
+      await pages.commercialTransporter.saveAndContinue.click();
       await pages.overview.heading.waitFor();
       await journey.answerAnimalIdentification();
       await journey.answerReasonAndAdditionalDetails();

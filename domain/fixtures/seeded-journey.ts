@@ -80,10 +80,12 @@ const arrivalStep: SeedStep = {
 
 // Only in scope because arrivalStep posts ROAD_VEHICLE — transitedCountries applies to land transport only.
 const transportSteps: SeedStep[] = [
-  // A checkbox group posts in the order the page lists its boxes, not the order they were ticked.
-  { slug: 'transit-countries', form: { transitedCountries: ['BE', 'FR'] } },
-  { slug: 'transporters', form: { transporterType: 'Commercial' } },
-  { slug: 'transporters/select', form: { commercialTransporter: 'garcia-livestock-transport' } },
+  // Countries are added one at a time and saved in the order they were added,
+  // so the seed matches the order the browser journey adds them: France, then Belgium.
+  { slug: 'transit-countries', form: { transitedCountries: ['FR', 'BE'] } },
+  // The list carries both kinds, so the pick settles the transporter type too
+  // and there is no separate type post.
+  { slug: 'transporters', form: { transporter: 'garcia-livestock-transport' } },
 ];
 
 const contactStep = (parties: PartyIds): SeedStep => ({

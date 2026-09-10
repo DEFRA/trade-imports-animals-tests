@@ -91,6 +91,8 @@ test.describe('High-risk plants consignment parties section', { tag: '@integrati
       }
       // The optional reference can be left blank, including on wood's only field.
       await numbers.btnSaveAndContinue.click();
+      await expect(pages.page).toHaveURL(pages.plantsConsignmentContactSelect.expectedUrl(reference));
+      await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
       await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
       await expect(pages.plantsOverview.taskRow(CONSIGNOR)).toContainText('Completed');
       await expect(pages.plantsOverview.taskRow(NUMBERS)).toContainText(type === WOOD ? 'Optional' : 'Completed');
@@ -137,6 +139,8 @@ test.describe('High-risk plants consignment parties section', { tag: '@integrati
     await numbers.producer.fill('P'.repeat(58));
     await numbers.crop.fill('C'.repeat(58));
     await numbers.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(pages.plantsConsignmentContactSelect.expectedUrl(reference));
+    await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.taskRowByTitle(CONSIGNOR)).toHaveCount(0);
     await expect(pages.plantsOverview.taskRow(NUMBERS)).toContainText('Completed');
@@ -168,6 +172,8 @@ test.describe('High-risk plants consignment parties section', { tag: '@integrati
     await expect(numbers.errorSummary).toContainText('Consignment number must only contain letters, numbers and underscores');
     await numbers.consignment.fill('N'.repeat(58));
     await numbers.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(pages.plantsConsignmentContactSelect.expectedUrl(reference));
+    await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
     await expect(pages.plantsOverview.taskRow(NUMBERS)).toContainText('Completed');
     await numbers.open(reference);
@@ -191,6 +197,8 @@ test.describe('High-risk plants consignment parties section', { tag: '@integrati
     await numbers.supplier.fill('GB-12345');
     await numbers.consignment.fill('SHIP_2027');
     await numbers.btnSaveAndContinue.click();
+    await expect(pages.page).toHaveURL(pages.plantsConsignmentContactSelect.expectedUrl(reference));
+    await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
 
     await plantsJourney.changeCommodityType(reference, POTATOES);

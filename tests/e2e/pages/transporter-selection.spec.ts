@@ -1,5 +1,9 @@
 import { test, expect } from '@fixtures';
 
+// The approved commercial register. Nothing links to it now that the add
+// route's commercial arm is the add-commercial form and the transporter list
+// carries the register's rows itself, so the journey helper reaches it by its
+// own URL — through the add route, which is what answers the transporter type.
 test.describe('Transporter selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ journey }) => {
     await journey.toTransporterSelection();
