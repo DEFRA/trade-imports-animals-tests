@@ -1,3 +1,6 @@
+import { PlantsConfirmationPage } from './plants/plants-confirmation-page';
+import { PlantsDeclarationPage } from './plants/plants-declaration-page';
+import { PlantsNotificationViewPage } from './plants/plants-notification-view-page';
 import { PlantsConsignmentContactSelectPage } from './plants/plants-consignment-contact-select-page';
 import { type Page } from '@playwright/test';
 import { AccompanyingDocumentsPage } from './notification/accompanying-documents-page';
@@ -86,6 +89,9 @@ export function createPageObjects(page: Page) {
     insAddressBookView: new InsAddressBookViewPage(page),
     insAddressBookEdit: new InsAddressBookEditPage(page),
     insAddressBookDelete: new InsAddressBookDeletePage(page),
+    plantsNotificationView: new PlantsNotificationViewPage(page),
+    plantsDeclaration: new PlantsDeclarationPage(page),
+    plantsConfirmation: new PlantsConfirmationPage(page),
     plantsDashboard: new PlantsDashboardPage(page),
     plantsOverview: new PlantsOverviewPage(page),
     plantsCommodityType: new PlantsCommodityTypePage(page),
