@@ -111,8 +111,8 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.transport.meansOfTransport).toBe('ROAD_VEHICLE');
       expect(notification.transport.transportIdentification).toBe('FR-892-LK');
       expect(notification.transport.transportDocumentReference).toBe('CMR-2026-884721');
-      // The checkbox list submits in its own (alphabetical) DOM order, not click order.
-      expect(notification.transport.transitedCountries).toEqual(['BE', 'FR']);
+      // Countries are added one at a time, so the list keeps the order they were added in.
+      expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
     } finally {
