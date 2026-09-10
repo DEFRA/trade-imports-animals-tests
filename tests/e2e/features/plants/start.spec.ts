@@ -1,12 +1,12 @@
 import { test, expect } from '@fixtures';
 
 /**
- * The plants reference has no type-code prefix: the backend's
- * ReferenceNumberGenerator mints {YY}-{XXXXXX} over a Crockford-style alphabet,
- * and the frontend's real records adapter carries it through as the journey id.
- * Assert the shape, never a literal — the prefix is still unagreed.
+ * The plants reference carries the agreed GBN-HRP type code: the backend's
+ * ReferenceNumberGenerator mints GBN-HRP-{YY}-{XXXXXX} over a Crockford-style
+ * alphabet, and the frontend's real records adapter carries it through as the
+ * journey id. Assert the shape, never a literal — the body is random.
  */
-const PLANTS_REFERENCE = /^\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;
+const PLANTS_REFERENCE = /^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/;
 
 test.describe('High-risk plants start section', { tag: '@integration' }, () => {
   test('the dashboard renders after signing in', { tag: '@smoke' }, async ({ pages }) => {

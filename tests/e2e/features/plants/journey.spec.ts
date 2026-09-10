@@ -70,7 +70,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
       date.setUTCDate(date.getUTCDate() + (scenario.late ? -1 : 7));
       const arrivalDate = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London' }).format(date);
       const reference = await plantsJourney.startNotification();
-      expect(reference).toMatch(/^\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/);
+      expect(reference).toMatch(/^GBN-HRP-\d{2}-[0-9A-HJ-KM-NP-TV-Z]{6}$/);
       await plantsJourney.chooseCommodityType(scenario.type);
       await plantsJourney.addCommodityLine(scenario.category, scenario.line);
       await plantsJourney.toOrigin();
