@@ -8,6 +8,7 @@ import { AdditionalDetailsPage } from './notification/additional-details-page';
 import { AddressesPage } from './notification/addresses-page';
 import { AnimalIdentificationPage } from './notification/animal-identification-page';
 import { ArrivalDetailsPage } from './notification/arrival-details-page';
+import { CommercialTransporterPage } from './notification/commercial-transporter-page';
 import { CommoditySelectionPage } from './notification/commodity-selection-page';
 import { ConsignmentDetailsPage } from './notification/consignment-details-page';
 import { ContactAddressPage } from './notification/contact-address-page';
@@ -74,6 +75,7 @@ export function createPageObjects(page: Page) {
     transporter: new TransporterPage(page),
     transporterAdd: new TransporterAddPage(page),
     transporterSelection: new TransporterSelectionPage(page),
+    commercialTransporter: new CommercialTransporterPage(page),
     privateTransporter: new PrivateTransporterPage(page),
     contactAddress: new ContactAddressPage(page),
     notificationView: new NotificationViewPage(page),

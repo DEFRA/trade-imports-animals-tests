@@ -283,14 +283,25 @@ export class Journey {
     await this.pages.transporter.heading.waitFor();
   }
 
-  // The register sits behind the add route now: the list first, then the type
-  // question, and only then the approved commercial register.
-  async toTransporterSelection(): Promise<void> {
+  // The commercial arm of the add route: the list first, then the type
+  // question, and then the form for a commercial transporter that is not on
+  // the list.
+  async toCommercialTransporter(): Promise<void> {
     await this.toTransporter();
     await this.pages.transporter.addTransporter.click();
     await this.pages.transporterAdd.heading.waitFor();
     await this.pages.transporterAdd.transporterType('Commercial').check();
     await this.pages.transporterAdd.saveAndContinue.click();
+    await this.pages.commercialTransporter.heading.waitFor();
+  }
+
+  // The approved commercial register, which nothing links to now that the add
+  // route's commercial arm is the add-commercial form. It is reached by its own
+  // URL, through that arm so the transporter type is answered — which is what
+  // puts the commercial answer the register writes in scope.
+  async toTransporterSelection(): Promise<void> {
+    await this.toCommercialTransporter();
+    await this.pages.transporterSelection.open(this.pages.commercialTransporter.journeyIdFromUrl());
     await this.pages.transporterSelection.heading.waitFor();
   }
 
