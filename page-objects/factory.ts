@@ -19,6 +19,7 @@ import { OverviewPage } from './notification/overview-page';
 import { PrivateTransporterPage } from './notification/private-transporter-page';
 import { PartyPickerPage } from './notification/party-picker-page';
 import { TransitedCountriesPage } from './notification/transited-countries-page';
+import { TransporterAddPage } from './notification/transporter-add-page';
 import { TransporterPage } from './notification/transporter-page';
 import { TransporterSelectionPage } from './notification/transporter-selection-page';
 import { AdminDashboardPage } from './admin/admin-dashboard-page';
@@ -68,6 +69,7 @@ export function createPageObjects(page: Page) {
     arrivalDetails: new ArrivalDetailsPage(page),
     transitedCountries: new TransitedCountriesPage(page),
     transporter: new TransporterPage(page),
+    transporterAdd: new TransporterAddPage(page),
     transporterSelection: new TransporterSelectionPage(page),
     privateTransporter: new PrivateTransporterPage(page),
     contactAddress: new ContactAddressPage(page),

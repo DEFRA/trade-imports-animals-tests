@@ -39,11 +39,13 @@ test.describe('Security scan (frontend, conditional pages)', { tag: '@active' },
     await pages.additionalDetails.saveAndContinue.click();
     await pages.overview.heading.waitFor();
 
-    // The private branch of the transporter question; the submission journey
-    // only ever takes the commercial one.
+    // The private branch of the add route; the submission journey only ever
+    // takes the commercial one.
     await journey.reachTransporterFromHub();
-    await pages.transporter.transporterType('Private').check();
-    await pages.transporter.saveAndContinue.click();
+    await pages.transporter.addTransporter.click();
+    await pages.transporterAdd.heading.waitFor();
+    await pages.transporterAdd.transporterType('Private').check();
+    await pages.transporterAdd.saveAndContinue.click();
 
     await expect(pages.privateTransporter.heading).toBeVisible();
     await pages.privateTransporter.fill(PRIVATE_TRANSPORTER);

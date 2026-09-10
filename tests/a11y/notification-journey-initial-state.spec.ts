@@ -146,11 +146,17 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await pages.transitedCountries.saveAndContinue.click();
     });
 
-    await test.step('Transporter', async () => {
+    await test.step('Transporter list', async () => {
       await pages.transporter.heading.waitFor();
       await runA11yScan();
-      await pages.transporter.transporterType('Commercial').check();
-      await pages.transporter.saveAndContinue.click();
+      await pages.transporter.addTransporter.click();
+    });
+
+    await test.step('Transporter type', async () => {
+      await pages.transporterAdd.heading.waitFor();
+      await runA11yScan();
+      await pages.transporterAdd.transporterType('Commercial').check();
+      await pages.transporterAdd.saveAndContinue.click();
     });
 
     await test.step('Transporter selection', async () => {

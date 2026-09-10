@@ -64,8 +64,10 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Continue to declaration', async () => {
       await pages.transporter.heading.waitFor();
-      await pages.transporter.transporterType('Commercial').check();
-      await pages.transporter.saveAndContinue.click();
+      await pages.transporter.addTransporter.click();
+      await pages.transporterAdd.heading.waitFor();
+      await pages.transporterAdd.transporterType('Commercial').check();
+      await pages.transporterAdd.saveAndContinue.click();
       await pages.transporterSelection.heading.waitFor();
       await pages.transporterSelection.transporter('García Livestock Transport SL').check();
       await pages.transporterSelection.saveAndContinue.click();
