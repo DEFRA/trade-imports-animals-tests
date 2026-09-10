@@ -12,8 +12,12 @@ export class TransporterPage extends NotificationPage {
     return this.page.getByRole('heading', { level: 1, name: 'Transporter details' });
   }
 
+  /** The list is a table with a radio in the leading column, so the radio's own
+   * label is a visually hidden "Select <name>" — the name itself is the cell in
+   * the Name column, not the control's accessible name. Same shape as the party
+   * picker's results table. */
   transporter(name: string): Locator {
-    return this.page.getByRole('radio', { name, exact: true });
+    return this.page.getByRole('radio', { name: `Select ${name}`, exact: true });
   }
 
   /** The govuk button macro renders the href as role=button. */
