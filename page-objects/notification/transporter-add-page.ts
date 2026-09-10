@@ -8,15 +8,25 @@ export class TransporterAddPage extends NotificationPage {
     super(page, 'transporters/add');
   }
 
+  /** The page is headed with the choice it asks for; the question itself is a
+   * visually hidden legend, so the heading is what carries the h1. */
   get heading(): Locator {
-    return this.page.getByRole('heading', {
-      level: 1,
-      name: 'What type of transporter will move the animals?',
-    });
+    return this.page.getByRole('heading', { level: 1, name: 'Choose a transporter type' });
   }
 
+  /** The rendered radio label for each type — 'Private' reads as
+   * 'Private transporter' on the page, so the key is mapped rather than used
+   * as the accessible name. */
+  private static readonly TYPE_LABELS = {
+    Commercial: 'Commercial',
+    Private: 'Private transporter',
+  } as const;
+
   transporterType(name: 'Commercial' | 'Private'): Locator {
-    return this.page.getByRole('radio', { name, exact: true });
+    return this.page.getByRole('radio', {
+      name: TransporterAddPage.TYPE_LABELS[name],
+      exact: true,
+    });
   }
 
   get saveAndContinue(): Locator {

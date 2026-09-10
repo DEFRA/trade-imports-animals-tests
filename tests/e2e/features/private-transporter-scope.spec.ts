@@ -22,9 +22,6 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     await journey.unlockSections();
 
     const openTransporters = () => journey.reachTransporterFromHub();
-    const detailsHeading = pages.page.getByRole('heading', {
-      name: 'Private transporter details',
-    });
 
     // The type question sits behind "Add a transporter" now, so every branch is
     // reached through the add route rather than off the list itself.
@@ -40,7 +37,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // naming the missing mandatory fields.
     await openTransporters();
     await chooseType('Private');
-    await expect(detailsHeading).toBeVisible();
+    await expect(pages.privateTransporter.heading).toBeVisible();
     await pages.page.getByLabel('Name or organisation name').fill(transporter.name);
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -61,7 +58,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // the form fields.
     await openTransporters();
     await chooseType('Private');
-    await expect(detailsHeading).toBeVisible();
+    await expect(pages.privateTransporter.heading).toBeVisible();
     await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue(transporter.name);
     await expect(pages.page.getByLabel('Country')).toHaveValue(transporter.address.country);
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
@@ -79,7 +76,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // renders empty.
     await openTransporters();
     await chooseType('Private');
-    await expect(detailsHeading).toBeVisible();
+    await expect(pages.privateTransporter.heading).toBeVisible();
     await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue('');
     await expect(pages.page.getByLabel('Country')).toHaveValue('');
   });

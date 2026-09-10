@@ -18,7 +18,7 @@ export class PrivateTransporterPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Private transporter details' });
+    return this.page.getByRole('heading', { level: 1, name: 'Add private transporter' });
   }
 
   get saveAndContinue(): Locator {
