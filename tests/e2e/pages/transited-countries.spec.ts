@@ -47,6 +47,8 @@ test.describe('Transited countries page', { tag: ['@integration', '@duplicated-i
   test('shows an error summary when Add country is pressed with no country chosen', async ({ pages }) => {
     await pages.transitedCountries.addCountryButton.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
-    await expect(pages.page.getByText('Enter a country to add')).toBeVisible();
+    // The message is on the page twice — the summary link and the field's own
+    // error — so the summary link is what this asserts, by role.
+    await expect(pages.page.getByRole('link', { name: 'Enter a country to add' })).toBeVisible();
   });
 });
