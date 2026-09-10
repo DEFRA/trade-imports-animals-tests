@@ -26,12 +26,20 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
       name: 'Private transporter details',
     });
 
+    // The type question sits behind "Add a transporter" now, so every branch is
+    // reached through the add route rather than off the list itself.
+    const chooseType = async (type: 'Commercial' | 'Private') => {
+      await pages.transporter.addTransporter.click();
+      await pages.transporterAdd.heading.waitFor();
+      await pages.transporterAdd.transporterType(type).check();
+      await pages.transporterAdd.saveAndContinue.click();
+    };
+
     // Private transporter: the details page opens. A PARTIAL fill blocks the
     // save — the fieldGroup's mandates apply once the record is provided —
     // naming the missing mandatory fields.
     await openTransporters();
-    await pages.transporter.transporterType('Private').check();
-    await pages.transporter.saveAndContinue.click();
+    await chooseType('Private');
     await expect(detailsHeading).toBeVisible();
     await pages.page.getByLabel('Name or organisation name').fill(transporter.name);
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
@@ -52,7 +60,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // The record persists: walking back in flattens the saved object into
     // the form fields.
     await openTransporters();
-    await pages.transporter.saveAndContinue.click();
+    await chooseType('Private');
     await expect(detailsHeading).toBeVisible();
     await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue(transporter.name);
     await expect(pages.page.getByLabel('Country')).toHaveValue(transporter.address.country);
@@ -62,8 +70,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // type walks to the commercial select page instead; a blank save there
     // returns to the hub.
     await openTransporters();
-    await pages.transporter.transporterType('Commercial').check();
-    await pages.transporter.saveAndContinue.click();
+    await chooseType('Commercial');
     await expect(pages.transporterSelection.heading).toBeVisible();
     await pages.transporterSelection.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
@@ -71,8 +78,7 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // Back to private: leaving scope wiped the saved details — the form
     // renders empty.
     await openTransporters();
-    await pages.transporter.transporterType('Private').check();
-    await pages.transporter.saveAndContinue.click();
+    await chooseType('Private');
     await expect(detailsHeading).toBeVisible();
     await expect(pages.page.getByLabel('Name or organisation name')).toHaveValue('');
     await expect(pages.page.getByLabel('Country')).toHaveValue('');
