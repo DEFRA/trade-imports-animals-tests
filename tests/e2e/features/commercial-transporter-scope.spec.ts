@@ -41,7 +41,7 @@ test.describe('Commercial transporter scope', { tag: ['@integration', '@duplicat
     // returns to the hub.
     await openTransporters();
     await chooseType('Private');
-    await expect(pages.page.getByRole('heading', { name: 'Private transporter details' })).toBeVisible();
+    await expect(pages.privateTransporter.heading).toBeVisible();
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
     await expect(pages.overview.heading).toBeVisible();
 
