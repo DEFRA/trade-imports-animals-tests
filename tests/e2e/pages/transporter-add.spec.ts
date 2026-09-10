@@ -25,6 +25,8 @@ test.describe('Transporter type page', { tag: ['@integration', '@duplicated-in-f
     await pages.transporterAdd.saveAndContinue.click();
 
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
-    await expect(pages.transporterSelection.heading).toBeVisible();
+    // The commercial arm is the add-commercial form: a trader who could not
+    // find their transporter on the list types it in rather than picking again.
+    await expect(pages.commercialTransporter.heading).toBeVisible();
   });
 });

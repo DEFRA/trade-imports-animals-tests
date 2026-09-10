@@ -63,13 +63,13 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     await expect(pages.page.getByLabel('Country')).toHaveValue(transporter.address.country);
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
 
-    // Commercial transporter: the details page is no longer owed — saving the
-    // type walks to the commercial select page instead; a blank save there
-    // returns to the hub.
+    // Commercial transporter: the private details page is no longer owed —
+    // saving the type walks to the add-commercial form instead; a blank save
+    // there returns to the hub.
     await openTransporters();
     await chooseType('Commercial');
-    await expect(pages.transporterSelection.heading).toBeVisible();
-    await pages.transporterSelection.saveAndContinue.click();
+    await expect(pages.commercialTransporter.heading).toBeVisible();
+    await pages.commercialTransporter.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
 
     // Back to private: leaving scope wiped the saved details — the form
