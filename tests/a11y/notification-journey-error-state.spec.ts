@@ -55,7 +55,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     await test.step('Transited countries with validation errors', async () => {
       await pages.transitedCountries.heading.waitFor();
-      await pages.transitedCountries.saveAndContinue.click();
+      await pages.transitedCountries.addCountryButton.click();
       await expect(errorSummaryHeading).toBeVisible();
       await runA11yScan();
       await pages.transitedCountries.addCountry('France');
