@@ -40,6 +40,27 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(pages.notificationView.cancelAmendment).toHaveCount(0);
     });
 
+    test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages }) => {
+      await pages.notificationView.continueButton.click();
+
+      await expect(pages.page).toHaveURL(/\/notification-view$/);
+      await expect(pages.notificationView.errorSummary).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toContainText('There is a problem');
+      await expect(pages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
+    });
+  });
+
+  test.describe('DRAFT ready to submit', () => {
+    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
+      await seededJourney.createDraftNotification('readyToSubmit');
+      await notificationActions.toNotificationView(journeyContext.journeyId);
+    });
+
+    test('shows no error summary once every section is answered', async ({ pages }) => {
+      await expect(pages.notificationView.heading).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toHaveCount(0);
+    });
+
     test('Continue moves on to the declaration', async ({ pages }) => {
       await pages.notificationView.continueButton.click();
       await expect(pages.page).toHaveURL(/\/declaration$/);
