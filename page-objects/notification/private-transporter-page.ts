@@ -29,9 +29,9 @@ export class PrivateTransporterPage extends NotificationPage {
     await this.page.getByLabel('Name or organisation name').fill(details.name);
     await this.page.getByLabel('Address line 1').fill(details.addressLine1);
     await this.page.getByLabel('Town or city').fill(details.townOrCity);
-    await this.page.getByLabel('Postal or zip code').fill(details.postalOrZipCode);
+    await this.page.getByLabel('Postcode or Zip code').fill(details.postalOrZipCode);
     await this.page.getByLabel('Country').selectOption(details.country);
-    await this.page.getByLabel('Telephone number').fill(details.telephoneNumber);
+    await this.page.getByLabel('Phone number').fill(details.telephoneNumber);
     await this.page.getByLabel('Email address').fill(details.emailAddress);
   }
 }
