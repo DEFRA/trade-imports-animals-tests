@@ -46,8 +46,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Movement' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Addresses' })).toBeVisible();
-    // No documents were uploaded, so the documents section does not render.
-    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toHaveCount(0);
+    // Documents are optional, so the section stands even with nothing uploaded.
+    await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
+    await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
+    await expect(pages.notificationView.changeLink('Change documents')).toBeVisible();
 
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Consignment details' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();

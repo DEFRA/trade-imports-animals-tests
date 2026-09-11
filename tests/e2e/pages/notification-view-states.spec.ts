@@ -15,7 +15,9 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '2. Movement' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '3. Addresses' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toHaveCount(0);
+      await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
+      await expect(pages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
+      await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(pages.notificationView.summaryCard('Import details')).toContainText('France');
       await expect(pages.notificationView.summaryCard('Cow (0102) — Bos taurus')).toContainText('Number of animals');
     });
