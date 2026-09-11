@@ -68,7 +68,10 @@ async function completeNotification(
     await pages.plantsIdentificationNumbers.crop.fill('C123');
   }
   await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
-  if (contact) await pages.plantsConsignmentContactSelect.address(address.name).check();
+  if (contact) {
+    await pages.plantsConsignmentContactSelect.searchFor(address.name);
+    await pages.plantsConsignmentContactSelect.address(address.name).check();
+  }
   await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
   await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
   return { reference, address };
@@ -111,6 +114,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(review).toContainText('Cannot start yet');
     await expect(review.getByRole('link')).toHaveCount(0);
     await pages.plantsConsignmentContactSelect.open(reference);
+    await pages.plantsConsignmentContactSelect.searchFor(address.name);
     await pages.plantsConsignmentContactSelect.address(address.name).check();
     await pages.plantsConsignmentContactSelect.btnSaveAndContinue.click();
     await openReview(pages);
