@@ -25,7 +25,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
 
     try {
       await journey.toReview();
-      await pages.notificationView.changeLink('Change place of origin').click();
+      await pages.notificationView.changeLink('Change roles and addresses').click();
       await expect(pages.addresses.heading).toBeVisible();
       await pages.addresses.changeParty('Place of origin').click();
       await pages.placeOfOriginSelection.select(originalName);
@@ -102,7 +102,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
 
     try {
       await journey.toReview();
-      await pages.notificationView.changeLink('Change place of origin').click();
+      await pages.notificationView.changeLink('Change roles and addresses').click();
       await pages.addresses.changeParty('Place of origin').click();
       await pages.placeOfOriginSelection.select(originalName);
       await pages.placeOfOriginSelection.saveAndContinue.click();
