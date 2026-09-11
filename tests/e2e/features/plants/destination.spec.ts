@@ -17,7 +17,7 @@ const NOT_YET_ARRIVED = 'No, it has not arrived yet';
 
 // One page asks three questions and the heading is the only thing that says
 // which, so each is matched in full rather than on a shared fragment.
-const INTENDED_DESTINATION_HEADING = 'Intended destination';
+const PRE_ARRIVAL_DESTINATION_HEADING = 'Place of destination';
 const POST_ARRIVAL_DESTINATION_HEADING = 'Where is the consignment now?';
 
 const DESTINATION_REQUIRED_ERROR = 'Select a place of destination from the list';
@@ -118,7 +118,7 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     const reference = await plantsToDestination(pages, plantsJourney, NOT_YET_ARRIVED);
 
     await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
-    await expect(pages.plantsPlaceOfDestination.headingNamed(INTENDED_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(pages.plantsPlaceOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
 
     // The state is read from the arrival answer on every render rather than
@@ -132,13 +132,13 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await expect(pages.plantsPlaceOfDestination.descriptionNamed(POST_ARRIVAL_DESTINATION_DESCRIPTION)).toBeVisible();
   });
 
-  test('a potato notification is asked for the intended destination', async ({ pages, plantsJourney }) => {
+  test('a potato notification is asked for the place of destination', async ({ pages, plantsJourney }) => {
     const reference = await potatoesToDestination(pages, plantsJourney);
 
     // Potatoes have no arrival status to read, so the page is asked in its
     // pre-arrival state without the trader ever having chosen one.
     await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
-    await expect(pages.plantsPlaceOfDestination.headingNamed(INTENDED_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(pages.plantsPlaceOfDestination.descriptionNamed(INTENDED_DESTINATION_DESCRIPTION)).toBeVisible();
   });
 
@@ -254,7 +254,7 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await expect(pages.plantsOverview.taskRow(DESTINATION_TASK_ROW)).toContainText('Not yet started');
 
     await pages.plantsPlaceOfDestination.open(reference);
-    await expect(pages.plantsPlaceOfDestination.headingNamed(INTENDED_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
     await expect(pages.plantsPlaceOfDestination.selectedAddressInset).toHaveCount(0);
   });
 });

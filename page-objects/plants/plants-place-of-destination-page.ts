@@ -5,7 +5,7 @@ import { PlantsNotificationPage } from '@page-objects/plants/plants-notification
  * Where the consignment is going, picked from the organisation's address book.
  *
  * The page asks one of three questions and the heading says which: potatoes and
- * a consignment still on its way are asked for the intended destination, and one
+ * a consignment still on its way are asked for the place of destination, and one
  * that has already arrived is asked where it is being kept now.
  *
  * The whole page is one form and the search button, the paging links and the

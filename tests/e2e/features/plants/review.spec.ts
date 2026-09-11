@@ -249,7 +249,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await openReview(pages);
     await addressBookApi.deleteAddress(address.id);
     await pages.page.reload();
-    const destination = pages.plantsNotificationView.card('Intended destination');
+    const destination = pages.plantsNotificationView.card('Place of destination');
     await expect(destination.getByText('Not provided', { exact: true })).toHaveCount(4);
     await expect(destination).not.toContainText(address.name);
     await pages.plantsNotificationView.btnContinue.click();

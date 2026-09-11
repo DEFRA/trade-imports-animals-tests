@@ -132,7 +132,7 @@ test.describe('High-risk plants full happy-path journeys', { tag: '@integration'
         await expect(commodity).toContainText(value);
       }
       await expect(pages.plantsNotificationView.card('Arrival details')).toContainText(arrivalDate);
-      await expect(pages.plantsNotificationView.card('Intended destination')).toContainText(address.name);
+      await expect(pages.plantsNotificationView.card('Place of destination')).toContainText(address.name);
       await expect(pages.plantsNotificationView.card('Identification numbers')).toContainText('JOURNEY_123');
       await expect(pages.plantsNotificationView.card('Contact')).toContainText(address.name);
       await expect(pages.plantsNotificationView.card('Contact')).toContainText(address.email);
