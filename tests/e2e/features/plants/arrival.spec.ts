@@ -34,7 +34,7 @@ const POST_ARRIVAL_DATE_LABEL = 'Date the consignment first arrived in Great Bri
 // Arrival details now runs on into the destination section. That page asks its
 // question in the state the arrival answer puts the notification in, and the
 // heading is the only thing that says which — so it is matched in full.
-const INTENDED_DESTINATION_HEADING = 'Intended destination';
+const PRE_ARRIVAL_DESTINATION_HEADING = 'Place of destination';
 const POST_ARRIVAL_DESTINATION_HEADING = 'Where is the consignment now?';
 
 // Far enough past the four-day window (reg 26(1)) that the notification is
@@ -250,9 +250,9 @@ test.describe('High-risk plants arrival section', { tag: '@integration' }, () =>
     await pages.plantsArrivalDetails.btnSaveAndContinue.click();
 
     // Reg 24A gives potatoes no post-arrival branch, so the destination
-    // question is asked in its own state: the intended destination.
+    // question is asked in its own state: the pre-arrival question.
     await expect(pages.page).toHaveURL(pages.plantsPlaceOfDestination.expectedUrl(reference));
-    await expect(pages.plantsPlaceOfDestination.headingNamed(INTENDED_DESTINATION_HEADING)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.headingNamed(PRE_ARRIVAL_DESTINATION_HEADING)).toBeVisible();
 
     await pages.plantsOverview.open(reference);
     await expect(pages.plantsOverview.taskRow(ARRIVAL_TASK_ROW)).toContainText('Completed');
