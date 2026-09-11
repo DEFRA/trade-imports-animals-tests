@@ -49,7 +49,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     // Documents are optional, so the section stands even with nothing uploaded.
     await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
     await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
-    await expect(pages.notificationView.changeLink('Change documents')).toBeVisible();
+    await expect(pages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
 
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Consignment details' })).toBeVisible();
     await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
