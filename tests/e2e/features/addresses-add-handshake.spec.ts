@@ -54,7 +54,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await pages.consignorSelection.addNewAddress.click();
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
-    await pages.insAddressBookAdd.btnCancel.click();
+    await pages.insAddressBookAdd.btnCancelFromJourney.click();
 
     await expect(pages.consignorSelection.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/consignors\/select/);
