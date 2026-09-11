@@ -30,6 +30,10 @@ export class PartyPickerPage extends NotificationPage {
     return this.page.getByRole('button', { name: 'Save and continue' });
   }
 
+  get addNewAddress(): Locator {
+    return this.page.getByRole('link', { name: 'Add a new address' });
+  }
+
   /** Search then tick — the book is shared and newest-first, so a fixture may not be on page one. */
   async select(name: string): Promise<void> {
     await this.search.fill(name);
