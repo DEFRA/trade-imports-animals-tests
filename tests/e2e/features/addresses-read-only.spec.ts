@@ -1,12 +1,12 @@
 import { test, expect } from '@fixtures';
 
 /**
- * The notification journey reads the address book and never writes to it.
- * Adding, changing and removing records belongs to the INS frontend, so these
- * specs prove the animals frontend offers no way in — by control and by URL.
+ * The notification journey reads the address book and never writes to it directly.
+ * Adding records is delegated to the INS frontend; these specs prove the journey
+ * does not serve its own create page and links out with the handshake query.
  */
 test.describe('Addresses are read-only in the journey', { tag: ['@integration'] }, () => {
-  test('the party picker offers no way to add an address', async ({ journey, pages }) => {
+  test('the party picker links to INS to add an address', async ({ journey, pages }) => {
     await journey.startNotification();
     await journey.unlockSections();
 
@@ -15,7 +15,8 @@ test.describe('Addresses are read-only in the journey', { tag: ['@integration'] 
 
     await expect(pages.consignorSelection.saveAndContinue).toBeVisible();
     await expect(pages.page.getByRole('button', { name: /add.*address/i })).toHaveCount(0);
-    await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveCount(0);
+    await expect(pages.consignorSelection.addNewAddress).toBeVisible();
+    await expect(pages.consignorSelection.addNewAddress).toHaveAttribute('href', /\/address-book\/add\?journey-type=gbn-ag/);
   });
 
   test('the create-address page is no longer served', async ({ journey, journeyContext, pages }) => {

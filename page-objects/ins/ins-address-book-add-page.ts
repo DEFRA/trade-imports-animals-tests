@@ -27,6 +27,11 @@ export class InsAddressBookAddPage extends InsAddressBookFormPage {
     await this.signInWhenRequested(attemptSignIn, options);
   }
 
+  /** Complete OIDC when a cross-app link lands on INS without an existing session. */
+  async ensureSignedIn(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+    await this.signInWhenRequested(true, options);
+  }
+
   async save(): Promise<void> {
     await this.btnSaveAndContinue.click();
   }
