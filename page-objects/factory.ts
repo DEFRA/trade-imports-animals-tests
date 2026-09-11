@@ -34,6 +34,7 @@ import { SignInPage } from './auth/sign-in-page';
 import { SignOutPage } from './auth/sign-out-page';
 import { OrganisationPickerPage } from './auth/organisation-picker-page';
 import { InsAddressBookListPage } from './ins/ins-address-book-list-page';
+import { InsDashboardPage } from './ins/ins-dashboard-page';
 import { InsAddressBookAddPage } from './ins/ins-address-book-add-page';
 import { InsAddressBookViewPage } from './ins/ins-address-book-view-page';
 import { InsAddressBookEditPage } from './ins/ins-address-book-edit-page';
@@ -88,6 +89,7 @@ export function createPageObjects(page: Page) {
     adminDlqEvents: new AdminDlqEventsPage(page),
     adminNotifications: new AdminNotificationsPage(page),
     adminOutboxEvents: new AdminOutboxEventsPage(page),
+    insDashboard: new InsDashboardPage(page),
     insAddressBookList: new InsAddressBookListPage(page),
     insAddressBookAdd: new InsAddressBookAddPage(page),
     insAddressBookView: new InsAddressBookViewPage(page),

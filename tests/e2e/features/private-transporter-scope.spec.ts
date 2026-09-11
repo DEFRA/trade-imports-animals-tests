@@ -47,9 +47,9 @@ test.describe('Private transporter scope', { tag: ['@integration', '@duplicated-
     // { name, address } object and finishes the section.
     await pages.page.getByLabel('Address line 1').fill(transporter.address.addressLine1);
     await pages.page.getByLabel('Town or city').fill(transporter.address.townOrCity);
-    await pages.page.getByLabel('Postal or zip code').fill(transporter.address.postalOrZipCode);
+    await pages.page.getByLabel('Postcode or Zip code').fill(transporter.address.postalOrZipCode);
     await pages.page.getByLabel('Country').selectOption(transporter.address.country);
-    await pages.page.getByLabel('Telephone number').fill(transporter.address.telephoneNumber);
+    await pages.page.getByLabel('Phone number').fill(transporter.address.telephoneNumber);
     await pages.page.getByLabel('Email address').fill(transporter.address.emailAddress);
     await pages.page.getByRole('button', { name: 'Save and continue' }).click();
     await expect(pages.overview.heading).toBeVisible();

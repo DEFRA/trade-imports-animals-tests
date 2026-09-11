@@ -3,6 +3,8 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { ARRIVAL_DATE } from '@flows/journey';
+import { toUtcDate } from '@utils/date-utils';
 
 /**
  * Integration seam: real UI-create -> backend/Mongo persistence -> reload.
@@ -104,6 +106,13 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(notification.transport.portOfEntry).toBe('GB ABD');
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
+      // EUDPA-282: the stored instant must be UTC start-of-day for the chosen calendar
+      // date, whatever timezone the backend JVM runs in. Asserting on the raw BSON Date
+      // is what catches the drift — reading back through the API decodes with the same
+      // zone that encoded it, so the bug cancels itself out and passes either way.
+      // Fails by exactly 3,600,000 ms on a non-UTC backend during BST.
+      const [day, month, year] = ARRIVAL_DATE.split('/');
+      expect(notification.transport.arrivalDate.getTime()).toBe(toUtcDate({ day, month, year }).getTime());
     } finally {
       await client.close();
     }
