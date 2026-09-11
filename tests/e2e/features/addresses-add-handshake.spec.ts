@@ -27,6 +27,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await pages.addresses.addParty('Consignor or exporter').click();
 
     await pages.consignorSelection.addNewAddress.click();
+    await pages.insAddressBookAdd.ensureSignedIn();
     await expect(pages.page).toHaveURL(/localhost:3002\/address-book\/add\?/);
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
@@ -52,6 +53,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await pages.addresses.addParty('Consignor or exporter').click();
 
     await pages.consignorSelection.addNewAddress.click();
+    await pages.insAddressBookAdd.ensureSignedIn();
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
     await pages.insAddressBookAdd.btnCancelFromJourney.click();
