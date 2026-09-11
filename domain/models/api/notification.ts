@@ -48,8 +48,26 @@ export type Transporter = {
 };
 
 /**
+ * One animal-identifier unit on a species line. Every unit on the line, not
+ * just the first — see `SpeciesEntry.earTag`/`passport`/`microchip` for the
+ * legacy first-unit-only scalars kept alongside this list.
+ */
+export type AnimalIdentifier = {
+  microchip?: string;
+  passport?: string;
+  tattoo?: string;
+  earTag?: string;
+  horseName?: string;
+  permanentAddress?: ConsignmentParty;
+};
+
+/**
  * Per-species counts are strings on the wire (the frontend submits raw form
  * input values) but echo back as numbers once the backend has stored them.
+ *
+ * `earTag`/`passport`/`microchip` carry only the line's first
+ * animal-identifier unit  — `animalIdentifiers` carries every
+ * unit.
  */
 export type SpeciesEntry = {
   value: string;
@@ -58,6 +76,8 @@ export type SpeciesEntry = {
   noOfPackages?: number | string;
   earTag?: string;
   passport?: string;
+  microchip?: string;
+  animalIdentifiers?: AnimalIdentifier[];
 };
 
 export type CommodityComplement = {
@@ -75,6 +95,7 @@ export type Commodity = {
 export type Origin = {
   countryCode?: string;
   requiresRegionCode?: string;
+  regionOfOriginCode?: string;
   internalReference?: string;
 };
 
@@ -112,6 +133,10 @@ export type Notification = {
   consignment?: ConsignmentParty | null;
   cphNumber?: string | null;
   transport?: Transport | null;
+  purposeInInternalMarket?: string | null;
+  destinationCountry?: string | null;
+  portOfExit?: string | null;
+  exitDate?: string | null;
   status?: NotificationStatus;
   created?: string;
   updated?: string;

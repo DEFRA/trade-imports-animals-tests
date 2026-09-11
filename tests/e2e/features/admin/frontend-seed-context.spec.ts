@@ -35,6 +35,7 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
       expect(doc.notification.origin).toEqual({
         countryCode: 'FR',
         requiresRegionCode: 'no',
+        regionOfOriginCode: '',
         internalReference: 'Imports456GB',
       });
       expect(doc.fulfilments?.length).toBeGreaterThan(0);

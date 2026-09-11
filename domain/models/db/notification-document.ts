@@ -21,10 +21,24 @@ type StoredParty = {
   address?: StoredAddress;
 };
 
+/**
+ * One animal-identifier unit on a species line — every unit, not just the
+ * first.
+ */
+type StoredAnimalIdentifier = {
+  microchip?: string;
+  passport?: string;
+  tattoo?: string;
+  earTag?: string;
+  horseName?: string;
+  permanentAddress?: StoredParty;
+};
+
 type NotificationContent = {
   origin: {
     countryCode: string;
     requiresRegionCode: string;
+    regionOfOriginCode?: string;
     internalReference?: string;
   };
   commodity: {
@@ -38,6 +52,8 @@ type NotificationContent = {
         noOfPackages: number;
         earTag: string;
         passport: string;
+        microchip?: string;
+        animalIdentifiers?: StoredAnimalIdentifier[];
       }>;
       totalNoOfAnimals: number;
       totalNoOfPackages: number;
@@ -69,6 +85,10 @@ type NotificationContent = {
     };
   };
   consignment?: StoredParty;
+  purposeInInternalMarket?: string;
+  destinationCountry?: string;
+  portOfExit?: string;
+  exitDate?: Date;
 };
 
 export type NotificationDocument = {

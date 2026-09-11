@@ -73,13 +73,19 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.status).toBe('SUBMITTED');
       expect(notification.origin.countryCode).toBe('FR');
       expect(notification.origin.requiresRegionCode).toBe('yes');
+      expect(notification.origin.regionOfOriginCode).toBe('FR-75');
       expect(notification.origin.internalReference).toBe('Imports456GB');
       expect(notification.commodity.name).toBe('Cow');
       expect(species.text).toBe('Bos taurus');
       expect(species.earTag).toBe('UK123456789012');
+      // animalIdentification only fills earTag on this journey; passport is submitted
+      // as an empty string rather than omitted, matching the legacy earTag/passport
+      // scalars' own behaviour on this same fixture.
+      expect(species.animalIdentifiers).toEqual([{ earTag: 'UK123456789012', passport: '' }]);
       expect(complement.totalNoOfAnimals).toBe(1);
       expect(complement.totalNoOfPackages).toBe(5);
       expect(notification.reasonForImport).toBe('internalMarket');
+      expect(notification.purposeInInternalMarket).toBe('breeding');
       expect(notification.additionalDetails.certifiedFor).toBe('slaughter');
       expect(notification.additionalDetails.unweanedAnimals).toBe('no');
       // Every party carries inline details after submit — the freeze lives on the
@@ -104,6 +110,11 @@ test.describe('Notification persistence round-trip', { tag: ['@integration', '@m
       expect(doc.preAmendNotification).toBeUndefined();
       expect(notification.cphNumber).toBe('123456789');
       expect(notification.transport.portOfEntry).toBe('GB ABD');
+      expect(notification.transport.meansOfTransport).toBe('ROAD_VEHICLE');
+      expect(notification.transport.transportIdentification).toBe('FR-892-LK');
+      expect(notification.transport.transportDocumentReference).toBe('CMR-2026-884721');
+      // Countries are added one at a time, so the list keeps the order they were added in.
+      expect(notification.transport.transitedCountries).toEqual(['FR', 'BE']);
       expect(notification.transport.transporter?.name).toBe('García Livestock Transport SL');
       expect(notification.transport.transporter?.type).toBe('Commercial');
       // EUDPA-282: the stored instant must be UTC start-of-day for the chosen calendar
