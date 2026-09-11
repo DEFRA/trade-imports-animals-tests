@@ -33,6 +33,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
 
     await pages.insAddressBookAdd.fill(details);
     await pages.insAddressBookAdd.save();
+    await pages.page.waitForURL(/consignors\/select/, { timeout: 15_000 });
 
     await expect(pages.consignorSelection.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/consignors\/select/);
@@ -57,6 +58,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
     await pages.insAddressBookAdd.btnCancelFromJourney.click();
+    await pages.page.waitForURL(/consignors\/select/, { timeout: 15_000 });
 
     await expect(pages.consignorSelection.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/consignors\/select/);
