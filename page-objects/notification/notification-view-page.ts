@@ -7,7 +7,7 @@ export class NotificationViewPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Check your answers' });
+    return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
   get journeyStrip(): Locator {
