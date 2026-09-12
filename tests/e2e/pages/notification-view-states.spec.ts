@@ -13,9 +13,11 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('renders the recorded answers in the numbered design sections', async ({ pages }) => {
       await expect(pages.notificationView.heading).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '2. Movement' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '3. Addresses' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '5. Consignment parties' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       await expect(pages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(pages.notificationView.summaryCard('Import details')).toContainText('France');
