@@ -203,7 +203,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
       // the shared fixtures cannot be deleted without breaking every spec
       // running alongside this one.
       await journey.toReview();
-      await pages.notificationView.changeLink('Change consignor').click();
+      await pages.notificationView.changeLink('Change roles and addresses').click();
       await expect(pages.addresses.heading).toBeVisible();
       await pages.addresses.changeParty('Consignor or exporter').click();
       await pages.consignorSelection.select(name);

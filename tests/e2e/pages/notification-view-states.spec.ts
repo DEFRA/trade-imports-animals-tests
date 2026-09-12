@@ -28,7 +28,7 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('shows Change links for the recorded answers', async ({ pages }) => {
-      await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
+      await expect(pages.notificationView.changeLink('Change import details')).toBeVisible();
       await expect(pages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     });
 
