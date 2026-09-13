@@ -63,7 +63,7 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await expect(pages.consignorSelection.heading).toBeVisible();
     await expect(pages.page).toHaveURL(/consignors\/select/);
 
-    await pages.page.getByRole('link', { name: 'Back' }).click();
+    await pages.consignorSelection.linkBack.click();
     await expect(pages.addresses.heading).toBeVisible();
     await expect(pages.addresses.partyRow('Consignor or exporter')).toContainText('Not added yet');
   });
