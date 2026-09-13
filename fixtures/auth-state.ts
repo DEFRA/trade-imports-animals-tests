@@ -19,6 +19,10 @@ const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
 export const AUTH_COOKIE_NAME = 'sid';
 
+/** INS uses distinct cookie names on localhost so sign-in does not overwrite animals-frontend. */
+export const authCookieNameFor = (targetName: string, baseUrl: string): string =>
+  targetName === 'ins' && baseUrl.includes('localhost:3002') ? 'ins-sid' : AUTH_COOKIE_NAME;
+
 export const LANDING_TIMEOUT_MS = 20_000;
 const SIGN_IN_ATTEMPTS = 2;
 
@@ -82,7 +86,7 @@ export const createAuthState = async (browser: Browser, mint: AuthMint): Promise
       await new SignInPage(page).signIn();
       await expect(target.landingHeading(page)).toBeVisible({ timeout: LANDING_TIMEOUT_MS });
 
-      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL);
+      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName, baseURL));
       writeFileSync(mintingPath, JSON.stringify(authOnlyState, null, 2));
       await verifySavedState(browser, contextOptions, target, mintingPath);
       renameSync(mintingPath, statePath);
@@ -117,10 +121,10 @@ export const createWorkerAuthState = async (browser: Browser, workerInfo: Worker
 };
 
 /** The yar `session` cookie carries per-user journey state that would bleed across a worker's tests. */
-export const stripToAuthCookie = (state: StorageState, baseUrl: string): StorageState => {
-  const cookies = state.cookies.filter((cookie) => cookie.name === AUTH_COOKIE_NAME);
+export const stripToAuthCookie = (state: StorageState, baseUrl: string, cookieName: string = AUTH_COOKIE_NAME): StorageState => {
+  const cookies = state.cookies.filter((cookie) => cookie.name === cookieName);
   if (cookies.length === 0) {
-    throw new Error(`Sign-in to ${baseUrl} produced no "${AUTH_COOKIE_NAME}" session cookie to save.`);
+    throw new Error(`Sign-in to ${baseUrl} produced no "${cookieName}" session cookie to save.`);
   }
   return { cookies, origins: [] };
 };
