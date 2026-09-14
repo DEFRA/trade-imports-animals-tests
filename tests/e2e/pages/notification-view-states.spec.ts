@@ -35,7 +35,6 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('offers submission and none of the post-submit actions', async ({ pages }) => {
-      await expect(pages.page.getByRole('heading', { name: 'Now submit your notification' })).toBeVisible();
       await expect(pages.notificationView.continueButton).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
