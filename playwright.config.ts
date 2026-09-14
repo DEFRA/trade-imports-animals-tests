@@ -24,9 +24,18 @@ const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectB
   TRADE_IMPORTS_ADDRESS_BOOK_URL: cdpServiceUrl('trade-imports-address-book', environment),
 });
 
+const CDP_TEST_TIMEOUT_MS = 90_000;
+const CDP_EXPECT_TIMEOUT_MS = 15_000;
+
 /**
  * Base config: e2e against the deployed CDP environment.
  * PROFILE=security or security:active routes traffic through ZAP's proxy.
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig(withZapProxy(cdpConfig));
+export default defineConfig(
+  withZapProxy({
+    ...cdpConfig,
+    timeout: CDP_TEST_TIMEOUT_MS,
+    expect: { timeout: CDP_EXPECT_TIMEOUT_MS },
+  }),
+);

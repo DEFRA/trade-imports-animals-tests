@@ -115,6 +115,13 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
+The CDP config sets a 90s test timeout and a 15s expect timeout, against
+Playwright's 30s and 5s defaults that the docker-compose config keeps. Every
+CDP test signs in for itself (session reuse is off there, see below) and each
+page load is a real network hop, so the localhost budgets time out the longer
+journeys. The wider budget masks that cost rather than removing it: the fix is
+session reuse on CDP and seeding through the frontend instead of the UI.
+
 ### Authenticated session reuse
 
 Each worker signs in once per project and its tests restore that session
