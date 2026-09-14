@@ -16,8 +16,9 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     ]);
 
     // One task list per group, in the same order as the headings. Conditional
-    // rows (exit details, transit countries) are not owed on a fresh
-    // notification, so only the always-present tasks are pinned per group.
+    // rows (exit details, transit countries, animal identification) are not
+    // owed on a fresh notification, so only the always-present tasks are
+    // pinned per group.
     const taskLists = pages.page.locator('ul.app-task-list');
     await expect(taskLists).toHaveCount(6);
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
@@ -28,7 +29,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
       'What are you importing?',
       'Main reason for importing',
     ]);
-    await expectListedTasks(taskLists.nth(1), ['Additional commodity details', 'Animal identification details']);
+    await expectListedTasks(taskLists.nth(1), ['Additional commodity details']);
+    // Identification is only owed once a chosen commodity carries identifiers,
+    // and nothing has been chosen yet, so the row is off the hub altogether.
+    await expect(taskLists.nth(1)).not.toContainText('Animal identification details');
     await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transporter']);
     await expectListedTasks(taskLists.nth(3), ['Roles and addresses', 'Contact address']);
     await expectListedTasks(taskLists.nth(4), ['Uploaded documents']);
