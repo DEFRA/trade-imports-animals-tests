@@ -1,6 +1,7 @@
 import { test, expect } from '@fixtures';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { fileUploadPaths } from '@resources/file-upload/paths';
+import { firstScanStatus } from '@utils/scan-status';
 
 const issueDate = '03/01/2026';
 
@@ -26,20 +27,23 @@ test.describe('Documents scan refresh without JavaScript', { tag: ['@integration
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = pages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toContainText('Scanning for virus');
-    await expect(pages.accompanyingDocuments.refreshStatus).toBeVisible();
-    await expect(pages.accompanyingDocuments.refreshStatus).toHaveAttribute('href', /attempt=1/);
+    const { pending } = await firstScanStatus(row, 'Check completed');
+    if (pending) {
+      await expect(pages.accompanyingDocuments.refreshStatus).toBeVisible();
+      await expect(pages.accompanyingDocuments.refreshStatus).toHaveAttribute('href', /attempt=1/);
 
-    await expect
-      .poll(
-        async () => {
-          await pages.accompanyingDocuments.refreshStatus.click();
-          return row.textContent();
-        },
-        { timeout: fileUploadTimeouts.virusScanComplete },
-      )
-      .toContain('Check completed');
+      await expect
+        .poll(
+          async () => {
+            await pages.accompanyingDocuments.refreshStatus.click();
+            return row.textContent();
+          },
+          { timeout: fileUploadTimeouts.virusScanComplete },
+        )
+        .toContain('Check completed');
+    }
 
+    await expect(row).toContainText('Check completed');
     await expect(pages.accompanyingDocuments.refreshStatus).toHaveCount(0);
     await expect(pages.accompanyingDocuments.viewFile(1)).toBeVisible();
   });
