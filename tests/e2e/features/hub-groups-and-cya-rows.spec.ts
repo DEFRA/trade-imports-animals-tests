@@ -107,6 +107,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
 
     const contactAddress = pages.notificationView.summaryCard('Contact address for this consignment');
-    await expect(value(contactAddress, 'Address')).toContainText('Animal and Plant Health Agency');
+    await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
   });
 });
