@@ -52,9 +52,14 @@ test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-i
     await pages.commoditySelection.saveAndContinue.click();
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
 
+    // Commodity details is a hub task of its own, so its back link returns to
+    // the overview. Reopen the selection from the row that owns it.
+    await pages.consignmentDetails.linkBack.click();
+    await expect(pages.overview.heading).toBeVisible();
+    await pages.overview.task('What are you importing?').click();
+
     // Back on the page, both pairs are listed under the running count without
     // any query — a choice made under an earlier query is never lost.
-    await pages.consignmentDetails.linkBack.click();
     await expect(pages.commoditySelection.selectionPanel).toContainText('2 selected');
     await expect(pages.commoditySelection.selectionPanel).toContainText('Bos taurus');
     await expect(pages.commoditySelection.selectionPanel).toContainText('Felis catus');
