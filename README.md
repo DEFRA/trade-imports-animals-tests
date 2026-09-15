@@ -116,17 +116,40 @@ those settings:
 `fixtures/a11y.ts`.
 
 The CDP config sets a 90s test timeout and a 15s expect timeout, against
-Playwright's 30s and 5s defaults that the docker-compose config keeps. Every
-CDP test signs in for itself (session reuse is off there, see below) and each
+Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
 page load is a real network hop, so the localhost budgets time out the longer
-journeys. The wider budget masks that cost rather than removing it: the fix is
-session reuse on CDP and seeding through the frontend instead of the UI.
+journeys. The wider budget masks the cost of the specs that still build their
+notification through the UI; the fix is seeding through the frontend.
 
 The flow helpers wait for each page's heading with `pageLoadWait`
 (`config/timeouts.ts`, 30s) rather than the test timeout, so a transient 502
 fails the step that hit it within 30s and names the page it was waiting for.
 Sign-in waits for either the landing page or the "Sorry, we are unable to sign
 you in." page before deciding whether to try again.
+
+### Address-book records made by a test
+
+Every address a test creates through the `addressBookApi` fixture is
+soft-deleted when the test ends, pass, fail or timeout, so specs do not clean
+up in `finally`. The fixture deletes after the test body and before Playwright
+disposes the test's `request` context, which a `finally` block cannot promise
+once a test has timed out. Deleting is idempotent, so a spec may still delete a
+record itself as part of what it tests. The shared journey addresses seeded in
+`globalSetup` are never deleted. A spec that adds a record through the UI
+instead of `createAddress` calls `addressBookApi.trackByName(name)` right
+after the save is confirmed, so the fixture's teardown sweeps it too.
+
+### Purging leaked address-book records on CDP
+
+`npm run address-book:purge` clears out records specs left behind on CDP
+before this fixture teardown existed. Dry run is the default: it lists the
+organisation's whole book, paged, and prints what it would delete (matched
+against every `createAddress` name pattern in the specs, file:line cited) and
+what it keeps and why — including the shared `globalSetup` journey addresses,
+which it never touches. Pass `--apply` to actually delete; deletes run one at
+a time, and a 404 is treated as already gone. Needs the same `.env` as a
+laptop-to-CDP run: `PLAYWRIGHT_ENVIRONMENT` (or `ENVIRONMENT`), `CDP_LOCAL`
+and `DEVELOPER_API_KEY`.
 
 ### Authenticated session reuse
 
@@ -138,12 +161,14 @@ has proved it restores to a signed-in landing page. A spec that must start
 unauthenticated opts out with `test.use({ storageState: COLD_START })`.
 
 `E2E_SESSION_REUSE=off` is the kill switch: every test signs in for itself
-again, so re-cap workers (e.g. `-- --workers=4`) to protect the auth stub.
-Reuse is on by default against the docker-compose stack. On CDP it stays off
-until `ENVIRONMENT=<env> npm run probe:cdp-session-reuse` has passed against
-the target environment — the probe signs in once per service and proves
-load-balanced replicas honour a session minted against another — after which a
-lane opts in with `E2E_SESSION_REUSE=on`.
+again. The CDP config caps workers at 4 when reuse is off; against the
+docker-compose stack re-cap them yourself (e.g. `-- --workers=4`).
+Reuse is on by default against both the docker-compose stack and CDP.
+`ENVIRONMENT=dev npm run probe:cdp-session-reuse` passed against dev on
+2026-09-15 for animals-frontend, admin and ins-frontend — it signs in once per
+service and proves load-balanced replicas honour a session minted against
+another. Re-run it before relying on reuse against a different CDP
+environment.
 
 The `docker-compose` config targets `localhost:3000` / `localhost:3001` /
 `localhost:3002` / `localhost:3003`, so start the workspace stack first. CI

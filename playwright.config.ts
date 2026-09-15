@@ -5,12 +5,9 @@ import { withProjectBaseUrls } from './utils/playwright/with-project-base-urls';
 import { withServiceBaseUrls } from './utils/playwright/with-service-base-urls';
 import { cdpServiceUrl } from './utils/playwright/cdp-service-url';
 import { withZapProxy } from './utils/playwright/with-zap-proxy';
-import { sessionReuseOptedIn } from './utils/playwright/session-reuse';
+import { sessionReuseEnabled } from './utils/playwright/session-reuse';
 
 const environment = getEnvironment();
-
-// Off on CDP until the session-reuse probe has passed for the target environment.
-process.env.E2E_SESSION_REUSE = sessionReuseOptedIn() ? 'on' : 'off';
 
 const projectBaseUrls: Record<string, string> = {
   e2e: `https://trade-imports-animals-frontend.${environment}.cdp-int.defra.cloud`,
@@ -26,6 +23,7 @@ const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectB
 
 const CDP_TEST_TIMEOUT_MS = 90_000;
 const CDP_EXPECT_TIMEOUT_MS = 15_000;
+const CDP_WORKERS_WITHOUT_SESSION_REUSE = 4;
 
 /**
  * Base config: e2e against the deployed CDP environment.
@@ -35,6 +33,7 @@ const CDP_EXPECT_TIMEOUT_MS = 15_000;
 export default defineConfig(
   withZapProxy({
     ...cdpConfig,
+    ...(sessionReuseEnabled() ? {} : { workers: CDP_WORKERS_WITHOUT_SESSION_REUSE }),
     timeout: CDP_TEST_TIMEOUT_MS,
     expect: { timeout: CDP_EXPECT_TIMEOUT_MS },
   }),
