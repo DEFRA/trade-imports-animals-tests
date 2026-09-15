@@ -3,11 +3,12 @@ import { defaultPassword, defaultUser } from '@config/users';
 
 export class SignInPage {
   readonly expectedUrl = new RegExp('/dcidmtest.onmicrosoft.com/oauth2/authresp$');
+  readonly headingName = 'Sign in using Government Gateway';
 
   constructor(private readonly page: Page) {}
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Sign in using Government Gateway' });
+    return this.page.getByRole('heading', { level: 1, name: this.headingName });
   }
 
   get inputUserId(): Locator {

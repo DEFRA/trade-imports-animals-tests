@@ -122,6 +122,12 @@ page load is a real network hop, so the localhost budgets time out the longer
 journeys. The wider budget masks that cost rather than removing it: the fix is
 session reuse on CDP and seeding through the frontend instead of the UI.
 
+The flow helpers wait for each page's heading with `pageLoadWait`
+(`config/timeouts.ts`, 30s) rather than the test timeout, so a transient 502
+fails the step that hit it within 30s and names the page it was waiting for.
+Sign-in waits for either the landing page or the "Sorry, we are unable to sign
+you in." page before deciding whether to try again.
+
 ### Authenticated session reuse
 
 Each worker signs in once per project and its tests restore that session
