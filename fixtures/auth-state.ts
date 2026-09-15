@@ -89,7 +89,7 @@ export const createAuthState = async (browser: Browser, mint: AuthMint): Promise
       await new SignInPage(page).signIn();
       await expect(target.landingHeading(page)).toBeVisible({ timeout: LANDING_TIMEOUT_MS });
 
-      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName, baseURL));
+      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName));
       writeFileSync(mintingPath, JSON.stringify(authOnlyState, null, 2));
       await verifySavedState(browser, contextOptions, target, mintingPath);
       renameSync(mintingPath, statePath);
