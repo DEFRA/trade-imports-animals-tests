@@ -3,16 +3,27 @@ import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/journey';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the hub groups its tasks under the six numbered group headings', async ({ journey, pages }) => {
+  test('the hub groups its tasks under the six numbered group headings, with the unnumbered review section last', async ({
+    journey,
+    pages,
+  }) => {
     await journey.startNotification();
 
-    await expect(pages.page.getByRole('heading', { level: 2 })).toContainText([
+    // Design release 1 sits the whole list under its own heading, so the
+    // section captions dropped from h2 to h3.
+    await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
+
+    // The commodity-total labels are h3s too, so the section headings are read
+    // off their own class rather than off the level alone.
+    await expect(pages.page.locator('h3.govuk-heading-m')).toHaveText([
       '1. About the consignment',
-      '2. Commodity details',
-      '3. Movement',
-      '4. Addresses',
-      '5. Documents',
-      '6. Check and submit',
+      '2. Description of the goods',
+      '3. Transport and arrival',
+      '4. Documents',
+      '5. Consignment parties',
+      '6. Contact address',
+      // Unnumbered, and only until the review becomes a button under the list.
+      'Check and submit',
     ]);
 
     // One task list per group, in the same order as the headings. Conditional
@@ -20,7 +31,7 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     // owed on a fresh notification, so only the always-present tasks are
     // pinned per group.
     const taskLists = pages.page.locator('ul.app-task-list');
-    await expect(taskLists).toHaveCount(6);
+    await expect(taskLists).toHaveCount(7);
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
       for (const task of tasks) await expect(list).toContainText(task);
     };
@@ -34,9 +45,10 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     // and nothing has been chosen yet, so the row is off the hub altogether.
     await expect(taskLists.nth(1)).not.toContainText('Animal identification details');
     await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transporter']);
-    await expectListedTasks(taskLists.nth(3), ['Roles and addresses', 'Contact address']);
-    await expectListedTasks(taskLists.nth(4), ['Uploaded documents']);
-    await expectListedTasks(taskLists.nth(5), ['Check and submit']);
+    await expectListedTasks(taskLists.nth(3), ['Uploaded documents']);
+    await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
+    await expectListedTasks(taskLists.nth(5), ['Contact address']);
+    await expectListedTasks(taskLists.nth(6), ['Check and submit']);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({ journey, pages }) => {
