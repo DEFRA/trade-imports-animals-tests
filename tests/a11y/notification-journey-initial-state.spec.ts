@@ -185,7 +185,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Review your notification', async () => {
-      await pages.overview.task('Check and submit').click();
+      await pages.overview.reviewAndSubmitButton.click();
       await pages.notificationView.heading.waitFor();
       await runA11yScan();
       await pages.notificationView.continueButton.click();

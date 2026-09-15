@@ -3,10 +3,7 @@ import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/journey';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the hub groups its tasks under the six numbered group headings, with the unnumbered review section last', async ({
-    journey,
-    pages,
-  }) => {
+  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ journey, pages }) => {
     await journey.startNotification();
 
     // Design release 1 sits the whole list under its own heading, so the
@@ -22,16 +19,18 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
       '4. Documents',
       '5. Consignment parties',
       '6. Contact address',
-      // Unnumbered, and only until the review becomes a button under the list.
-      'Check and submit',
     ]);
+
+    // Design release 1 ends the hub with the review as a primary button beside
+    // the secondary return, not as a seventh section holding a locked row.
+    await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
     // One task list per group, in the same order as the headings. Conditional
     // rows (exit details, transit countries, animal identification) are not
     // owed on a fresh notification, so only the always-present tasks are
     // pinned per group.
     const taskLists = pages.page.locator('ul.app-task-list');
-    await expect(taskLists).toHaveCount(7);
+    await expect(taskLists).toHaveCount(6);
     const expectListedTasks = async (list: Locator, tasks: string[]) => {
       for (const task of tasks) await expect(list).toContainText(task);
     };
@@ -48,7 +47,6 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expectListedTasks(taskLists.nth(3), ['Uploaded documents']);
     await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
     await expectListedTasks(taskLists.nth(5), ['Contact address']);
-    await expectListedTasks(taskLists.nth(6), ['Check and submit']);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({ journey, pages }) => {
