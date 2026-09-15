@@ -78,7 +78,9 @@ export const test = base.extend<PageFixtures, AuthWorkerFixtures>({
     await use(new NotificationApiClient(request));
   },
   addressBookApi: async ({ request }, use) => {
-    await use(new AddressBookApiClient(request));
+    const addressBookApi = new AddressBookApiClient(request);
+    await use(addressBookApi);
+    await addressBookApi.deleteCreatedAddresses();
   },
   frontendForms: async ({ frontendSeedContext }, use) => {
     await use(new FrontendFormClient(frontendSeedContext));

@@ -13,9 +13,11 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     test('renders the recorded answers in the numbered design sections', async ({ pages }) => {
       await expect(pages.notificationView.heading).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '1. About the consignment' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '2. Movement' })).toBeVisible();
-      await expect(pages.page.getByRole('heading', { name: '3. Addresses' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '2. Description of the goods' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '3. Transport and arrival' })).toBeVisible();
       await expect(pages.page.getByRole('heading', { name: '4. Documents' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '5. Consignment parties' })).toBeVisible();
+      await expect(pages.page.getByRole('heading', { name: '6. Contact address' })).toBeVisible();
       await expect(pages.notificationView.summaryCard('Uploaded documents')).toBeVisible();
       await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
       await expect(pages.notificationView.summaryCard('Import details')).toContainText('France');
@@ -28,16 +30,36 @@ test.describe('Notification view states', { tag: ['@integration', '@duplicated-i
     });
 
     test('shows Change links for the recorded answers', async ({ pages }) => {
-      await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
+      await expect(pages.notificationView.changeLink('Change import details')).toBeVisible();
       await expect(pages.notificationView.changeLink('Change commodity 1')).toBeVisible();
     });
 
     test('offers submission and none of the post-submit actions', async ({ pages }) => {
-      await expect(pages.page.getByRole('heading', { name: 'Now submit your notification' })).toBeVisible();
       await expect(pages.notificationView.continueButton).toBeVisible();
       await expect(pages.page.getByRole('button', { name: 'Copy as new' })).toHaveCount(0);
       await expect(pages.page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
       await expect(pages.notificationView.cancelAmendment).toHaveCount(0);
+    });
+
+    test('Continue: when the notification is unfinished, stays put and names what is left', async ({ pages }) => {
+      await pages.notificationView.continueButton.click();
+
+      await expect(pages.page).toHaveURL(/\/notification-view$/);
+      await expect(pages.notificationView.errorSummary).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toContainText('There is a problem');
+      await expect(pages.notificationView.errorSummary.getByRole('link', { name: 'Complete arrival details' })).toBeVisible();
+    });
+  });
+
+  test.describe('DRAFT ready to submit', () => {
+    test.beforeEach(async ({ seededJourney, notificationActions, journeyContext }) => {
+      await seededJourney.createDraftNotification('readyToSubmit');
+      await notificationActions.toNotificationView(journeyContext.journeyId);
+    });
+
+    test('shows no error summary once every section is answered', async ({ pages }) => {
+      await expect(pages.notificationView.heading).toBeVisible();
+      await expect(pages.notificationView.errorSummary).toHaveCount(0);
     });
 
     test('Continue moves on to the declaration', async ({ pages }) => {

@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { pageLoadWait } from '@config/timeouts';
 import { NotificationPage } from '@page-objects/base/base-page';
 
 export class NotificationViewPage extends NotificationPage {
@@ -7,7 +8,7 @@ export class NotificationViewPage extends NotificationPage {
   }
 
   get heading(): Locator {
-    return this.page.getByRole('heading', { level: 1, name: 'Check your answers' });
+    return this.page.getByRole('heading', { level: 1, name: 'Review your notification' });
   }
 
   get journeyStrip(): Locator {
@@ -63,6 +64,6 @@ export class NotificationViewPage extends NotificationPage {
 
   async open(journeyId: string, attemptSignIn: boolean = true): Promise<void> {
     await super.open(journeyId, attemptSignIn);
-    if (attemptSignIn) await this.heading.waitFor();
+    if (attemptSignIn) await this.heading.waitFor(pageLoadWait);
   }
 }

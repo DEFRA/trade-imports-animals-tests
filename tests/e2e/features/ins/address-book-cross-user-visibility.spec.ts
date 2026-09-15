@@ -4,7 +4,7 @@ import { createPageObjects } from '@page-objects';
 import { users } from '@config/users';
 
 test.describe('Address book cross-user visibility', { tag: '@integration' }, () => {
-  test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages }) => {
+  test('an address added by one user is visible to another user in the same organisation', async ({ browser, pages, addressBookApi }) => {
     const createdName = `Cross User Farm ${Date.now()}`;
 
     await pages.insAddressBookAdd.open(true, { userId: users.andrew.crn });
@@ -19,6 +19,8 @@ test.describe('Address book cross-user visibility', { tag: '@integration' }, () 
     });
     await pages.insAddressBookAdd.save();
     await expect(pages.page).toHaveURL(new RegExp(`${pages.insAddressBookList.expectedUrl}$`));
+
+    await addressBookApi.trackByName(createdName);
 
     // browser.newContext() inherits the test's storageState; Sarah must start cold.
     const contextB = await browser.newContext({ storageState: COLD_START });

@@ -6,7 +6,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     pages,
     runA11yScan,
   }) => {
-    await test.step('Check your answers (draft)', async () => {
+    await test.step('Review your notification (draft)', async () => {
       const draftReference = await seededJourney.createDraftNotification('unlocked');
       await seededJourney.resumeInUi(draftReference, pages.notificationView);
       await runA11yScan();
@@ -14,7 +14,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
 
     const submittedReference = await seededJourney.createSubmittedNotification();
 
-    await test.step('Check your answers (submitted, read-only)', async () => {
+    await test.step('Review your notification (submitted, read-only)', async () => {
       await seededJourney.resumeInUi(submittedReference, pages.notificationView);
       await pages.page.getByRole('button', { name: 'Delete' }).waitFor();
       await runA11yScan();

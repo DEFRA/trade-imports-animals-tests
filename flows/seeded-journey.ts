@@ -1,4 +1,5 @@
 import type { Locator } from '@playwright/test';
+import { pageLoadWait } from '@config/timeouts';
 import type { FrontendFormClient } from '@adapters/http/frontend-form-client';
 import type { AddressBookApiClient } from '@adapters/http/address-book-api-client';
 import { PARTY_NAMES, declarationStep, seedSteps, type PartyIds, type PartyRole, type SeedDepth } from '@domain/fixtures/seeded-journey';
@@ -67,7 +68,7 @@ export class SeededJourney {
 
   async resumeInUi<T extends { open(journeyId: string): Promise<void>; heading: Locator }>(journeyId: string, targetPage: T): Promise<T> {
     await targetPage.open(journeyId);
-    await targetPage.heading.waitFor();
+    await targetPage.heading.waitFor(pageLoadWait);
     return targetPage;
   }
 

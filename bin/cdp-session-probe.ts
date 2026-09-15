@@ -1,4 +1,4 @@
-import { chromium, type Browser } from '@playwright/test';
+import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { AUTH_COOKIE_NAME, AUTH_TARGETS, LANDING_TIMEOUT_MS, stripToAuthCookie, type AuthTarget } from '@fixtures/auth-state';
 import { getEnvironment, throwIfProdEnvironment } from '@utils/playwright/environment';
@@ -23,6 +23,15 @@ function probeBaseUrls(): Record<string, string> {
   );
 }
 
+function whereItLanded(page: Page): string {
+  const { origin, pathname } = new URL(page.url());
+  return `${origin}${pathname}`;
+}
+
+async function cookieNames(context: BrowserContext): Promise<string> {
+  return (await context.cookies()).map((cookie) => cookie.name).join(', ') || 'none';
+}
+
 async function probeService(browser: Browser, baseURL: string, target: AuthTarget): Promise<void> {
   console.log(`Minting one session against ${baseURL} ...`);
   const mintContext = await browser.newContext({ baseURL });
@@ -40,9 +49,18 @@ async function probeService(browser: Browser, baseURL: string, target: AuthTarge
       const page = await context.newPage();
       await page.goto(target.landingPath);
       if (new SignInPage(page).expectedUrl.test(page.url())) {
-        throw new Error(`Navigation ${navigation} of ${NAVIGATIONS} was bounced to the sign-in form — the session was not honoured.`);
+        throw new Error(
+          `Navigation ${navigation} of ${NAVIGATIONS} was bounced to the sign-in form at ${whereItLanded(page)} — the session was not honoured. Cookies held: ${await cookieNames(context)}.`,
+        );
       }
-      await target.landingHeading(page).waitFor({ state: 'visible', timeout: LANDING_TIMEOUT_MS });
+      await target
+        .landingHeading(page)
+        .waitFor({ state: 'visible', timeout: LANDING_TIMEOUT_MS })
+        .catch((error: unknown) => {
+          throw new Error(`Navigation ${navigation} of ${NAVIGATIONS} landed on ${whereItLanded(page)}, not the landing page.`, {
+            cause: error,
+          });
+        });
       console.log(`  navigation ${navigation}/${NAVIGATIONS}: honoured`);
     } finally {
       await context.close();

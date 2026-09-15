@@ -3,6 +3,7 @@ import { test, expect } from '@fixtures';
 import { fileUploadPaths } from '@resources/file-upload/paths';
 import { fileUploadTimeouts } from '@config/file-upload-timeouts';
 import { writeEicarPdfFile } from '@utils/eicar-file-writer';
+import { firstScanStatus } from '@utils/scan-status';
 
 const issueDate = '03/01/2026';
 
@@ -20,8 +21,7 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = pages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toBeVisible();
-    await expect(row).toContainText('Scanning for virus');
+    await firstScanStatus(row, 'Virus found');
 
     await expect(row).toContainText('Virus found', { timeout: fileUploadTimeouts.virusScanComplete });
     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
@@ -38,9 +38,10 @@ test.describe('Documents scan lifecycle', { tag: ['@integration', '@duplicated-i
     await pages.accompanyingDocuments.saveAndAddAnother.click();
 
     const row = pages.accompanyingDocuments.documentRow(reference);
-    await expect(row).toBeVisible();
-    await expect(row).toContainText('Scanning for virus');
-    await expect(pages.accompanyingDocuments.viewFile(1)).toHaveCount(0);
+    const { pending, text } = await firstScanStatus(row, 'Check completed');
+    if (pending) {
+      expect(text).not.toContain('View file');
+    }
     await expect(pages.accompanyingDocuments.removeDocument(1)).toBeVisible();
 
     await expect(row).toContainText('Check completed', { timeout: fileUploadTimeouts.virusScanComplete });

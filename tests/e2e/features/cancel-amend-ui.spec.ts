@@ -31,7 +31,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       await expect(pages.page).toHaveURL(new RegExp(`${pages.notificationView.expectedUrl(journeyContext.referenceNumber)}$`));
       await expect(pages.notificationView.journeyStrip).toContainText('Amending');
       await expect(pages.notificationView.cancelAmendment).toBeVisible();
-      await expect(pages.notificationView.changeLink('Change country of origin')).toBeVisible();
+      await expect(pages.notificationView.changeLink('Change import details')).toBeVisible();
     });
   });
 
@@ -45,7 +45,7 @@ test.describe('Cancel amendment through the UI', { tag: ['@integration'] }, () =
       const countryRow = pages.page.locator('.govuk-summary-list__row', { hasText: 'Country of origin' });
       await expect(countryRow).toContainText('France');
 
-      await pages.notificationView.changeLink('Change country of origin').click();
+      await pages.notificationView.changeLink('Change import details').click();
       await expect(pages.originOfImport.heading).toBeVisible();
       await pages.originOfImport.selectCountry('Belgium');
       await pages.originOfImport.saveAndContinue.click();
