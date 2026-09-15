@@ -21,7 +21,7 @@ const cdpConfig = withServiceBaseUrls(withProjectBaseUrls(sharedConfig, projectB
   TRADE_IMPORTS_ADDRESS_BOOK_URL: cdpServiceUrl('trade-imports-address-book', environment),
 });
 
-const CDP_TEST_TIMEOUT_MS = 90_000;
+const CDP_TEST_TIMEOUT_MS = 60_000;
 const CDP_EXPECT_TIMEOUT_MS = 15_000;
 const CDP_WORKERS_WITHOUT_SESSION_REUSE = 4;
 

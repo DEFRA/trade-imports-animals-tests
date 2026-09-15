@@ -115,11 +115,22 @@ those settings:
 `@a11y` tests use the same configs; per-test timeout is longer in
 `fixtures/a11y.ts`.
 
-The CDP config sets a 90s test timeout and a 15s expect timeout, against
+The CDP config sets a 60s test timeout and a 15s expect timeout, against
 Playwright's 30s and 5s defaults that the docker-compose config keeps. Each CDP
-page load is a real network hop, so the localhost budgets time out the longer
-journeys. The wider budget masks the cost of the specs that still build their
-notification through the UI; the fix is seeding through the frontend.
+page load is a real network hop, so CDP needs a longer budget than the local
+stack. The suite once also timed out in bursts: a
+leaked address book on dev (grown to 4,882 records) made every
+`contact-address` page load fan out dozens of concurrent reads through the
+CDP SSL sidecar, which returned 502/504s for a few minutes at a time. Session
+reuse, the address-book teardown and a one-off purge (see below) removed the
+leak and the outage; three clean CDP runs then kept every test under
+three-quarters of its new budget (45s, or 135s for tests marked
+`test.slow()`), so the timeout came down from 90s to 60s.
+
+`documents-limits`' fifteen-document test sets its own 120s timeout: its real
+uploads and virus scans take 57–60s on the local stack and about 67s on CDP,
+which left too thin a margin under the 90s a slow test gets on compose.
+Re-check it if the base timeouts change.
 
 The flow helpers wait for each page's heading with `pageLoadWait`
 (`config/timeouts.ts`, 30s) rather than the test timeout, so a transient 502

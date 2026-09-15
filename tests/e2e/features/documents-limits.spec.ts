@@ -19,7 +19,7 @@ const paddedPdf = async (destination: string, bytes: number): Promise<string> =>
 
 test.describe('Documents limits', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test('accepts a fifteenth document and rejects a sixteenth with the maximum-documents error', async ({ journey, pages }) => {
-    test.slow();
+    test.setTimeout(120_000);
     await journey.toAccompanyingDocuments();
 
     for (let index = 1; index <= maximumDocuments; index += 1) {
