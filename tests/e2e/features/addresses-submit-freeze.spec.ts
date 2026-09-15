@@ -2,8 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () => {
   test('renaming the book after submit does not change the submitted view, then shows live on amend', async ({
-    journey,
-    journeyContext,
+    seededJourney,
     pages,
     addressBookApi,
     notificationActions,
@@ -23,7 +22,8 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'freeze@example.co.uk',
     });
 
-    await journey.toReview();
+    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
+    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
     await pages.notificationView.changeLink('Change roles and addresses').click();
     await expect(pages.addresses.heading).toBeVisible();
     await pages.addresses.changeParty('Place of origin').click();
@@ -52,14 +52,14 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'freeze@example.co.uk',
     });
 
-    await notificationActions.toNotificationView(journeyContext.journeyId);
+    await notificationActions.toNotificationView(referenceNumber);
     await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');
     await expect(originRow).not.toContainText(renamed);
     await expect(originRow).not.toContainText('Penrith');
 
-    await notificationActions.amendNotification(journeyContext.journeyId);
+    await notificationActions.amendNotification(referenceNumber);
     await pages.overview.task('Check and submit').click();
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.journeyStrip).toContainText('Amending');
@@ -76,8 +76,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
   });
 
   test('deleting the book record after submit does not change the submitted view or error', async ({
-    journey,
-    journeyContext,
+    seededJourney,
     pages,
     addressBookApi,
     notificationActions,
@@ -96,7 +95,8 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
       email: 'delete-freeze@example.co.uk',
     });
 
-    await journey.toReview();
+    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
+    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
     await pages.notificationView.changeLink('Change roles and addresses').click();
     await pages.addresses.changeParty('Place of origin').click();
     await pages.placeOfOriginSelection.select(originalName);
@@ -113,7 +113,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
 
     await addressBookApi.deleteAddress(address.id);
 
-    await notificationActions.toNotificationView(journeyContext.journeyId);
+    await notificationActions.toNotificationView(referenceNumber);
     await expect(pages.notificationView.journeyStrip).toContainText('Submitted');
     await expect(originRow).toContainText(originalName);
     await expect(originRow).toContainText('Carlisle');

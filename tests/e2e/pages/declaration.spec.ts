@@ -1,8 +1,9 @@
 import { test, expect } from '@fixtures';
 
 test.describe('Declaration page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test.beforeEach(async ({ journey }) => {
-    await journey.toDeclaration();
+  test.beforeEach(async ({ seededJourney, pages }) => {
+    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
+    await seededJourney.resumeInUi(referenceNumber, pages.declaration);
   });
 
   test('renders the page controls', async ({ pages }) => {
