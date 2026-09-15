@@ -180,7 +180,7 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
   });
 
   test('the review page names a deleted address, walks the trader to a replacement and lets the submit through once it is replaced', async ({
-    journey,
+    seededJourney,
     pages,
     addressBookApi,
   }) => {
@@ -201,7 +201,8 @@ test.describe('Addresses are linked, not copied', { tag: ['@integration'] }, () 
     // A complete notification, then swap the consignor for our own record —
     // the shared fixtures cannot be deleted without breaking every spec
     // running alongside this one.
-    await journey.toReview();
+    const referenceNumber = await seededJourney.createDraftNotification('readyToSubmit');
+    await seededJourney.resumeInUi(referenceNumber, pages.notificationView);
     await pages.notificationView.changeLink('Change roles and addresses').click();
     await expect(pages.addresses.heading).toBeVisible();
     await pages.addresses.changeParty('Consignor or exporter').click();

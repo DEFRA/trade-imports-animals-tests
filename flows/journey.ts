@@ -218,10 +218,8 @@ export class Journey {
   }
 
   // Reach helpers — land on a page UNFILLED so a per-page spec can drive it.
-  // API-seeded notifications cannot be saved through the UI, so specs that submit
-  // must reach the page through the real journey flow. The commodity section (and
-  // everything downstream) is gated behind origin, so any reach past origin runs
-  // unlockSections first.
+  // The commodity section (and everything downstream) is gated behind origin,
+  // so any reach past origin runs unlockSections first.
   async toCommoditySelection(): Promise<void> {
     await this.startNotification();
     await this.pages.overview.task('What are you importing?').click();
