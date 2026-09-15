@@ -19,10 +19,9 @@ test.describe('Notifications (admin)', { tag: ['@integration', '@mongodb'] }, ()
   test(
     'finds and deletes a submitted notification by reference number',
     { tag: '@smoke' },
-    async ({ journey, journeyContext, adminNavigation, pages }) => {
+    async ({ seededJourney, adminNavigation, pages }) => {
       test.slow();
-      await journey.submitNotification();
-      const referenceNumber = journeyContext.journeyId;
+      const referenceNumber = await seededJourney.createSubmittedNotification();
 
       await adminNavigation.toNotifications();
       await pages.adminNotifications.findRowByReference(referenceNumber);

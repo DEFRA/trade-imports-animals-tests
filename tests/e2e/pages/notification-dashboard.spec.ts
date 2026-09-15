@@ -46,14 +46,14 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
       await expect(pages.notificationDashboard.notificationCards).toHaveCount(1);
     });
 
-    test('displays details on a notification card', async ({ journey, journeyContext, pages }) => {
+    test('displays details on a notification card', async ({ seededJourney, pages }) => {
       test.slow();
-      await journey.submitNotification();
+      const referenceNumber = await seededJourney.createSubmittedNotification();
       await pages.notificationDashboard.open();
-      await pages.notificationDashboard.searchForReference(journeyContext.journeyId);
+      await pages.notificationDashboard.searchForReference(referenceNumber);
 
       const details = pages.notificationDashboard.notificationCardDetails(0);
-      await expect(details.heading).toContainText(journeyContext.journeyId);
+      await expect(details.heading).toContainText(referenceNumber);
       await expect(details.commodity).toBeVisible();
       await expect(details.origin).toBeVisible();
       await expect(details.arrivalAtDestination).toContainText(DISPLAYED_DATE_PATTERN);

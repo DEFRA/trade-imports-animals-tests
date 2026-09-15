@@ -1,7 +1,10 @@
 import { Page, Locator } from '@playwright/test';
 import { defaultUser } from '@config/users';
+import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/auth/organisation-picker-page';
+
+const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
 function requireBaseUrl(
   envVar:
@@ -84,16 +87,33 @@ export class BasePage {
       return;
     }
     await signInPage.signIn({ userId: options?.userId });
-    const transientError = this.page.getByRole('heading', {
-      level: 1,
-      name: 'Sorry, we are unable to sign you in.',
-    });
-    if (await transientError.isVisible()) {
-      await this.page.getByRole('link', { name: 'try again' }).click();
-      await signInPage.inputUserId.waitFor();
-      await signInPage.signIn({ userId: options?.userId });
+    if (await this.landedOnSignInError(signInPage)) {
+      await Promise.all([
+        this.page.waitForEvent('framenavigated', { predicate: (frame) => frame === this.page.mainFrame(), ...pageLoadWait }),
+        this.page.getByRole('link', { name: 'try again' }).click(),
+      ]);
+      if (await this.landedOnSignInForm(signInPage)) {
+        await signInPage.signIn({ userId: options?.userId });
+      }
+      if (await this.landedOnSignInError(signInPage)) {
+        throw new Error(`Sign-in failed twice: "${SIGN_IN_ERROR_HEADING}" was shown again after trying again.`);
+      }
     }
     await this.selectOrganisationIfPrompted(options?.organisationSbi);
+  }
+
+  private async landedOnSignInError(signInPage: SignInPage): Promise<boolean> {
+    const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
+    const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
+    await signInError.or(landingHeading).first().waitFor(pageLoadWait);
+    return signInError.isVisible();
+  }
+
+  private async landedOnSignInForm(signInPage: SignInPage): Promise<boolean> {
+    const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
+    const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
+    await signInPage.heading.or(signInError).or(landingHeading).first().waitFor(pageLoadWait);
+    return signInPage.heading.isVisible();
   }
 
   private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
@@ -119,7 +139,7 @@ export class BasePage {
       }
       return;
     }
-    await organisationPicker.heading.waitFor({ state: 'visible' });
+    await organisationPicker.heading.waitFor({ ...pageLoadWait, state: 'visible' });
     await organisationPicker.select(organisationSbi);
   }
 }

@@ -1,4 +1,4 @@
-import { timeouts } from '@config/timeouts';
+import { pageLoadWait, timeouts } from '@config/timeouts';
 import type { PageObjects } from '@page-objects';
 
 export class NotificationActions {
@@ -12,7 +12,7 @@ export class NotificationActions {
     await this.pages.notificationDashboard.open();
     await this.pages.notificationDashboard.searchForReference(journeyId);
     await this.pages.notificationDashboard.amend(journeyId).click();
-    await this.pages.overview.heading.waitFor();
+    await this.pages.overview.heading.waitFor(pageLoadWait);
   }
 
   /** Copies a notification from its dashboard card, landing on the copy's overview. */
@@ -20,7 +20,7 @@ export class NotificationActions {
     await this.pages.notificationDashboard.open();
     await this.pages.notificationDashboard.searchForReference(journeyId);
     await this.pages.notificationDashboard.copyAsNew(journeyId).click();
-    await this.pages.overview.heading.waitFor();
+    await this.pages.overview.heading.waitFor(pageLoadWait);
   }
 
   /**
@@ -30,7 +30,7 @@ export class NotificationActions {
   async cancelAmend(journeyId: string): Promise<void> {
     await this.toNotificationView(journeyId);
     await this.pages.notificationView.cancelAmendment.click();
-    await this.pages.notificationCancelAmend.heading.waitFor();
+    await this.pages.notificationCancelAmend.heading.waitFor(pageLoadWait);
     await this.pages.notificationCancelAmend.confirm.click();
     await this.pages.page.waitForURL(/\/notification-view\?cancelled=1$/, { timeout: timeouts.medium });
   }
@@ -39,8 +39,8 @@ export class NotificationActions {
     await this.pages.notificationDashboard.open();
     await this.pages.notificationDashboard.searchFor(journeyId);
     await this.pages.notificationDashboard.delete(journeyId).click();
-    await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor();
+    await this.pages.page.getByRole('heading', { name: 'Delete this notification?' }).waitFor(pageLoadWait);
     await this.pages.page.getByRole('button', { name: 'Yes, delete notification' }).click();
-    await this.pages.page.getByText('The notification has been deleted.').waitFor();
+    await this.pages.page.getByText('The notification has been deleted.').waitFor(pageLoadWait);
   }
 }

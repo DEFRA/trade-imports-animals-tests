@@ -6,8 +6,3 @@ function setting(): string {
 export function sessionReuseEnabled(): boolean {
   return setting() !== 'off';
 }
-
-/** True only when the run has spelled out `on`, for lanes where reuse must be opted into. */
-export function sessionReuseOptedIn(): boolean {
-  return setting() === 'on';
-}
