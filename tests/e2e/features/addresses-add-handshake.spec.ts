@@ -2,6 +2,9 @@ import { test, expect } from '@fixtures';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 import { type NewAddressDetails } from '@page-objects/ins/ins-address-book-add-page';
 
+const insBaseUrl = (process.env.TRADE_IMPORTS_INS_FRONTEND_BASE_URL ?? 'http://localhost:3002').replace(/\/$/, '');
+const insAddUrlPattern = new RegExp(`^${insBaseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/address-book/add\\?`);
+
 test.describe('Add an address from the journey via INS', { tag: ['@integration'] }, () => {
   test.beforeEach(() => {
     skipUnlessComposeEnvironment('the handshake crosses animals-frontend and ins-frontend, which only the compose stack runs together');
@@ -28,15 +31,14 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
 
     await pages.consignorSelection.addNewAddress.click();
     await pages.insAddressBookAdd.ensureSignedIn();
-    await expect(pages.page).toHaveURL(/localhost:3002\/address-book\/add\?/);
+    await expect(pages.page).toHaveURL(insAddUrlPattern);
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
     await pages.insAddressBookAdd.fill(details);
     await pages.insAddressBookAdd.save();
-    await pages.page.waitForURL(/consignors\/select/, { timeout: 15_000 });
+    await expect(pages.page).toHaveURL(/consignors\/select/, { timeout: 15_000 });
 
     await expect(pages.consignorSelection.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/consignors\/select/);
     await pages.consignorSelection.search.fill(farmName);
     await pages.consignorSelection.searchButton.click();
     await expect(pages.consignorSelection.party(farmName)).toBeChecked();
@@ -58,10 +60,9 @@ test.describe('Add an address from the journey via INS', { tag: ['@integration']
     await expect(pages.insAddressBookAdd.heading).toBeVisible();
 
     await pages.insAddressBookAdd.btnCancelFromJourney.click();
-    await pages.page.waitForURL(/consignors\/select/, { timeout: 15_000 });
+    await expect(pages.page).toHaveURL(/consignors\/select/, { timeout: 15_000 });
 
     await expect(pages.consignorSelection.heading).toBeVisible();
-    await expect(pages.page).toHaveURL(/consignors\/select/);
 
     await pages.consignorSelection.linkBack.click();
     await expect(pages.addresses.heading).toBeVisible();

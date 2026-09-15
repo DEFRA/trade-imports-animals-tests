@@ -19,9 +19,7 @@ const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
 export const AUTH_COOKIE_NAME = 'sid';
 
-/** INS uses distinct cookie names on localhost so sign-in does not overwrite animals-frontend. */
-export const authCookieNameFor = (targetName: string, baseUrl: string): string =>
-  targetName === 'ins' && baseUrl.includes('localhost:3002') ? 'ins-sid' : AUTH_COOKIE_NAME;
+export const authCookieNameFor = (targetName: string): string => AUTH_TARGETS[targetName]?.cookieName ?? AUTH_COOKIE_NAME;
 
 export const LANDING_TIMEOUT_MS = 20_000;
 const SIGN_IN_ATTEMPTS = 2;
@@ -36,6 +34,7 @@ export const COLD_START: StorageState = Object.freeze(coldStartState);
 export type AuthTarget = {
   landingPath: string;
   landingHeading: (page: Page) => Locator;
+  cookieName?: string;
 };
 
 // The sign-in failure page also has an h1, so each target asserts its own landing
@@ -43,7 +42,11 @@ export type AuthTarget = {
 export const AUTH_TARGETS: Record<string, AuthTarget> = {
   e2e: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
   admin: { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
-  ins: { landingPath: '/address-book', landingHeading: (page) => new InsAddressBookListPage(page).heading },
+  ins: {
+    landingPath: '/address-book',
+    landingHeading: (page) => new InsAddressBookListPage(page).heading,
+    cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'ins-sid',
+  },
   plants: { landingPath: '/', landingHeading: (page) => new PlantsDashboardPage(page).heading },
 };
 
