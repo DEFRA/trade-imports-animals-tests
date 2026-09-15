@@ -40,9 +40,8 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     await pages.insAddressBookDelete.confirm();
     await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
 
-    // The service's two static routes. A GET each, folded in here rather than
-    // given a spec of their own — nothing else in the suite reaches them.
-    await pages.page.goto('/about');
+    // The service's one static route. A GET, folded in here rather than
+    // given a spec of its own — nothing else in the suite reaches it.
     await pages.page.goto('/');
   });
 });
