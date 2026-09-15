@@ -1,0 +1,211 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e/features/hub-groups-and-cya-rows.spec.ts >> Hub groups and check-your-answers rows >> the hub groups its tasks under the six numbered group headings
+- Location: tests/e2e/features/hub-groups-and-cya-rows.spec.ts:6:3
+
+# Error details
+
+```
+Error: expect(locator).not.toContainText(expected) failed
+
+Locator: locator('ul.app-task-list').nth(1)
+Expected substring: not "Animal identification details"
+Received string: "
+  
+    
+      
+        Additional commodity details
+      
+      
+        What the animals are certified for and whether any are unweaned
+      
+    
+    
+      Cannot start yet
+    
+  
+  
+    
+      
+        Animal identification details
+      
+      
+        Identification details for the animals in each commodity
+      
+    
+    
+      Cannot start yet
+    
+  
+"
+Timeout: 5000ms
+
+Call log:
+  - Expect "not toContainText" with timeout 5000ms
+  - waiting for locator('ul.app-task-list').nth(1)
+    14 × locator resolved to <ul class="govuk-task-list app-task-list govuk-!-margin-bottom-8">…</ul>
+       - unexpected value "
+  
+    
+      
+        Additional commodity details
+      
+      
+        What the animals are certified for and whether any are unweaned
+      
+    
+    
+      Cannot start yet
+    
+  
+  
+    
+      
+        Animal identification details
+      
+      
+        Identification details for the animals in each commodity
+      
+    
+    
+      Cannot start yet
+    
+  
+"
+
+```
+
+```yaml
+- list:
+  - listitem: Additional commodity details What the animals are certified for and whether any are unweaned Cannot start yet
+  - listitem: Animal identification details Identification details for the animals in each commodity Cannot start yet
+```
+
+# Test source
+
+```ts
+  1   | import type { Locator } from '@playwright/test';
+  2   | import { test, expect } from '@fixtures';
+  3   | import { ARRIVAL_DATE } from '@flows/journey';
+  4   | 
+  5   | test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  6   |   test('the hub groups its tasks under the six numbered group headings', async ({ journey, pages }) => {
+  7   |     await journey.startNotification();
+  8   | 
+  9   |     await expect(pages.page.getByRole('heading', { level: 2 })).toContainText([
+  10  |       '1. About the consignment',
+  11  |       '2. Commodity details',
+  12  |       '3. Movement',
+  13  |       '4. Addresses',
+  14  |       '5. Documents',
+  15  |       '6. Check and submit',
+  16  |     ]);
+  17  | 
+  18  |     // One task list per group, in the same order as the headings. Conditional
+  19  |     // rows (exit details, transit countries, animal identification) are not
+  20  |     // owed on a fresh notification, so only the always-present tasks are
+  21  |     // pinned per group.
+  22  |     const taskLists = pages.page.locator('ul.app-task-list');
+  23  |     await expect(taskLists).toHaveCount(6);
+  24  |     const expectListedTasks = async (list: Locator, tasks: string[]) => {
+  25  |       for (const task of tasks) await expect(list).toContainText(task);
+  26  |     };
+  27  |     await expectListedTasks(taskLists.nth(0), [
+  28  |       'Where is this consignment coming from?',
+  29  |       'What are you importing?',
+  30  |       'Main reason for importing',
+  31  |     ]);
+  32  |     await expectListedTasks(taskLists.nth(1), ['Additional commodity details']);
+  33  |     // Identification is only owed once a chosen commodity carries identifiers,
+  34  |     // and nothing has been chosen yet, so the row is off the hub altogether.
+> 35  |     await expect(taskLists.nth(1)).not.toContainText('Animal identification details');
+      |                                        ^ Error: expect(locator).not.toContainText(expected) failed
+  36  |     await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transporter']);
+  37  |     await expectListedTasks(taskLists.nth(3), ['Roles and addresses', 'Contact address']);
+  38  |     await expectListedTasks(taskLists.nth(4), ['Uploaded documents']);
+  39  |     await expectListedTasks(taskLists.nth(5), ['Check and submit']);
+  40  |   });
+  41  | 
+  42  |   test('after completing every section the check-your-answers page renders the answered rows', async ({ journey, pages }) => {
+  43  |     test.slow();
+  44  |     await journey.toReview();
+  45  | 
+  46  |     const value = (card: Locator, key: string) =>
+  47  |       card.locator('.govuk-summary-list__row', { has: pages.page.getByText(key, { exact: true }) }).locator('.govuk-summary-list__value');
+  48  | 
+  49  |     await expect(pages.notificationView.heading).toBeVisible();
+  50  |     await expect(pages.page.getByRole('heading', { level: 2, name: '1. About the consignment' })).toBeVisible();
+  51  |     await expect(pages.page.getByRole('heading', { level: 2, name: '2. Description of the goods' })).toBeVisible();
+  52  |     await expect(pages.page.getByRole('heading', { level: 2, name: '3. Transport and arrival' })).toBeVisible();
+  53  |     // Documents are optional, so the section stands even with nothing uploaded.
+  54  |     await expect(pages.page.getByRole('heading', { level: 2, name: '4. Documents' })).toBeVisible();
+  55  |     await expect(pages.page.getByRole('heading', { level: 2, name: '5. Consignment parties' })).toBeVisible();
+  56  |     await expect(pages.page.getByRole('heading', { level: 2, name: '6. Contact address' })).toBeVisible();
+  57  |     await expect(pages.notificationView.summaryCard('Uploaded documents')).toContainText('You have not added any documents yet.');
+  58  |     await expect(pages.notificationView.changeLink('Change uploaded documents')).toBeVisible();
+  59  | 
+  60  |     await expect(pages.page.getByRole('heading', { level: 3, name: 'Where is this consignment coming from?' })).toBeVisible();
+  61  |     await expect(pages.page.getByRole('heading', { level: 3, name: 'Commodity details' })).toBeVisible();
+  62  |     await expect(pages.page.getByRole('heading', { level: 3, name: 'Additional details' })).toBeVisible();
+  63  | 
+  64  |     const importDetails = pages.notificationView.summaryCard('Import details');
+  65  |     await expect(value(importDetails, 'Country of origin')).toHaveText('France');
+  66  |     await expect(value(importDetails, 'Region of origin code required')).toHaveText('Yes');
+  67  |     await expect(value(importDetails, 'Region of origin code')).toHaveText('FR-75');
+  68  |     await expect(value(importDetails, 'Internal reference number')).toHaveText('Imports456GB');
+  69  | 
+  70  |     const additionalAnimalDetails = pages.notificationView.summaryCard('Additional animal details');
+  71  |     await expect(value(additionalAnimalDetails, 'Certified for')).toHaveText('Slaughter');
+  72  |     await expect(value(additionalAnimalDetails, 'Includes unweaned animals')).toHaveText('No');
+  73  | 
+  74  |     const reasonForImport = pages.notificationView.summaryCard('Reason for import');
+  75  |     await expect(value(reasonForImport, 'Reason for import')).toHaveText('Internal market');
+  76  |     await expect(value(reasonForImport, 'Purpose in the market')).toHaveText('Breeding');
+  77  | 
+  78  |     const speciesCard = pages.notificationView.summaryCard('Cow (0102) — Bos taurus');
+  79  |     await expect(value(speciesCard, 'Commodity code')).toHaveText('0102');
+  80  |     await expect(value(speciesCard, 'Common name')).toHaveText('Cow');
+  81  |     await expect(value(speciesCard, 'Species')).toHaveText('Bos taurus');
+  82  |     await expect(value(speciesCard, 'Number of animals')).toHaveText('1');
+  83  |     await expect(value(speciesCard, 'Number of packages')).toHaveText('5');
+  84  |     await expect(speciesCard.getByRole('heading', { name: 'Animal details' })).toBeVisible();
+  85  |     await expect(speciesCard.getByRole('columnheader', { name: 'Ear tag' })).toBeVisible();
+  86  |     await expect(speciesCard.getByRole('cell', { name: 'Animal 1' })).toBeVisible();
+  87  |     await expect(speciesCard.getByRole('cell', { name: 'UK123456789012' })).toBeVisible();
+  88  | 
+  89  |     const arrivalDetails = pages.notificationView.summaryCard('Arrival details');
+  90  |     await expect(value(arrivalDetails, 'Port of entry')).toHaveText('Aberdeen Harbour (GB ABD)');
+  91  |     await expect(value(arrivalDetails, 'Arrival date at port of entry')).toHaveText(ARRIVAL_DATE);
+  92  |     await expect(value(arrivalDetails, 'Means of transport to the port of entry')).toHaveText('Road Vehicle');
+  93  |     await expect(value(arrivalDetails, 'Transport identification')).toHaveText('FR-892-LK');
+  94  |     await expect(value(arrivalDetails, 'Transport document reference')).toHaveText('CMR-2026-884721');
+  95  | 
+  96  |     const transitCountries = pages.notificationView.summaryCard('Transit countries');
+  97  |     // Read back in the order they were added, not alphabetically.
+  98  |     await expect(value(transitCountries, 'Countries that the consignment will travel through')).toHaveText('France, Belgium');
+  99  | 
+  100 |     const transportDetails = pages.notificationView.summaryCard('Transport details');
+  101 |     await expect(value(transportDetails, 'Name')).toContainText('García Livestock Transport SL');
+  102 |     await expect(value(transportDetails, 'Type')).toHaveText('Commercial');
+  103 | 
+  104 |     const rolesAndAddresses = pages.notificationView.summaryCard('Roles and addresses');
+  105 |     await expect(value(rolesAndAddresses, 'Place of origin')).toContainText('Origin Farm');
+  106 |     await expect(value(rolesAndAddresses, 'Consignor')).toContainText('Astra Rosales');
+  107 |     await expect(value(rolesAndAddresses, 'Consignee')).toContainText('British Livestock Ltd');
+  108 |     await expect(value(rolesAndAddresses, 'Importer')).toContainText('Import Co UK');
+  109 |     await expect(value(rolesAndAddresses, 'Place of destination')).toContainText('Tech Imports Ltd');
+  110 |     // The CYA renders the CPH normalised (separators stripped), not as typed.
+  111 |     await expect(value(rolesAndAddresses, 'County parish holding (CPH) number')).toHaveText('123456789');
+  112 | 
+  113 |     const contactAddress = pages.notificationView.summaryCard('Contact address for this consignment');
+  114 |     await expect(value(contactAddress, 'Contact address')).toContainText('Animal and Plant Health Agency');
+  115 |   });
+  116 | });
+  117 | 
+```
