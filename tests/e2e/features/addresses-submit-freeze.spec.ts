@@ -60,7 +60,7 @@ test.describe('Submitted addresses are frozen', { tag: ['@integration'] }, () =>
     await expect(originRow).not.toContainText('Penrith');
 
     await notificationActions.amendNotification(referenceNumber);
-    await pages.overview.task('Check and submit').click();
+    await pages.overview.reviewAndSubmitButton.click();
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.journeyStrip).toContainText('Amending');
     await expect(originRow).toContainText(renamed);

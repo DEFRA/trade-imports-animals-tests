@@ -50,7 +50,7 @@ export class Journey {
     await this.saveOriginOfImport();
     // Wait for the save to land before navigating away. Opening the overview
     // regardless hides a failed save — the run then dies several steps later on
-    // a task stuck at "Cannot start yet", pointing at the wrong page entirely.
+    // a task stuck at "Not yet started", pointing at the wrong page entirely.
     await this.pages.originOfImport.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor(pageLoadWait);
@@ -314,14 +314,14 @@ export class Journey {
   async toReview(): Promise<void> {
     if (!this.context.journeyId) await this.startNotification();
     await this.completeAnswerSections();
-    await this.pages.overview.task('Check and submit').click();
+    await this.pages.overview.reviewAndSubmitButton.click();
     await this.pages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   async toDeclaration(): Promise<void> {
     await this.startNotification();
     await this.completeAnswerSections();
-    await this.pages.overview.task('Check and submit').click();
+    await this.pages.overview.reviewAndSubmitButton.click();
     await this.pages.notificationView.heading.waitFor(pageLoadWait);
     await this.pages.notificationView.continueButton.click();
     await this.pages.declaration.heading.waitFor(pageLoadWait);

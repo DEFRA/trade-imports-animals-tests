@@ -14,6 +14,15 @@ export class OverviewPage extends NotificationPage {
     return this.page.locator('.app-journey-strip');
   }
 
+  /**
+   * Design release 1 reaches the review from a primary button under the task
+   * list rather than from a task row, and offers it whatever the notification
+   * still owes.
+   */
+  get reviewAndSubmitButton(): Locator {
+    return this.page.getByRole('button', { name: 'Review and submit' });
+  }
+
   task(name: string): Locator {
     return this.page.getByRole('link', { name, exact: true });
   }

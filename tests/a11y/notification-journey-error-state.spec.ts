@@ -83,7 +83,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
       await journey.answerAnimalIdentification();
       await journey.answerReasonAndAdditionalDetails();
       await journey.answerContact();
-      await pages.overview.task('Check and submit').click();
+      await pages.overview.reviewAndSubmitButton.click();
       await pages.notificationView.heading.waitFor();
       await pages.notificationView.continueButton.click();
       await pages.declaration.heading.waitFor();
