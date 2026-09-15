@@ -88,9 +88,13 @@ export class BasePage {
     }
     await signInPage.signIn({ userId: options?.userId });
     if (await this.landedOnSignInError(signInPage)) {
-      await this.page.getByRole('link', { name: 'try again' }).click();
-      await signInPage.inputUserId.waitFor(pageLoadWait);
-      await signInPage.signIn({ userId: options?.userId });
+      await Promise.all([
+        this.page.waitForEvent('framenavigated', { predicate: (frame) => frame === this.page.mainFrame(), ...pageLoadWait }),
+        this.page.getByRole('link', { name: 'try again' }).click(),
+      ]);
+      if (await this.landedOnSignInForm(signInPage)) {
+        await signInPage.signIn({ userId: options?.userId });
+      }
       if (await this.landedOnSignInError(signInPage)) {
         throw new Error(`Sign-in failed twice: "${SIGN_IN_ERROR_HEADING}" was shown again after trying again.`);
       }
@@ -103,6 +107,13 @@ export class BasePage {
     const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
     await signInError.or(landingHeading).first().waitFor(pageLoadWait);
     return signInError.isVisible();
+  }
+
+  private async landedOnSignInForm(signInPage: SignInPage): Promise<boolean> {
+    const signInError = this.page.getByRole('heading', { level: 1, name: SIGN_IN_ERROR_HEADING });
+    const landingHeading = this.page.getByRole('heading', { level: 1 }).filter({ hasNotText: signInPage.headingName });
+    await signInPage.heading.or(signInError).or(landingHeading).first().waitFor(pageLoadWait);
+    return signInPage.heading.isVisible();
   }
 
   private requireDefaultIdentity(options?: { userId?: string; organisationSbi?: string }): void {
