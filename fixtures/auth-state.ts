@@ -19,6 +19,8 @@ const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
 export const AUTH_COOKIE_NAME = 'sid';
 
+export const authCookieNameFor = (targetName: string): string => AUTH_TARGETS[targetName]?.cookieName ?? AUTH_COOKIE_NAME;
+
 export const LANDING_TIMEOUT_MS = 20_000;
 const SIGN_IN_ATTEMPTS = 2;
 
@@ -32,6 +34,7 @@ export const COLD_START: StorageState = Object.freeze(coldStartState);
 export type AuthTarget = {
   landingPath: string;
   landingHeading: (page: Page) => Locator;
+  cookieName?: string;
 };
 
 // The sign-in failure page also has an h1, so each target asserts its own landing
@@ -39,7 +42,11 @@ export type AuthTarget = {
 export const AUTH_TARGETS: Record<string, AuthTarget> = {
   e2e: { landingPath: '/', landingHeading: (page) => new NotificationDashboardPage(page).heading },
   admin: { landingPath: '/', landingHeading: (page) => new AdminDashboardPage(page).heading },
-  ins: { landingPath: '/address-book', landingHeading: (page) => new InsAddressBookListPage(page).heading },
+  ins: {
+    landingPath: '/address-book',
+    landingHeading: (page) => new InsAddressBookListPage(page).heading,
+    cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'ins-sid',
+  },
   plants: { landingPath: '/', landingHeading: (page) => new PlantsDashboardPage(page).heading },
 };
 
@@ -82,7 +89,7 @@ export const createAuthState = async (browser: Browser, mint: AuthMint): Promise
       await new SignInPage(page).signIn();
       await expect(target.landingHeading(page)).toBeVisible({ timeout: LANDING_TIMEOUT_MS });
 
-      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL);
+      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName));
       writeFileSync(mintingPath, JSON.stringify(authOnlyState, null, 2));
       await verifySavedState(browser, contextOptions, target, mintingPath);
       renameSync(mintingPath, statePath);
@@ -117,10 +124,10 @@ export const createWorkerAuthState = async (browser: Browser, workerInfo: Worker
 };
 
 /** The yar `session` cookie carries per-user journey state that would bleed across a worker's tests. */
-export const stripToAuthCookie = (state: StorageState, baseUrl: string): StorageState => {
-  const cookies = state.cookies.filter((cookie) => cookie.name === AUTH_COOKIE_NAME);
+export const stripToAuthCookie = (state: StorageState, baseUrl: string, cookieName: string = AUTH_COOKIE_NAME): StorageState => {
+  const cookies = state.cookies.filter((cookie) => cookie.name === cookieName);
   if (cookies.length === 0) {
-    throw new Error(`Sign-in to ${baseUrl} produced no "${AUTH_COOKIE_NAME}" session cookie to save.`);
+    throw new Error(`Sign-in to ${baseUrl} produced no "${cookieName}" session cookie to save.`);
   }
   return { cookies, origins: [] };
 };
