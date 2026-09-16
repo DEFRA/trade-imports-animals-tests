@@ -19,7 +19,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.consignmentDetails.numberOfAnimals.fill('2');
     await pages.consignmentDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await pages.overview.task('Animal identification details').click();
+    await pages.overview.task('Identification details').click();
     await expect(pages.animalIdentification.heading).toBeVisible();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Felis catus' })).toBeVisible();
 
@@ -82,7 +82,7 @@ test.describe('Animal identifiers — conditional identifier surface', { tag: ['
     await pages.consignmentDetails.fillEveryAnimalCount('1');
     await pages.consignmentDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await pages.overview.task('Animal identification details').click();
+    await pages.overview.task('Identification details').click();
     await expect(pages.animalIdentification.heading).toBeVisible();
 
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus' })).toBeVisible();
