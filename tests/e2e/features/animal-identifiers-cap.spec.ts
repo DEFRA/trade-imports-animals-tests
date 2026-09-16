@@ -19,7 +19,7 @@ test.describe('Animal identifiers cap', { tag: ['@integration', '@duplicated-in-
 
     // Counter progression: 1 of 2, then Save and add another moves to 2 of 2
     // with the first record in the card's table.
-    await pages.overview.task('Animal identification details').click();
+    await pages.overview.task('Identification details').click();
     await expect(pages.page.getByRole('heading', { name: 'Enter details for Bos taurus 1 of 2' })).toBeVisible();
     await pages.animalIdentification.earTag.fill('UK000000000001');
     await pages.animalIdentification.saveAndAddAnother.click();

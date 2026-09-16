@@ -33,7 +33,7 @@ test.describe('Additional details scope', { tag: ['@integration', '@duplicated-i
     // skipping the internal-market purpose page.
     const openAdditionalDetails = async (): Promise<void> => {
       await pages.overview.open(journeyId);
-      await pages.overview.task('Main reason for importing').click();
+      await pages.overview.task('Main reason for import').click();
       await pages.importReason.heading.waitFor();
       await pages.importReason.saveAndContinue.click();
       await pages.additionalDetails.heading.waitFor();

@@ -19,7 +19,7 @@ test.describe('Documents scan refresh without JavaScript', { tag: ['@integration
     await expect(pages.overview.heading).toBeVisible();
 
     await journey.answerCommodity();
-    await pages.overview.task('Uploaded documents').click();
+    await pages.overview.task('Upload documents').click();
     await expect(pages.accompanyingDocuments.heading).toBeVisible();
 
     const reference = `PWNOJS${Date.now()}`;
