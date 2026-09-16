@@ -33,14 +33,14 @@ test.describe('Transit countries scope', { tag: ['@integration', '@duplicated-in
     await expect(transitRow).toHaveCount(0);
 
     // A road vehicle routes through the transit-countries page; save two countries
-    // and the hub row reads Completed.
+    // and the hub row reads Complete.
     await saveArrivalWithMeans('Road Vehicle');
     await expect(pages.transitedCountries.heading).toBeVisible();
     await pages.transitedCountries.addCountry('France');
     await pages.transitedCountries.addCountry('Belgium');
     await pages.transitedCountries.saveAndContinue.click();
     await saveThroughTransporters();
-    await expect(transitRow).toContainText('Completed');
+    await expect(transitRow).toContainText('Complete');
 
     // Changing to a non-overland means takes the countries out of scope — the
     // page is skipped and the hub row drops.
