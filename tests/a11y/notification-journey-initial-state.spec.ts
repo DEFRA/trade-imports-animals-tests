@@ -54,7 +54,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Animal identification', async () => {
-      await pages.overview.task('Animal identification details').click();
+      await pages.overview.task('Identification details').click();
       await pages.animalIdentification.heading.waitFor();
       await runA11yScan();
       await pages.animalIdentification.earTag.fill('UK123456789012');
@@ -63,7 +63,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import reason', async () => {
-      await pages.overview.task('Main reason for importing').click();
+      await pages.overview.task('Main reason for import').click();
       await pages.importReason.heading.waitFor();
       await runA11yScan({ exclude: conditionalReasonRadios });
       await pages.importReason.reason('Internal market').check();
@@ -81,7 +81,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Upload documents', async () => {
-      await pages.overview.task('Uploaded documents').click();
+      await pages.overview.task('Upload documents').click();
       await pages.accompanyingDocuments.heading.waitFor();
       await runA11yScan();
       await pages.overview.open(pages.accompanyingDocuments.journeyIdFromUrl());
@@ -176,7 +176,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Contact address', async () => {
-      await pages.overview.task('Contact address').click();
+      await pages.overview.task('Contact address for this consignment').click();
       await pages.contactAddress.heading.waitFor();
       await runA11yScan();
       await pages.contactAddress.address('Animal and Plant Health Agency').check();
@@ -185,7 +185,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Review your notification', async () => {
-      await pages.overview.task('Check and submit').click();
+      await pages.overview.reviewAndSubmitButton.click();
       await pages.notificationView.heading.waitFor();
       await runA11yScan();
       await pages.notificationView.continueButton.click();

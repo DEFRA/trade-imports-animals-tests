@@ -3,17 +3,27 @@ import { test, expect } from '@fixtures';
 import { ARRIVAL_DATE } from '@flows/journey';
 
 test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
-  test('the hub groups its tasks under the six numbered group headings', async ({ journey, pages }) => {
+  test('the hub groups its tasks under the six numbered group headings, with nothing after them', async ({ journey, pages }) => {
     await journey.startNotification();
 
-    await expect(pages.page.getByRole('heading', { level: 2 })).toContainText([
+    // Design release 1 sits the whole list under its own heading, so the
+    // section captions dropped from h2 to h3.
+    await expect(pages.page.getByRole('heading', { level: 2, name: 'Notification tasklist' })).toBeVisible();
+
+    // The commodity-total labels are h3s too, so the section headings are read
+    // off their own class rather than off the level alone.
+    await expect(pages.page.locator('h3.govuk-heading-m')).toHaveText([
       '1. About the consignment',
-      '2. Commodity details',
-      '3. Movement',
-      '4. Addresses',
-      '5. Documents',
-      '6. Check and submit',
+      '2. Description of the goods',
+      '3. Transport and arrival',
+      '4. Documents',
+      '5. Consignment parties',
+      '6. Contact address',
     ]);
+
+    // Design release 1 ends the hub with the review as a primary button beside
+    // the secondary return, not as a seventh section holding a locked row.
+    await expect(pages.page.locator('.govuk-button-group .govuk-button')).toHaveText(['Review and submit', 'Return to dashboard']);
 
     // One task list per group, in the same order as the headings. Conditional
     // rows (exit details, transit countries, animal identification) are not
@@ -27,16 +37,16 @@ test.describe('Hub groups and check-your-answers rows', { tag: ['@integration', 
     await expectListedTasks(taskLists.nth(0), [
       'Where is this consignment coming from?',
       'What are you importing?',
-      'Main reason for importing',
+      'Main reason for import',
     ]);
-    await expectListedTasks(taskLists.nth(1), ['Additional commodity details']);
+    await expectListedTasks(taskLists.nth(1), ['Additional details']);
     // Identification is only owed once a chosen commodity carries identifiers,
     // and nothing has been chosen yet, so the row is off the hub altogether.
-    await expect(taskLists.nth(1)).not.toContainText('Animal identification details');
-    await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transporter']);
-    await expectListedTasks(taskLists.nth(3), ['Roles and addresses', 'Contact address']);
-    await expectListedTasks(taskLists.nth(4), ['Uploaded documents']);
-    await expectListedTasks(taskLists.nth(5), ['Check and submit']);
+    await expect(taskLists.nth(1)).not.toContainText('Identification details');
+    await expectListedTasks(taskLists.nth(2), ['Arrival details', 'Transport details']);
+    await expectListedTasks(taskLists.nth(3), ['Upload documents']);
+    await expectListedTasks(taskLists.nth(4), ['Roles and addresses']);
+    await expectListedTasks(taskLists.nth(5), ['Contact address for this consignment']);
   });
 
   test('after completing every section the check-your-answers page renders the answered rows', async ({ journey, pages }) => {

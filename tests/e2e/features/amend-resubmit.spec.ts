@@ -25,7 +25,7 @@ test.describe('Amend resubmission', { tag: ['@integration'] }, () => {
     await expect(pages.overview.journeyStrip).toContainText('Amending');
 
     // Change the country of origin through the amending check your answers page.
-    await pages.overview.task('Check and submit').click();
+    await pages.overview.reviewAndSubmitButton.click();
     await expect(pages.notificationView.heading).toBeVisible();
     await expect(pages.notificationView.changeLink('Change import details')).toBeVisible();
     await expect(pages.notificationView.changeLink('Change commodity 1')).toBeVisible();

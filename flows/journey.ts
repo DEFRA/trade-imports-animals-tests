@@ -50,7 +50,7 @@ export class Journey {
     await this.saveOriginOfImport();
     // Wait for the save to land before navigating away. Opening the overview
     // regardless hides a failed save — the run then dies several steps later on
-    // a task stuck at "Cannot start yet", pointing at the wrong page entirely.
+    // a task stuck at "Not yet started", pointing at the wrong page entirely.
     await this.pages.originOfImport.heading.waitFor({ ...pageLoadWait, state: 'hidden' });
     await this.pages.overview.open(journeyId);
     await this.pages.overview.heading.waitFor(pageLoadWait);
@@ -106,14 +106,14 @@ export class Journey {
   }
 
   async answerAnimalIdentification(): Promise<void> {
-    await this.pages.overview.task('Animal identification details').click();
+    await this.pages.overview.task('Identification details').click();
     await this.pages.animalIdentification.earTag.fill('UK123456789012');
     await this.pages.animalIdentification.saveAndContinue.click();
     await this.pages.overview.heading.waitFor(pageLoadWait);
   }
 
   async answerReasonAndAdditionalDetails(): Promise<void> {
-    await this.pages.overview.task('Main reason for importing').click();
+    await this.pages.overview.task('Main reason for import').click();
     await this.pages.importReason.reason('Internal market').check();
     // The purpose is a conditional reveal under the reason, so both answers go
     // in on the one submit.
@@ -133,7 +133,7 @@ export class Journey {
   async toAccompanyingDocuments(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.pages.overview.task('Uploaded documents').click();
+    await this.pages.overview.task('Upload documents').click();
     await this.pages.accompanyingDocuments.heading.waitFor(pageLoadWait);
   }
 
@@ -201,7 +201,7 @@ export class Journey {
   }
 
   async answerContact(): Promise<void> {
-    await this.pages.overview.task('Contact address').click();
+    await this.pages.overview.task('Contact address for this consignment').click();
     await this.pages.contactAddress.address('Animal and Plant Health Agency').check();
     await this.pages.contactAddress.saveAndContinue.click();
     await this.pages.overview.heading.waitFor(pageLoadWait);
@@ -236,14 +236,14 @@ export class Journey {
   async toAnimalIdentification(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.pages.overview.task('Animal identification details').click();
+    await this.pages.overview.task('Identification details').click();
     await this.pages.animalIdentification.heading.waitFor(pageLoadWait);
   }
 
   async toImportReason(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.pages.overview.task('Main reason for importing').click();
+    await this.pages.overview.task('Main reason for import').click();
     await this.pages.importReason.heading.waitFor(pageLoadWait);
   }
 
@@ -307,21 +307,21 @@ export class Journey {
   async toContactAddress(): Promise<void> {
     await this.startNotification();
     await this.unlockSections();
-    await this.pages.overview.task('Contact address').click();
+    await this.pages.overview.task('Contact address for this consignment').click();
     await this.pages.contactAddress.heading.waitFor(pageLoadWait);
   }
 
   async toReview(): Promise<void> {
     if (!this.context.journeyId) await this.startNotification();
     await this.completeAnswerSections();
-    await this.pages.overview.task('Check and submit').click();
+    await this.pages.overview.reviewAndSubmitButton.click();
     await this.pages.notificationView.heading.waitFor(pageLoadWait);
   }
 
   async toDeclaration(): Promise<void> {
     await this.startNotification();
     await this.completeAnswerSections();
-    await this.pages.overview.task('Check and submit').click();
+    await this.pages.overview.reviewAndSubmitButton.click();
     await this.pages.notificationView.heading.waitFor(pageLoadWait);
     await this.pages.notificationView.continueButton.click();
     await this.pages.declaration.heading.waitFor(pageLoadWait);

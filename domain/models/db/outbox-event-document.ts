@@ -64,8 +64,15 @@ export type GbnAgTradeParty = {
   partyTypeCode?: CodedValue[];
 };
 
+export type GbnAgTradeCountrySubDivision = {
+  identifier?: string;
+  urlId?: string;
+  functionTypeCode?: { content: string };
+};
+
 export type GbnAgTradeCountry = {
   code?: CodedValue;
+  subordinateTradeCountrySubDivision?: GbnAgTradeCountrySubDivision;
 };
 
 export type GbnAgLogisticsLocation = {
@@ -75,8 +82,37 @@ export type GbnAgLogisticsLocation = {
   typeCode?: string;
 };
 
+export type GbnAgReferencedDocument = {
+  typeCode?: string;
+  identifier?: string;
+};
+
+export type GbnAgLogisticsTransportMovement = {
+  modeCode?: number;
+  transportContractRelatedReferencedDocument?: GbnAgReferencedDocument[];
+};
+
+export type GbnAgAnimalIdentifier = {
+  typeCode: string;
+  content: string;
+};
+
+export type GbnAgTradeProductInstance = {
+  name?: string;
+  identifier?: GbnAgAnimalIdentifier[];
+};
+
+export type GbnAgTradeLineItem = {
+  description?: string[];
+  scientificName?: string;
+  commonName?: string;
+  specifiedLineTradeDelivery?: { productUnitQuantity: { content: number } }[];
+  physicalReferencedLogisticsPackage?: { itemQuantity: number }[];
+  individualTradeProductInstance?: GbnAgTradeProductInstance[];
+};
+
 export type GbnAgConsignmentItem = {
-  includedTradeLineItem?: unknown[];
+  includedTradeLineItem?: GbnAgTradeLineItem[];
 };
 
 export type GbnAgSpecifiedConsignment = {
@@ -88,6 +124,8 @@ export type GbnAgSpecifiedConsignment = {
   carrier?: GbnAgTradeParty;
   originCountry?: GbnAgTradeCountry;
   unloadingBaseportLocation?: GbnAgLogisticsLocation;
-  mainCarriageLogisticsTransportMovement?: unknown[];
+  finalDestinationLocation?: GbnAgLogisticsLocation;
+  mainCarriageLogisticsTransportMovement?: GbnAgLogisticsTransportMovement[];
+  transitTradeCountry?: GbnAgTradeCountry[];
   includedConsignmentItem?: GbnAgConsignmentItem[];
 };
