@@ -16,7 +16,7 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await expect(pages.additionalDetails.heading).toBeVisible();
     await pages.additionalDetails.certifiedFor('Slaughter').check();
     await pages.additionalDetails.saveAndContinue.click();
-    await expect(reasonRow).toContainText('Completed');
+    await expect(reasonRow).toContainText('Complete');
 
     // Transit: the purpose is no longer owed, but the reason-gated exit details
     // (port of exit + destination country) come into scope and reveal under the
@@ -29,7 +29,7 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await expect(pages.additionalDetails.heading).toBeVisible();
     await pages.additionalDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await expect(reasonRow).toContainText('Completed');
+    await expect(reasonRow).toContainText('Complete');
 
     // Back to the internal market: leaving scope wiped the saved purpose, so no
     // purpose radio is pre-selected and the task is owed again. The assertion is
@@ -52,6 +52,6 @@ test.describe('Reason and purpose scope', { tag: ['@integration', '@duplicated-i
     await expect(pages.additionalDetails.heading).toBeVisible();
     await pages.additionalDetails.saveAndContinue.click();
     await expect(pages.overview.heading).toBeVisible();
-    await expect(reasonRow).toContainText('Completed');
+    await expect(reasonRow).toContainText('Complete');
   });
 });
