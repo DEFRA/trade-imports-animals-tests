@@ -35,8 +35,11 @@ export class BasePage {
     return this.page.getByText(email);
   }
 
+  /** The three frontends sign out from their service navigation, where the
+   * item reads "Log out" and points at /auth/sign-out. `exact` keeps the
+   * match off any other link whose name merely contains "log out". */
   get linkSignOut(): Locator {
-    return this.page.getByRole('link', { name: 'Sign out' });
+    return this.page.getByRole('link', { name: 'Log out', exact: true });
   }
 
   /**

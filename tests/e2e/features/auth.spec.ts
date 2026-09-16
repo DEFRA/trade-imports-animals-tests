@@ -34,6 +34,7 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
 
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
+    await expect(pages.notificationDashboard.linkSignOut).toHaveAttribute('href', pages.signOut.path);
     await pages.notificationDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
     await expect(pages.signOut.heading).toBeVisible();
