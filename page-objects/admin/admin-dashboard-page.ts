@@ -8,6 +8,12 @@ export class AdminDashboardPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Home' });
   }
 
+  /** The admin portal still renders "Sign out" in its own header, outside the
+   * frontends' shared shape. */
+  get linkSignOut(): Locator {
+    return this.page.getByRole('link', { name: 'Sign out' });
+  }
+
   get btnNotifications(): Locator {
     return this.page.getByRole('button', { name: 'Notifications' });
   }

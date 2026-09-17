@@ -1,6 +1,10 @@
 import { Page, Locator } from '@playwright/test';
 
+/** Signing out of a frontend. The service drops its session at `path` and
+ * sends the browser to the identity provider, whose signed-out page is
+ * where `expectedUrl` and `heading` land. */
 export class SignOutPage {
+  readonly path = '/auth/sign-out';
   readonly expectedUrl = new RegExp('/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/signout($|\\?)');
 
   constructor(private readonly page: Page) {}

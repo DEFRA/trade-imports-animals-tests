@@ -47,7 +47,11 @@ export const AUTH_TARGETS: Record<string, AuthTarget> = {
     landingHeading: (page) => new InsAddressBookListPage(page).heading,
     cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'ins-sid',
   },
-  plants: { landingPath: '/', landingHeading: (page) => new PlantsDashboardPage(page).heading },
+  plants: {
+    landingPath: '/',
+    landingHeading: (page) => new PlantsDashboardPage(page).heading,
+    cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'plants-sid',
+  },
 };
 
 const slug = (baseUrl: string): string => baseUrl.replace(/^https?:\/\//, '').replace(/[^a-z0-9]+/gi, '-');
