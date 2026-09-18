@@ -25,8 +25,13 @@ To bring the stack up:
 
 ```sh
 cd ~/git/defra/trade-imports-workspace
-./scripts/stack/run-stack.sh --profile frontend --profile backend --profile plants-frontend --profile plants-backend
+./scripts/stack/run-stack.sh
 ```
+
+Profiles are role-based, not per-service — `frontend` covers every
+frontend (animals, admin, INS, plants) and `backend` covers every
+backend (animals, INS, plants, reference-data, address-book, dynamics
+gateway). With no `--profile` flag, all default profiles start.
 
 ## Getting a submitted notification
 
