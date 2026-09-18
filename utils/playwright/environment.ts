@@ -25,11 +25,40 @@ export function throwIfProdEnvironment(environment = getEnvironment()): void {
 }
 
 /**
+ * True when Playwright targets a deployed CDP hostname (dev, test, etc.).
+ */
+export function isCdpHostedEnvironment(): boolean {
+  const baseUrl = String(test.info().project.use.baseURL ?? '').toLowerCase();
+  return baseUrl.includes('.cdp-int.defra.cloud');
+}
+
+/**
  * Skip a test when running against CDP hosted environments.
  */
 export function skipIfCdpEnvironment(reason: string): void {
-  const baseUrl = String(test.info().project.use.baseURL ?? '');
-  test.skip(baseUrl.toLowerCase().includes('.cdp-int.defra.cloud'), reason);
+  test.skip(isCdpHostedEnvironment(), reason);
+}
+
+/**
+ * True when animals-frontend runs outside stub mode — compose (LIVE_ANIMALS_MODE=real)
+ * and CDP (production) both render the INS handshake link.
+ */
+export function isNonStubStackEnvironment(): boolean {
+  return isComposeEnvironment() || isCdpHostedEnvironment();
+}
+
+/**
+ * Skip when the stack runs outside stub mode (compose or CDP).
+ */
+export function skipIfNonStubStackEnvironment(reason: string): void {
+  test.skip(isNonStubStackEnvironment(), reason);
+}
+
+/**
+ * Skip everywhere except non-stub stacks (compose or CDP).
+ */
+export function skipUnlessNonStubStackEnvironment(reason: string): void {
+  test.skip(!isNonStubStackEnvironment(), reason);
 }
 
 /**
