@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { skipIfComposeEnvironment, skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 
 /**
  * The notification journey reads the address book and never writes to it directly.
@@ -17,13 +17,13 @@ test.describe('Addresses are read-only in the journey', { tag: ['@integration'] 
     });
 
     test('offers no INS add link in stub mode', async ({ pages }) => {
-      skipIfComposeEnvironment('the INS add link is shown when animals-frontend runs against the full stack');
+      skipIfNonStubStackEnvironment('the INS add link is shown when animals-frontend runs outside stub mode (compose or CDP)');
       await expect(pages.consignorSelection.saveAndContinue).toBeVisible();
       await expect(pages.consignorSelection.addNewAddress).toHaveCount(0);
     });
 
     test('links to INS to add an address when the full stack is running', async ({ pages }) => {
-      skipUnlessComposeEnvironment('the handshake link is only rendered outside stub mode, which the compose stack uses');
+      skipUnlessNonStubStackEnvironment('the handshake link is only rendered outside stub mode (compose or CDP)');
       await expect(pages.consignorSelection.saveAndContinue).toBeVisible();
       await expect(pages.page.getByRole('button', { name: /add.*address/i })).toHaveCount(0);
       await expect(pages.consignorSelection.addNewAddress).toBeVisible();

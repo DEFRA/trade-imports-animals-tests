@@ -1,5 +1,5 @@
 import { test, expect } from '@fixtures';
-import { skipIfComposeEnvironment, skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 
 test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
   test.beforeEach(async ({ journey }) => {
@@ -31,12 +31,12 @@ test.describe('Contact address page', { tag: ['@integration', '@duplicated-in-fr
   });
 
   test('offers no way to add an address in stub mode', async ({ pages }) => {
-    skipIfComposeEnvironment('the INS add link is shown when animals-frontend runs against the full stack');
+    skipIfNonStubStackEnvironment('the INS add link is shown when animals-frontend runs outside stub mode (compose or CDP)');
     await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveCount(0);
   });
 
   test('links to INS to add an address when the full stack is running', async ({ pages }) => {
-    skipUnlessComposeEnvironment('the handshake link is only rendered outside stub mode, which the compose stack uses');
+    skipUnlessNonStubStackEnvironment('the handshake link is only rendered outside stub mode (compose or CDP)');
     await expect(pages.page.getByRole('link', { name: /add.*address/i })).toHaveAttribute(
       'href',
       /\/address-book\/add\?journey-type=gbn-ag/,
