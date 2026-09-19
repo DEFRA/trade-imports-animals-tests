@@ -1,0 +1,193 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e/pages/commodities.spec.ts >> Commodity selection page >> accepts and persists multiple commodity-species pairs found under different queries
+- Location: tests/e2e/pages/commodities.spec.ts:48:3
+
+# Error details
+
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('heading', { name: 'Overview', level: 1 })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" with timeout 5000ms
+  - waiting for getByRole('heading', { name: 'Overview', level: 1 })
+
+```
+
+```yaml
+- link "Skip to main content":
+  - /url: "#main-content"
+- banner:
+  - link "GOV.UK":
+    - /url: https://www.gov.uk/
+    - img "GOV.UK"
+  - region "Service information":
+    - link "Import notification service":
+      - /url: /
+    - navigation "Menu":
+      - list:
+        - listitem:
+          - link "Dashboard":
+            - /url: /
+            - strong: Dashboard
+        - listitem:
+          - link "Address book":
+            - /url: "#"
+        - listitem:
+          - link "Manage account":
+            - /url: "#"
+        - listitem:
+          - link "Log out":
+            - /url: /auth/sign-out
+- paragraph:
+  - strong: Alpha
+  - text: This is a new service. Help us improve it and
+  - link "give your feedback by email":
+    - /url: mailto:APHAServiceDesk@apha.gov.uk
+  - text: .
+- link "Back":
+  - /url: /notifications/GBN-AG-26-1X76Y5
+- main:
+  - strong: Draft
+  - text: GBN-AG-26-1X76Y5 About the consignment
+  - heading "What are you importing?" [level=1]
+  - text: A separate notification is required for each health certificate. Consignments that do not require a health certificate must still be notified. Search for a commodity You can search by commodity name (for example, Cow), commodity code (0102), or species name (Bos taurus). Enter at least 3 characters.
+  - searchbox "Search for a commodity"
+  - button "Search"
+  - heading "2 selected" [level=2]
+  - list:
+    - listitem: "Cow (0102): Domestic cattle (Bos taurus)"
+    - listitem: "Cat (01061900): Cat (Felis catus)"
+  - button "Clear all"
+  - group: Help with commodity codes
+  - button "Save and continue"
+  - button "Save and return to overview"
+  - link "Cancel and return to overview":
+    - /url: /notifications/GBN-AG-26-1X76Y5
+- contentinfo:
+  - heading "Support links" [level=2]
+  - list:
+    - listitem:
+      - link "Privacy":
+        - /url: https://www.gov.uk/help/privacy-notice
+    - listitem:
+      - link "Cookies":
+        - /url: https://www.gov.uk/help/cookies
+    - listitem:
+      - link "Accessibility statement":
+        - /url: https://www.gov.uk/help/accessibility-statement
+  - text: All content is available under the
+  - link "Open Government Licence v3.0":
+    - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+  - text: ", except where otherwise stated"
+  - link "© Crown copyright":
+    - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@fixtures';
+  2  | 
+  3  | // The page holds nothing until a query reaches it, so each commodity is found
+  4  | // by its own code. Cat and Dog share 01061900, so that query returns both.
+  5  | const expectedGroups = [
+  6  |   ['Cow (0102)', '0102', ['Bison bison', 'Bos spp.', 'Bos taurus', 'Bubalus bubalis']],
+  7  |   ['Horse (0101)', '0101', ['Equus caballus']],
+  8  |   ['Cat (01061900)', '01061900', ['Felis catus']],
+  9  |   ['Dog (01061900)', '01061900', ['Canis lupus familiaris']],
+  10 |   ['Fish (0301)', '0301', ['Salmo salar']],
+  11 | ] as const;
+  12 | 
+  13 | test.describe('Commodity selection page', { tag: ['@integration', '@duplicated-in-frontend'] }, () => {
+  14 |   test.beforeEach(async ({ journey }) => {
+  15 |     await journey.toCommoditySelection();
+  16 |   });
+  17 | 
+  18 |   test('offers a search box and lists nothing until it is used', async ({ pages }) => {
+  19 |     await expect(pages.commoditySelection.heading).toBeVisible();
+  20 |     await expect(pages.commoditySelection.searchBox).toBeVisible();
+  21 |     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
+  22 |     await expect(pages.commoditySelection.selectionPanel).toHaveCount(0);
+  23 |     await expect(pages.commoditySelection.saveAndContinue).toBeVisible();
+  24 |   });
+  25 | 
+  26 |   test('lists nothing for a query shorter than three characters', async ({ pages }) => {
+  27 |     await pages.commoditySelection.search('Bo');
+  28 |     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
+  29 |   });
+  30 | 
+  31 |   test('groups the matching species under their commodity heading', async ({ pages }) => {
+  32 |     for (const [legend, query, species] of expectedGroups) {
+  33 |       await pages.commoditySelection.search(query);
+  34 |       const group = pages.page.getByRole('group', { name: legend });
+  35 |       await expect(group).toBeVisible();
+  36 |       for (const name of species) {
+  37 |         await expect(group.getByRole('checkbox', { name })).toBeVisible();
+  38 |       }
+  39 |     }
+  40 |   });
+  41 | 
+  42 |   test('says so when nothing matches', async ({ pages }) => {
+  43 |     await pages.commoditySelection.search('zzz');
+  44 |     await expect(pages.page.getByText('No results found')).toBeVisible();
+  45 |     await expect(pages.page.getByRole('checkbox')).toHaveCount(0);
+  46 |   });
+  47 | 
+  48 |   test('accepts and persists multiple commodity-species pairs found under different queries', async ({ pages }) => {
+  49 |     test.slow();
+  50 | 
+  51 |     await pages.commoditySelection.selectSpecies(['Bos taurus', 'Felis catus']);
+  52 |     await pages.commoditySelection.saveAndContinue.click();
+  53 |     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toHaveCount(0);
+  54 | 
+  55 |     // Commodity details is a hub task of its own, so its back link returns to
+  56 |     // the overview. Reopen the selection from the row that owns it.
+  57 |     await pages.consignmentDetails.linkBack.click();
+> 58 |     await expect(pages.overview.heading).toBeVisible();
+     |                                          ^ Error: expect(locator).toBeVisible() failed
+  59 |     await pages.overview.task('What are you importing?').click();
+  60 | 
+  61 |     // Back on the page, both pairs are listed under the running count without
+  62 |     // any query — a choice made under an earlier query is never lost.
+  63 |     await expect(pages.commoditySelection.selectionPanel).toContainText('2 selected');
+  64 |     await expect(pages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+  65 |     await expect(pages.commoditySelection.selectionPanel).toContainText('Felis catus');
+  66 | 
+  67 |     // And each is ticked again when its own query brings it back on screen.
+  68 |     await pages.commoditySelection.search('Bos taurus');
+  69 |     await expect(pages.commoditySelection.species('Bos taurus')).toBeChecked();
+  70 |     await pages.commoditySelection.search('Felis catus');
+  71 |     await expect(pages.commoditySelection.species('Felis catus')).toBeChecked();
+  72 |   });
+  73 | 
+  74 |   test('counts what has been chosen and clears it on request', async ({ pages }) => {
+  75 |     await pages.commoditySelection.selectSpecies(['Bos taurus']);
+  76 |     // The panel is written on the server, so it appears on the next render.
+  77 |     await pages.commoditySelection.search('Salmo');
+  78 |     await expect(pages.commoditySelection.selectionPanel).toContainText('1 selected');
+  79 |     await expect(pages.commoditySelection.selectionPanel).toContainText('Bos taurus');
+  80 | 
+  81 |     await pages.commoditySelection.clearAll.click();
+  82 |     await expect(pages.commoditySelection.selectionPanel).toHaveCount(0);
+  83 |   });
+  84 | 
+  85 |   test('shows an error summary when submitted empty', async ({ pages }) => {
+  86 |     await pages.commoditySelection.saveAndContinue.click();
+  87 |     await expect(pages.page.getByRole('heading', { name: 'There is a problem' })).toBeVisible();
+  88 |     await expect(pages.page.getByRole('link', { name: 'Select a commodity' })).toBeVisible();
+  89 |   });
+  90 | });
+  91 | 
+```
