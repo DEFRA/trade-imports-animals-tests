@@ -82,16 +82,8 @@ run_security_profile() {
   # started yet, so there is nothing to shut down or collect.
   if [ "$PROFILE" = "security:active" ]; then
     echo "PROFILE=security:active is not supported on CDP; run it against the workspace docker-compose stack" >> FAILED
-    cat > "$REPORT_DIR/index.html" <<EOF
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Security scan — refused</title></head>
-<body>
-<h1>Security scan — refused</h1>
-<p>security:active is destructive and only runs against the workspace docker-compose stack.</p>
-</body>
-</html>
-EOF
+    write_fallback_report_html "Security scan — refused" \
+      "security:active is destructive and only runs against the workspace docker-compose stack."
     return
   fi
 
