@@ -30,6 +30,27 @@ configure_zap_urls() {
   export ZAP_TRADE_IMPORTS_ADDRESS_BOOK_URL="https://trade-imports-address-book.${ENVIRONMENT}.cdp-int.defra.cloud"
 }
 
+# CDP's report viewer looks for index.html inside whichever directory gets
+# published, so every early-exit path below needs one even though the real
+# scan never produced its own. $1: title/heading, $2: explanation, $3:
+# optional extra paragraph (e.g. links to zap-log.html/playwright-report).
+write_fallback_report_html() {
+  title="$1"
+  message="$2"
+  links="$3"
+  cat > "$REPORT_DIR/index.html" <<EOF
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>${title}</title></head>
+<body>
+<h1>${title}</h1>
+<p>${message}</p>
+${links:+<p>${links}</p>}
+</body>
+</html>
+EOF
+}
+
 # Starts ZAP as a background process (CDP has no separate container to run
 # it in, unlike local's docker-compose setup), points the security specs and
 # the gate at it, then shuts it down. Shared by both security profiles below
@@ -122,17 +143,9 @@ EOF
     # report instead of a bare zap-log.html.
     if [ ! -f "$REPORT_DIR/index.html" ]; then
       [ -d playwright-report ] && cp -r playwright-report "$REPORT_DIR/playwright-report"
-      cat > "$REPORT_DIR/index.html" <<EOF
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Security scan — specs failed</title></head>
-<body>
-<h1>Security scan — specs failed</h1>
-<p>The Playwright specs failed before the ZAP gate could run, so no ZAP scan took place.</p>
-<p>See <a href="playwright-report/index.html">the Playwright report</a> for the failing spec(s), and <a href="zap-log.html">zap.log</a> for ZAP's own diagnostics.</p>
-</body>
-</html>
-EOF
+      write_fallback_report_html "Security scan — specs failed" \
+        "The Playwright specs failed before the ZAP gate could run, so no ZAP scan took place." \
+        "See <a href=\"playwright-report/index.html\">the Playwright report</a> for the failing spec(s), and <a href=\"zap-log.html\">zap.log</a> for ZAP's own diagnostics."
     fi
   else
     # Still fall through to kill/cp below — ZAP did start (just never became
@@ -141,20 +154,10 @@ EOF
     echo "ZAP did not become ready before timing out" >> FAILED
 
     # No scan ran, so run-and-gate.ts's index.html (which needs a
-    # completed scan's alert data) never gets written either — publish a
-    # minimal one of our own so the published report explains the failure
-    # instead of shipping a bare zap.log with no landing page.
-    cat > "$REPORT_DIR/index.html" <<EOF
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>ZAP security scan — FAILED</title></head>
-<body>
-<h1>ZAP security scan — FAILED</h1>
-<p>ZAP did not become ready before timing out — no scan ran.</p>
-<p>See <a href="zap-log.html">zap.log</a> for diagnostics.</p>
-</body>
-</html>
-EOF
+    # completed scan's alert data) never gets written either.
+    write_fallback_report_html "ZAP security scan — FAILED" \
+      "ZAP did not become ready before timing out — no scan ran." \
+      "See <a href=\"zap-log.html\">zap.log</a> for diagnostics."
   fi
 
   # wait, not just kill: zap.log is only complete once the process has
