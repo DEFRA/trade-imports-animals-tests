@@ -195,6 +195,7 @@ async function writeIndexHtml(
   failed: boolean,
   started: string,
   finished: string,
+  specsOutcome: string | undefined,
 ): Promise<void> {
   const rows = summaries
     .map(
@@ -224,6 +225,15 @@ async function writeIndexHtml(
 
   const truncationSection =
     truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
+
+  // Undefined outside the GitHub Action (local, CDP): those lanes either
+  // never reach here on a failed run (CDP's && short-circuit) or aren't
+  // gated on partial traffic to begin with. 'success' is the only outcome
+  // that means every @active spec actually ran.
+  const partialRunSection =
+    specsOutcome && specsOutcome !== 'success'
+      ? `<h2 class="fail">Partial run</h2><p>The traffic-generation specs did not all succeed (outcome: ${specsOutcome}) — the findings below reflect whatever traffic ran before that, not full corpus coverage.</p>`
+      : '';
 
   await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
   await wrapAsHtml(`${REPORT_NAME}.json`, JSON_REPORT_ARTEFACT);
@@ -285,6 +295,7 @@ tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 <p>started: ${started}</p>
 <p>finished: ${finished}</p>
 ${truncationSection}
+${partialRunSection}
 <h2>Sites</h2>
 <table>
 <thead>
@@ -394,7 +405,7 @@ async function main(): Promise<void> {
   // when someone most needs the report, and entrypoint.sh's publish step
   // runs regardless of this script's exit code, so the index has to exist
   // on disk either way.
-  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished);
+  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished, process.env.PLAYWRIGHT_OUTCOME);
 
   if (failures.length > 0) {
     throw new Error(`ZAP security scan found ${failures.length} failure(s):\n${failures.join('\n')}`);
