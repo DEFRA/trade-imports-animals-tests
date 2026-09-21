@@ -1,3 +1,4 @@
+import { resolveObligationId } from '../manifests.js';
 import type { Scenario } from './index.js';
 
 // A code that is definitely not in the seeded MDM stub. Two Zs feel obviously
@@ -17,9 +18,10 @@ export const countryStale: Scenario = {
   id: 'country-stale',
   summary: 'Rewrite the stored countryOfOrigin to a code the current origin block no longer offers',
   applies: ['animals', 'plants'],
-  mutate: async ({ notifications, referenceNumber }) => {
+  mutate: async ({ notifications, referenceNumber, frontend }) => {
+    const obligationId = await resolveObligationId(frontend, 'countryOfOrigin');
     const result = await notifications.updateOne(
-      { referenceNumber, 'fulfilments.obligationId': 'countryOfOrigin' },
+      { referenceNumber, 'fulfilments.obligationId': obligationId },
       { $set: { 'fulfilments.$.value': STALE_CODE } },
     );
     if (result.matchedCount === 0) {

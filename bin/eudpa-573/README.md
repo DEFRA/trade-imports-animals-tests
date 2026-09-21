@@ -102,6 +102,41 @@ it in `scenarios/index.ts`. Keep the mutation idempotent, and throw
 loudly if the notification is not in a state the scenario expects
 (e.g. no `countryOfOrigin` fulfilment for `country-stale`).
 
+## Known limitation — dashboard card doesn't reflect the mutation (follow-up)
+
+The seed rewrites only the raw `fulfilments` array. The dashboard row
+reads from a separate flat projection on the same document —
+`notification.origin.countryCode`, `notification.consignor.name`,
+`notification.consignee.name`, `notification.commodity`,
+`notification.transport.arrivalDate` — extracted at submit time by the
+dashboard list-item mapper
+(`services/persistence/records/real/marshal/list-item.js` in the
+animals frontend). Those projected fields are untouched by the seed,
+so the dashboard card still shows the trader's original answers after
+any scenario runs.
+
+Concretely for `country-stale`: the dashboard card still names
+"Austria" even after the fulfilment has been rewritten to `ZZ`. A real
+MDM re-release incident would have both storage locations holding the
+stale code, and the dashboard would render the raw ISO because
+`originLabel('ZZ') ?? 'ZZ'` — that surface is precisely one leg of the
+cross-view divergence described in `notes.md`.
+
+Follow-up: extend each scenario to also update the projected fields
+whose display path it means to break, so the dashboard tells the same
+story a live incident would tell. Concretely:
+
+- `country-stale` — also `$set` `notification.origin.countryCode` (and
+  the plants equivalent) to the stale code.
+- `party-deleted` — also blank or repoint the frozen party names on
+  the doc (`notification.consignor.name`, `notification.consignee.name`
+  and any other projected party names).
+- `unknown-obligation` — no equivalent projected field; nothing to
+  extend.
+
+Keep the scenarios idempotent — a second run should leave the doc in
+the same terminal state, not double-mutate.
+
 ## Related
 
 - Investigation notes: `workareas/shared/eudpa-573-stale-state/notes.md`
