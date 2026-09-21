@@ -10,7 +10,7 @@ FROM zaproxy/zap-stable:2.17.0 AS zap
 # auto-update only updates add-ons that are already installed).
 RUN rm -f /zap/plugin/client-alpha-*.zap
 
-FROM mcr.microsoft.com/playwright:v1.61.1-jammy
+FROM mcr.microsoft.com/playwright:v1.63.0-jammy
 
 ENV TZ="Europe/London"
 ENV CI=true
