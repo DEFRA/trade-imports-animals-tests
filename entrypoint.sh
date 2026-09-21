@@ -114,6 +114,26 @@ EOF
     if [ $security_exit_code -ne 0 ]; then
       echo "security profile exited $security_exit_code before completing" >> FAILED
     fi
+
+    # run-and-gate.ts always writes index.html before it can throw, so its
+    # absence means the && above short-circuited — specs failed before the
+    # gate ran. Don't run the gate to recover (see the && comment above);
+    # just give the published report a landing page and the Playwright
+    # report instead of a bare zap-log.html.
+    if [ ! -f "$REPORT_DIR/index.html" ]; then
+      [ -d playwright-report ] && cp -r playwright-report "$REPORT_DIR/playwright-report"
+      cat > "$REPORT_DIR/index.html" <<EOF
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Security scan — specs failed</title></head>
+<body>
+<h1>Security scan — specs failed</h1>
+<p>The Playwright specs failed before the ZAP gate could run, so no ZAP scan took place.</p>
+<p>See <a href="playwright-report/index.html">the Playwright report</a> for the failing spec(s), and <a href="zap-log.html">zap.log</a> for ZAP's own diagnostics.</p>
+</body>
+</html>
+EOF
+    fi
   else
     # Still fall through to kill/cp below — ZAP did start (just never became
     # ready), and the readiness failure itself is exactly the kind of thing
