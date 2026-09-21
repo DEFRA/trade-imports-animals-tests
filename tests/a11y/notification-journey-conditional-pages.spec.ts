@@ -11,8 +11,9 @@ const PRIVATE_TRANSPORTER = {
   emailAddress: 'jean.dupont@example.fr',
 };
 
-// govuk-frontend's conditional-reveal radios set aria-expanded on the radio input,
-// which axe's aria-allowed-attr rule rejects.
+// Same behaviour from the govuk-frontend npm package's radios.mjs, excluded
+// elsewhere in this suite (e.g. notification-journey-filled-state.spec.ts) —
+// component code we don't own, not a defect in this service.
 const conditionalReasonRadios = 'input[name="reasonForImport"][aria-controls]';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
