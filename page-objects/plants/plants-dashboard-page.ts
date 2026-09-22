@@ -1,8 +1,9 @@
 import { Locator } from '@playwright/test';
 import { BasePage } from '@page-objects/base/base-page';
+import { SET_BASES } from '@page-objects/base/sets';
 
 export class PlantsDashboardPage extends BasePage {
-  readonly expectedUrl = '/';
+  readonly expectedUrl = SET_BASES.highRiskPlants;
 
   get heading(): Locator {
     return this.page.getByRole('heading', { level: 1, name: 'Import notification service' });
@@ -81,7 +82,7 @@ export class PlantsDashboardPage extends BasePage {
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {
-    await this.navigateToPlantsFrontend('/');
+    await this.navigateToPlantsFrontend(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn);
   }
 }

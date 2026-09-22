@@ -1,3 +1,4 @@
+import { SET_BASES } from '@page-objects/base/sets';
 import { test, expect } from '@fixtures';
 
 /**
@@ -54,7 +55,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     ]);
     await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
-      `/notifications/${reference}/commodity-type`,
+      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type`,
     );
     await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Not yet started');
 

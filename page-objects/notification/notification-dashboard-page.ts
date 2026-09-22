@@ -1,6 +1,7 @@
 import { type Locator } from '@playwright/test';
 import type { SortByValue } from '@domain/constants/sort-by-values';
 import { BasePage } from '@page-objects/base/base-page';
+import { SET_BASES } from '@page-objects/base/sets';
 
 export type ResultsRange = {
   start: number;
@@ -9,7 +10,7 @@ export type ResultsRange = {
 };
 
 export class NotificationDashboardPage extends BasePage {
-  readonly expectedUrl = '/';
+  readonly expectedUrl = SET_BASES.liveAnimals;
 
   /**
    * The notification service signs out from its service navigation, where the item reads "Log out".
@@ -148,7 +149,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   async openDashboardPage(pageNumber: number): Promise<void> {
-    await this.navigateToFrontend(pageNumber <= 1 ? '/' : `/?page=${pageNumber}`);
+    await this.navigateToFrontend(pageNumber <= 1 ? this.expectedUrl : `${this.expectedUrl}?page=${pageNumber}`);
     await this.heading.waitFor({ state: 'visible' });
     await this.waitForNotificationList();
   }
@@ -217,7 +218,7 @@ export class NotificationDashboardPage extends BasePage {
   }
 
   async open(attemptSignIn: boolean = true): Promise<void> {
-    await this.navigateToFrontend('/');
+    await this.navigateToFrontend(this.expectedUrl);
     await this.signInWhenRequested(attemptSignIn);
 
     if (attemptSignIn) {
@@ -226,7 +227,7 @@ export class NotificationDashboardPage extends BasePage {
         await this.waitForNotificationList();
       } catch {
         console.warn('Auth retry triggered — initial sign-in did not land on dashboard within 5s');
-        await this.navigateToFrontend('/');
+        await this.navigateToFrontend(this.expectedUrl);
         await this.signInWhenRequested(true);
         await this.heading.waitFor({ state: 'visible', timeout: 5000 });
         await this.waitForNotificationList();

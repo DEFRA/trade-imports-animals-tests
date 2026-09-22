@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
@@ -14,11 +16,11 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
   });
 
   test('seeds an origin answer into the notification document from an admin-project spec', async ({ frontendForms }) => {
-    const created = await frontendForms.postForm('/notifications');
-    expect(created).toMatch(/^\/notifications\/[^/]+\/origin$/);
+    const created = await frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications`);
+    expect(created).toMatch(new RegExp(`^${SET_BASES.liveAnimals}/notifications/[^/]+/origin$`));
 
     const referenceNumber = referenceNumberFrom(created);
-    await frontendForms.postForm(`/notifications/${referenceNumber}/origin`, {
+    await frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/origin`, {
       countryOfOrigin: 'FR',
       regionOfOriginCodeRequirement: 'no',
       regionOfOriginCodeSuffix: '',
@@ -45,12 +47,12 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
   });
 
   test('refuses a page the frontend rejected, rather than seeding half a notification', async ({ frontendForms }) => {
-    const created = await frontendForms.postForm('/notifications');
+    const created = await frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications`);
     const referenceNumber = referenceNumberFrom(created);
 
-    await expect(frontendForms.postForm(`/notifications/${referenceNumber}/origin`, { countryOfOrigin: 'Narnia' })).rejects.toThrow(
-      /responded 400/,
-    );
+    await expect(
+      frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/origin`, { countryOfOrigin: 'Narnia' }),
+    ).rejects.toThrow(/responded 400/);
   });
 
   test('seeds a complete journey into every section of the notification document', async ({ seededJourney, addressBookApi }) => {

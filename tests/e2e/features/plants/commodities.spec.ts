@@ -1,3 +1,4 @@
+import { SET_BASES } from '@page-objects/base/sets';
 import { test, expect } from '@fixtures';
 
 const POTATOES = 'Potatoes (seed or ware)';
@@ -161,7 +162,7 @@ test.describe('High-risk plants commodity section', { tag: '@integration' }, () 
 
     await pages.plantsCommodities.btnSaveAndContinue.click();
 
-    await expect(pages.page).toHaveURL(`/notifications/${reference}/origin`);
+    await expect(pages.page).toHaveURL(`${SET_BASES.highRiskPlants}/notifications/${reference}/origin`);
 
     await pages.plantsOverview.open(reference);
     await expect(pages.page).toHaveURL(pages.plantsOverview.expectedUrl(reference));
