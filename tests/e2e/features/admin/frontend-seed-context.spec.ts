@@ -6,7 +6,19 @@ import { type NotificationDocument } from '@domain/models/db/notification-docume
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
-const referenceNumberFrom = (redirectPath: string) => redirectPath.split('/')[2];
+const CREATED_AT_ORIGIN = new RegExp(`^${SET_BASES.liveAnimals}/notifications/([^/]+)/origin$`);
+
+// Matched against the set base rather than read from a fixed path segment: the
+// set prefix shifts every index by one, and `split('/')[2]` answered
+// "notifications" rather than failing, which surfaced later as a 500 on a
+// doubled path.
+const referenceNumberFrom = (redirectPath: string): string => {
+  const match = redirectPath.match(CREATED_AT_ORIGIN);
+  if (!match) {
+    throw new Error(`Expected a redirect to the origin page under ${SET_BASES.liveAnimals}, got "${redirectPath}".`);
+  }
+  return match[1];
+};
 
 // Auth state is minted per Playwright project, so this proof only holds from the admin
 // project: an e2e-project session is already a frontend session.
@@ -17,7 +29,7 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
 
   test('seeds an origin answer into the notification document from an admin-project spec', async ({ frontendForms }) => {
     const created = await frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications`);
-    expect(created).toMatch(new RegExp(`^${SET_BASES.liveAnimals}/notifications/[^/]+/origin$`));
+    expect(created).toMatch(CREATED_AT_ORIGIN);
 
     const referenceNumber = referenceNumberFrom(created);
     await frontendForms.postForm(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/origin`, {
