@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, expect } from '@fixtures';
 import { sortByValues } from '@domain/constants/sort-by-values';
 
@@ -79,7 +81,9 @@ test.describe('Notification dashboard search', () => {
   test('preserves referenceNumber in the URL when a page param is present', async ({ pages }) => {
     await pages.notificationDashboard.searchForReference(NO_MATCH_REFERENCE_NUMBER);
 
-    await pages.page.goto(`/?referenceNumber=${NO_MATCH_REFERENCE_NUMBER}&page=2`);
+    // Straight to the set's dashboard: `/` redirects to it but drops the query
+    // string on the way, which is the very thing this test is asserting survives.
+    await pages.page.goto(`${SET_BASES.liveAnimals}?referenceNumber=${NO_MATCH_REFERENCE_NUMBER}&page=2`);
     await pages.notificationDashboard.heading.waitFor();
     await pages.notificationDashboard.waitForNotificationList();
 
