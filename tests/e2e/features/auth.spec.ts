@@ -47,9 +47,10 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
 
-    // /signout registers perfectly happily at /<set-id>/signout and fails only
-    // when a user tries to sign out, so its path is pinned rather than trusted.
-    await expect(pages.notificationDashboard.linkSignOut).toHaveAttribute('href', '/signout');
+    // Sign-out registers perfectly happily at /<set-id>/auth/sign-out and fails
+    // only when a user tries to sign out, so its path is pinned rather than
+    // trusted. The literal is what layout.njk renders as signOutUrl.
+    await expect(pages.notificationDashboard.linkSignOut).toHaveAttribute('href', '/auth/sign-out');
 
     await pages.notificationDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
