@@ -1,3 +1,4 @@
+import { SET_BASES } from '@page-objects/base/sets';
 import { test, expect } from '@fixtures';
 
 /**
@@ -29,7 +30,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
 
     // The entry page's back link is the one in the journey that depends on
     // state: nothing is committed yet, so it points at the dashboard.
-    await expect(pages.plantsCommodityType.linkBack).toHaveAttribute('href', '/');
+    await expect(pages.plantsCommodityType.linkBack).toHaveAttribute('href', pages.plantsDashboard.expectedUrl);
   });
 
   test('the Overview carries the journey strip and the task rows landed so far', async ({ pages, plantsJourney }) => {
@@ -54,7 +55,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     ]);
     await expect(pages.plantsOverview.taskRowLink('What are you importing?')).toHaveAttribute(
       'href',
-      `/notifications/${reference}/commodity-type`,
+      `${SET_BASES.highRiskPlants}/notifications/${reference}/commodity-type`,
     );
     await expect(pages.plantsOverview.taskRow('What are you importing?')).toContainText('Not yet started');
 
@@ -77,8 +78,8 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.plantsOverview.taskRowByTitle('Check and submit')).toContainText('Cannot start yet');
     await expect(pages.plantsOverview.taskRowLink('Check and submit')).toHaveCount(0);
 
-    await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', '/');
-    await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', '/');
+    await expect(pages.plantsOverview.btnReturnToDashboard).toHaveAttribute('href', pages.plantsDashboard.expectedUrl);
+    await expect(pages.plantsOverview.linkBack).toHaveAttribute('href', pages.plantsDashboard.expectedUrl);
   });
 
   test('the new draft is listed on the dashboard and Resume reopens it', async ({ pages, plantsJourney }) => {
@@ -105,7 +106,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
     await expect(pages.page).toHaveURL(pages.plantsDeleteNotification.expectedUrl(reference));
     await expect(pages.plantsDeleteNotification.heading).toBeVisible();
     await expect(pages.plantsDeleteNotification.body).toBeVisible();
-    await expect(pages.plantsDeleteNotification.btnNo).toHaveAttribute('href', '/');
+    await expect(pages.plantsDeleteNotification.btnNo).toHaveAttribute('href', pages.plantsDashboard.expectedUrl);
 
     await pages.plantsDeleteNotification.btnNo.click();
 
@@ -125,7 +126,7 @@ test.describe('High-risk plants start section', { tag: '@integration' }, () => {
 
     await pages.plantsDeleteNotification.btnConfirm.click();
 
-    await expect(pages.page).toHaveURL('/?deleted=1');
+    await expect(pages.page).toHaveURL(`${pages.plantsDashboard.expectedUrl}?deleted=1`);
     await expect(pages.plantsDashboard.deletedBanner).toContainText('Notification deleted');
     await expect(pages.plantsDashboard.deletedBanner).toContainText('The notification has been deleted.');
 

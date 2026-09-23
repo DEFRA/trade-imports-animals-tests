@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, expect } from '@fixtures';
 import { skipIfNonStubStackEnvironment, skipUnlessNonStubStackEnvironment } from '@utils/playwright/environment';
 import type { AddressesPage } from '@page-objects/notification/addresses-page';
@@ -59,7 +61,7 @@ test.describe('Addresses are read-only in the journey', { tag: ['@integration'] 
     await journey.startNotification();
     const journeyId = journeyContext.journeyId;
 
-    const response = await pages.page.goto(`/notifications/${journeyId}/addresses/create?for=consignor`);
+    const response = await pages.page.goto(`${SET_BASES.liveAnimals}/notifications/${journeyId}/addresses/create?for=consignor`);
 
     expect(response?.status()).toBe(404);
   });

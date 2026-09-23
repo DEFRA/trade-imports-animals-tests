@@ -1,7 +1,16 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
+import { SET_BASES } from '@page-objects/base/sets';
 
 /** A page's form fields. An array posts the key repeatedly, the way a checkbox group does. */
 export type FormFields = Record<string, string | string[]>;
+
+/**
+ * The page the crumb cookie is minted from. No set is served at the root any
+ * more — `/` is a server-wide 302 to the default set — so land on the set's own
+ * dashboard. The seed context is always the animals frontend
+ * (`createFrontendSeedContext`), so this set base is the right one.
+ */
+const CRUMB_MINT_PATH = SET_BASES.liveAnimals;
 
 export class FrontendFormError extends Error {
   constructor(
@@ -41,10 +50,10 @@ export class FrontendFormClient {
       return this.crumb;
     }
 
-    const landing = await this.request.get('/', { maxRedirects: 0 });
+    const landing = await this.request.get(CRUMB_MINT_PATH, { maxRedirects: 0 });
     if (landing.status() !== HTTP_STATUS_OK) {
       throw new Error(
-        `GET / answered ${landing.status()} (${landing.headers().location ?? 'no Location'}) instead of the dashboard. ` +
+        `GET ${CRUMB_MINT_PATH} answered ${landing.status()} (${landing.headers().location ?? 'no Location'}) instead of the dashboard. ` +
           'The seed context is not signed in to the frontend, so no post would reach a page.',
       );
     }
@@ -52,7 +61,7 @@ export class FrontendFormClient {
     const { cookies } = await this.request.storageState();
     const minted = cookies.find((cookie) => cookie.name === 'crumb')?.value;
     if (!minted) {
-      throw new Error('GET / minted no "crumb" cookie, so no form post can pass CSRF validation.');
+      throw new Error(`GET ${CRUMB_MINT_PATH} minted no "crumb" cookie, so no form post can pass CSRF validation.`);
     }
 
     this.crumb = minted;

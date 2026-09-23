@@ -8,7 +8,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   test('starts a journey at the origin page and lists the draft', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
 
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${journeyId}$`));
+    await expect(pages.page).toHaveURL(pages.overview.expectedUrl(journeyId));
     await expect(pages.overview.heading).toBeVisible();
 
     const card = pages.notificationDashboard.notificationCard(journeyId);

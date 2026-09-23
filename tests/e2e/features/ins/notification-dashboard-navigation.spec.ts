@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, expect } from '@fixtures';
 import { timeouts } from '@config/timeouts';
 
@@ -32,7 +34,7 @@ test.describe('INS dashboard notification navigation', { tag: ['@integration'] }
     await pages.insDashboard.viewLink(referenceNumber).click();
 
     // Then — it lands on that notification's read-only view in trade-imports-animals-frontend
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${referenceNumber}/notification-view$`));
+    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${referenceNumber}/notification-view$`));
     await expect(pages.notificationView.heading).toBeVisible();
   });
 });

@@ -3,6 +3,7 @@ import { defaultUser } from '@config/users';
 import { pageLoadWait } from '@config/timeouts';
 import { SignInPage } from '@page-objects/auth/sign-in-page';
 import { OrganisationPickerPage } from '@page-objects/auth/organisation-picker-page';
+import { SET_BASES, SetBase } from '@page-objects/base/sets';
 
 const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
@@ -152,13 +153,26 @@ export class NotificationPage extends BasePage {
     super(page);
   }
 
-  expectedUrl(journeyId: string): string {
-    const suffix = this.slug ? `/${this.slug}` : '';
-    return `/notifications/${journeyId}${suffix}`;
+  /**
+   * The set this notification's pages belong to. Overridden by a subclass whose
+   * journey runs under another set's prefix.
+   */
+  protected get setBase(): SetBase {
+    return SET_BASES.liveAnimals;
   }
 
+  expectedUrl(journeyId: string): string {
+    const suffix = this.slug ? `/${this.slug}` : '';
+    return `${this.setBase}/notifications/${journeyId}${suffix}`;
+  }
+
+  /**
+   * Anchored at the set base rather than at `/notifications`, so a URL under another
+   * set's prefix fails the match and throws here, naming the URL, instead of yielding
+   * a journey id that belongs to a different set.
+   */
   journeyIdFromUrl(): string {
-    const match = new URL(this.page.url()).pathname.match(/^\/notifications\/([^/]+)/);
+    const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));
     if (!match) {
       throw new Error(`No journey id in notification URL: ${this.page.url()}`);
     }
@@ -167,7 +181,7 @@ export class NotificationPage extends BasePage {
 
   currentJourneyUrl(slug: string = this.slug): string {
     const suffix = slug ? `/${slug}` : '';
-    return `/notifications/${this.journeyIdFromUrl()}${suffix}`;
+    return `${this.setBase}/notifications/${this.journeyIdFromUrl()}${suffix}`;
   }
 
   /**

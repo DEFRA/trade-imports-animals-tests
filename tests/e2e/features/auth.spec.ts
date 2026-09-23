@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, expect } from '@fixtures';
 import { COLD_START } from '@fixtures/auth-state';
 
@@ -32,8 +34,24 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
     await expect(pages.signIn.errorSummary).toContainText('Enter a valid 10-digit customer reference number (CRN) and password');
   });
 
+  // No set is served at the root any more, so `/` is a server-wide redirect to
+  // the default set. This is the path a user takes with no stored redirect —
+  // signing in and being put somewhere sensible rather than nowhere.
+  test('redirects the service root to the default set’s dashboard', async ({ pages }) => {
+    await pages.signIn.signIn();
+    await pages.page.goto('/');
+    await expect(pages.page).toHaveURL(SET_BASES.liveAnimals);
+    await expect(pages.notificationDashboard.heading).toBeVisible();
+  });
+
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
+
+    // Sign-out registers perfectly happily at /<set-id>/auth/sign-out and fails
+    // only when a user tries to sign out, so its path is pinned rather than
+    // trusted. The literal is what layout.njk renders as signOutUrl.
+    await expect(pages.notificationDashboard.linkSignOut).toHaveAttribute('href', '/auth/sign-out');
+
     await pages.notificationDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
     await expect(pages.signOut.heading).toBeVisible();
@@ -78,7 +96,7 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
 
     test('allows signing into a page further in the journey', async ({ pages }) => {
       await pages.signIn.signIn();
-      await expect(pages.page).toHaveURL(new RegExp(`/notifications/${journeyId}/origin$`));
+      await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}/origin$`));
       await expect(pages.originOfImport.heading).toBeVisible();
     });
   });

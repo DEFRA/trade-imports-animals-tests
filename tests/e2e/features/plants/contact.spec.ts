@@ -98,12 +98,12 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
     await pages.plantsOverview.open(reference);
     await pages.page.getByRole('link', { name: 'Check and submit', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/notification-view$`));
+    await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/declaration$`));
+    await expect(pages.page).toHaveURL(pages.plantsDeclaration.expectedUrl(reference));
     await expect(pages.page.getByRole('heading', { name: 'Declaration', level: 1 })).toBeVisible();
     await pages.page.getByRole('link', { name: 'Back', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/notification-view$`));
+    await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
     await pages.page
       .getByRole('checkbox', {
@@ -111,7 +111,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
       })
       .check();
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`/notifications/${reference}/confirmation$`));
+    await expect(pages.page).toHaveURL(pages.plantsConfirmation.expectedUrl(reference));
     await expect(pages.page.getByRole('heading', { name: 'Notification submitted', level: 1 })).toBeVisible();
     await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });

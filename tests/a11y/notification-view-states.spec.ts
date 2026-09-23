@@ -1,3 +1,5 @@
+import { SET_BASES } from '@page-objects/base/sets';
+
 import { test, WCAG_STANDARD } from '@fixtures/a11y';
 
 test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
@@ -21,7 +23,7 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Import notification submitted (confirmation)', async () => {
-      await pages.notificationView.navigateToFrontend(`/notifications/${submittedReference}/confirmation`);
+      await pages.notificationView.navigateToFrontend(`${SET_BASES.liveAnimals}/notifications/${submittedReference}/confirmation`);
       await pages.page.getByRole('heading', { name: 'Import notification submitted' }).waitFor();
       await runA11yScan();
     });
