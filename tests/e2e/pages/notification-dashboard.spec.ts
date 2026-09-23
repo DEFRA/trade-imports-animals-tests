@@ -1,5 +1,3 @@
-import { SET_BASES } from '@page-objects/base/sets';
-
 import { test, expect } from '@fixtures';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
@@ -10,7 +8,7 @@ test.describe('Import notification service dashboard', { tag: '@integration' }, 
   test('starts a journey at the origin page and lists the draft', async ({ journey, pages }) => {
     const journeyId = await journey.startNotification();
 
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.liveAnimals}/notifications/${journeyId}$`));
+    await expect(pages.page).toHaveURL(pages.overview.expectedUrl(journeyId));
     await expect(pages.overview.heading).toBeVisible();
 
     const card = pages.notificationDashboard.notificationCard(journeyId);

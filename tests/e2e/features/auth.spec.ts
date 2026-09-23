@@ -37,25 +37,20 @@ test.describe('Authentication', { tag: ['@auth', '@integration'] }, () => {
   // No set is served at the root any more, so `/` is a server-wide redirect to
   // the default set. This is the path a user takes with no stored redirect —
   // signing in and being put somewhere sensible rather than nowhere.
-  test('sends the service root to the default set’s dashboard after signing in', async ({ pages }) => {
+  test('redirects the service root to the default set’s dashboard', async ({ pages }) => {
     await pages.signIn.signIn();
     await pages.page.goto('/');
     await expect(pages.page).toHaveURL(SET_BASES.liveAnimals);
     await expect(pages.notificationDashboard.heading).toBeVisible();
   });
 
-  // /signout registers perfectly happily at /<set-id>/signout and fails only
-  // when a user tries to sign out, so its path is pinned rather than trusted.
-  test('serves sign-out from outside every set prefix', async ({ pages }) => {
-    await pages.signIn.signIn();
-    await pages.notificationDashboard.linkSignOut.click();
-    await pages.signOut.heading.waitFor();
-
-    expect(new URL(pages.page.url()).pathname.startsWith(SET_BASES.liveAnimals)).toBe(false);
-  });
-
   test('allows signing out after signing in', async ({ pages }) => {
     await pages.signIn.signIn();
+
+    // /signout registers perfectly happily at /<set-id>/signout and fails only
+    // when a user tries to sign out, so its path is pinned rather than trusted.
+    await expect(pages.notificationDashboard.linkSignOut).toHaveAttribute('href', '/signout');
+
     await pages.notificationDashboard.linkSignOut.click();
     await expect(pages.page).toHaveURL(pages.signOut.expectedUrl);
     await expect(pages.signOut.heading).toBeVisible();

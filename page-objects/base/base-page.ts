@@ -161,23 +161,15 @@ export class NotificationPage extends BasePage {
     return SET_BASES.liveAnimals;
   }
 
-  get dashboardUrl(): string {
-    return this.setBase;
-  }
-
-  get createUrl(): string {
-    return `${this.setBase}/notifications`;
-  }
-
   expectedUrl(journeyId: string): string {
     const suffix = this.slug ? `/${this.slug}` : '';
     return `${this.setBase}/notifications/${journeyId}${suffix}`;
   }
 
   /**
-   * Anchored at the set base rather than at `/notifications`. Left anchored at
-   * the root it would match nothing under a prefix and return undefined, which
-   * surfaces later as a confusing 404 rather than an honest failure here.
+   * Anchored at the set base rather than at `/notifications`, so a URL under another
+   * set's prefix fails the match and throws here, naming the URL, instead of yielding
+   * a journey id that belongs to a different set.
    */
   journeyIdFromUrl(): string {
     const match = new URL(this.page.url()).pathname.match(new RegExp(`^${this.setBase}/notifications/([^/]+)`));

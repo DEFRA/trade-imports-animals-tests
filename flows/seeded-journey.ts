@@ -6,7 +6,7 @@ import { PARTY_NAMES, declarationStep, seedSteps, type PartyIds, type PartyRole,
 import type { JourneyContext } from '@flows/journey';
 import { SET_BASES } from '@page-objects/base/sets';
 
-const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
+export const CREATE_PATH = `${SET_BASES.liveAnimals}/notifications`;
 const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/(?<journeyId>[^/]+)/origin$`);
 
 /**
@@ -56,7 +56,7 @@ export class SeededJourney {
   }
 
   async amend(journeyId: string): Promise<void> {
-    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/amend`, {}, { redirectsTo: new RegExp(`/notifications/${journeyId}$`) });
+    await this.forms.postForm(`${CREATE_PATH}/${journeyId}/amend`, {}, { redirectsTo: new RegExp(`^${CREATE_PATH}/${journeyId}$`) });
   }
 
   async cancelAmend(journeyId: string): Promise<void> {

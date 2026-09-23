@@ -1,4 +1,3 @@
-import { SET_BASES } from '@page-objects/base/sets';
 import type { AddressBookRecord } from '@adapters/http/address-book-api-client';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
@@ -99,12 +98,12 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
     await pages.plantsIdentificationNumbers.btnSaveAndContinue.click();
     await pages.plantsOverview.open(reference);
     await pages.page.getByRole('link', { name: 'Check and submit', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.highRiskPlants}/notifications/${reference}/notification-view$`));
+    await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.highRiskPlants}/notifications/${reference}/declaration$`));
+    await expect(pages.page).toHaveURL(pages.plantsDeclaration.expectedUrl(reference));
     await expect(pages.page.getByRole('heading', { name: 'Declaration', level: 1 })).toBeVisible();
     await pages.page.getByRole('link', { name: 'Back', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.highRiskPlants}/notifications/${reference}/notification-view$`));
+    await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
     await pages.page
       .getByRole('checkbox', {
@@ -112,7 +111,7 @@ test.describe('High-risk plants contact', { tag: '@integration' }, () => {
       })
       .check();
     await pages.page.getByRole('button', { name: 'Continue', exact: true }).click();
-    await expect(pages.page).toHaveURL(new RegExp(`${SET_BASES.highRiskPlants}/notifications/${reference}/confirmation$`));
+    await expect(pages.page).toHaveURL(pages.plantsConfirmation.expectedUrl(reference));
     await expect(pages.page.getByRole('heading', { name: 'Notification submitted', level: 1 })).toBeVisible();
     await expect(pages.page.getByText('Your notification reference', { exact: false })).toContainText(reference);
   });
