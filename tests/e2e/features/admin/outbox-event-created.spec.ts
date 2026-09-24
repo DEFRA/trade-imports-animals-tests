@@ -1,9 +1,12 @@
 import { test, expect } from '@fixtures';
 import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type OutboxEventActor, type OutboxEventDocument } from '@domain/models/db/outbox-event-document';
+import { CONSIGNOR_NAME } from '@domain/constants/journey-options';
 import { timeouts } from '@config/timeouts';
 import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+
+const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
@@ -63,6 +66,45 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
       expect(doc.statusChanges).toHaveLength(1);
       expect(doc.statusChanges?.[0].status).toBe('DRAFT');
       expect(doc.statusChanges?.[0].dateChanged).toEqual(expect.any(Date));
+    } finally {
+      await client.close();
+    }
+  });
+
+  test('writes a NotificationCreated event with consignor name when a submitted notification is copied', async ({
+    seededJourney,
+    notificationActions,
+    pages,
+    journeyContext,
+  }) => {
+    test.slow();
+    await seededJourney.createSubmittedNotification();
+    const sourceReferenceNumber = journeyContext.journeyId;
+    await notificationActions.toNotificationView(sourceReferenceNumber);
+    await pages.notificationView.btnCopyAsNew.click();
+    await pages.overview.heading.waitFor();
+
+    const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
+    expect(copiedReferenceNumber).toBeDefined();
+    expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
+    if (!copiedReferenceNumber) {
+      return;
+    }
+
+    const aggregateId = aggregateIdFor(copiedReferenceNumber);
+    const client = new MongoDbClient();
+
+    try {
+      await client.connect();
+      const collection = client.collection<OutboxEventDocument>('trade-imports-animals-backend', 'outbox');
+
+      await expect
+        .poll(() => collection.countDocuments({ aggregateId, eventType: NOTIFICATION_CREATED }), { timeout: timeouts.long })
+        .toBe(1);
+
+      const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_CREATED }).toArray();
+
+      expect(doc.data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
     } finally {
       await client.close();
     }
