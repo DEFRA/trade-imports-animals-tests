@@ -14,6 +14,12 @@ test.describe('Authentication (high-risk plants)', { tag: ['@auth', '@integratio
     await expect(pages.signIn.heading).toBeVisible();
   });
 
+  test('allows signing into the plants dashboard', { tag: '@smoke' }, async ({ pages }) => {
+    await pages.signIn.signIn();
+    await expect(pages.page).toHaveURL(pages.plantsDashboard.expectedUrl);
+    await expect(pages.plantsDashboard.heading).toBeVisible();
+  });
+
   test('displays an error message when signing in with invalid user id', async ({ pages }) => {
     await pages.signIn.signIn({ userId: 'invalid' });
     await expect(pages.page).toHaveURL(pages.signIn.expectedUrl);

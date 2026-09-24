@@ -236,11 +236,27 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     const reference = await plantsToDestination(pages, plantsJourney, NOT_YET_ARRIVED);
     await chooseAddress(pages, token, originalName);
 
-    await addressBookApi.updateAddress(record.id, addressNamed(renamed));
-
+    await pages.plantsOverview.open(reference);
+    await expect(pages.plantsOverview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
     await pages.plantsPlaceOfDestination.open(reference);
-    await expect(pages.plantsPlaceOfDestination.selectedAddress(renamed)).toBeVisible();
-    await expect(pages.plantsPlaceOfDestination.selectedAddress(originalName)).toHaveCount(0);
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(originalName)).toBeVisible();
+
+    await addressBookApi.updateAddress(record.id, {
+      ...addressNamed(renamed),
+      townOrCity: 'Dundee',
+      postcode: 'DD1 1AA',
+    });
+
+    await pages.plantsOverview.open(reference);
+    await expect(pages.plantsOverview.taskRow(DESTINATION_TASK_ROW)).toContainText('Completed');
+
+    await pages.plantsNotificationView.open(reference);
+    const destination = pages.plantsNotificationView.card('Place of destination');
+    await expect(destination).toContainText(renamed);
+    await expect(destination).toContainText('Dundee');
+    await expect(destination).toContainText('DD1 1AA');
+    await expect(destination).not.toContainText(originalName);
+    await expect(destination).not.toContainText('Perth');
   });
 
   test('deleting the chosen address takes the answer off the notification', async ({ pages, plantsJourney, addressBookApi }) => {
