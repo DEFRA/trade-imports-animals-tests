@@ -227,6 +227,22 @@ test.describe('High-risk plants destination section', { tag: '@integration' }, (
     await expect(pages.plantsPlaceOfDestination.address(target)).toHaveCount(0);
   });
 
+  test('editing the address book record changes what the notification shows', async ({ pages, plantsJourney, addressBookApi }) => {
+    const token = `LiveLink${Date.now()}`;
+    const originalName = `Linked Nursery ${token}`;
+    const renamed = `Renamed Nursery ${token}`;
+    const record = await addressBookApi.createAddress(addressNamed(originalName));
+
+    const reference = await plantsToDestination(pages, plantsJourney, NOT_YET_ARRIVED);
+    await chooseAddress(pages, token, originalName);
+
+    await addressBookApi.updateAddress(record.id, addressNamed(renamed));
+
+    await pages.plantsPlaceOfDestination.open(reference);
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(renamed)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(originalName)).toHaveCount(0);
+  });
+
   test('deleting the chosen address takes the answer off the notification', async ({ pages, plantsJourney, addressBookApi }) => {
     const token = `Montrose${Date.now()}`;
     const name = `Doomed Nursery ${token}`;
