@@ -19,7 +19,26 @@ const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
 export const AUTH_COOKIE_NAME = 'sid';
 
-export const authCookieNameFor = (targetName: string): string => AUTH_TARGETS[targetName]?.cookieName ?? AUTH_COOKIE_NAME;
+const LOCAL_STACK_HOSTS = ['localhost', '127.0.0.1', 'cdp-docker.test'];
+
+const COMPOSE_AUTH_COOKIE_NAMES: Record<string, string> = { ins: 'ins-sid', plants: 'plants-sid' };
+
+const isLocalStackUrl = (baseURL: string): boolean => {
+  const url = baseURL.toLowerCase();
+  return LOCAL_STACK_HOSTS.some((host) => url.includes(host));
+};
+
+/** ins and plants mint their own development session cookie (ins-sid, plants-sid) on the local stack — see frontend.compose.yml and each frontend's auth.cookieName default. Every other target, and every service outside the local stack, uses sid. AUTH_SESSION_COOKIE_NAME overrides all of them. */
+export const authCookieNameFor = (targetName: string, baseURL?: string): string => {
+  if (process.env.AUTH_SESSION_COOKIE_NAME) {
+    return process.env.AUTH_SESSION_COOKIE_NAME;
+  }
+  const composeCookieName = COMPOSE_AUTH_COOKIE_NAMES[targetName];
+  if (composeCookieName && baseURL && isLocalStackUrl(baseURL)) {
+    return composeCookieName;
+  }
+  return AUTH_COOKIE_NAME;
+};
 
 export const LANDING_TIMEOUT_MS = 20_000;
 const SIGN_IN_ATTEMPTS = 2;
@@ -34,7 +53,6 @@ export const COLD_START: StorageState = Object.freeze(coldStartState);
 export type AuthTarget = {
   landingPath: string;
   landingHeading: (page: Page) => Locator;
-  cookieName?: string;
 };
 
 // The sign-in failure page also has an h1, so each target asserts its own landing
@@ -45,13 +63,8 @@ export const AUTH_TARGETS: Record<string, AuthTarget> = {
   ins: {
     landingPath: '/address-book',
     landingHeading: (page) => new InsAddressBookListPage(page).heading,
-    cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'ins-sid',
   },
-  plants: {
-    landingPath: '/',
-    landingHeading: (page) => new PlantsDashboardPage(page).heading,
-    cookieName: process.env.AUTH_SESSION_COOKIE_NAME ?? 'plants-sid',
-  },
+  plants: { landingPath: '/', landingHeading: (page) => new PlantsDashboardPage(page).heading },
 };
 
 const slug = (baseUrl: string): string => baseUrl.replace(/^https?:\/\//, '').replace(/[^a-z0-9]+/gi, '-');
@@ -93,7 +106,7 @@ export const createAuthState = async (browser: Browser, mint: AuthMint): Promise
       await new SignInPage(page).signIn();
       await expect(target.landingHeading(page)).toBeVisible({ timeout: LANDING_TIMEOUT_MS });
 
-      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName));
+      const authOnlyState = stripToAuthCookie(await context.storageState(), baseURL, authCookieNameFor(targetName, baseURL));
       writeFileSync(mintingPath, JSON.stringify(authOnlyState, null, 2));
       await verifySavedState(browser, contextOptions, target, mintingPath);
       renameSync(mintingPath, statePath);

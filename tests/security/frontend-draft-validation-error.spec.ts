@@ -4,9 +4,13 @@ test.describe('Security scan (frontend, draft)', { tag: '@active' }, () => {
   test('routes a draft validation error through the ZAP proxy', async ({ journey, pages }) => {
     await journey.toOriginOfImport();
 
-    // Fresh, unsubmitted draft — a blank required field here is real
+    // Fresh, unsubmitted draft — a region code claimed but not given is real
     // input-accepting attack surface the sibling frontend-notification-journey
-    // spec's submit-only happy path never generates.
+    // spec's submit-only happy path never generates. (Country of origin alone
+    // no longer blocks the save — see origin/controller.js's oneOf swap for
+    // parity-dr1 — so this is the field still enforced on submit.)
+    await pages.originOfImport.selectCountry('France');
+    await pages.originOfImport.radioRequiresOriginCode('Yes').check();
     await pages.originOfImport.saveAndContinue.click();
     await expect(pages.originOfImport.errorSummary).toBeVisible();
 

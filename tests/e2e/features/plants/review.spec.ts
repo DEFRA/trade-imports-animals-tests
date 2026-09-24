@@ -1,3 +1,4 @@
+import { SET_BASES } from '@page-objects/base/sets';
 import { randomUUID } from 'node:crypto';
 import { test, expect } from '@fixtures';
 import type { PageObjects } from '@page-objects';
@@ -238,7 +239,7 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await pages.plantsNotificationView.btnContinue.click();
     await expect(pages.page).toHaveURL(pages.plantsNotificationView.expectedUrl(reference));
     const correction = pages.plantsNotificationView.errorSummary.getByRole('link', { name: /Poland/ });
-    await expect(correction).toHaveAttribute('href', `/notifications/${reference}/origin?change=1`);
+    await expect(correction).toHaveAttribute('href', `${SET_BASES.highRiskPlants}/notifications/${reference}/origin?change=1`);
     await expect(pages.plantsOverview.statusTag).toHaveText('Draft');
     await correction.click();
     await expect(pages.page).toHaveURL(/\/origin\?change=1$/);

@@ -3,8 +3,21 @@ import { MongoDbClient } from '@adapters/db/mongodb-client';
 import { type NotificationDocument } from '@domain/models/db/notification-document';
 import { timeouts } from '@config/timeouts';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
+import { CREATE_PATH } from '@flows/seeded-journey';
 
-const referenceNumberFrom = (redirectPath: string) => redirectPath.split('/')[2];
+const CREATED_AT_ORIGIN = new RegExp(`^${CREATE_PATH}/([^/]+)/origin$`);
+
+// Matched against the set base rather than read from a fixed path segment: the
+// set prefix shifts every index by one, and `split('/')[2]` answered
+// "notifications" rather than failing, which surfaced later as a 500 on a
+// doubled path.
+const referenceNumberFrom = (redirectPath: string): string => {
+  const match = redirectPath.match(CREATED_AT_ORIGIN);
+  if (!match) {
+    throw new Error(`Expected a redirect to the origin page under ${CREATE_PATH}, got "${redirectPath}".`);
+  }
+  return match[1];
+};
 
 // Auth state is minted per Playwright project, so this proof only holds from the admin
 // project: an e2e-project session is already a frontend session.
@@ -14,11 +27,11 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
   });
 
   test('seeds an origin answer into the notification document from an admin-project spec', async ({ frontendForms }) => {
-    const created = await frontendForms.postForm('/notifications');
-    expect(created).toMatch(/^\/notifications\/[^/]+\/origin$/);
+    const created = await frontendForms.postForm(CREATE_PATH);
+    expect(created).toMatch(CREATED_AT_ORIGIN);
 
     const referenceNumber = referenceNumberFrom(created);
-    await frontendForms.postForm(`/notifications/${referenceNumber}/origin`, {
+    await frontendForms.postForm(`${CREATE_PATH}/${referenceNumber}/origin`, {
       countryOfOrigin: 'FR',
       regionOfOriginCodeRequirement: 'no',
       regionOfOriginCodeSuffix: '',
@@ -45,10 +58,10 @@ test.describe('Frontend seed context', { tag: ['@integration', '@mongodb'] }, ()
   });
 
   test('refuses a page the frontend rejected, rather than seeding half a notification', async ({ frontendForms }) => {
-    const created = await frontendForms.postForm('/notifications');
+    const created = await frontendForms.postForm(CREATE_PATH);
     const referenceNumber = referenceNumberFrom(created);
 
-    await expect(frontendForms.postForm(`/notifications/${referenceNumber}/origin`, { countryOfOrigin: 'Narnia' })).rejects.toThrow(
+    await expect(frontendForms.postForm(`${CREATE_PATH}/${referenceNumber}/origin`, { countryOfOrigin: 'Narnia' })).rejects.toThrow(
       /responded 400/,
     );
   });

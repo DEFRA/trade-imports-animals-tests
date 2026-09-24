@@ -43,5 +43,13 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     // The service's one static route. A GET, folded in here rather than
     // given a spec of its own — nothing else in the suite reaches it.
     await pages.page.goto('/');
+
+    // journey-type/notification-id/fulfilment-id/handshake-token: query params
+    // no other spec sends. Only the rejected-guard path is provable here —
+    // extend to a real accepted token if seeding one becomes possible.
+    await pages.page.goto(
+      '/address-book/add?journey-type=not-a-journey&notification-id=GBN-AG-26-4F7K2P&fulfilment-id=9ad1e2f3-a4b5-4c60-8d1c-9e0f1a2b3c4d&handshake-token=handshake-token-value',
+    );
+    await expect(pages.page.getByText('Page not found')).toBeVisible();
   });
 });

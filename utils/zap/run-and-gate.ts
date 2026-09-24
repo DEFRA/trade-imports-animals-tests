@@ -195,6 +195,7 @@ async function writeIndexHtml(
   failed: boolean,
   started: string,
   finished: string,
+  specsOutcome: string | undefined,
 ): Promise<void> {
   const rows = summaries
     .map(
@@ -223,7 +224,18 @@ async function writeIndexHtml(
   );
 
   const truncationSection =
-    truncatedScans.length > 0 ? `<h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul>` : '';
+    truncatedScans.length > 0
+      ? `<div class="callout"><h2 class="fail">Truncated scans</h2><ul>${truncatedScans.map((w) => `<li>${w}</li>`).join('')}</ul></div>`
+      : '';
+
+  // Undefined outside the GitHub Action (local, CDP): those lanes either
+  // never reach here on a failed run (CDP's && short-circuit) or aren't
+  // gated on partial traffic to begin with. 'success' is the only outcome
+  // that means every @active spec actually ran.
+  const partialRunSection =
+    specsOutcome && specsOutcome !== 'success'
+      ? `<div class="callout"><h2 class="fail">Partial run</h2><p>The traffic-generation specs did not all succeed (outcome: ${specsOutcome}) — the findings below reflect whatever traffic ran before that, not full corpus coverage.</p></div>`
+      : '';
 
   await wrapAsHtml('zap.log', ZAP_LOG_ARTEFACT);
   await wrapAsHtml(`${REPORT_NAME}.json`, JSON_REPORT_ARTEFACT);
@@ -252,6 +264,7 @@ async function writeIndexHtml(
   --border: #ccc;
   --th-bg: #f0f0f0;
   --fail: #b30000;
+  --fail-bg: #fdecea;
   --pass: #007a3d;
 }
 @media (prefers-color-scheme: dark) {
@@ -261,6 +274,7 @@ async function writeIndexHtml(
     --border: #444;
     --th-bg: #2a2a2a;
     --fail: #ff6b6b;
+    --fail-bg: #3a1f1f;
     --pass: #4caf80;
   }
 }
@@ -277,6 +291,9 @@ th { background: var(--th-bg); }
 tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 .fail { color: var(--fail); }
 .pass { color: var(--pass); }
+.callout { border: 1px solid var(--fail); background: var(--fail-bg); border-radius: 4px; padding: 0.75rem 1rem; margin: 1rem 0; }
+.callout h2 { margin: 0 0 0.5rem; }
+.callout p, .callout ul { margin: 0; }
 </style>
 </head>
 <body>
@@ -285,6 +302,7 @@ tfoot td { font-weight: bold; border-top: 2px solid var(--border); }
 <p>started: ${started}</p>
 <p>finished: ${finished}</p>
 ${truncationSection}
+${partialRunSection}
 <h2>Sites</h2>
 <table>
 <thead>
@@ -394,7 +412,7 @@ async function main(): Promise<void> {
   // when someone most needs the report, and entrypoint.sh's publish step
   // runs regardless of this script's exit code, so the index has to exist
   // on disk either way.
-  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished);
+  await writeIndexHtml(summaries, truncatedScans, failures.length > 0, progress.started, progress.finished, process.env.PLAYWRIGHT_OUTCOME);
 
   if (failures.length > 0) {
     throw new Error(`ZAP security scan found ${failures.length} failure(s):\n${failures.join('\n')}`);
