@@ -258,6 +258,49 @@ test.describe('High-risk plants check and submit section', { tag: '@integration'
     await expect(pages.plantsNotificationView.errorSummary).toContainText('Select an address for the place of destination');
   });
 
+  test('editing a linked address in the address book changes what the notification shows', async ({
+    pages,
+    plantsJourney,
+    addressBookApi,
+  }) => {
+    const { reference, address } = await completeNotification(pages, plantsJourney, addressBookApi);
+    const originalName = address.name;
+    const renamed = `Renamed Holding ${randomUUID()}`;
+
+    await pages.plantsPlaceOfDestination.open(reference);
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(originalName)).toBeVisible();
+    await pages.plantsNotificationView.open(reference);
+    const destination = pages.plantsNotificationView.card('Place of destination');
+    await expect(destination).toContainText(originalName);
+    await expect(destination).toContainText('Perth');
+    await expect(destination).toContainText('PH1 5EX');
+
+    // The notification stores the address-book id only. Editing the record
+    // behind the journey's back must change what the picker inset and CYA
+    // card show; a copy taken at selection would still read the old details.
+    await addressBookApi.updateAddress(address.id, {
+      name: renamed,
+      addressLine1: '4 Nursery Lane',
+      townOrCity: 'Dundee',
+      postcode: 'DD1 1AA',
+      countryCode: 'GB',
+      phone: '01738 555 0143',
+      email: 'review@example.co.uk',
+    });
+
+    await pages.plantsPlaceOfDestination.open(reference);
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(renamed)).toBeVisible();
+    await expect(pages.plantsPlaceOfDestination.selectedAddress(originalName)).toHaveCount(0);
+
+    await pages.plantsNotificationView.open(reference);
+    await expect(destination).toContainText(renamed);
+    await expect(destination).toContainText('Dundee');
+    await expect(destination).toContainText('DD1 1AA');
+    await expect(destination).not.toContainText(originalName);
+    await expect(destination).not.toContainText('Perth');
+    await expect(destination).not.toContainText('PH1 5EX');
+  });
+
   for (const source of ['dashboard', 'CYA']) {
     test(`cancel amendment from ${source} restores submitted answers and read-only CYA`, async ({
       pages,
