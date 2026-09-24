@@ -7,6 +7,9 @@ import { users } from '@config/users';
 import { skipUnlessComposeEnvironment } from '@utils/playwright/environment';
 
 const REFERENCE_NUMBER_PATTERN = /GBN-AG-\d{2}-[0-9A-Z]{6}/;
+const CONSIGNOR_ADDRESS_LINE = '43 East Hague Extension';
+const CONSIGNOR_CITY = 'Bern';
+const CONSIGNOR_POSTCODE = '30055';
 
 const NOTIFICATION_CREATED = 'uk.gov.defra.imports.notification.NotificationCreated';
 const aggregateIdFor = (referenceNumber: string): string => `Imports.Notification.GBN-AG.${referenceNumber}`;
@@ -87,9 +90,6 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
     const copiedReferenceNumber = (await pages.notificationView.referenceNumberCaption.textContent())?.match(REFERENCE_NUMBER_PATTERN)?.[0];
     expect(copiedReferenceNumber).toBeDefined();
     expect(copiedReferenceNumber).not.toEqual(sourceReferenceNumber);
-    if (!copiedReferenceNumber) {
-      return;
-    }
 
     const aggregateId = aggregateIdFor(copiedReferenceNumber);
     const client = new MongoDbClient();
@@ -104,7 +104,14 @@ test.describe('Notification created outbox event', { tag: ['@integration', '@mon
 
       const [doc] = await collection.find({ aggregateId, eventType: NOTIFICATION_CREATED }).toArray();
 
-      expect(doc.data.specifiedConsignment.consignorParty?.name).toBe(CONSIGNOR_NAME);
+      expect(doc.data.specifiedConsignment.consignorParty).toMatchObject({
+        name: CONSIGNOR_NAME,
+        postalAddress: {
+          lineOne: CONSIGNOR_ADDRESS_LINE,
+          cityName: CONSIGNOR_CITY,
+          postcodeCode: CONSIGNOR_POSTCODE,
+        },
+      });
     } finally {
       await client.close();
     }
