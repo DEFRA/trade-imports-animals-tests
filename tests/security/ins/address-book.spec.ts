@@ -40,9 +40,6 @@ test.describe('Security scan (ins)', { tag: '@active' }, () => {
     await pages.insAddressBookDelete.confirm();
     await expect(pages.insAddressBookList.row(name)).toHaveCount(0);
 
-    // The service's two static routes. A GET each, folded in here rather than
-    // given a spec of their own — nothing else in the suite reaches them.
-    await pages.page.goto('/about');
     await pages.page.goto('/');
 
     // journey-type/notification-id/fulfilment-id/handshake-token: query params

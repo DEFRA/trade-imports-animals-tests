@@ -7,7 +7,7 @@ import { SET_BASES, SetBase } from '@page-objects/base/sets';
 
 const SIGN_IN_ERROR_HEADING = 'Sorry, we are unable to sign you in.';
 
-function requireBaseUrl(
+export function requireBaseUrl(
   envVar:
     | 'TRADE_IMPORTS_ANIMALS_FRONTEND_BASE_URL'
     | 'TRADE_IMPORTS_ANIMALS_ADMIN_BASE_URL'
@@ -37,7 +37,15 @@ export class BasePage {
   }
 
   get linkSignOut(): Locator {
-    return this.page.getByRole('link', { name: 'Sign out' });
+    return this.page.getByRole('link', { name: 'Log out', exact: true });
+  }
+
+  get linkAddressBook(): Locator {
+    return this.page.getByRole('link', { name: 'Address book', exact: true });
+  }
+
+  get linkDashboard(): Locator {
+    return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
 
   /**
@@ -70,6 +78,10 @@ export class BasePage {
   async navigateToPlantsFrontend(path: string = '/'): Promise<void> {
     const baseUrl = requireBaseUrl('TRADE_IMPORTS_PLANTS_FRONTEND_BASE_URL');
     await this.page.goto(`${baseUrl}${path}`);
+  }
+
+  async completeSignInIfRequested(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
+    await this.signInWhenRequested(true, options);
   }
 
   /**

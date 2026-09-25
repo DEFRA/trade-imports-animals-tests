@@ -19,18 +19,22 @@ const AUTH_STATE_DIR = resolve(process.cwd(), 'playwright/.auth');
 
 export const AUTH_COOKIE_NAME = 'sid';
 
-const INS_COMPOSE_AUTH_COOKIE_NAME = 'ins-sid';
+const LOCAL_STACK_HOSTS = ['localhost', '127.0.0.1', 'cdp-docker.test'];
 
-/** INS uses ins-sid on the local compose stack and sid on deployed CDP — see frontend.compose.yml and ins-frontend config. */
+const COMPOSE_AUTH_COOKIE_NAMES: Record<string, string> = { ins: 'ins-sid', plants: 'plants-sid' };
+
+const isLocalStackUrl = (baseURL: string): boolean => {
+  const url = baseURL.toLowerCase();
+  return LOCAL_STACK_HOSTS.some((host) => url.includes(host));
+};
+
 export const authCookieNameFor = (targetName: string, baseURL?: string): string => {
   if (process.env.AUTH_SESSION_COOKIE_NAME) {
     return process.env.AUTH_SESSION_COOKIE_NAME;
   }
-  if (targetName === 'ins' && baseURL) {
-    const host = baseURL.toLowerCase();
-    if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('cdp-docker.test')) {
-      return INS_COMPOSE_AUTH_COOKIE_NAME;
-    }
+  const composeCookieName = COMPOSE_AUTH_COOKIE_NAMES[targetName];
+  if (composeCookieName && baseURL && isLocalStackUrl(baseURL)) {
+    return composeCookieName;
   }
   return AUTH_COOKIE_NAME;
 };

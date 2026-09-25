@@ -8,6 +8,10 @@ export class AdminDashboardPage extends BasePage {
     return this.page.getByRole('heading', { level: 1, name: 'Home' });
   }
 
+  get linkSignOut(): Locator {
+    return this.page.getByRole('link', { name: 'Sign out' });
+  }
+
   get btnNotifications(): Locator {
     return this.page.getByRole('button', { name: 'Notifications' });
   }
