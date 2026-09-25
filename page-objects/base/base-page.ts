@@ -36,26 +36,14 @@ export class BasePage {
     return this.page.getByText(email);
   }
 
-  /** The three frontends sign out from their service navigation, where the
-   * item reads "Log out" and points at /auth/sign-out. `exact` keeps the
-   * match off any other link whose name merely contains "log out". */
   get linkSignOut(): Locator {
     return this.page.getByRole('link', { name: 'Log out', exact: true });
   }
 
-  /** The three frontends carry the same service navigation. "Address book" leaves
-   * a journey frontend for trade-imports-ins-frontend and stays in-service on ins.
-   * `exact` is the same guard as linkBack below: Playwright matches an accessible
-   * name as a case-insensitive SUBSTRING unless you opt out, so without it this
-   * getter would also resolve any future link whose name merely contains
-   * "address book" — the ins address-book pages already carry that phrase on
-   * their cancel controls. */
   get linkAddressBook(): Locator {
     return this.page.getByRole('link', { name: 'Address book', exact: true });
   }
 
-  /** Service-navigation "Dashboard", present in all three frontends. `exact` carries
-   * the same substring guard as linkAddressBook above. */
   get linkDashboard(): Locator {
     return this.page.getByRole('link', { name: 'Dashboard', exact: true });
   }
@@ -92,9 +80,6 @@ export class BasePage {
     await this.page.goto(`${baseUrl}${path}`);
   }
 
-  /** A link into another service lands on that service's sign-in when this browser
-   * context has no session for it — the compose stack gives each service its own
-   * session cookie. Call after clicking a cross-service link. */
   async completeSignInIfRequested(options?: { userId?: string; organisationSbi?: string }): Promise<void> {
     await this.signInWhenRequested(true, options);
   }

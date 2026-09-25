@@ -28,7 +28,6 @@ const isLocalStackUrl = (baseURL: string): boolean => {
   return LOCAL_STACK_HOSTS.some((host) => url.includes(host));
 };
 
-/** ins and plants mint their own development session cookie (ins-sid, plants-sid) on the local stack — see frontend.compose.yml and each frontend's auth.cookieName default. Every other target, and every service outside the local stack, uses sid. AUTH_SESSION_COOKIE_NAME overrides all of them. */
 export const authCookieNameFor = (targetName: string, baseURL?: string): string => {
   if (process.env.AUTH_SESSION_COOKIE_NAME) {
     return process.env.AUTH_SESSION_COOKIE_NAME;
