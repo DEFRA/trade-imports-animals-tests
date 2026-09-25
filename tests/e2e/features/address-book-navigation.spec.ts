@@ -1,5 +1,6 @@
 import { test, expect } from '@fixtures';
 import { requireBaseUrl } from '@page-objects/base/base-page';
+import { SET_BASES } from '@page-objects/base/sets';
 
 test.describe('Address book navigation between services', { tag: ['@compose', '@integration'] }, () => {
   test('follows the Address book item from the animals journey to the INS address book and back', async ({ pages }) => {
@@ -21,11 +22,11 @@ test.describe('Address book navigation between services', { tag: ['@compose', '@
     await expect(pages.page).toHaveURL((url) => url.origin === insOrigin && url.pathname === '/address-book');
     await expect(pages.insAddressBookList.heading).toBeVisible();
 
-    // And — the way back to the journey frontend works, via the INS dashboard
+    // And — the way back to the journey frontend lands in the live-animals set, via the INS dashboard
     await pages.insAddressBookList.linkDashboard.click();
     await expect(pages.insDashboard.heading).toBeVisible();
     await pages.page.locator(`a[href^="${animalsBaseUrl}"]`).first().click();
 
-    await expect(pages.page).toHaveURL((url) => url.origin === animalsOrigin);
+    await expect(pages.page).toHaveURL((url) => url.origin === animalsOrigin && url.pathname.startsWith(SET_BASES.liveAnimals));
   });
 });
