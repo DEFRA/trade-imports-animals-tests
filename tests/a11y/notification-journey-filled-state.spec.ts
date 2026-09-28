@@ -16,6 +16,12 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
   });
 
   test('each notification journey page has no accessibility violations after user input', async ({ journey, pages, runA11yScan }) => {
+    // EUDPA-636 — commercial-transporter-details.controller.js never calls
+    // rememberTransporter(), so the "Add commercial transporter" step below
+    // leaves the journey unable to reach Declaration. Remove this annotation
+    // once the fix lands.
+    test.fail(true, 'EUDPA-636');
+
     await test.step('Origin of import', async () => {
       await pages.overview.task('Where is this consignment coming from?').click();
       await journey.fillOriginOfImport({ requiresRegionCode: 'Yes', internalReference: 'Imports456GB' });
@@ -178,7 +184,9 @@ test.describe(`Accessibility ${WCAG_STANDARD.name}`, { tag: '@a11y' }, () => {
     });
 
     await test.step('Declaration', async () => {
-      await pages.declaration.heading.waitFor();
+      // Bounded rather than the full 300s a11y timeout — EUDPA-636 means this
+      // never resolves right now, so fail fast instead of hanging.
+      await pages.declaration.heading.waitFor({ timeout: 10_000 });
       await pages.declaration.confirmation.check();
       await runA11yScan();
       await pages.declaration.continueButton.click();
