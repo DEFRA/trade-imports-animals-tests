@@ -57,4 +57,18 @@ test.describe('Origin of the import page', { tag: ['@integration', '@duplicated-
 
     await expect(pages.originOfImport.errorSummary).toBeVisible();
   });
+
+  test('persists a country subdivision selection', async ({ pages }) => {
+    await pages.originOfImport.selectCountry('Canary Islands');
+    await pages.originOfImport.radioRequiresOriginCode('No').check();
+    await pages.originOfImport.internalReference.fill(INTERNAL_REFERENCE);
+    await pages.originOfImport.saveAndContinue.click();
+
+    await expect(pages.overview.heading).toBeVisible();
+
+    const journeyId = pages.originOfImport.journeyIdFromUrl();
+    await pages.originOfImport.open(journeyId);
+    await expect(pages.originOfImport.countrySelect).toHaveValue('ES-CN');
+    await expect(pages.originOfImport.countryOfOrigin).toHaveValue('Canary Islands');
+  });
 });
